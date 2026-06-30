@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --background: #fbf8ff;
+  --foreground: #1a1b22;
+  --card: #ffffff;
+  --card-foreground: #1a1b22;
+  --popover: #ffffff;
+  --popover-foreground: #1a1b22;
+  --primary: #1e40af;
+  --primary-foreground: #ffffff;
+  --secondary: #2563eb;
+  --secondary-foreground: #ffffff;
+  --muted: #f4f2fc;
+  --muted-foreground: #444653;
+  --accent: #eeedf7;
+  --accent-foreground: #1a1b22;
+  --destructive: #dc2626;
+  --border: #c4c5d5;
+  --input: #c4c5d5;
+  --ring: #1e40af;
+}
+
+* { font-family: "Inter", sans-serif; }
+body { @apply bg-background text-foreground antialiased; }
+
+/* ── Labels ── */
+.label-stitch {
+  @apply mb-1 block text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground;
+}
+
+/* ── Inputs ── */
+.input-stitch {
+  @apply w-full rounded-lg border border-border bg-white px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-foreground/40;
+}
+.input-stitch:focus {
+  @apply border-primary shadow-[0_0_0_3px_rgba(30,64,175,0.1)];
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.97];
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary/20 bg-primary/5 px-6 py-3 text-xs font-black uppercase tracking-[0.08em] text-primary transition-all hover:bg-primary/10 active:scale-[0.97];
+}
+
+/* ── Cards ── */
+.card-glass {
+  @apply rounded-xl border border-white/20 bg-white/80 shadow-sm backdrop-blur-sm;
+}
+
+/* Card with top accent bar — signature element */
+.card-accent {
+  @apply overflow-hidden rounded-xl border border-border bg-card shadow-sm;
+}
+
+/* Structured section header */
+.section-header {
+  @apply flex items-center justify-between border-b border-border pb-3 mb-4;
+}
+.section-header h2, .section-header h3 {
+  @apply text-sm font-bold text-foreground;
+}
+.section-header .section-action {
+  @apply text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-primary transition-colors;
+}
+
+/* Empty state — intentional, not leftover */
+.empty-state {
+  @apply flex flex-col items-center gap-4 py-16 text-center;
+}
+.empty-state .empty-icon {
+  @apply flex items-center justify-center w-16 h-16 rounded-2xl bg-muted border border-border;
+}
+.empty-state h3 {
+  @apply text-base font-semibold text-foreground;
+}
+.empty-state p {
+  @apply text-sm text-muted-foreground max-w-sm;
+}
+
+/* ── Status Badges ── */
+.badge-stitch {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em];
+}
+
+/* ── Tables ── */
+.table-stitch th {
+  @apply bg-muted/80 px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground backdrop-blur-sm;
+}
+.table-stitch td {
+  @apply px-6 py-4 text-sm;
+}
+.table-stitch tbody tr {
+  @apply border-b border-border/50 last:border-0 transition-all hover:bg-gradient-to-r hover:from-primary/[0.03] hover:to-transparent;
+}
+
+/* ── Animations ── */
+.page-enter {
+  animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-hover {
+  @apply transition-all duration-300;
+}
+.card-hover:hover {
+  @apply shadow-md;
+  transform: translateY(-2px);
+}
+
+/* QR detection pulse */
+.detected-pulse {
+  animation: detectedPulse 0.5s ease-in-out infinite alternate;
+}
+@keyframes detectedPulse {
+  from { border-color: rgba(16, 185, 129, 0.3); }
+  to { border-color: rgba(16, 185, 129, 1); }
+}
+
+/* Stat counter fade-in */
+.stat-enter {
+  animation: statFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes statFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Sidebar active accent */
+.sidebar-active {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* QR pulse ring */
+.qr-pulse {
+  animation: qrPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes qrPulse {
+  0% { box-shadow: 0 0 0 0 rgba(30,64,175,0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(30,64,175,0); }
+  100% { box-shadow: 0 0 0 0 rgba(30,64,175,0); }
+}
+
+/* Scan line */
+.scan-line {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #b8c4ff, transparent);
+  position: absolute;
+  width: 100%;
+  z-index: 20;
+  animation: scan-line 3s linear infinite;
+}
+@keyframes scan-line {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Dark theme */
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f0fa;
+  --card: #1e293b;
+  --card-foreground: #f1f0fa;
+  --popover: #1e293b;
+  --popover-foreground: #f1f0fa;
+  --primary: #b8c4ff;
+  --primary-foreground: #001453;
+  --secondary: #b4c5ff;
+  --secondary-foreground: #00174b;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f1f0fa;
+  --destructive: #ffb4ab;
+  --border: #334155;
+  --input: #334155;
+  --ring: #b8c4ff;
+}
