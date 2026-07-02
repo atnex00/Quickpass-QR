@@ -34,6 +34,8 @@ Write-Host "  ╔═════════════════════
 Write-Host "  ║     Quickpass Environment Setup              ║" -ForegroundColor Cyan
 Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
+Write-Info "Project: $ProjectDir"
+Write-Host ""
 
 # ── System Dependencies ──
 
@@ -49,11 +51,6 @@ if (-not (Get-Command "curl" -ErrorAction SilentlyContinue)) {
 # Check git
 if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
     $Missing += "git"
-}
-
-# Check 7-Zip (needed for tar.xz extraction on Windows)
-if (-not (Get-Command "7z" -ErrorAction SilentlyContinue)) {
-    $Missing += "7z"
 }
 
 # Check Java 17+
@@ -75,12 +72,21 @@ if ($Missing.Count -gt 0) {
     Write-Host ""
     Write-Warn " Install the following manually:"
     Write-Warn "   - Java 17+: https://adoptium.net/temurin/releases/?version=17"
-    Write-Warn "   - 7-Zip:   https://www.7-zip.org/download.html"
-    Write-Warn "   - curl:    bundled in Windows 10/11, or install via package manager"
+    Write-Warn "   - curl:    bundled in Windows 10/11"
     Write-Warn "   - git:     https://git-scm.com/download/win"
     Write-Host ""
     Write-Warn " After installing, re-run this script."
     exit 1
+}
+
+# Download 7-Zip portable if not found
+if (-not (Get-Command "7z" -ErrorAction SilentlyContinue)) {
+    Write-Info "7-Zip not found. Downloading portable version..."
+    $7zUrl = "https://www.7-zip.org/a/7zr.exe"
+    $7zPath = "$env:TEMP\7zr.exe"
+    curl.exe -fsSL $7zUrl -o $7zPath
+    $env:Path += ";$env:TEMP"
+    Write-Log "7-Zip portable downloaded"
 }
 
 Write-Log "All system dependencies found"
