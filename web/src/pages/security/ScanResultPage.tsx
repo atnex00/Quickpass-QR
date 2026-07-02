@@ -44,7 +44,7 @@ export default function ScanResultPage() {
             <QrCode className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-bold text-white">
-            Pass<span className="text-emerald-400">Lynx</span>
+            Quickpass
             <span className="ml-2 rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400">
               Scanner
             </span>

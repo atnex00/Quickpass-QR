@@ -169,7 +169,7 @@ export default function ScannerPage() {
             <Shield className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className="text-base font-bold text-primary">Pass<span className="text-secondary">Lynx</span></span>
+            <span className="text-base font-bold text-primary">Quickpass</span>
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Security Scanner</p>
           </div>
         </div>
