@@ -202,7 +202,7 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                       icon: const Icon(Icons.undo, color: Colors.amber),
                       onPressed: () async {
                         final ok = await supProv.revokeApproval(leave.leaveId);
-                        if (ok && context.mounted) {
+                        if (ok != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Approval revoked'), backgroundColor: QuickpassColors.success),
                           );
