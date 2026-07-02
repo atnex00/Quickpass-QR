@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
-import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
@@ -17,6 +14,7 @@ class RequestLeaveScreen extends StatefulWidget {
 
 class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
   final _formKey = GlobalKey<FormState>();
+  DateTime _leaveDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute);
   TimeOfDay _endTime = TimeOfDay(hour: DateTime.now().hour + 2, minute: DateTime.now().minute);
   String _reason = '';
@@ -27,6 +25,18 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
     super.initState();
     if (_startTime.hour > 23) _startTime = const TimeOfDay(hour: 23, minute: 0);
     if (_endTime.hour > 23) _endTime = const TimeOfDay(hour: 23, minute: 59);
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _leaveDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() => _leaveDate = picked);
+    }
   }
 
   Future<void> _pickTime({required bool isStart}) async {
@@ -48,17 +58,17 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
 
     if (st.compareTo(et) >= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End time must be after start time'), backgroundColor: QuickpassColors.error),
+        const SnackBar(content: Text('End time must be after start time')),
       );
       return;
     }
 
     setState(() => _isSubmitting = true);
 
-    final today = DateFormatter.dateApi.format(DateTime.now());
+    final dateStr = DateFormatter.dateApi.format(_leaveDate);
     final leaveProv = context.read<LeaveProvider>();
     final result = await leaveProv.submitLeave(
-      leaveDate: today,
+      leaveDate: dateStr,
       startTime: st,
       endTime: et,
       reason: _reason,
@@ -68,20 +78,20 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
 
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Leave request submitted'), backgroundColor: QuickpassColors.success),
+        const SnackBar(content: Text('Leave request submitted')),
       );
       Navigator.pop(context);
     } else if (leaveProv.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(leaveProv.error!), backgroundColor: QuickpassColors.error),
+        SnackBar(content: Text(leaveProv.error!)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final auth = context.watch<AuthProvider>();
-    final today = DateTime.now();
 
     return Scaffold(
       appBar: const QuickpassAppBar(title: 'Request Leave', showBack: true),
@@ -92,51 +102,48 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Auto-filled info card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Employee Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      Text('Employee Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
                       const Divider(),
-                      _readOnlyField('Employee ID', auth.user?.employeeId ?? ''),
-                      _readOnlyField('Full Name', auth.user?.fullName ?? ''),
-                      _readOnlyField('Position', auth.user?.position ?? ''),
-                      _readOnlyField('Department', auth.user?.departmentName ?? ''),
+                      _readOnlyField('Employee ID', auth.user?.employeeId ?? '', colorScheme),
+                      _readOnlyField('Full Name', auth.user?.fullName ?? '', colorScheme),
+                      _readOnlyField('Position', auth.user?.position ?? '', colorScheme),
+                      _readOnlyField('Department', auth.user?.departmentName ?? '', colorScheme),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              // Date (locked)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today, color: QuickpassColors.textSecondary, size: 20),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Date', style: TextStyle(fontSize: 12, color: QuickpassColors.textSecondary)),
-                          Text(DateFormatter.formatDate(today), style: const TextStyle(fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.lock, size: 16, color: QuickpassColors.textSecondary),
-                    ],
+              InkWell(
+                onTap: _pickDate,
+                borderRadius: BorderRadius.circular(12),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: colorScheme.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Date', style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
+                            Text(DateFormatter.formatDate(_leaveDate), style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                          ],
+                        ),
+                        const Spacer(),
+                        Icon(Icons.edit_calendar, size: 16, color: colorScheme.primary),
+                      ],
+                    ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              // Time pickers
               Row(
                 children: [
                   Expanded(
@@ -156,30 +163,25 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
-              // Duration
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(Icons.access_time, color: QuickpassColors.secondary),
+                      Icon(Icons.access_time, color: colorScheme.secondary),
                       const SizedBox(width: 12),
-                      const Text('Duration: ', style: TextStyle(fontWeight: FontWeight.w500)),
+                      Text('Duration: ', style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.onSurface)),
                       Text(
                         _calculateDuration(),
-                        style: const TextStyle(fontWeight: FontWeight.w700, color: QuickpassColors.secondary),
+                        style: TextStyle(fontWeight: FontWeight.w700, color: colorScheme.secondary),
                       ),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              const Text('Reason for Leave', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text('Reason for Leave', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: _reason,
@@ -195,20 +197,17 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                 },
                 onChanged: (v) => _reason = v,
               ),
-
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton(
+                child: FilledButton(
                   onPressed: _isSubmitting ? null : _submit,
                   child: _isSubmitting
                       ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                       : const Text('Submit Request'),
                 ),
               ),
-
               const SizedBox(height: 16),
             ],
           ),
@@ -217,16 +216,16 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
     );
   }
 
-  Widget _readOnlyField(String label, String value) {
+  Widget _readOnlyField(String label, String value, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           SizedBox(
             width: 110,
-            child: Text(label, style: const TextStyle(color: QuickpassColors.textSecondary, fontSize: 13)),
+            child: Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
+          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: colorScheme.onSurface))),
         ],
       ),
     );
@@ -252,6 +251,7 @@ class _TimePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -261,13 +261,13 @@ class _TimePickerCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: QuickpassColors.textSecondary)),
+              Text(label, style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 18, color: QuickpassColors.primary),
+                  Icon(Icons.access_time, size: 18, color: colorScheme.primary),
                   const SizedBox(width: 6),
-                  Text(time, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(time, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: colorScheme.onSurface)),
                 ],
               ),
             ],

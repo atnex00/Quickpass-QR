@@ -120,6 +120,29 @@ class LeaveRequest {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'leave_id': leaveId,
+    'employee_id': employeeId,
+    'employee_name': employeeName,
+    'department_id': departmentId,
+    'supervisor_id': supervisorId,
+    'supervisor_name': supervisorName,
+    'leave_date': leaveDate.toIso8601String().split('T').first,
+    'start_time': startTime,
+    'end_time': endTime,
+    'reason': reason,
+    'status': status.name,
+    'out_qr_code': outQrCode,
+    'in_qr_code': inQrCode,
+    'out_scan_time': outScanTime?.toIso8601String(),
+    'in_scan_time': inScanTime?.toIso8601String(),
+    'rejection_reason': rejectionReason,
+    'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
+    'employee_position': employeePosition,
+    'employee_photo': employeePhoto,
+  };
+
   bool get hasQrCodes => outQrCode != null && inQrCode != null;
 
   int get durationMinutes {

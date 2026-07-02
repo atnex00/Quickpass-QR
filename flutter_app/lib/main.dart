@@ -13,7 +13,6 @@ import 'screens/employee/dashboard_screen.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
 import 'screens/admin/admin_panel.dart';
 import 'screens/security/scanner_screen.dart';
-import 'widgets/loading_indicator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +59,7 @@ class QuickpassApp extends StatelessWidget {
       return const LoginScreen();
     }
 
-    if (auth.isScanner || auth.isSecurity) {
+    if (auth.isScanner) {
       return const ScannerScreen();
     }
 

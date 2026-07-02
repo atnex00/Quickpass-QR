@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../providers/scan_provider.dart';
 import '../../widgets/loading_indicator.dart';
 import 'scanner_screen.dart';
@@ -28,6 +27,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final scanProv = context.watch<ScanProvider>();
 
     return Scaffold(
@@ -35,13 +35,13 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
         child: scanProv.isLoading
             ? const LoadingIndicator(message: 'Validating QR code...')
             : scanProv.lastResult != null && scanProv.lastResult!['success'] == true
-                ? _buildSuccess(scanProv.lastResult!['data'] as Map<String, dynamic>?)
-                : _buildError(scanProv.error ?? 'Invalid QR code'),
+                ? _buildSuccess(scanProv.lastResult!['data'] as Map<String, dynamic>?, colorScheme)
+                : _buildError(scanProv.error ?? 'Invalid QR code', colorScheme),
       ),
     );
   }
 
-  Widget _buildSuccess(Map<String, dynamic>? data) {
+  Widget _buildSuccess(Map<String, dynamic>? data, ColorScheme colorScheme) {
     final isOut = data?['type'] == 'OUT';
 
     return Center(
@@ -54,27 +54,27 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: QuickpassColors.success.withValues(alpha: 0.1),
+                color: colorScheme.primaryContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle, size: 60, color: QuickpassColors.success),
+              child: Icon(Icons.check_circle, size: 60, color: colorScheme.primary),
             ),
             const SizedBox(height: 24),
             Text(
               isOut ? 'Exit Recorded' : 'Entry Recorded',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: (isOut ? QuickpassColors.qrOut : QuickpassColors.qrIn).withValues(alpha: 0.1),
+                color: colorScheme.tertiaryContainer,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 isOut ? 'OUT SCAN' : 'IN SCAN',
                 style: TextStyle(
-                  color: isOut ? QuickpassColors.qrOut : QuickpassColors.qrIn,
+                  color: colorScheme.onTertiaryContainer,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
                 ),
@@ -87,10 +87,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      _resultRow('Employee', data['employee_name'] ?? ''),
-                      _resultRow('ID', data['employee_id'] ?? ''),
-                      _resultRow('Time', '${data['start_time']} - ${data['end_time']}'),
-                      _resultRow('Status', data['new_status'] ?? ''),
+                      _resultRow('Employee', data['employee_name'] ?? '', colorScheme),
+                      _resultRow('ID', data['employee_id'] ?? '', colorScheme),
+                      _resultRow('Time', '${data['start_time']} - ${data['end_time']}', colorScheme),
+                      _resultRow('Status', data['new_status'] ?? '', colorScheme),
                     ],
                   ),
                 ),
@@ -99,7 +99,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: FilledButton(
                 onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ScannerScreen())),
                 child: const Text('Scan Next'),
               ),
@@ -110,7 +110,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     );
   }
 
-  Widget _buildError(String message) {
+  Widget _buildError(String message, ColorScheme colorScheme) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -121,24 +121,24 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: QuickpassColors.error.withValues(alpha: 0.1),
+                color: colorScheme.errorContainer,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.cancel, size: 60, color: QuickpassColors.error),
+              child: Icon(Icons.cancel, size: 60, color: colorScheme.error),
             ),
             const SizedBox(height: 24),
-            const Text('Invalid QR Code', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+            Text('Invalid QR Code', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: colorScheme.onSurface)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: QuickpassColors.error.withValues(alpha: 0.05),
+                color: colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: QuickpassColors.error, fontSize: 14),
+                style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 14),
               ),
             ),
             const SizedBox(height: 32),
@@ -155,14 +155,14 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     );
   }
 
-  Widget _resultRow(String label, String value) {
+  Widget _resultRow(String label, String value, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: QuickpassColors.textSecondary)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
         ],
       ),
     );

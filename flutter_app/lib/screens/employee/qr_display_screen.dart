@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../utils/constants.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -12,6 +11,7 @@ class QrDisplayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final dateStr = leave.leaveDate.toIso8601String().split('T').first;
 
     return Scaffold(
@@ -29,29 +29,26 @@ class QrDisplayScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.info_outline, color: QuickpassColors.primary, size: 18),
+                        Icon(Icons.info_outline, color: colorScheme.primary, size: 18),
                         const SizedBox(width: 8),
-                        Text('Leave Details', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                        Text('Leave Details', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colorScheme.onSurface)),
                       ],
                     ),
                     const Divider(),
-                    _detailRow('Date', dateStr),
-                    _detailRow('Time', '${leave.startTime} - ${leave.endTime}'),
-                    _detailRow('Duration', leave.durationText),
-                    _detailRow('Reason', leave.reason),
+                    _detailRow('Date', dateStr, colorScheme),
+                    _detailRow('Time', '${leave.startTime} - ${leave.endTime}', colorScheme),
+                    _detailRow('Duration', leave.durationText, colorScheme),
+                    _detailRow('Reason', leave.reason, colorScheme),
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // OUT QR Code
             if (leave.outQrCode != null)
               QrCodeWidget(
                 qrData: leave.outQrCode!,
                 label: AppConstants.outQrLabel,
-                color: QuickpassColors.qrOut,
+                color: colorScheme.primary,
                 date: dateStr,
                 time: leave.startTime,
                 priorScanTime: leave.outScanTime,
@@ -59,15 +56,12 @@ class QrDisplayScreen extends StatelessWidget {
                 employeePosition: leave.employeePosition,
                 isOut: true,
               ),
-
             const SizedBox(height: 16),
-
-            // IN QR Code
             if (leave.inQrCode != null)
               QrCodeWidget(
                 qrData: leave.inQrCode!,
                 label: AppConstants.inQrLabel,
-                color: QuickpassColors.qrIn,
+                color: QuickpassQrColors.qrIn,
                 date: dateStr,
                 time: leave.endTime,
                 priorScanTime: leave.inScanTime,
@@ -75,7 +69,6 @@ class QrDisplayScreen extends StatelessWidget {
                 employeePosition: leave.employeePosition,
                 isOut: false,
               ),
-
             if (!leave.hasQrCodes)
               Card(
                 child: Padding(
@@ -83,26 +76,25 @@ class QrDisplayScreen extends StatelessWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.qr_code, size: 64, color: Colors.grey[400]),
+                        Icon(Icons.qr_code, size: 64, color: colorScheme.outlineVariant),
                         const SizedBox(height: 12),
-                        Text('QR codes are not available yet', style: TextStyle(color: Colors.grey[600])),
+                        Text('QR codes are not available yet', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 4),
-                        const Text('Approved leaves will show QR codes here'),
+                        Text('Approved leaves will show QR codes here', style: TextStyle(color: colorScheme.outline)),
                       ],
                     ),
                   ),
                 ),
               ),
-
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.info_outline, size: 14, color: Colors.grey[500]),
+                Icon(Icons.info_outline, size: 14, color: colorScheme.outline),
                 const SizedBox(width: 6),
                 Text(
-                  'QR codes are valid ±15 minutes from scheduled time',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  'QR codes are valid \u00b115 minutes from scheduled time',
+                  style: TextStyle(fontSize: 12, color: colorScheme.outline),
                 ),
               ],
             ),
@@ -112,13 +104,13 @@ class QrDisplayScreen extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  Widget _detailRow(String label, String value, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          SizedBox(width: 80, child: Text(label, style: const TextStyle(color: QuickpassColors.textSecondary, fontSize: 13))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
+          SizedBox(width: 80, child: Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13))),
+          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: colorScheme.onSurface))),
         ],
       ),
     );

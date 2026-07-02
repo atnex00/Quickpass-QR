@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import 'pending_requests_screen.dart';
@@ -20,20 +19,23 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
     const PendingRequestsScreen(),
   ];
 
-  void _rebuild() {
-    setState(() {});
+  void _switchToRequests() {
+    setState(() => _currentIndex = 1);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), activeIcon: Icon(Icons.dashboard), label: 'Overview'),
-          BottomNavigationBarItem(icon: Icon(Icons.pending_actions_outlined), activeIcon: Icon(Icons.pending_actions), label: 'Requests'),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (i) => setState(() => _currentIndex = i),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Overview'),
+          NavigationDestination(icon: Icon(Icons.pending_actions_outlined), selectedIcon: Icon(Icons.pending_actions), label: 'Requests'),
         ],
       ),
     );
@@ -60,6 +62,7 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final auth = context.watch<AuthProvider>();
     final supProv = context.watch<SupervisorProvider>();
 
@@ -88,10 +91,10 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                     children: [
                       CircleAvatar(
                         radius: 28,
-                        backgroundColor: QuickpassColors.secondary,
+                        backgroundColor: colorScheme.secondary,
                         child: Text(
                           (auth.user?.fullName ?? 'S').substring(0, 1).toUpperCase(),
-                          style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 24, color: colorScheme.onSecondary, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -99,8 +102,8 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(auth.user?.fullName ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                            Text(auth.user?.departmentName ?? '', style: const TextStyle(color: QuickpassColors.textSecondary)),
+                            Text(auth.user?.fullName ?? '', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                            Text(auth.user?.departmentName ?? '', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -108,12 +111,9 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // Pending count
               Card(
-                color: QuickpassColors.primary,
+                color: colorScheme.primary,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
@@ -127,10 +127,10 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: colorScheme.onPrimary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.pending_actions, color: Colors.white, size: 32),
+                          child: Icon(Icons.pending_actions, color: colorScheme.onPrimary, size: 32),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
@@ -139,29 +139,27 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                             children: [
                               Text(
                                 '${supProv.pendingCount}',
-                                style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w700, color: Colors.white),
+                                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w700, color: colorScheme.onPrimary),
                               ),
-                              const Text('Pending Requests', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                              Text('Pending Requests', style: TextStyle(color: colorScheme.onPrimary.withValues(alpha: 0.7), fontSize: 14)),
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+                        Icon(Icons.arrow_forward_ios, color: colorScheme.onPrimary.withValues(alpha: 0.5), size: 16),
                       ],
                     ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              const Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
               const SizedBox(height: 12),
               Row(
                 children: [
                   _ActionCard(
                     icon: Icons.pending_actions,
                     label: 'Review Pending',
-                    color: Colors.orange,
+                    color: colorScheme.tertiary,
                     onTap: () {
                       final parent = context.findAncestorStateOfType<_SupervisorDashboardState>();
                       parent?._switchToRequests();
@@ -171,45 +169,47 @@ class _SupervisorHomeTabState extends State<_SupervisorHomeTab> {
                   _ActionCard(
                     icon: Icons.calendar_month,
                     label: 'Team Calendar',
-                    color: QuickpassColors.secondary,
+                    color: colorScheme.secondary,
                     onTap: () {},
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
-              const Text('Approved Leaves', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              Text('Approved Leaves', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
               const SizedBox(height: 4),
-              Text('Tap to revoke approval', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              Text('Tap to revoke approval', style: TextStyle(fontSize: 12, color: colorScheme.outline)),
               const SizedBox(height: 8),
-
               if (supProv.approvedLeaves.isEmpty)
-                Card(child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Center(child: Text('No approved leaves', style: TextStyle(color: Colors.grey[500]))),
-                ))
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Text('No approved leaves', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                    ),
+                  ),
+                )
               else
                 ...supProv.approvedLeaves.take(5).map((leave) => Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: QuickpassColors.primary,
+                      backgroundColor: colorScheme.primary,
                       radius: 18,
-                      child: Text(leave.employeeName[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      child: Text(leave.employeeName[0], style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600)),
                     ),
-                    title: Text(leave.employeeName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    subtitle: Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 12)),
+                    title: Text(leave.employeeName, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
+                    subtitle: Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(fontSize: 12)),
                     trailing: IconButton(
-                      icon: const Icon(Icons.undo, color: Colors.amber),
+                      icon: Icon(Icons.undo, color: colorScheme.tertiary),
                       onPressed: () async {
-                        final ok = await supProv.revokeApproval(leave.leaveId);
-                        if (ok && context.mounted) {
+                        final result = await supProv.revokeApproval(leave.leaveId);
+                        if (result != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Approval revoked'), backgroundColor: QuickpassColors.success),
+                            const SnackBar(content: Text('Approval revoked')),
                           );
                           supProv.loadPendingRequests();
                         } else if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(supProv.error ?? 'Failed to revoke'), backgroundColor: QuickpassColors.error),
+                            SnackBar(content: Text(supProv.error ?? 'Failed to revoke')),
                           );
                         }
                       },
@@ -234,6 +234,7 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Card(
         child: InkWell(
@@ -245,22 +246,12 @@ class _ActionCard extends StatelessWidget {
               children: [
                 Icon(icon, color: color, size: 32),
                 const SizedBox(height: 8),
-                Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: colorScheme.onSurface)),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-extension on _SupervisorDashboardState {
-  void _switchToRequests() {
-    final dashState = context.findAncestorStateOfType<_SupervisorDashboardState>();
-    if (dashState != null) {
-      dashState._currentIndex = 1;
-      dashState._rebuild();
-    }
   }
 }

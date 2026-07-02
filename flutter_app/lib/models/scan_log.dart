@@ -37,4 +37,17 @@ class ScanLog {
       employeeId: json['employee_id'],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'log_id': logId,
+    'leave_id': leaveId,
+    'qr_type': qrType,
+    'scanned_by': scannedBy,
+    'scan_time': scanTime.toIso8601String(),
+    'ip_address': ipAddress,
+    'is_valid': isValid,
+    'validation_message': validationMessage,
+    'employee_name': employeeName,
+    'employee_id': employeeId,
+  };
 }

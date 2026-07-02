@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../config/theme.dart';
 import '../services/qr_service.dart';
 
 class QrCodeWidget extends StatefulWidget {
@@ -64,7 +63,6 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
 
   bool get _isExpired => widget.isOut && _windowState == 'after';
   bool get _isUsed => widget.priorScanTime != null;
-  bool get _showQr => !_isUsed && (widget.isOut ? !_isExpired : true);
 
   String _formatTime(int secs) {
     final m = (secs ~/ 60).toString().padLeft(2, '0');
@@ -74,8 +72,10 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: widget.color.withValues(alpha: 0.3), width: 2),
@@ -88,7 +88,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
             end: Alignment.bottomRight,
             colors: [
               widget.color.withValues(alpha: 0.05),
-              Colors.white,
+              colorScheme.surface,
             ],
           ),
         ),
@@ -119,9 +119,9 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.check_circle, size: 14, color: Colors.grey[400]),
+                      Icon(Icons.check_circle, size: 14, color: colorScheme.outline),
                       const SizedBox(width: 4),
-                      Text('Scanned', style: TextStyle(fontSize: 11, color: Colors.grey[400])),
+                      Text('Scanned', style: TextStyle(fontSize: 11, color: colorScheme.outline)),
                     ],
                   ),
               ],
@@ -131,26 +131,25 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
             if (_isUsed)
               Column(
                 children: [
-                  Icon(Icons.check_circle, size: 48, color: Colors.grey[400]),
+                  Icon(Icons.check_circle, size: 48, color: colorScheme.outline),
                   const SizedBox(height: 8),
-                  Text('Already Scanned', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                  Text('Already Scanned', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
                 ],
               )
             else if (_isExpired)
               Column(
                 children: [
-                  Icon(Icons.timer_off, size: 48, color: Colors.grey[400]),
+                  Icon(Icons.timer_off, size: 48, color: colorScheme.outline),
                   const SizedBox(height: 8),
-                  Text('QR Code Expired', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                  Text('QR Code Expired', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
                   const SizedBox(height: 4),
                   Text('The 15-minute validity window has passed',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                      style: TextStyle(color: colorScheme.outline, fontSize: 12)),
                 ],
               )
             else if (widget.priorScanTime == null && !widget.isOut && _remainingSeconds <= -86400)
               const SizedBox.shrink()
             else ...[
-              // QR Code with embedded logo overlay
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -160,7 +159,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                     size: 450,
                     backgroundColor: Colors.white,
                     eyeStyle: QrEyeStyle(
-                      eyeShape: QrEyeShape.roundedOuter,
+                      eyeShape: QrEyeShape.square,
                       color: widget.color,
                     ),
                     dataModuleStyle: QrDataModuleStyle(
@@ -184,17 +183,16 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
               ),
               const SizedBox(height: 16),
 
-              // Timer
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: widget.isOut && _windowState == 'before'
-                      ? Colors.blue.withValues(alpha: 0.1)
+                      ? colorScheme.primaryContainer
                       : widget.isOut
                           ? (_remainingSeconds > 300
-                              ? QuickpassColors.success.withValues(alpha: 0.1)
-                              : QuickpassColors.warning.withValues(alpha: 0.1))
-                          : QuickpassColors.success.withValues(alpha: 0.1),
+                              ? colorScheme.primaryContainer
+                              : colorScheme.errorContainer)
+                          : colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -204,24 +202,24 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                       Icons.timer,
                       size: 18,
                       color: widget.isOut && _windowState == 'before'
-                          ? Colors.blue
+                          ? colorScheme.primary
                           : widget.isOut
-                              ? (_remainingSeconds > 300 ? QuickpassColors.success : QuickpassColors.warning)
-                              : QuickpassColors.success,
+                              ? (_remainingSeconds > 300 ? colorScheme.primary : colorScheme.error)
+                              : colorScheme.primary,
                     ),
                     const SizedBox(width: 6),
                     widget.isOut
                         ? Text(
-                            '${_windowState == 'before' ? "Opens in " : "Expires in "}${_formatTime(_remainingSeconds)}',
+                            '${_windowState == 'before' ? 'Opens in ' : 'Expires in '}${_formatTime(_remainingSeconds)}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'monospace',
                               color: _windowState == 'before'
-                                  ? Colors.blue
+                                  ? colorScheme.primary
                                   : _remainingSeconds > 300
-                                      ? QuickpassColors.success
-                                      : QuickpassColors.warning,
+                                      ? colorScheme.primary
+                                      : colorScheme.error,
                             ),
                           )
                         : Text(
@@ -229,7 +227,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: QuickpassColors.success,
+                              color: colorScheme.primary,
                             ),
                           ),
                   ],
@@ -237,7 +235,6 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
               ),
             ],
 
-            // Employee info footer
             if (widget.employeeName != null || widget.employeePosition != null) ...[
               const SizedBox(height: 16),
               Container(
@@ -254,7 +251,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                       backgroundColor: widget.color,
                       child: Text(
                         (widget.employeeName ?? '?')[0].toUpperCase(),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                        style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -263,9 +260,9 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (widget.employeeName != null)
-                            Text(widget.employeeName!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            Text(widget.employeeName!, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: colorScheme.onSurface)),
                           if (widget.employeePosition != null)
-                            Text(widget.employeePosition!, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                            Text(widget.employeePosition!, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12)),
                         ],
                       ),
                     ),

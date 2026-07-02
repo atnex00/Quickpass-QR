@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/employee.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _api = ApiService();
-  final _storage = const FlutterSecureStorage();
 
   Employee? _user;
   bool _isLoading = true;
@@ -19,7 +17,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isSupervisor => _user?.isSupervisor ?? false;
   bool get isAdmin => _user?.isAdmin ?? false;
   bool get isSecurity => _user?.isSecurity ?? false;
-  bool get isScanner => _user == null && _isAuthenticated;
+  bool get isScanner => _user?.isSecurity == true;
 
   Future<void> initialize() async {
     _isLoading = true;

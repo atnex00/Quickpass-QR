@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../providers/scan_provider.dart';
 import 'scan_result_screen.dart';
 
@@ -62,7 +61,6 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
             controller: _controller,
             onDetect: _onDetect,
           ),
-          // Overlay
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -84,7 +82,7 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
-                      const Text('Scan QR Code', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+                      Text('Scan QR Code', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.flashlight_on, color: Colors.white),

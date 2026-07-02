@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../config/theme.dart';
 
 class LoadingIndicator extends StatelessWidget {
   final String? message;
@@ -8,17 +7,18 @@ class LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: QuickpassColors.primary),
+          CircularProgressIndicator(color: colorScheme.primary),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
               message!,
               style: TextStyle(
-                color: QuickpassColors.textSecondary,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -36,6 +36,8 @@ class ShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final shimmerBase = colorScheme.surfaceContainerHighest;
     return ListView.builder(
       itemCount: itemCount,
       shrinkWrap: true,
@@ -51,8 +53,8 @@ class ShimmerLoading extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
+                    color: shimmerBase,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -64,7 +66,7 @@ class ShimmerLoading extends StatelessWidget {
                         height: 14,
                         width: 150,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: shimmerBase,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -73,7 +75,7 @@ class ShimmerLoading extends StatelessWidget {
                         height: 12,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: shimmerBase.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),

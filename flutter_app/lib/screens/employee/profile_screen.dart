@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 
@@ -47,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (data.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No changes to save'), backgroundColor: QuickpassColors.warning),
+        const SnackBar(content: Text('No changes to save')),
       );
       return;
     }
@@ -58,14 +57,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated'), backgroundColor: QuickpassColors.success),
+        const SnackBar(content: Text('Profile updated')),
       );
       _passCtl.clear();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.read<AuthProvider>().error ?? 'Could not update profile'),
-          backgroundColor: QuickpassColors.error,
         ),
       );
     }
@@ -73,56 +71,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
 
     return Scaffold(
-      appBar: const QuickpassAppBar(title: 'My Profile', showBack: true),
+      appBar: const QuickpassAppBar(title: 'My Profile', showBack: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Read-only info
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Account Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    const Divider(),
-                    _readOnlyRow('Employee ID', user?.employeeId ?? ''),
-                    _readOnlyRow('Department', user?.departmentName ?? 'N/A'),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 32,
+                          backgroundColor: colorScheme.primary,
+                          child: Text(
+                            (user?.fullName ?? 'U')[0].toUpperCase(),
+                            style: TextStyle(fontSize: 28, color: colorScheme.onPrimary, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user?.fullName ?? '', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colorScheme.onSurface)),
+                              Text(user?.position ?? '', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
-            // Editable fields
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Personal Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text('Account Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
+                    const Divider(),
+                    _readOnlyRow('Employee ID', user?.employeeId ?? '', colorScheme),
+                    _readOnlyRow('Department', user?.departmentName ?? 'N/A', colorScheme),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Personal Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
                     const Divider(),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _nameCtl,
-                      decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(labelText: 'Full Name'),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _posCtl,
-                      decoration: const InputDecoration(labelText: 'Position', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(labelText: 'Position'),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _emailCtl,
-                      decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(labelText: 'Email'),
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 12),
@@ -130,7 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       controller: _passCtl,
                       decoration: const InputDecoration(
                         labelText: 'New Password (leave blank to keep)',
-                        border: OutlineInputBorder(),
                       ),
                       obscureText: true,
                     ),
@@ -138,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(
                       width: double.infinity,
                       height: 48,
-                      child: ElevatedButton(
+                      child: FilledButton(
                         onPressed: _saving ? null : _save,
                         child: _saving
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
@@ -155,13 +183,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _readOnlyRow(String label, String value) {
+  Widget _readOnlyRow(String label, String value, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: 110, child: Text(label, style: const TextStyle(color: QuickpassColors.textSecondary, fontSize: 13))),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
+          SizedBox(width: 110, child: Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13))),
+          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: colorScheme.onSurface))),
         ],
       ),
     );

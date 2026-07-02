@@ -1,10 +1,4 @@
 class QrService {
-  static int _parseMinutes(String time) {
-    final parts = time.split(':');
-    if (parts.length < 2) return 0;
-    return int.parse(parts[0]) * 60 + int.parse(parts[1]);
-  }
-
   static bool isWithinWindow(String qrTimestamp, int windowMinutes) {
     final qrTime = DateTime.parse(qrTimestamp);
     final now = DateTime.now();

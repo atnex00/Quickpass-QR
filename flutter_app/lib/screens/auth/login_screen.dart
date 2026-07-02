@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/constants.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,10 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-
     final auth = context.read<AuthProvider>();
     auth.clearError();
-
     await auth.login(
       _employeeIdCtrl.text.trim(),
       _passwordCtrl.text,
@@ -39,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -52,33 +49,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 88,
                   height: 88,
                   decoration: BoxDecoration(
-                    color: QuickpassColors.primary,
+                    color: colorScheme.primary,
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: QuickpassColors.primary.withValues(alpha: 0.3),
+                        color: colorScheme.primary.withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.qr_code_scanner, size: 48, color: Colors.white),
+                  child: Icon(Icons.qr_code_scanner, size: 48, color: colorScheme.onPrimary),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  AppConstants.appName,
-                  style: const TextStyle(
+                  'Quickpass',
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
-                    color: QuickpassColors.textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppConstants.tagline,
-                  style: const TextStyle(
+                  'Smart Gatepass & Leave Management',
+                  style: TextStyle(
                     fontSize: 14,
-                    color: QuickpassColors.textSecondary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -88,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   maxLength: 6,
                   decoration: const InputDecoration(
                     labelText: 'Employee ID',
-                    hintText: AppConstants.employeeIdHint,
+                    hintText: '000001',
                     prefixIcon: Icon(Icons.badge_outlined),
                     counterText: '',
                   ),
@@ -115,10 +112,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (auth.error != null) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          auth.error!,
-                          style: const TextStyle(color: QuickpassColors.error, fontSize: 13),
-                          textAlign: TextAlign.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline, size: 16, color: colorScheme.error),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  auth.error!,
+                                  style: TextStyle(color: colorScheme.onErrorContainer, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }
@@ -131,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     return SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
+                      child: FilledButton(
                         onPressed: auth.isLoading ? null : _login,
                         child: auth.isLoading
                             ? const SizedBox(

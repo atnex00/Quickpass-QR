@@ -22,4 +22,12 @@ class Department {
       isActive: json['is_active'] as bool? ?? true,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'department_id': departmentId,
+    'department_name': departmentName,
+    'department_code': departmentCode,
+    'head_of_department': headOfDepartment,
+    'is_active': isActive,
+  };
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/leave_provider.dart';
 import '../../widgets/status_badge.dart';
+import '../../widgets/loading_indicator.dart';
 import 'qr_display_screen.dart';
 
 class LeaveHistoryScreen extends StatefulWidget {
@@ -26,6 +26,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final leaveProv = context.watch<LeaveProvider>();
 
     return Scaffold(
@@ -57,18 +58,20 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
       body: RefreshIndicator(
         onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
         child: leaveProv.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const LoadingIndicator()
             : leaveProv.history.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
+                        Icon(Icons.inbox_outlined, size: 64, color: colorScheme.outlineVariant),
                         const SizedBox(height: 12),
-                        Text('No leave requests found', style: TextStyle(color: Colors.grey[700], fontSize: 16, fontWeight: FontWeight.w500)),
+                        Text('No leave requests found', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 4),
-                        Text(_statusFilter != null ? 'No $_statusFilter requests match your filter' : 'Submit a leave request to get started',
-                            style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                        Text(
+                          _statusFilter != null ? 'No $_statusFilter requests match your filter' : 'Submit a leave request to get started',
+                          style: TextStyle(color: colorScheme.outline, fontSize: 13),
+                        ),
                       ],
                     ),
                   )
@@ -97,7 +100,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                   children: [
                                     Text(
                                       leave.leaveDate.toIso8601String().split('T').first,
-                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colorScheme.onSurface),
                                     ),
                                     StatusBadge(status: leave.status),
                                   ],
@@ -105,28 +108,28 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                 const SizedBox(height: 8),
                                 Row(
                                   children: [
-                                    const Icon(Icons.access_time, size: 16, color: QuickpassColors.textSecondary),
+                                    Icon(Icons.access_time, size: 16, color: colorScheme.onSurfaceVariant),
                                     const SizedBox(width: 4),
-                                    Text('${leave.startTime} - ${leave.endTime}'),
+                                    Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                                     const Spacer(),
-                                    Text(leave.durationText, style: const TextStyle(fontWeight: FontWeight.w500, color: QuickpassColors.secondary)),
+                                    Text(leave.durationText, style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.secondary)),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(leave.reason, style: const TextStyle(color: QuickpassColors.textSecondary, fontSize: 13)),
+                                Text(leave.reason, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
                                 if (leave.rejectionReason != null) ...[
                                   const SizedBox(height: 4),
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: QuickpassColors.error.withValues(alpha: 0.08),
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: colorScheme.errorContainer,
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.info_outline, size: 14, color: QuickpassColors.error),
+                                        Icon(Icons.info_outline, size: 14, color: colorScheme.error),
                                         const SizedBox(width: 6),
-                                        Expanded(child: Text(leave.rejectionReason!, style: const TextStyle(fontSize: 12, color: QuickpassColors.error))),
+                                        Expanded(child: Text(leave.rejectionReason!, style: TextStyle(fontSize: 12, color: colorScheme.onErrorContainer))),
                                       ],
                                     ),
                                   ),

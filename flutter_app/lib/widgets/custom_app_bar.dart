@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../config/theme.dart';
 
 class QuickpassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -17,19 +16,15 @@ class QuickpassAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       title: Text(title),
-      leading: leading ?? (showBack ? const BackButton(color: Colors.white) : null),
+      leading: leading ?? (showBack ? BackButton(color: colorScheme.onPrimary) : null),
       actions: actions,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [QuickpassColors.primary, Color(0xFF2D4A7A)],
-          ),
-        ),
-      ),
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      elevation: 0,
+      centerTitle: true,
     );
   }
 

@@ -4,7 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
-import '../models/scan_log.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -198,6 +197,10 @@ class ApiService {
   Future<List<dynamic>> getDepartments() async {
     final res = await _dio.get('/admin/departments');
     return res.data['data'];
+  }
+
+  Future<void> createDepartment(Map<String, dynamic> data) async {
+    await _dio.post('/admin/departments', data: data);
   }
 
   Future<Map<String, dynamic>> getReports({String? type, String? startDate, String? endDate}) async {
