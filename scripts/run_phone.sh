@@ -41,7 +41,7 @@ resolve_sdk_path() {
 
 ANDROID_SDK_DIR=$(resolve_sdk_path "sdk.dir" "$PROJECT_DIR/tools/android-sdk")
 FLUTTER_DIR=$(resolve_sdk_path "flutter.sdk" "$PROJECT_DIR/tools/flutter")
-ADB="$ANDROID_SDK_DIR/platform-tools/adb"
+ADB="${ANDROID_SDK_DIR:+$ANDROID_SDK_DIR/platform-tools/adb}"
 FLUTTER="$FLUTTER_DIR/bin/flutter"
 
 # ── Environment ──
@@ -112,3 +112,4 @@ cd "$PROJECT_DIR/flutter_app"
 info "Starting Flutter on $DEVICE..."
 br
 "$FLUTTER" run --dart-define=API_BASE_URL=http://localhost:3000/api
+

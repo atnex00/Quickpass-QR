@@ -33,12 +33,21 @@ br
 # ── Confirm ──
 
 printf "  ${YELLOW}?${RESET} This will remove all SDKs from tools/ and reset Flutter config. Continue? [y/N] "
-read -r REPLY
+read -r REPLY </dev/tty
 case "$REPLY" in
   [yY]|[yY][eE][sS]) ;;
   *) info "Cancelled."; exit 0 ;;
 esac
 br
+
+# ── Clear Flutter global config referencing this SDK ──
+
+FLUTTER_BIN="$TOOLS_DIR/flutter/bin/flutter"
+if [ -f "$FLUTTER_BIN" ]; then
+  info "Clearing Flutter android-sdk config..."
+  "$FLUTTER_BIN" config --clear-android-sdk 2>/dev/null || true
+  log "Cleared Flutter android-sdk config"
+fi
 
 # ── Remove SDK directories ──
 
@@ -58,14 +67,6 @@ done
 if [ -f "$PROPERTIES_FILE" ]; then
   rm -f "$PROPERTIES_FILE"
   log "Removed $PROPERTIES_FILE"
-fi
-
-# ── Clear Flutter global config referencing this SDK ──
-
-FLUTTER_BIN="$TOOLS_DIR/flutter/bin/flutter"
-if [ -f "$FLUTTER_BIN" ]; then
-  "$FLUTTER_BIN" config --clear-android-sdk 2>/dev/null || true
-  log "Cleared Flutter android-sdk config"
 fi
 
 # ── Clean Gradle caches for this project ──
