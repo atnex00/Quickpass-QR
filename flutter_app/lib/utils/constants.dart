@@ -16,14 +16,13 @@ class AppConstants {
   static const int employeeIdLength = 6;
 
   static const Duration qrCountdownInterval = Duration(seconds: 1);
-
   static const Duration scanTimeout = Duration(seconds: 30);
 
   static const Map<String, Color> statusColors = {
     'pending': Color(0xFFF59E0B),
     'approved': Color(0xFF1E40AF),
     'rejected': Color(0xFFDC2626),
-    'active': Color(0xFF10B981),
+    'active': Color(0xFF16A34A),
     'completed': Color(0xFF2563EB),
     'cancelled': Color(0xFF94A3B8),
   };

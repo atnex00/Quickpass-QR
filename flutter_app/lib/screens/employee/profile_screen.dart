@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/custom_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -71,125 +71,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
 
     return Scaffold(
-      appBar: const QuickpassAppBar(title: 'My Profile', showBack: false),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            toolbarHeight: 64,
+            backgroundColor: QuickpassColors.darkPrimary,
+            foregroundColor: QuickpassColors.darkOnPrimary,
+            automaticallyImplyLeading: false,
+            flexibleSpace: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 32,
-                          backgroundColor: colorScheme.primary,
-                          child: Text(
-                            (user?.fullName ?? 'U')[0].toUpperCase(),
-                            style: TextStyle(fontSize: 28, color: colorScheme.onPrimary, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(user?.fullName ?? '', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colorScheme.onSurface)),
-                              Text(user?.position ?? '', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Account Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
-                    const Divider(),
-                    _readOnlyRow('Employee ID', user?.employeeId ?? '', colorScheme),
-                    _readOnlyRow('Department', user?.departmentName ?? 'N/A', colorScheme),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Personal Information', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colorScheme.onSurface)),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _nameCtl,
-                      decoration: const InputDecoration(labelText: 'Full Name'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _posCtl,
-                      decoration: const InputDecoration(labelText: 'Position'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _emailCtl,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _passCtl,
-                      decoration: const InputDecoration(
-                        labelText: 'New Password (leave blank to keep)',
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      obscureText: true,
+                      child: Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: _saving ? null : _save,
-                        child: _saving
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Text('Save Changes'),
+                    const SizedBox(width: 12),
+                    Text(
+                      'My Profile',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: QuickpassColors.darkOnPrimary,
                       ),
                     ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
+                      onPressed: () => context.read<AuthProvider>().logout(),
+                    ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: QuickpassColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: QuickpassColors.outlineVariant),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
+                        child: Text(
+                          (user?.fullName ?? 'U')[0].toUpperCase(),
+                          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: QuickpassColors.primary),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(user?.fullName ?? '',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: QuickpassColors.onSurface)),
+                            Text(user?.position ?? '',
+                              style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: QuickpassColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: QuickpassColors.outlineVariant),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Account Information',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+                      Divider(color: QuickpassColors.outlineVariant),
+                      _readOnlyRow('Employee ID', user?.employeeId ?? ''),
+                      _readOnlyRow('Department', user?.departmentName ?? 'N/A'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: QuickpassColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: QuickpassColors.outlineVariant),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Personal Information',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+                      Divider(color: QuickpassColors.outlineVariant),
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: _nameCtl,
+                        decoration: const InputDecoration(labelText: 'Full Name'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _posCtl,
+                        decoration: const InputDecoration(labelText: 'Position'),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _emailCtl,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _passCtl,
+                        decoration: const InputDecoration(
+                          labelText: 'New Password (leave blank to keep)',
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: FilledButton(
+                          onPressed: _saving ? null : _save,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: QuickpassColors.darkPrimary,
+                            foregroundColor: QuickpassColors.darkOnPrimary,
+                          ),
+                          child: _saving
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Text('Save Changes'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _readOnlyRow(String label, String value, ColorScheme colorScheme) {
+  Widget _readOnlyRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: 110, child: Text(label, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: colorScheme.onSurface))),
+          SizedBox(width: 110, child: Text(label, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13))),
+          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: QuickpassColors.onSurface))),
         ],
       ),
     );

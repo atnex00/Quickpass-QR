@@ -189,6 +189,14 @@ class ApiService {
     return res.data;
   }
 
+  Future<void> toggleActive(String id) async {
+    await _dio.put('/admin/employees/$id/status');
+  }
+
+  Future<void> deleteEmployee(String id) async {
+    await _dio.delete('/admin/employees/$id');
+  }
+
   Future<Map<String, dynamic>> importEmployees(List<Map<String, dynamic>> employees) async {
     final res = await _dio.post('/admin/import/hr', data: {'employees': employees});
     return res.data;
@@ -201,6 +209,10 @@ class ApiService {
 
   Future<void> createDepartment(Map<String, dynamic> data) async {
     await _dio.post('/admin/departments', data: data);
+  }
+
+  Future<void> deleteDepartment(String id) async {
+    await _dio.delete('/admin/departments/$id');
   }
 
   Future<Map<String, dynamic>> getReports({String? type, String? startDate, String? endDate}) async {

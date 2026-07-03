@@ -9,7 +9,12 @@ async function login(req, res, next) {
     const { employee_id, password } = req.body;
 
     const employee = await db('employees')
-      .where({ employee_id })
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
+      .where('employees.employee_id', employee_id)
+      .select(
+        'employees.*',
+        'departments.department_name'
+      )
       .first();
 
     if (!employee) {
@@ -55,11 +60,13 @@ async function login(req, res, next) {
         full_name: employee.full_name,
         position: employee.position,
         department_id: employee.department_id,
+        department_name: employee.department_name,
         email: employee.email,
         is_supervisor: employee.is_supervisor,
         is_admin: employee.is_admin,
         is_security: employee.is_security,
         profile_photo: employee.profile_photo,
+        hire_date: employee.hire_date,
       },
     });
   } catch (err) {

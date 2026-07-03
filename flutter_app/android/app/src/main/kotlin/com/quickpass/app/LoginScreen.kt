@@ -245,7 +245,8 @@ fun CustomTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryBlue,
                 unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f),
-                containerColor = Color.White
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
             ),
             singleLine = true
         )

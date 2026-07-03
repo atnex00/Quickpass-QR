@@ -1,5 +1,5 @@
 exports.seed = async function (knex) {
-  await knex('departments').del();
+  await knex.raw('TRUNCATE TABLE employees, departments, sessions, leave_requests, qr_scan_logs RESTART IDENTITY CASCADE');
 
   await knex('departments').insert([
     { department_id: 'DEP-001', department_name: 'Engineering', department_code: 'ENG', head_of_department: 'David Kim', is_active: true },

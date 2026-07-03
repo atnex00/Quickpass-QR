@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/leave_provider.dart';
-import '../../widgets/status_badge.dart';
-import '../../widgets/loading_indicator.dart';
+import '../../utils/date_formatter.dart';
 import 'qr_display_screen.dart';
+import 'request_leave_screen.dart';
 
 class LeaveHistoryScreen extends StatefulWidget {
   const LeaveHistoryScreen({super.key});
@@ -24,123 +25,416 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
     });
   }
 
+  void _setFilter(String? status) {
+    setState(() => _statusFilter = status);
+    context.read<LeaveProvider>().loadHistory(status: status);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final leaveProv = context.watch<LeaveProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leave History'),
-        actions: [
-          PopupMenuButton<String?>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (s) {
-              setState(() => _statusFilter = s);
-              context.read<LeaveProvider>().loadHistory(status: s);
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: null, child: Text('All')),
-              ...LeaveStatus.values.map((s) => PopupMenuItem(
-                value: s.name,
+      body: CustomScrollView(
+        slivers: [
+          // ── Electric Yellow App Bar ──
+          SliverAppBar(
+            pinned: true,
+            toolbarHeight: 64,
+            backgroundColor: QuickpassColors.darkPrimary,
+            foregroundColor: QuickpassColors.darkOnPrimary,
+            automaticallyImplyLeading: false,
+            flexibleSpace: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Container(width: 10, height: 10, decoration: BoxDecoration(color: s.color, shape: BoxShape.circle)),
-                    const SizedBox(width: 8),
-                    Text(s.label),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Gate History',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: QuickpassColors.darkOnPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content: Text('No new notifications'),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
-              )),
-            ],
+              ),
+            ),
+          ),
+
+          // ── Sticky Filter Bar ──
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _FilterBarDelegate(_statusFilter, _setFilter),
+          ),
+
+          // ── Content ──
+          if (leaveProv.isLoading)
+            const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+          else if (leaveProv.history.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.inbox_outlined, size: 64, color: QuickpassColors.outlineVariant),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No leave requests found',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _statusFilter != null
+                            ? 'No $_statusFilter requests match your filter'
+                            : 'Submit a leave request to get started',
+                        style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              sliver: RefreshIndicator(
+                onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
+                child: SliverList(
+                  delegate: SliverChildListDelegate([
+                    ...leaveProv.history.map((leave) => _HistoryCard(
+                      leave: leave,
+                      onTap: () {
+                        if (leave.hasQrCodes) {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (_) => QrDisplayScreen(leave: leave),
+                          ));
+                        }
+                      },
+                    )),
+                    const SizedBox(height: 16),
+
+                    // ── Promotion Banner ──
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: QuickpassColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: QuickpassColors.primary.withValues(alpha: 0.2)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Planning ahead?',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: QuickpassColors.onPrimaryContainer,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Secure your holiday pass now to ensure quick approval from the command center.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: QuickpassColors.onPrimaryContainer,
+                              height: 1.43,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const RequestLeaveScreen()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: QuickpassColors.darkPrimary,
+                              foregroundColor: QuickpassColors.darkOnPrimary,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'New Request',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Sticky Filter Bar ──
+
+class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
+  final String? currentFilter;
+  final void Function(String?) onFilterChanged;
+
+  _FilterBarDelegate(this.currentFilter, this.onFilterChanged);
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      height: 56,
+      color: QuickpassColors.surface.withValues(alpha: 0.95),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _FilterChip(label: 'All', selected: currentFilter == null, onTap: () => onFilterChanged(null)),
+                const SizedBox(width: 8),
+                _FilterChip(label: 'Pending', selected: currentFilter == 'pending', onTap: () => onFilterChanged('pending')),
+                const SizedBox(width: 8),
+                _FilterChip(label: 'Approved', selected: currentFilter == 'approved', onTap: () => onFilterChanged('approved')),
+                const SizedBox(width: 8),
+                _FilterChip(label: 'Rejected', selected: currentFilter == 'rejected', onTap: () => onFilterChanged('rejected')),
+                const SizedBox(width: 8),
+                _FilterChip(label: 'Completed', selected: currentFilter == 'completed', onTap: () => onFilterChanged('completed')),
+              ],
+            ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
-        child: leaveProv.isLoading
-            ? const LoadingIndicator()
-            : leaveProv.history.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.inbox_outlined, size: 64, color: colorScheme.outlineVariant),
-                        const SizedBox(height: 12),
-                        Text('No leave requests found', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 4),
-                        Text(
-                          _statusFilter != null ? 'No $_statusFilter requests match your filter' : 'Submit a leave request to get started',
-                          style: TextStyle(color: colorScheme.outline, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: leaveProv.history.length,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemBuilder: (context, index) {
-                      final leave = leaveProv.history[index];
-                      return Card(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            if (leave.hasQrCodes) {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => QrDisplayScreen(leave: leave),
-                              ));
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  @override
+  double get maxExtent => 56;
+
+  @override
+  double get minExtent => 56;
+
+  @override
+  bool shouldRebuild(covariant _FilterBarDelegate oldDelegate) {
+    return currentFilter != oldDelegate.currentFilter;
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? QuickpassColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? QuickpassColors.primary : QuickpassColors.outline,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.01,
+            color: selected ? Colors.white : QuickpassColors.onSurface,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── History Card ──
+
+class _HistoryCard extends StatelessWidget {
+  final LeaveRequest leave;
+  final VoidCallback onTap;
+
+  const _HistoryCard({required this.leave, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = leave.status.color;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: QuickpassColors.outlineVariant),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      leave.leaveDate.toIso8601String().split('T').first,
-                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colorScheme.onSurface),
+                                Flexible(
+                                  child: Text(
+                                    leave.reason,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: QuickpassColors.onSurface,
+                                      height: 1.5,
                                     ),
-                                    StatusBadge(status: leave.status),
-                                  ],
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time, size: 16, color: colorScheme.onSurfaceVariant),
-                                    const SizedBox(width: 4),
-                                    Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(color: colorScheme.onSurfaceVariant)),
-                                    const Spacer(),
-                                    Text(leave.durationText, style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.secondary)),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(leave.reason, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
-                                if (leave.rejectionReason != null) ...[
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.errorContainer,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.info_outline, size: 14, color: colorScheme.error),
-                                        const SizedBox(width: 6),
-                                        Expanded(child: Text(leave.rejectionReason!, style: TextStyle(fontSize: 12, color: colorScheme.onErrorContainer))),
-                                      ],
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    leave.status.label.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.5,
+                                      color: statusColor,
                                     ),
                                   ),
-                                ],
+                                ),
                               ],
                             ),
-                          ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_month, size: 16, color: QuickpassColors.onSurfaceVariant),
+                                const SizedBox(width: 4),
+                                Text(
+                                  DateFormatter.formatDate(leave.leaveDate),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: QuickpassColors.onSurfaceVariant,
+                                    height: 1.43,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'ID: #${leave.leaveId} \u2022 ${leave.durationText}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: QuickpassColors.neutralGray,
+                              ),
+                            ),
+                            if (leave.rejectionReason != null) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: QuickpassColors.errorContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline, size: 14, color: QuickpassColors.error),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        leave.rejectionReason!,
+                                        style: TextStyle(fontSize: 12, color: QuickpassColors.onErrorContainer),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: QuickpassColors.surfaceContainer,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: QuickpassColors.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

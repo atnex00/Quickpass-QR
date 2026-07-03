@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,15 +26,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [colorScheme.primary, colorScheme.primary.withValues(alpha: 0.8)],
+            colors: [QuickpassColors.primary, Color(0xFF00288E)],
           ),
         ),
         child: Column(
@@ -43,27 +43,21 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: colorScheme.onPrimary,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                border: Border.all(color: QuickpassColors.outlineVariant),
               ),
               child: Icon(
                 Icons.qr_code_scanner,
                 size: 56,
-                color: colorScheme.primary,
+                color: QuickpassColors.primary,
               ),
             ),
             const SizedBox(height: 24),
-            Text(
+            const Text(
               'Quickpass',
               style: TextStyle(
-                color: colorScheme.onPrimary,
+                color: Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.5,
@@ -71,15 +65,22 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Smart Gatepass & Leave Management',
+              'Employee Gatepass System',
               style: TextStyle(
-                color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 48),
-            CircularProgressIndicator(color: colorScheme.onPrimary),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
           ],
         ),
       ),

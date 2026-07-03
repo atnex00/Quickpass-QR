@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../widgets/status_badge.dart';
@@ -23,12 +24,14 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final supProv = context.watch<SupervisorProvider>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Pending Requests (${supProv.pendingCount})'),
+        backgroundColor: QuickpassColors.darkPrimary,
+        foregroundColor: QuickpassColors.darkOnPrimary,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: () => supProv.loadPendingRequests(),
@@ -39,20 +42,20 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_outline, size: 64, color: colorScheme.outlineVariant),
+                        Icon(Icons.check_circle_outline, size: 64, color: QuickpassColors.outlineVariant),
                         const SizedBox(height: 12),
-                        Text('No pending requests', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
+                        const Text('No pending requests', style: TextStyle(color: QuickpassColors.onSurfaceVariant, fontSize: 16)),
                         const SizedBox(height: 4),
-                        Text('All caught up!', style: TextStyle(color: colorScheme.outline)),
+                        const Text('All caught up!', style: TextStyle(color: QuickpassColors.neutralGray)),
                       ],
                     ),
                   )
                 : ListView.builder(
                     itemCount: supProv.pendingRequests.length,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemBuilder: (context, index) {
                       final leave = supProv.pendingRequests[index];
-                      return _PendingCard(leave: leave, colorScheme: colorScheme);
+                      return _PendingCard(leave: leave);
                     },
                   ),
       ),
@@ -62,13 +65,18 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
 
 class _PendingCard extends StatelessWidget {
   final LeaveRequest leave;
-  final ColorScheme colorScheme;
 
-  const _PendingCard({required this.leave, required this.colorScheme});
+  const _PendingCard({required this.leave});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: QuickpassColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: QuickpassColors.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -78,10 +86,10 @@ class _PendingCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: colorScheme.primary,
+                  backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
                   child: Text(
                     leave.employeeName.substring(0, 1).toUpperCase(),
-                    style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600),
+                    style: const TextStyle(color: QuickpassColors.darkPrimary, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -89,9 +97,9 @@ class _PendingCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(leave.employeeName, style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                      Text(leave.employeeName, style: const TextStyle(fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
                       if (leave.employeePosition != null)
-                        Text(leave.employeePosition!, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12)),
+                        Text(leave.employeePosition!, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -101,17 +109,17 @@ class _PendingCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 14, color: colorScheme.onSurfaceVariant),
+                Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
                 const SizedBox(width: 4),
-                Text(DateFormatter.formatDate(leave.leaveDate), style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
+                Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
                 const SizedBox(width: 16),
-                Icon(Icons.access_time, size: 14, color: colorScheme.onSurfaceVariant),
+                Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
                 const SizedBox(width: 4),
-                Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
+                Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
               ],
             ),
             const SizedBox(height: 6),
-            Text(leave.reason, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
+            Text(leave.reason, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -121,8 +129,8 @@ class _PendingCard extends StatelessWidget {
                   icon: const Icon(Icons.close, size: 18),
                   label: const Text('Reject'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: colorScheme.error,
-                    side: BorderSide(color: colorScheme.error),
+                    foregroundColor: QuickpassColors.error,
+                    side: const BorderSide(color: QuickpassColors.error),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -131,8 +139,8 @@ class _PendingCard extends StatelessWidget {
                   icon: const Icon(Icons.check, size: 18),
                   label: const Text('Approve'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
+                    backgroundColor: QuickpassColors.darkPrimary,
+                    foregroundColor: QuickpassColors.darkOnPrimary,
                   ),
                 ),
               ],
@@ -147,6 +155,7 @@ class _PendingCard extends StatelessWidget {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
         content: Text('${leave.employeeName} \u2014 ${leave.leaveDate.toIso8601String().split('T').first} (${leave.startTime} - ${leave.endTime})'),
         actions: [
@@ -165,6 +174,7 @@ class _PendingCard extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
             content: Text('Approved leave for ${leave.employeeName}'),
           ),
         );
@@ -177,6 +187,7 @@ class _PendingCard extends StatelessWidget {
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Reject Leave'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -197,7 +208,7 @@ class _PendingCard extends StatelessWidget {
               if (ctrl.text.trim().isEmpty) return;
               Navigator.pop(ctx, ctrl.text.trim());
             },
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
             child: const Text('Reject'),
           ),
         ],
@@ -210,6 +221,7 @@ class _PendingCard extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
+            behavior: SnackBarBehavior.floating,
             content: Text('Rejected leave for ${leave.employeeName}'),
           ),
         );

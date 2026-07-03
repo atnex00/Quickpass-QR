@@ -59,16 +59,16 @@ class QuickpassApp extends StatelessWidget {
       return const LoginScreen();
     }
 
-    if (auth.isScanner) {
-      return const ScannerScreen();
-    }
-
     if (auth.isAdmin) {
       return const AdminPanel();
     }
 
     if (auth.isSupervisor) {
       return const SupervisorDashboard();
+    }
+
+    if (auth.isScanner) {
+      return const ScannerScreen();
     }
 
     return const EmployeeDashboard();

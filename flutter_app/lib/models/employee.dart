@@ -32,7 +32,7 @@ class Employee {
       employeeId: json['employee_id'] ?? '',
       fullName: json['full_name'] ?? '',
       position: json['position'] ?? '',
-      departmentId: json['department_id'] ?? '',
+      departmentId: (json['department_id'] ?? '').toString(),
       departmentName: json['department_name'] ?? '',
       email: json['email'] ?? '',
       isSupervisor: json['is_supervisor'] ?? false,

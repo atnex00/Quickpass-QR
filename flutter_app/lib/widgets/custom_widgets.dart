@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/theme.dart';
 
 class LoadingOverlay extends StatelessWidget {
   final bool isLoading;
@@ -14,7 +15,6 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Stack(
       children: [
         child,
@@ -22,20 +22,23 @@ class LoadingOverlay extends StatelessWidget {
           Container(
             color: Colors.black26,
             child: Center(
-              child: Card(
+              child: Container(
                 margin: const EdgeInsets.all(32),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(color: colorScheme.primary),
-                      if (message != null) ...[
-                        const SizedBox(height: 16),
-                        Text(message!, style: Theme.of(context).textTheme.bodyMedium),
-                      ],
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: QuickpassColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: QuickpassColors.outlineVariant),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(color: QuickpassColors.primary),
+                    if (message != null) ...[
+                      const SizedBox(height: 16),
+                      Text(message!, style: const TextStyle(color: QuickpassColors.onSurfaceVariant)),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -61,19 +64,29 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: colorScheme.outlineVariant),
+            Icon(icon, size: 64, color: QuickpassColors.outlineVariant),
             const SizedBox(height: 16),
-            Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: QuickpassColors.onSurfaceVariant,
+              ),
+            ),
             if (subtitle != null) ...[
               const SizedBox(height: 8),
-              Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: QuickpassColors.neutralGray),
+              ),
             ],
             if (action != null) ...[
               const SizedBox(height: 24),
