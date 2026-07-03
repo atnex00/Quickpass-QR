@@ -64,14 +64,6 @@ br
 install_system_deps() {
   local MISSING=""
 
-  # Check if Java 17+ is already available
-  if command -v java &>/dev/null; then
-    JAVA_VER=$(java -version 2>&1 | head -1 | sed 's/[^0-9.]//g' | cut -d. -f1)
-    if [ "$JAVA_VER" -ge 17 ] 2>/dev/null; then
-      log "Java $JAVA_VER found"
-    fi
-  fi
-
   # Check if required CLI tools exist
   for cmd in curl unzip git; do
     if ! command -v "$cmd" &>/dev/null; then
@@ -79,11 +71,14 @@ install_system_deps() {
     fi
   done
 
-  # If everything exists and Java 17+ is available, skip
+  # Check if Java 17+ is available
   JAVA_OK=false
   if command -v java &>/dev/null; then
     JAVA_VER=$(java -version 2>&1 | head -1 | sed 's/[^0-9.]//g' | cut -d. -f1)
-    [ "$JAVA_VER" -ge 17 ] 2>/dev/null && JAVA_OK=true
+    if [ "$JAVA_VER" -ge 17 ] 2>/dev/null; then
+      JAVA_OK=true
+      log "Java $JAVA_VER found"
+    fi
   fi
 
   if [ -z "${MISSING:-}" ] && [ "$JAVA_OK" = true ]; then
@@ -163,7 +158,8 @@ install_android_sdk() {
     err "Java 17+ is required but not found. Install it, then re-run."
   fi
 
-  export JAVA_HOME="$(dirname $(dirname "$JAVA_BIN"))"
+  JAVA_HOME="$(dirname "$(dirname "$JAVA_BIN")")"
+  export JAVA_HOME
   export ANDROID_HOME="$ANDROID_SDK_DIR"
 
   SDKMANAGER="$CMDLINE_TOOLS_DIR/bin/sdkmanager"
@@ -180,7 +176,10 @@ install_android_sdk() {
 
   # Write local.properties for the Flutter project
   PROPERTIES_FILE="$PROJECT_DIR/flutter_app/android/local.properties"
-  echo "sdk.dir=$ANDROID_SDK_DIR" > "$PROPERTIES_FILE"
+  {
+    echo "sdk.dir=$ANDROID_SDK_DIR"
+    echo "flutter.sdk=$FLUTTER_DIR"
+  } > "$PROPERTIES_FILE"
   log "local.properties written"
 }
 
@@ -238,7 +237,7 @@ prompt_mobile_sdks() {
   info "If you only need the web frontend (web/), you can skip this."
   br
   printf "  ${YELLOW}?${RESET} Install Android SDK + Flutter SDK for mobile development? [y/N] "
-  read -r REPLY
+  read -r REPLY </dev/tty
   case "$REPLY" in
     [yY]|[yY][eE][sS]) return 0 ;;
     *) return 1 ;;

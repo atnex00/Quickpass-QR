@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 export NODE_ENV=${NODE_ENV:-dev}
 
@@ -10,8 +10,8 @@ WEB_DIR="$ROOT_DIR/web"
 cleanup() {
   echo ""
   echo "Shutting down..."
-  kill $BACKEND_PID $WEB_PID 2>/dev/null
-  wait $BACKEND_PID $WEB_PID 2>/dev/null
+  kill "${BACKEND_PID:-}" "${WEB_PID:-}" 2>/dev/null || true
+  wait "${BACKEND_PID:-}" "${WEB_PID:-}" 2>/dev/null || true
   echo "Done."
 }
 
@@ -22,6 +22,9 @@ echo "║        PassLynx Dev Server        ║"
 echo "╚════════════════════════════════════╝"
 echo ""
 
+[ -d "$BACKEND_DIR" ] || { echo "ERROR: Backend directory not found at $BACKEND_DIR"; exit 1; }
+[ -d "$WEB_DIR" ] || { echo "ERROR: Web directory not found at $WEB_DIR"; exit 1; }
+
 # Start backend
 echo "[1/2] Starting Backend API (port 3000)..."
 cd "$BACKEND_DIR"
@@ -31,7 +34,7 @@ BACKEND_PID=$!
 # Start web frontend
 echo "[2/2] Starting Web Frontend (port 8080)..."
 cd "$WEB_DIR"
-npx vite --host 0.0.0.0 &
+npx vite --host 0.0.0.0 --port 8080 &
 WEB_PID=$!
 
 echo ""
