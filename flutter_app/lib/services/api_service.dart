@@ -9,10 +9,6 @@ import '../models/employee.dart';
 import '../models/leave_request.dart';
 
 class ApiService {
-  static final ApiService _instance = ApiService._internal();
-  factory ApiService() => _instance;
-  ApiService._internal();
-
   late Dio _dio;
   final _storage = const FlutterSecureStorage();
 
@@ -258,6 +254,10 @@ class ApiService {
 
   Future<void> createDepartment(Map<String, dynamic> data) async {
     await _dio.post('/admin/departments', data: data);
+  }
+
+  Future<void> updateDepartment(String id, Map<String, dynamic> data) async {
+    await _dio.put('/admin/departments/$id', data: data);
   }
 
   Future<void> deleteDepartment(String id) async {

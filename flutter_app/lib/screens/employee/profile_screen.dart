@@ -75,16 +75,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = auth.user;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            toolbarHeight: 64,
-            backgroundColor: QuickpassColors.darkPrimary,
-            foregroundColor: QuickpassColors.darkOnPrimary,
-            automaticallyImplyLeading: false,
-            flexibleSpace: SafeArea(
-              child: Padding(
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              toolbarHeight: 64,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
+              automaticallyImplyLeading: false,
+              flexibleSpace: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
@@ -111,12 +111,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
                       onPressed: () => context.read<AuthProvider>().logout(),
                     ),
-                  ],
-                ),
+                    ],
+                  ),
               ),
             ),
-          ),
-          SliverPadding(
+            SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
@@ -235,7 +234,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -250,7 +250,7 @@ class _ReadOnlyRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: 110, child: Text(label, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13))),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.3, child: Text(label, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13))),
           Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: QuickpassColors.onSurface))),
         ],
       ),

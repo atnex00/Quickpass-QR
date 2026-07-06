@@ -245,6 +245,30 @@ async function createDepartment(req, res, next) {
   }
 }
 
+async function updateDepartment(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { department_name, department_code, head_of_department, is_active } = req.body;
+
+    const dept = await db('departments').where({ department_id: id }).first();
+    if (!dept) {
+      throw createError(404, 'Department not found');
+    }
+
+    const updateData = {};
+    if (department_name !== undefined) updateData.department_name = department_name;
+    if (department_code !== undefined) updateData.department_code = department_code || null;
+    if (head_of_department !== undefined) updateData.head_of_department = head_of_department || null;
+    if (is_active !== undefined) updateData.is_active = is_active;
+
+    await db('departments').where({ department_id: id }).update(updateData);
+    const updated = await db('departments').where({ department_id: id }).first();
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function deleteDepartment(req, res, next) {
   try {
     const { id } = req.params;
@@ -408,6 +432,7 @@ module.exports = {
   toggleActive,
   getDepartments,
   createDepartment,
+  updateDepartment,
   deleteDepartment,
   importEmployees,
   getReports,

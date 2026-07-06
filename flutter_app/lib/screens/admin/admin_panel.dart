@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,9 @@ import '../../config/theme.dart';
 import '../../models/department.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../utils/constants.dart';
 import '../../widgets/loading_indicator.dart';
+import 'employee_detail_screen.dart';
 
 Widget _buildAdminAppBar(BuildContext context) {
   return SliverAppBar(
@@ -70,18 +73,20 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: SafeArea(top: false, child: Stack(
         children: [
           IndexedStack(
             index: _currentIndex,
-            children: const [
-              _OverviewTab(),
-              _EmployeeTab(),
-              _DepartmentTab(),
-            ],
+          children: const [
+            _OverviewTab(),
+            _EmployeeTab(),
+            _DepartmentTab(),
+            _ReportsTab(),
+            _LeaveTab(),
+          ],
           ),
         ],
-      ),
+      )),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
@@ -109,6 +114,16 @@ class _AdminPanelState extends State<AdminPanel> {
               selectedIcon: Icon(Icons.business, color: QuickpassColors.darkPrimary),
               label: 'Departments',
             ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_outlined, color: QuickpassColors.onSurfaceVariant),
+              selectedIcon: Icon(Icons.bar_chart, color: QuickpassColors.darkPrimary),
+              label: 'Reports',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.event_note_outlined, color: QuickpassColors.onSurfaceVariant),
+              selectedIcon: Icon(Icons.event_note, color: QuickpassColors.darkPrimary),
+              label: 'Leaves',
+            ),
           ],
         ),
       ),
@@ -124,7 +139,7 @@ class _OverviewTab extends StatefulWidget {
 }
 
 class _OverviewTabState extends State<_OverviewTab> {
-  final _api = ApiService();
+  late final ApiService _api;
   Map<String, dynamic>? _reportData;
   List<dynamic>? _departmentReport;
   bool _isLoading = true;
@@ -132,6 +147,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   @override
   void initState() {
     super.initState();
+    _api = context.read<ApiService>();
     _loadReports();
   }
 
@@ -237,9 +253,9 @@ class _OverviewTabState extends State<_OverviewTab> {
           const Row(
             children: [
               SizedBox(width: 24, child: Text('ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              Expanded(child: Text('Department', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              SizedBox(width: 48, child: Text('Total', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              SizedBox(width: 48, child: Text('Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
+              Expanded(flex: 3, child: Text('Department', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
+              Expanded(flex: 1, child: Text('Total', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
+              Expanded(flex: 1, child: Text('Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
             ],
           ),
           const SizedBox(height: 8),
@@ -252,9 +268,9 @@ class _OverviewTabState extends State<_OverviewTab> {
                     width: 24,
                     child: Text('${dept['department_id'] ?? ''}', style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
                   ),
-                  Expanded(child: Text('${dept['department_name'] ?? ''}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
-                  SizedBox(width: 48, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface))),
-                  SizedBox(width: 48, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.warning))),
+                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
+                  Expanded(flex: 1, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface))),
+                  Expanded(flex: 1, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.warning))),
                 ],
               ),
             );
@@ -531,7 +547,7 @@ class _EmployeeTab extends StatefulWidget {
 }
 
 class _EmployeeTabState extends State<_EmployeeTab> {
-  final _api = ApiService();
+  late final ApiService _api;
   List<Map<String, dynamic>> _employees = [];
   List<Map<String, dynamic>> _departments = [];
   bool _isLoading = true;
@@ -782,6 +798,70 @@ class _EmployeeTabState extends State<_EmployeeTab> {
     );
   }
 
+  void _showImportDialog() {
+    final ctl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Import Employees'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Paste employee JSON array:', style: TextStyle(fontSize: 13, color: QuickpassColors.onSurfaceVariant)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: ctl,
+                maxLines: 10,
+                decoration: const InputDecoration(
+                  hintText: '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+              ),
+              const SizedBox(height: 8),
+              const Text('Required: employee_id, full_name, position, department_id, email, password', style: TextStyle(fontSize: 11, color: QuickpassColors.neutralGray)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              final trimmed = ctl.text.trim();
+              if (trimmed.isEmpty) return;
+              try {
+                final list = (jsonDecode(trimmed) as List).cast<Map<String, dynamic>>();
+                if (list.isEmpty) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('No employees found in data')));
+                  return;
+                }
+                final result = await _api.importEmployees(list);
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                _loadData();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Imported ${result['imported'] ?? list.length} employees')),
+                  );
+                }
+              } catch (e) {
+                if (!ctx.mounted) return;
+                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+              }
+            },
+            child: const Text('Import'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showPasswordResetDialog(Map<String, dynamic> emp) {
     final passCtl = TextEditingController();
     final empId = emp['employee_id'] as String;
@@ -884,7 +964,23 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       ),
                       onChanged: _onSearchChanged,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _showImportDialog,
+                          icon: const Icon(Icons.upload_file, size: 18),
+                          label: const Text('Import HR Data'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: QuickpassColors.darkPrimary,
+                            side: const BorderSide(color: QuickpassColors.darkPrimary),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
 
                     // ── Filter Row ──
                     SingleChildScrollView(
@@ -893,13 +989,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                         children: [
                           // Department filter
                           Container(
-                            constraints: const BoxConstraints(maxWidth: 160),
+                            constraints: const BoxConstraints(maxWidth: 240),
                             child: DropdownButtonFormField<String>(
                               initialValue: _filterDepartment,
                               decoration: const InputDecoration(
                                 labelText: 'Dept',
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                isDense: false,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               ),
                               items: [
                                 const DropdownMenuItem<String>(value: null, child: Text('All')),
@@ -920,13 +1016,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                           const SizedBox(width: 8),
                           // Status filter
                           Container(
-                            constraints: const BoxConstraints(maxWidth: 120),
+                            constraints: const BoxConstraints(maxWidth: 220),
                             child: DropdownButtonFormField<String>(
                               initialValue: _filterStatus.isEmpty ? null : _filterStatus,
                               decoration: const InputDecoration(
                                 labelText: 'Status',
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                isDense: false,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               ),
                               items: const [
                                 DropdownMenuItem<String>(value: null, child: Text('All')),
@@ -945,13 +1041,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                           const SizedBox(width: 8),
                           // Role filter
                           Container(
-                            constraints: const BoxConstraints(maxWidth: 140),
+                            constraints: const BoxConstraints(maxWidth: 240),
                             child: DropdownButtonFormField<String>(
                               initialValue: _filterRole.isEmpty ? null : _filterRole,
                               decoration: const InputDecoration(
                                 labelText: 'Role',
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                isDense: false,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               ),
                               items: const [
                                 DropdownMenuItem<String>(value: null, child: Text('All')),
@@ -1057,7 +1153,15 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                               color: isActive ? QuickpassColors.outlineVariant : QuickpassColors.error.withValues(alpha: 0.3),
                             ),
                           ),
-                          child: Padding(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => EmployeeDetailScreen(employee: emp)),
+                              );
+                            },
+                            child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Column(
                               children: [
@@ -1201,6 +1305,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                               ],
                             ),
                           ),
+                        ),
                         );
                       }),
 
@@ -1322,8 +1427,501 @@ class _ActionButton extends StatelessWidget {
           child: Column(
             children: [
               Icon(icon, size: 16, color: active ? color : QuickpassColors.neutralGray),
-              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active ? color : QuickpassColors.neutralGray)),
+              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active ? color : QuickpassColors.neutralGray), overflow: TextOverflow.ellipsis, maxLines: 1),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportsTab extends StatefulWidget {
+  const _ReportsTab();
+
+  @override
+  State<_ReportsTab> createState() => _ReportsTabState();
+}
+
+class _ReportsTabState extends State<_ReportsTab> {
+  late final ApiService _api;
+  List<dynamic>? _reportData;
+  List<dynamic>? _departmentReport;
+  bool _isLoading = true;
+  String _reportType = '';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  final _startCtl = TextEditingController();
+  final _endCtl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _api = context.read<ApiService>();
+    _loadReports();
+  }
+
+  @override
+  void dispose() {
+    _startCtl.dispose();
+    _endCtl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() => _isLoading = true);
+    try {
+      final params = <String, dynamic>{};
+      if (_reportType.isNotEmpty) params['type'] = _reportType;
+      if (_startDate != null) params['start_date'] = _startDate!.toIso8601String().split('T').first;
+      if (_endDate != null) params['end_date'] = _endDate!.toIso8601String().split('T').first;
+      _reportData = (await _api.getReports(type: params['type'], startDate: params['start_date'], endDate: params['end_date']))['data'] as List?;
+      final deptRes = await _api.getReports(type: 'department');
+      _departmentReport = deptRes['data'] as List<dynamic>?;
+    } catch (_) {}
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _pickDate(bool isStart) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+          _startCtl.text = picked.toIso8601String().split('T').first;
+        } else {
+          _endDate = picked;
+          _endCtl.text = picked.toIso8601String().split('T').first;
+        }
+      });
+      _loadReports();
+    }
+  }
+
+  Map<String, int> get _statusCounts {
+    if (_reportData == null) return {};
+    final counts = <String, int>{};
+    for (final entry in _reportData!) {
+      final s = entry['status'] as String? ?? 'unknown';
+      counts[s] = (counts[s] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              _buildAdminAppBar(context),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // ── Date Range & Filter ──
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _startCtl,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Start Date',
+                              prefixIcon: Icon(Icons.calendar_today, size: 18),
+                              isDense: true,
+                            ),
+                            onTap: () => _pickDate(true),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Text('to', style: TextStyle(color: QuickpassColors.neutralGray)),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _endCtl,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              labelText: 'End Date',
+                              prefixIcon: Icon(Icons.calendar_today, size: 18),
+                              isDense: true,
+                            ),
+                            onTap: () => _pickDate(false),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _FilterChip(label: 'All', selected: _reportType.isEmpty, onTap: () { setState(() => _reportType = ''); _loadReports(); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Department', selected: _reportType == 'department', onTap: () { setState(() => _reportType = 'department'); _loadReports(); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Employee', selected: _reportType == 'employee', onTap: () { setState(() => _reportType = 'employee'); _loadReports(); }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (_isLoading)
+                      const Center(child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(),
+                      ))
+                    else ...[
+                      // ── Stats Summary ──
+                      Row(
+                        children: [
+                          _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${_statusCounts['pending'] ?? 0}', color: QuickpassColors.warning),
+                          const SizedBox(width: 8),
+                          _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${_statusCounts['approved'] ?? 0}', color: QuickpassColors.success),
+                          const SizedBox(width: 8),
+                          _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${_statusCounts['rejected'] ?? 0}', color: QuickpassColors.error),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _StatCard(icon: Icons.timer, label: 'Active', value: '${_statusCounts['active'] ?? 0}', color: QuickpassColors.primary),
+                          const SizedBox(width: 8),
+                          _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${_statusCounts['completed'] ?? 0}', color: QuickpassColors.secondary),
+                          const SizedBox(width: 8),
+                          _StatCard(icon: Icons.business, label: 'Departments', value: '${_departmentReport?.length ?? 0}', color: QuickpassColors.tertiary),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // ── Leave List ──
+                      const Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
+                      const SizedBox(height: 8),
+                      if (_reportData == null || _reportData!.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: QuickpassColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: QuickpassColors.outlineVariant),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(Icons.inbox_outlined, size: 48, color: QuickpassColors.outlineVariant),
+                              SizedBox(height: 12),
+                              Text('No leave requests found', style: TextStyle(color: QuickpassColors.neutralGray)),
+                            ],
+                          ),
+                        )
+                      else
+                        ...(_reportData!.take(50).map((entry) {
+                          final status = entry['status'] as String? ?? 'pending';
+                          final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: QuickpassColors.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: QuickpassColors.outlineVariant),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${entry['employee_name'] ?? 'Unknown'}',
+                                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
+                                        style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
+                                      ),
+                                      Text(
+                                        entry['reason'] ?? '',
+                                        style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Text(
+                                    AppConstants.statusLabels[status] ?? status,
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        })),
+                    ],
+                  ]),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaveTab extends StatefulWidget {
+  const _LeaveTab();
+
+  @override
+  State<_LeaveTab> createState() => _LeaveTabState();
+}
+
+class _LeaveTabState extends State<_LeaveTab> {
+  late final ApiService _api;
+  List<dynamic>? _leaves;
+  bool _isLoading = true;
+  String _statusFilter = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _api = context.read<ApiService>();
+    _loadLeaves();
+  }
+
+  Future<void> _loadLeaves() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getReports();
+      _leaves = res['data'] as List<dynamic>?;
+    } catch (_) {}
+    setState(() => _isLoading = false);
+  }
+
+  List<dynamic> get _filteredLeaves {
+    if (_leaves == null) return [];
+    if (_statusFilter.isEmpty) return _leaves!;
+    return _leaves!.where((l) => l['status'] == _statusFilter).toList();
+  }
+
+  void _confirmDeleteLeave(Map<String, dynamic> leave) {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Leave'),
+        content: Text('Remove leave request by ${leave['employee_name'] ?? 'Unknown'} on ${leave['leave_date'] ?? ''}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed == true && mounted) {
+        _api.deleteLeave(leave['leave_id'] as String).then((_) {
+          _loadLeaves();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Leave deleted')));
+          }
+        }).catchError((e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _filteredLeaves;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              _buildAdminAppBar(context),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // ── Status Filters ──
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _FilterChip(label: 'All', selected: _statusFilter.isEmpty, onTap: () { setState(() => _statusFilter = ''); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Pending', selected: _statusFilter == 'pending', onTap: () { setState(() => _statusFilter = 'pending'); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Approved', selected: _statusFilter == 'approved', onTap: () { setState(() => _statusFilter = 'approved'); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Active', selected: _statusFilter == 'active', onTap: () { setState(() => _statusFilter = 'active'); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Completed', selected: _statusFilter == 'completed', onTap: () { setState(() => _statusFilter = 'completed'); }),
+                          const SizedBox(width: 8),
+                          _FilterChip(label: 'Rejected', selected: _statusFilter == 'rejected', onTap: () { setState(() => _statusFilter = 'rejected'); }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // ── Count ──
+                    Text('${filtered.length} leave${filtered.length == 1 ? '' : 's'}',
+                      style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                    const SizedBox(height: 8),
+
+                    // ── List ──
+                    if (_isLoading)
+                      const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+                    else if (filtered.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: QuickpassColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: QuickpassColors.outlineVariant),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(Icons.inbox_outlined, size: 48, color: QuickpassColors.outlineVariant),
+                            SizedBox(height: 12),
+                            Text('No leave requests', style: TextStyle(color: QuickpassColors.neutralGray)),
+                          ],
+                        ),
+                      )
+                    else
+                      ...filtered.map((leave) {
+                        final status = leave['status'] as String? ?? 'pending';
+                        final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: QuickpassColors.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: QuickpassColors.outlineVariant),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      leave['employee_name'] ?? 'Unknown',
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${leave['department_name'] ?? ''}',
+                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${leave['leave_date'] ?? ''} \u2022 ${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
+                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
+                                    ),
+                                    Text(
+                                      leave['reason'] ?? '',
+                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: statusColor.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                                    ),
+                                    child: Text(
+                                      AppConstants.statusLabels[status] ?? status,
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
+                                    ),
+                                  ),
+                                  if (status == 'pending' || status == 'approved' || status == 'active')
+                                    TextButton.icon(
+                                      onPressed: () => _confirmDeleteLeave(leave),
+                                      icon: const Icon(Icons.delete_outline, size: 14),
+                                      label: const Text('Delete', style: TextStyle(fontSize: 11)),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: QuickpassColors.error,
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ]),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? QuickpassColors.darkPrimary.withValues(alpha: 0.15) : QuickpassColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? QuickpassColors.darkPrimary : QuickpassColors.outlineVariant,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: selected ? QuickpassColors.darkPrimary : QuickpassColors.onSurfaceVariant,
           ),
         ),
       ),
@@ -1339,13 +1937,14 @@ class _DepartmentTab extends StatefulWidget {
 }
 
 class _DepartmentTabState extends State<_DepartmentTab> {
-  final _api = ApiService();
+  late final ApiService _api;
   List<Department> _departments = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _api = context.read<ApiService>();
     _loadDepartments();
   }
 
@@ -1401,6 +2000,51 @@ class _DepartmentTabState extends State<_DepartmentTab> {
               }
             },
             child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(Department dept) {
+    final nameCtl = TextEditingController(text: dept.departmentName);
+    final codeCtl = TextEditingController(text: dept.departmentCode ?? '');
+    final hodCtl = TextEditingController(text: dept.headOfDepartment ?? '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit ${dept.departmentName}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Department Name')),
+            const SizedBox(height: 12),
+            TextField(controller: codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
+            const SizedBox(height: 12),
+            TextField(controller: hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              if (nameCtl.text.trim().isEmpty) return;
+              try {
+                await _api.updateDepartment(dept.departmentId, {
+                  'department_name': nameCtl.text.trim(),
+                  'department_code': codeCtl.text.trim(),
+                  'head_of_department': hodCtl.text.trim(),
+                });
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                _loadDepartments();
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+              }
+            },
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -1515,6 +2159,8 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                                           decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999), border: Border.all(color: statusColor.withValues(alpha: 0.3))),
                                           child: Text(dept.isActive ? 'Active' : 'Inactive', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
                                         ),
+                                        const SizedBox(width: 4),
+                                        IconButton(icon: const Icon(Icons.edit_outlined, size: 20), color: QuickpassColors.neutralGray, onPressed: () => _showEditDialog(dept)),
                                         const SizedBox(width: 4),
                                         IconButton(icon: const Icon(Icons.delete_outline, size: 20), color: QuickpassColors.error, onPressed: () => _confirmDelete(dept)),
                                       ],

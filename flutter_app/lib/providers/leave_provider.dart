@@ -3,7 +3,9 @@ import '../models/leave_request.dart';
 import '../services/api_service.dart';
 
 class LeaveProvider extends ChangeNotifier {
-  final ApiService _api = ApiService();
+  final ApiService _api;
+
+  LeaveProvider({ApiService? api}) : _api = api ?? ApiService();
 
   List<LeaveRequest> _history = [];
   LeaveRequest? _activeLeave;

@@ -79,6 +79,7 @@ router.delete('/admin/employees/:id', authenticate, requireAdmin, adminControlle
 router.post('/admin/import/hr', authenticate, requireAdmin, adminController.importEmployees);
 router.get('/admin/departments', authenticate, requireAdmin, adminController.getDepartments);
 router.post('/admin/departments', authenticate, requireAdmin, adminController.createDepartment);
+router.put('/admin/departments/:id', authenticate, requireAdmin, adminController.updateDepartment);
 router.delete('/admin/departments/:id', authenticate, requireAdmin, adminController.deleteDepartment);
 router.get('/admin/reports', authenticate, requireAdmin, adminController.getReports);
 

@@ -22,14 +22,14 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
+      body: SafeArea(top: false, child: IndexedStack(
         index: _currentIndex,
         children: const [
           _SupervisorOverview(),
           PendingRequestsScreen(),
           ProfileScreen(),
         ],
-      ),
+      )),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
@@ -583,16 +583,22 @@ class _PendingCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
                     const SizedBox(width: 4),
-                    Text(
-                      DateFormatter.formatDate(leave.leaveDate),
-                      style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                    Flexible(
+                      child: Text(
+                        DateFormatter.formatDate(leave.leaveDate),
+                        style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
                     const SizedBox(width: 4),
-                    Text(
-                      '${leave.startTime} - ${leave.endTime}',
-                      style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                    Flexible(
+                      child: Text(
+                        '${leave.startTime} - ${leave.endTime}',
+                        style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),

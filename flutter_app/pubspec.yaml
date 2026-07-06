@@ -33,6 +33,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.3
+  mockito: ^5.7.0
+  build_runner: ^2.15.0
+  coverage: ^1.15.1
 
 flutter:
   uses-material-design: true

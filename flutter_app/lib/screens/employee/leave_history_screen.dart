@@ -37,180 +37,226 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
     final isAdmin = context.read<AuthProvider>().isAdmin;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // ── Electric Yellow App Bar ──
-          SliverAppBar(
-            pinned: true,
-            toolbarHeight: 64,
-            backgroundColor: QuickpassColors.darkPrimary,
-            foregroundColor: QuickpassColors.darkOnPrimary,
-            automaticallyImplyLeading: false,
-            flexibleSpace: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Gate History',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: QuickpassColors.darkOnPrimary,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text('No new notifications'),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // ── Sticky Filter Bar ──
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _FilterBarDelegate(_statusFilter, _setFilter),
-          ),
-
-          // ── Content ──
-          if (leaveProv.isLoading)
-            const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
-          else if (leaveProv.history.isEmpty)
-            SliverFillRemaining(
-              child: Center(
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // ── Electric Yellow App Bar ──
+            SliverAppBar(
+              pinned: true,
+              toolbarHeight: 64,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
+              automaticallyImplyLeading: false,
+              flexibleSpace: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
                     children: [
-                      const Icon(Icons.inbox_outlined, size: 64, color: QuickpassColors.outlineVariant),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'No leave requests found',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: QuickpassColors.darkOnPrimary
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.qr_code_scanner,
+                            size: 18, color: QuickpassColors.darkOnPrimary),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _statusFilter != null
-                            ? 'No $_statusFilter requests match your filter'
-                            : 'Submit a leave request to get started',
-                        style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Gate History',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: QuickpassColors.darkOnPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined,
+                            color: QuickpassColors.darkOnPrimary),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text('No new notifications'),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
               ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-              sliver: RefreshIndicator(
-                onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
-                child: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index < leaveProv.history.length) {
-                        final leave = leaveProv.history[index];
-                        return _HistoryCard(
-                          leave: leave,
-                          isAdmin: isAdmin,
-                          onTap: () {
-                            if (leave.hasQrCodes) {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => QrDisplayScreen(leave: leave),
-                              ));
-                            }
-                          },
-                          onDelete: () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: const Text('Delete Leave'),
-                                content: Text('Delete leave #${leave.leaveId}? This cannot be undone.'),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                  FilledButton(
-                                    onPressed: () => Navigator.pop(ctx, true),
-                                    style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (confirmed == true && context.mounted) {
-                              try {
-                                await context.read<LeaveProvider>().deleteLeave(leave.leaveId);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Leave deleted')),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(behavior: SnackBarBehavior.floating, content: Text('$e')),
-                                  );
+            ),
+
+            // ── Sticky Filter Bar ──
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _FilterBarDelegate(_statusFilter, _setFilter),
+            ),
+
+            // ── Content ──
+            if (leaveProv.isLoading)
+              const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()))
+            else if (leaveProv.history.isEmpty)
+              SliverFillRemaining(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.inbox_outlined,
+                            size: 64, color: QuickpassColors.outlineVariant),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No leave requests found',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: QuickpassColors.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _statusFilter != null
+                              ? 'No $_statusFilter requests match your filter'
+                              : 'Submit a leave request to get started',
+                          style: const TextStyle(
+                              color: QuickpassColors.neutralGray, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                sliver: RefreshIndicator(
+                  onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
+                  child: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index < leaveProv.history.length) {
+                          final leave = leaveProv.history[index];
+                          return _HistoryCard(
+                            leave: leave,
+                            isAdmin: isAdmin,
+                            onTap: () {
+                              if (leave.hasQrCodes) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          QrDisplayScreen(leave: leave),
+                                    ));
+                              }
+                            },
+                            onDelete: () async {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Delete Leave'),
+                                  content: Text(
+                                      'Delete leave #${leave.leaveId}? This cannot be undone.'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: const Text('Cancel')),
+                                    FilledButton(
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      style: FilledButton.styleFrom(
+                                          backgroundColor:
+                                              QuickpassColors.error),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true && context.mounted) {
+                                try {
+                                  await context
+                                      .read<LeaveProvider>()
+                                      .deleteLeave(leave.leaveId);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text('Leave deleted')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text('$e')),
+                                    );
+                                  }
                                 }
                               }
-                            }
-                          },
-                        );
-                      }
-                      final offset = index - leaveProv.history.length;
-                      if (offset == 0) return const SizedBox(height: 16);
-                      if (offset == 1) {
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: QuickpassColors.primaryContainer,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: QuickpassColors.primary.withValues(alpha: 0.2)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Planning ahead?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onPrimaryContainer, height: 1.5)),
-                              const SizedBox(height: 8),
-                              const Text('Secure your holiday pass now to ensure quick approval from the command center.', style: TextStyle(fontSize: 14, color: QuickpassColors.onPrimaryContainer, height: 1.43)),
-                              const SizedBox(height: 16),
-                              FilledButton(
-                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RequestLeaveScreen())),
-                                child: const Text('New Request', style: TextStyle(fontWeight: FontWeight.w700)),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return null;
-                    },
-                    childCount: leaveProv.history.length + 2,
+                            },
+                          );
+                        }
+                        final offset = index - leaveProv.history.length;
+                        if (offset == 0) return const SizedBox(height: 16);
+                        if (offset == 1) {
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: QuickpassColors.primaryContainer,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                  color: QuickpassColors.primary
+                                      .withValues(alpha: 0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Planning ahead?',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color:
+                                            QuickpassColors.onPrimaryContainer,
+                                        height: 1.5)),
+                                const SizedBox(height: 8),
+                                const Text(
+                                    'Secure your holiday pass now to ensure quick approval from the command center.',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color:
+                                            QuickpassColors.onPrimaryContainer,
+                                        height: 1.43)),
+                                const SizedBox(height: 16),
+                                FilledButton(
+                                  onPressed: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const RequestLeaveScreen())),
+                                  child: const Text('New Request',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700)),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return null;
+                      },
+                      childCount: leaveProv.history.length + 2,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -225,7 +271,8 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
   _FilterBarDelegate(this.currentFilter, this.onFilterChanged);
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       height: 56,
       color: QuickpassColors.surface.withValues(alpha: 0.95),
@@ -233,15 +280,35 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
         padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         children: [
-          Center(child: _FilterChip(label: 'All', selected: currentFilter == null, onTap: () => onFilterChanged(null))),
+          Center(
+              child: _FilterChip(
+                  label: 'All',
+                  selected: currentFilter == null,
+                  onTap: () => onFilterChanged(null))),
           const SizedBox(width: 8),
-          Center(child: _FilterChip(label: 'Pending', selected: currentFilter == 'pending', onTap: () => onFilterChanged('pending'))),
+          Center(
+              child: _FilterChip(
+                  label: 'Pending',
+                  selected: currentFilter == 'pending',
+                  onTap: () => onFilterChanged('pending'))),
           const SizedBox(width: 8),
-          Center(child: _FilterChip(label: 'Approved', selected: currentFilter == 'approved', onTap: () => onFilterChanged('approved'))),
+          Center(
+              child: _FilterChip(
+                  label: 'Approved',
+                  selected: currentFilter == 'approved',
+                  onTap: () => onFilterChanged('approved'))),
           const SizedBox(width: 8),
-          Center(child: _FilterChip(label: 'Rejected', selected: currentFilter == 'rejected', onTap: () => onFilterChanged('rejected'))),
+          Center(
+              child: _FilterChip(
+                  label: 'Rejected',
+                  selected: currentFilter == 'rejected',
+                  onTap: () => onFilterChanged('rejected'))),
           const SizedBox(width: 8),
-          Center(child: _FilterChip(label: 'Completed', selected: currentFilter == 'completed', onTap: () => onFilterChanged('completed'))),
+          Center(
+              child: _FilterChip(
+                  label: 'Completed',
+                  selected: currentFilter == 'completed',
+                  onTap: () => onFilterChanged('completed'))),
         ],
       ),
     );
@@ -264,7 +331,8 @@ class _FilterChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +369,11 @@ class _HistoryCard extends StatelessWidget {
   final bool isAdmin;
   final VoidCallback? onDelete;
 
-  const _HistoryCard({required this.leave, required this.onTap, this.isAdmin = false, this.onDelete});
+  const _HistoryCard(
+      {required this.leave,
+      required this.onTap,
+      this.isAdmin = false,
+      this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +428,8 @@ class _HistoryCard extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: statusColor.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(999),
@@ -376,7 +449,9 @@ class _HistoryCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                const Icon(Icons.calendar_month, size: 16, color: QuickpassColors.onSurfaceVariant),
+                                const Icon(Icons.calendar_month,
+                                    size: 16,
+                                    color: QuickpassColors.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   DateFormatter.formatDate(leave.leaveDate),
@@ -407,12 +482,16 @@ class _HistoryCard extends StatelessWidget {
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.info_outline, size: 14, color: QuickpassColors.error),
+                                    const Icon(Icons.info_outline,
+                                        size: 14, color: QuickpassColors.error),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         leave.rejectionReason!,
-                                        style: const TextStyle(fontSize: 12, color: QuickpassColors.onErrorContainer),
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: QuickpassColors
+                                                .onErrorContainer),
                                       ),
                                     ),
                                   ],
@@ -429,10 +508,12 @@ class _HistoryCard extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: QuickpassColors.error.withValues(alpha: 0.12),
+                              color:
+                                  QuickpassColors.error.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(999),
                             ),
-                            child: const Icon(Icons.delete_outline, size: 20, color: QuickpassColors.error),
+                            child: const Icon(Icons.delete_outline,
+                                size: 20, color: QuickpassColors.error),
                           ),
                         ),
                       const SizedBox(width: 4),

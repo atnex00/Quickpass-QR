@@ -3,7 +3,9 @@ import '../models/leave_request.dart';
 import '../services/api_service.dart';
 
 class SupervisorProvider extends ChangeNotifier {
-  final ApiService _api = ApiService();
+  final ApiService _api;
+
+  SupervisorProvider({ApiService? api}) : _api = api ?? ApiService();
 
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];

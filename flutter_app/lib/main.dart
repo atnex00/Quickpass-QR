@@ -7,7 +7,6 @@ import 'providers/leave_provider.dart';
 import 'providers/supervisor_provider.dart';
 import 'providers/scan_provider.dart';
 import 'services/api_service.dart';
-import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/employee/dashboard_screen.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
@@ -16,23 +15,27 @@ import 'screens/security/scanner_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  ApiService().init();
-  runApp(const QuickpassApp());
+  final apiService = ApiService();
+  apiService.init();
+  runApp(QuickpassApp(apiService: apiService));
 }
 
 class QuickpassApp extends StatelessWidget {
-  const QuickpassApp({super.key});
+  final ApiService apiService;
+  const QuickpassApp({super.key, required this.apiService});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => LeaveProvider()),
-        ChangeNotifierProvider(create: (_) => SupervisorProvider()),
-        ChangeNotifierProvider(create: (_) => ScanProvider()),
-      ],
-      child: Consumer<AuthProvider>(
+    return Provider<ApiService>.value(
+      value: apiService,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => AuthProvider(api: apiService)),
+          ChangeNotifierProvider(create: (_) => LeaveProvider(api: apiService)),
+          ChangeNotifierProvider(create: (_) => SupervisorProvider(api: apiService)),
+          ChangeNotifierProvider(create: (_) => ScanProvider(api: apiService)),
+        ],
+        child: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           return MaterialApp(
             title: AppConfig.appName,
@@ -43,12 +46,13 @@ class QuickpassApp extends StatelessWidget {
           );
         },
       ),
+      ),
     );
   }
 
   Widget _buildHome(AuthProvider auth) {
     if (auth.isLoading) {
-      return const SplashScreen();
+      return const LoginScreen();
     }
 
     if (!auth.isAuthenticated) {

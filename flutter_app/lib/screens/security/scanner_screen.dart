@@ -212,26 +212,31 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                   ),
                 ),
                 const Spacer(),
-                SizedBox(
-                  width: 260,
-                  height: 260,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: _cameraError != null ? QuickpassColors.error : QuickpassColors.secondary, width: 2),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final frameSize = (constraints.maxWidth).clamp(200.0, 260.0);
+                    return SizedBox(
+                      width: frameSize,
+                      height: frameSize,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: _cameraError != null ? QuickpassColors.error : QuickpassColors.secondary, width: 2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                          const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                          const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                          const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                          if (_cameraError != null)
+                            const Icon(Icons.videocam_off, size: 48, color: QuickpassColors.error),
+                        ],
                       ),
-                      const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      if (_cameraError != null)
-                        const Icon(Icons.videocam_off, size: 48, color: QuickpassColors.error),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 _buildStatusIndicator(),

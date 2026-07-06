@@ -1,5 +1,5 @@
-# ═══════════════════════════════════════════════════════════════════
-# Quickpass Phone Runner — Windows (PowerShell)
+# ============================================================
+# Quickpass Phone Runner - Windows (PowerShell)
 #
 # Runs the Flutter app on a physical Android device connected via USB,
 # with an ADB reverse tunnel so the phone can reach the backend API
@@ -14,7 +14,7 @@
 # Usage:
 #   .\scripts\run_phone.ps1
 #
-# ═══════════════════════════════════════════════════════════════════
+# ============================================================
 
 $ErrorActionPreference = "Stop"
 
@@ -22,13 +22,13 @@ $ScriptDir = Split-Path -Parent $PSCommandPath
 $ProjectDir = Split-Path -Parent $ScriptDir
 $Properties = Join-Path $ProjectDir "flutter_app\android\local.properties"
 
-# ── Colors ──
+# -- Colors --
 function Write-Log  { Write-Host "  $($args[0])" -ForegroundColor Green }
 function Write-Warn { Write-Host "  $($args[0])" -ForegroundColor Yellow }
 function Write-Err  { Write-Host "  $($args[0])" -ForegroundColor Red; exit 1 }
 function Write-Info { Write-Host "  $($args[0])" -ForegroundColor Cyan }
 
-# ── Resolve SDK paths from local.properties ──
+# -- Resolve SDK paths from local.properties --
 
 function Resolve-SdkPath($key, $fallback) {
     if (Test-Path $Properties) {
@@ -47,7 +47,7 @@ $FlutterDir    = Resolve-SdkPath "flutter.sdk" (Join-Path $ProjectDir "tools\flu
 $Adb           = Join-Path $AndroidSdkDir "platform-tools\adb.exe"
 $Flutter       = Join-Path $FlutterDir "bin\flutter.bat"
 
-# ── Environment ──
+# -- Environment --
 
 $env:ANDROID_HOME = $AndroidSdkDir
 
@@ -57,7 +57,7 @@ if (Test-Path (Join-Path $BundledJdk "bin\javac.exe")) {
     $env:JAVA_HOME = $BundledJdk
 }
 
-# ── Check dependencies ──
+# -- Check dependencies --
 
 if (-not (Test-Path $Flutter)) {
     Write-Err "Flutter SDK not found at $FlutterDir`n  Run .\scripts\setup.ps1 to install it."
@@ -66,7 +66,7 @@ if (-not (Test-Path $Adb)) {
     Write-Err "ADB not found at $Adb`n  Run .\scripts\setup.ps1 to install the Android SDK."
 }
 
-# ── Find connected device ──
+# -- Find connected device --
 
 $Devices = & $Adb devices | Select-String "device$"
 $Device = $null
@@ -80,32 +80,32 @@ foreach ($line in $Devices) {
 
 if (-not $Device) {
     Write-Host ""
-    Write-Err "No Android device detected.`n`n  1. Enable Developer Options on your phone:`n     Settings → About Phone → Tap Build Number 7 times`n  2. Enable USB Debugging:`n     Settings → Developer Options → USB Debugging`n  3. Connect your phone via USB and accept the RSA prompt`n  4. Verify with: $Adb devices"
+    Write-Err "No Android device detected.`n`n  1. Enable Developer Options on your phone:`n     Settings -> About Phone -> Tap Build Number 7 times`n  2. Enable USB Debugging:`n     Settings -> Developer Options -> USB Debugging`n  3. Connect your phone via USB and accept the RSA prompt`n  4. Verify with: $Adb devices"
 }
 
 Write-Host ""
-Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║     Quickpass — Phone Runner                ║" -ForegroundColor Cyan
-Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "  +------------------------------------------+" -ForegroundColor Cyan
+Write-Host "  |   Quickpass - Phone Runner               |" -ForegroundColor Cyan
+Write-Host "  +------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
 Write-Info "Device:     $Device"
 Write-Info "Project:    $ProjectDir"
 Write-Host ""
 
-# ── Set up ADB reverse tunnel ──
+# -- Set up ADB reverse tunnel --
 
-Write-Info "Setting up ADB reverse tunnel (phone:3000 → host:3000)..."
+Write-Info "Setting up ADB reverse tunnel (phone:3000 -> host:3000)..."
 $TunnelResult = & $Adb reverse tcp:3000 tcp:3000 2>&1
 if ($LASTEXITCODE -eq 0) {
     Write-Log "ADB reverse tunnel established"
 } else {
-    Write-Warn "Failed to set up reverse tunnel — is the port already in use?"
+    Write-Warn "Failed to set up reverse tunnel - is the port already in use?"
 }
 
-# ── Cleanup on exit ──
+# -- Cleanup on exit --
 
 try {
-    # ── Run ──
+    # -- Run --
     Push-Location (Join-Path $ProjectDir "flutter_app")
     Write-Info "Starting Flutter on $Device..."
     Write-Host ""

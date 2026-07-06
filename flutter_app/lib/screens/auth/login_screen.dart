@@ -18,6 +18,17 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthProvider>();
+      if (auth.isLoading) {
+        auth.initialize();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _employeeIdCtrl.dispose();
     _passwordCtrl.dispose();
@@ -108,18 +119,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Logo & Branding ──
-                Column(
+        child: Consumer<AuthProvider>(
+          builder: (context, auth, _) {
+            if (auth.isLoading) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 96,
-                      height: 96,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -127,93 +135,105 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: Image.asset(
                         'assets/icon/logo.png',
-                        width: 48,
-                        height: 48,
+                        height: 56,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                      const Text(
-                        'Quickpass',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: QuickpassColors.darkPrimary,
-                          letterSpacing: -0.01,
-                          height: 1.33,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 24),
                     const Text(
-                      'Sign in to your workplace command center',
+                      'Quickpass',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: QuickpassColors.darkPrimary,
+                        letterSpacing: -0.01,
+                        height: 1.33,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Employee Gatepass System',
                       style: TextStyle(
                         fontSize: 14,
                         color: QuickpassColors.onSurfaceVariant,
                         height: 1.43,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: QuickpassColors.darkPrimary,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+              );
+            }
 
-                // ── Auth Form Card ──
-                Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: QuickpassColors.outlineVariant),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Column(
                       children: [
-                        // Employee ID
-                        const Text('Employee ID',
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: QuickpassColors.outlineVariant),
+                          ),
+                          child: Image.asset(
+                            'assets/icon/logo.png',
+                            height: 56,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Quickpass',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: QuickpassColors.darkPrimary,
+                            letterSpacing: -0.01,
+                            height: 1.33,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Sign in to your workplace command center',
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.01,
                             color: QuickpassColors.onSurfaceVariant,
                             height: 1.43,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _employeeIdCtrl,
-                          keyboardType: TextInputType.number,
-                          maxLength: 6,
-                          decoration: InputDecoration(
-                            hintText: '6-digit ID',
-                            prefixIcon: const Icon(Icons.badge_outlined, color: QuickpassColors.outline),
-                            counterText: '',
-                            filled: true,
-                            fillColor: QuickpassColors.surfaceContainerLow,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.secondary, width: 2),
-                            ),
-                          ),
-                          validator: Validators.employeeId,
-                        ),
-                        const SizedBox(height: 16),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-                        // Password
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: QuickpassColors.outlineVariant),
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Password',
+                            const Text('Employee ID',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -222,206 +242,244 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 1.43,
                               ),
                             ),
-                            TextButton(
-                              onPressed: _showForgotPassword,
-                              style: TextButton.styleFrom(
-                                foregroundColor: QuickpassColors.secondary,
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: const Text('Forgot?',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: QuickpassColors.secondary,
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _employeeIdCtrl,
+                              keyboardType: TextInputType.number,
+                              maxLength: 6,
+                              decoration: InputDecoration(
+                                hintText: '6-digit ID',
+                                prefixIcon: const Icon(Icons.badge_outlined, color: QuickpassColors.outline),
+                                counterText: '',
+                                filled: true,
+                                fillColor: QuickpassColors.surfaceContainerLow,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.secondary, width: 2),
                                 ),
                               ),
+                              validator: Validators.employeeId,
+                            ),
+                            const SizedBox(height: 16),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Password',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.01,
+                                    color: QuickpassColors.onSurfaceVariant,
+                                    height: 1.43,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: _showForgotPassword,
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: QuickpassColors.secondary,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: const Text('Forgot?',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: QuickpassColors.secondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _passwordCtrl,
+                              obscureText: _obscurePassword,
+                              decoration: InputDecoration(
+                                hintText: '••••••••',
+                                prefixIcon: const Icon(Icons.lock_outlined, color: QuickpassColors.outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                    color: QuickpassColors.outline,
+                                  ),
+                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                ),
+                                filled: true,
+                                fillColor: QuickpassColors.surfaceContainerLow,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(color: QuickpassColors.secondary, width: 2),
+                                ),
+                              ),
+                              validator: Validators.password,
+                              onFieldSubmitted: (_) => _login(),
+                            ),
+                            const SizedBox(height: 8),
+
+                            Consumer<AuthProvider>(
+                              builder: (context, auth, _) {
+                                if (auth.error != null) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: QuickpassColors.errorContainer,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.2)),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.error_outline, size: 20, color: QuickpassColors.error),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              auth.error!,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: QuickpassColors.onErrorContainer,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                            const SizedBox(height: 8),
+
+                            Consumer<AuthProvider>(
+                              builder: (context, auth, _) {
+                                return SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: FilledButton(
+                                    onPressed: auth.loginLoading ? null : _login,
+                                    child: auth.loginLoading
+                                        ? const SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              color: QuickpassColors.darkOnPrimary,
+                                            ),
+                                          )
+                                        : const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                'Sign In',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  height: 1.5,
+                                                ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Icon(Icons.arrow_forward, size: 20, color: QuickpassColors.darkOnPrimary),
+                                            ],
+                                          ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _passwordCtrl,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            prefixIcon: const Icon(Icons.lock_outlined, color: QuickpassColors.outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                color: QuickpassColors.outline,
-                              ),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                            ),
-                            filled: true,
-                            fillColor: QuickpassColors.surfaceContainerLow,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.outlineVariant),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: QuickpassColors.secondary, width: 2),
-                            ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      padding: const EdgeInsets.only(top: 16),
+                      child: const Column(
+                        children: [
+                          Divider(color: QuickpassColors.outlineVariant),
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _FooterBadge(icon: Icons.verified_user, label: 'Verified'),
+                              SizedBox(width: 24),
+                              _FooterBadge(icon: Icons.security, label: 'Secured'),
+                            ],
                           ),
-                          validator: Validators.password,
-                          onFieldSubmitted: (_) => _login(),
-                        ),
-                        const SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
 
-                        // Error box
-                        Consumer<AuthProvider>(
-                          builder: (context, auth, _) {
-                            if (auth.error != null) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: QuickpassColors.errorContainer,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.2)),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.error_outline, size: 20, color: QuickpassColors.error),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          auth.error!,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: QuickpassColors.onErrorContainer,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          },
+                    const Text(
+                      'ZANECO QUICKPASS AUTHORITY SYSTEM',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                        color: QuickpassColors.outline,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: _showPrivacyPolicy,
+                          style: TextButton.styleFrom(
+                            foregroundColor: QuickpassColors.onSurfaceVariant,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Privacy Policy',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-
-                        // Sign In Button - Electric Yellow
-                        Consumer<AuthProvider>(
-                          builder: (context, auth, _) {
-                            return SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: FilledButton(
-                                onPressed: auth.loginLoading ? null : _login,
-                                child: auth.loginLoading
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color: QuickpassColors.darkOnPrimary,
-                                        ),
-                                      )
-                                    : const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'Sign In',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1.5,
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_forward, size: 20, color: QuickpassColors.darkOnPrimary),
-                                        ],
-                                      ),
-                              ),
-                            );
-                          },
+                        const Text('•', style: TextStyle(color: QuickpassColors.outlineVariant)),
+                        TextButton(
+                          onPressed: _showSupport,
+                          style: TextButton.styleFrom(
+                            foregroundColor: QuickpassColors.onSurfaceVariant,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Internal Support',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-
-                // ── Footer Verified/Secured badges ──
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  padding: const EdgeInsets.only(top: 16),
-                  child: const Column(
-                    children: [
-                      Divider(color: QuickpassColors.outlineVariant),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _FooterBadge(icon: Icons.verified_user, label: 'Verified'),
-                          SizedBox(width: 24),
-                          _FooterBadge(icon: Icons.security, label: 'Secured'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // ── Institutional Footer ──
-                const Text(
-                  'ZANECO QUICKPASS AUTHORITY SYSTEM',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.5,
-                    color: QuickpassColors.outline,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: _showPrivacyPolicy,
-                      style: TextButton.styleFrom(
-                        foregroundColor: QuickpassColors.onSurfaceVariant,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('Privacy Policy',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    const Text('•', style: TextStyle(color: QuickpassColors.outlineVariant)),
-                    TextButton(
-                      onPressed: _showSupport,
-                      style: TextButton.styleFrom(
-                        foregroundColor: QuickpassColors.onSurfaceVariant,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('Internal Support',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
