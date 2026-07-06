@@ -89,7 +89,7 @@ class _DashboardTab extends StatefulWidget {
 class _DashboardTabState extends State<_DashboardTab> {
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final user = context.select((AuthProvider p) => p.user);
     final leaveProv = context.watch<LeaveProvider>();
 
     return Scaffold(
@@ -172,7 +172,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                               backgroundColor: QuickpassColors.primary
                                   .withValues(alpha: 0.1),
                               child: Text(
-                                (auth.user?.fullName ?? 'U')
+                                (user?.fullName ?? 'U')
                                     .substring(0, 1)
                                     .toUpperCase(),
                                 style: const TextStyle(
@@ -196,7 +196,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                     ),
                                   ),
                                   Text(
-                                    auth.user?.fullName ?? '',
+                                    user?.fullName ?? '',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
@@ -208,7 +208,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                   Row(
                                     children: [
                                       Text(
-                                        auth.user?.position ?? '',
+                                        user?.position ?? '',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
@@ -227,7 +227,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                         ),
                                       ),
                                       Text(
-                                        'ID: ${auth.user?.employeeId ?? ''}',
+                                        'ID: ${user?.employeeId ?? ''}',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,
@@ -599,7 +599,9 @@ class _ActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
+    return Hero(
+      tag: ValueKey('qr-leave-${leave.leaveId}'),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -675,6 +677,7 @@ class _ActivityCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

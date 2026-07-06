@@ -130,9 +130,9 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final user = context.select((AuthProvider p) => p.user);
     final supProv = context.watch<SupervisorProvider>();
-    final userName = auth.user?.fullName ?? 'Supervisor';
+    final userName = user?.fullName ?? 'Supervisor';
 
     return Scaffold(
       body: Stack(

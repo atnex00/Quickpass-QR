@@ -1,6 +1,36 @@
 import 'package:flutter/material.dart';
 
 const double _designWidth = 375;
+const double tabletBreakpoint = 600;
+const double desktopBreakpoint = 900;
+
+enum ScreenType { phone, tablet, desktop }
+
+/// Returns the screen type based on width breakpoints.
+ScreenType getScreenType(BuildContext context) {
+  final w = MediaQuery.of(context).size.width;
+  if (w >= desktopBreakpoint) return ScreenType.desktop;
+  if (w >= tabletBreakpoint) return ScreenType.tablet;
+  return ScreenType.phone;
+}
+
+/// Returns a value based on the current screen type.
+T adaptiveValue<T>(BuildContext context, {required T phone, T? tablet, T? desktop}) {
+  switch (getScreenType(context)) {
+    case ScreenType.desktop:
+      return desktop ?? tablet ?? phone;
+    case ScreenType.tablet:
+      return tablet ?? phone;
+    case ScreenType.phone:
+      return phone;
+  }
+}
+
+/// Scales a value based on screen height (not width), preventing overflow on short screens.
+double responsiveHeight(BuildContext context, double size) {
+  final h = MediaQuery.of(context).size.height;
+  return size * (h / 812).clamp(0.75, 1.15);
+}
 
 double scaleWidth(BuildContext context, double size) {
   return size * (MediaQuery.of(context).size.width / _designWidth);

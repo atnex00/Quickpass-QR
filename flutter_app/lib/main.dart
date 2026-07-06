@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'config/app_config.dart';
 import 'config/theme.dart';
@@ -17,23 +18,45 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final apiService = ApiService();
   apiService.init();
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
   runApp(QuickpassApp(apiService: apiService));
 }
 
-class QuickpassApp extends StatelessWidget {
+class QuickpassApp extends StatefulWidget {
   final ApiService apiService;
   const QuickpassApp({super.key, required this.apiService});
 
   @override
+  State<QuickpassApp> createState() => _QuickpassAppState();
+}
+
+class _QuickpassAppState extends State<QuickpassApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      precacheImage(const AssetImage('assets/icon/app-icon.png'), context);
+      precacheImage(const AssetImage('assets/icon/logo.png'), context);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final api = widget.apiService;
     return Provider<ApiService>.value(
-      value: apiService,
+      value: api,
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider(api: apiService)),
-          ChangeNotifierProvider(create: (_) => LeaveProvider(api: apiService)),
-          ChangeNotifierProvider(create: (_) => SupervisorProvider(api: apiService)),
-          ChangeNotifierProvider(create: (_) => ScanProvider(api: apiService)),
+          ChangeNotifierProvider(create: (_) => AuthProvider(api: api)),
+          ChangeNotifierProvider(create: (_) => LeaveProvider(api: api)),
+          ChangeNotifierProvider(create: (_) => SupervisorProvider(api: api)),
+          ChangeNotifierProvider(create: (_) => ScanProvider(api: api)),
         ],
         child: Consumer<AuthProvider>(
         builder: (context, auth, _) {

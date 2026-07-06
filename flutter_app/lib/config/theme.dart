@@ -67,9 +67,12 @@ class QuickpassColors {
 }
 
 class QuickpassTheme {
+  static final TextTheme _lightTextTheme = GoogleFonts.interTextTheme();
+  static final TextTheme _darkTextTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
+
   static ThemeData get light {
-    final textTheme = GoogleFonts.interTextTheme();
     return ThemeData(
+      textTheme: _lightTextTheme,
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
@@ -94,7 +97,6 @@ class QuickpassTheme {
         outlineVariant: QuickpassColors.outlineVariant,
       ),
       scaffoldBackgroundColor: QuickpassColors.background,
-      textTheme: textTheme,
 
       appBarTheme: AppBarTheme(
         backgroundColor: QuickpassColors.darkPrimary,
@@ -247,10 +249,10 @@ class QuickpassTheme {
   }
 
   static ThemeData get dark {
-    final textTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      textTheme: _darkTextTheme,
       colorScheme: const ColorScheme.dark(
         primary: QuickpassColors.darkPrimary,
         onPrimary: QuickpassColors.darkOnPrimary,
@@ -270,7 +272,6 @@ class QuickpassTheme {
         outlineVariant: QuickpassColors.darkOutlineVariant,
       ),
       scaffoldBackgroundColor: QuickpassColors.darkBackground,
-      textTheme: textTheme,
 
       appBarTheme: AppBarTheme(
         backgroundColor: QuickpassColors.darkSurface,

@@ -43,7 +43,9 @@ class QrDisplayScreen extends StatelessWidget {
         child: Stack(
           children: [
             // ── Main Content ──
-            CustomScrollView(
+            Hero(
+              tag: ValueKey('qr-leave-${leave.leaveId}'),
+              child: CustomScrollView(
               slivers: [
                 // ── Electric Yellow App Bar ──
                 SliverAppBar(
@@ -331,6 +333,7 @@ class QrDisplayScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
             ),
 
             // ── Bottom Timer Footer ──
