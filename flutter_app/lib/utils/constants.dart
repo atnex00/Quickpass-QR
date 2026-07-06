@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 
-class QuickpassQrColors {
-  static const Color qrOut = Color(0xFF2563EB);
-  static const Color qrIn = Color(0xFF16A34A);
-}
-
 class AppConstants {
   static const String appName = 'Quickpass';
   static const String tagline = 'Smart Gatepass & Leave Management';

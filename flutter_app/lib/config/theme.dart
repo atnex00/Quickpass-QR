@@ -115,7 +115,7 @@ class QuickpassTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: QuickpassColors.outlineVariant),
+          side: const BorderSide(color: QuickpassColors.outlineVariant),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
@@ -315,7 +315,7 @@ class QuickpassTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: QuickpassColors.darkPrimary,
-          side: BorderSide(color: QuickpassColors.darkPrimary),
+          side: const BorderSide(color: QuickpassColors.darkPrimary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

@@ -125,14 +125,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: QuickpassColors.outlineVariant),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.qr_code_scanner_rounded,
                         size: 48,
                         color: QuickpassColors.primary,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       'Quickpass',
                       style: TextStyle(
                         fontSize: 24,
@@ -143,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    const Text(
                       'Sign in to your workplace command center',
                       style: TextStyle(
                         fontSize: 14,
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Employee ID
-                        Text('Employee ID',
+                        const Text('Employee ID',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -188,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           maxLength: 6,
                           decoration: InputDecoration(
                             hintText: '6-digit ID',
-                            prefixIcon: Icon(Icons.badge_outlined, color: QuickpassColors.outline),
+                            prefixIcon: const Icon(Icons.badge_outlined, color: QuickpassColors.outline),
                             counterText: '',
                             filled: true,
                             fillColor: QuickpassColors.surfaceContainerLow,
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Password',
+                            const Text('Password',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -230,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 minimumSize: Size.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Text('Forgot?',
+                              child: const Text('Forgot?',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -246,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             hintText: '••••••••',
-                            prefixIcon: Icon(Icons.lock_outlined, color: QuickpassColors.outline),
+                            prefixIcon: const Icon(Icons.lock_outlined, color: QuickpassColors.outline),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -291,12 +291,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.error_outline, size: 20, color: QuickpassColors.error),
+                                      const Icon(Icons.error_outline, size: 20, color: QuickpassColors.error),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           auth.error!,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                             color: QuickpassColors.onErrorContainer,
@@ -332,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 24),
                                 ),
                                 child: auth.isLoading
-                                    ? SizedBox(
+                                    ? const SizedBox(
                                         width: 24,
                                         height: 24,
                                         child: CircularProgressIndicator(
@@ -340,10 +340,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color: QuickpassColors.darkOnPrimary,
                                         ),
                                       )
-                                    : Row(
+                                    : const Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Sign In',
                                             style: TextStyle(
                                               fontSize: 16,
@@ -351,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               height: 1.5,
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
+                                          SizedBox(width: 8),
                                           Icon(Icons.arrow_forward, size: 20, color: QuickpassColors.darkOnPrimary),
                                         ],
                                       ),
@@ -370,15 +370,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   constraints: const BoxConstraints(maxWidth: 400),
                   padding: const EdgeInsets.only(top: 16),
-                  child: Column(
+                  child: const Column(
                     children: [
                       Divider(color: QuickpassColors.outlineVariant),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _FooterBadge(icon: Icons.verified_user, label: 'Verified'),
-                          const SizedBox(width: 24),
+                          SizedBox(width: 24),
                           _FooterBadge(icon: Icons.security, label: 'Secured'),
                         ],
                       ),
@@ -388,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // ── Institutional Footer ──
-                Text(
+                const Text(
                   'ZANECO QUICKPASS AUTHORITY SYSTEM',
                   style: TextStyle(
                     fontSize: 12,
@@ -410,11 +410,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text('Privacy Policy',
+                      child: const Text('Privacy Policy',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                     ),
-                    Text('•', style: TextStyle(color: QuickpassColors.outlineVariant)),
+                    const Text('•', style: TextStyle(color: QuickpassColors.outlineVariant)),
                     TextButton(
                       onPressed: _showSupport,
                       style: TextButton.styleFrom(
@@ -423,7 +423,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: Text('Internal Support',
+                      child: const Text('Internal Support',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                     ),
@@ -453,7 +453,7 @@ class _FooterBadge extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: QuickpassColors.outline,

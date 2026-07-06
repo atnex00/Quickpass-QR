@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
@@ -26,7 +27,9 @@ class ApiService {
       },
     ));
 
-    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () => HttpClient();
+    if (!kIsWeb) {
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () => HttpClient();
+    }
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -42,6 +45,12 @@ class ApiService {
         }
         return handler.next(error);
       },
+      onResponse: (response, handler) async {
+        if (response.data is Map && response.data['force_logout'] == true) {
+          await _storage.deleteAll();
+        }
+        return handler.next(response);
+      },
     ));
   }
 
@@ -52,11 +61,12 @@ class ApiService {
       'password': password,
     });
     final data = res.data;
-    if (data['success']) {
-      await _storage.write(key: 'auth_token', value: data['token']);
-      await _storage.write(key: 'employee_id', value: employeeId);
-      await _storage.write(key: 'user_data', value: jsonEncode(data['user']));
+    if (data['success'] != true) {
+      throw Exception(data['message'] ?? 'Login failed');
     }
+    await _storage.write(key: 'auth_token', value: data['token']);
+    await _storage.write(key: 'employee_id', value: employeeId);
+    await _storage.write(key: 'user_data', value: jsonEncode(data['user']));
     return data;
   }
 
@@ -80,12 +90,16 @@ class ApiService {
   // ── Employee ──
   Future<Employee> getProfile() async {
     final res = await _dio.get('/auth/profile');
-    return Employee.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Invalid profile response');
+    return Employee.fromJson(d);
   }
 
   Future<Employee> updateProfile(Map<String, dynamic> data) async {
     final res = await _dio.put('/auth/profile', data: data);
-    return Employee.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Invalid update profile response');
+    return Employee.fromJson(d);
   }
 
   // ── Leave Requests ──
@@ -101,7 +115,9 @@ class ApiService {
       'end_time': endTime,
       'reason': reason,
     });
-    return LeaveRequest.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Invalid leave submission response');
+    return LeaveRequest.fromJson(d);
   }
 
   Future<Map<String, dynamic>> getLeaveHistory({String? status, int page = 1, int limit = 20}) async {
@@ -122,40 +138,54 @@ class ApiService {
 
   Future<LeaveRequest> getLeaveById(String id) async {
     final res = await _dio.get('/leave/$id');
-    return LeaveRequest.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Leave not found');
+    return LeaveRequest.fromJson(d);
   }
 
   // ── Supervisor ──
   Future<List<LeaveRequest>> getPendingRequests() async {
     final res = await _dio.get('/supervisor/pending');
-    return (res.data['data'] as List).map((j) => LeaveRequest.fromJson(j)).toList();
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
   }
 
   Future<LeaveRequest> approveLeave(String leaveId) async {
     final res = await _dio.post('/supervisor/approve/$leaveId');
-    return LeaveRequest.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Failed to approve leave');
+    return LeaveRequest.fromJson(d);
   }
 
   Future<LeaveRequest> rejectLeave(String leaveId, String reason) async {
     final res = await _dio.post('/supervisor/reject/$leaveId', data: {'reason': reason});
-    return LeaveRequest.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Failed to reject leave');
+    return LeaveRequest.fromJson(d);
   }
 
   Future<List<LeaveRequest>> getApprovedLeaves() async {
     final res = await _dio.get('/supervisor/approved');
-    return (res.data['data'] as List).map((j) => LeaveRequest.fromJson(j)).toList();
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
   }
 
   Future<LeaveRequest> revokeApproval(String leaveId) async {
     final res = await _dio.post('/supervisor/revoke/$leaveId');
-    return LeaveRequest.fromJson(res.data['data']);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Failed to revoke approval');
+    return LeaveRequest.fromJson(d);
   }
 
   Future<List<LeaveRequest>> getTeamLeaves({String? date}) async {
     final params = <String, dynamic>{};
     if (date != null) params['date'] = date;
     final res = await _dio.get('/supervisor/team-leaves', queryParameters: params);
-    return (res.data['data'] as List).map((j) => LeaveRequest.fromJson(j)).toList();
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
   }
 
   // ── Scan ──

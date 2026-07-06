@@ -47,7 +47,9 @@ class SupervisorProvider extends ChangeNotifier {
   Future<void> loadApprovedLeaves() async {
     try {
       _approvedLeaves = await _api.getApprovedLeaves();
-    } catch (_) {}
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+    }
     notifyListeners();
   }
 

@@ -95,10 +95,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
+                      child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    const Text(
                       'My Profile',
                       style: TextStyle(
                         fontSize: 20,
@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
+                      icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
                       onPressed: () => context.read<AuthProvider>().logout(),
                     ),
                   ],
@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
                         child: Text(
                           (user?.fullName ?? 'U')[0].toUpperCase(),
-                          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: QuickpassColors.primary),
+                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: QuickpassColors.primary),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -167,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const Text('Account Information',
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
-                      Divider(color: QuickpassColors.outlineVariant),
+                      const Divider(color: QuickpassColors.outlineVariant),
                       _readOnlyRow('Employee ID', user?.employeeId ?? ''),
                       _readOnlyRow('Department', user?.departmentName ?? 'N/A'),
                     ],
@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const Text('Personal Information',
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
-                      Divider(color: QuickpassColors.outlineVariant),
+                      const Divider(color: QuickpassColors.outlineVariant),
                       const SizedBox(height: 4),
                       TextField(
                         controller: _nameCtl,

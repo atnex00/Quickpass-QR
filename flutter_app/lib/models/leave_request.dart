@@ -103,7 +103,7 @@ class LeaveRequest {
       departmentId: json['department_id'] ?? '',
       supervisorId: json['supervisor_id'] ?? '',
       supervisorName: json['supervisor_name'] ?? '',
-      leaveDate: DateTime.parse(json['leave_date']),
+      leaveDate: DateTime.tryParse(json['leave_date'] ?? '') ?? DateTime.now(),
       startTime: json['start_time'] ?? '',
       endTime: json['end_time'] ?? '',
       reason: json['reason'] ?? '',
@@ -113,8 +113,8 @@ class LeaveRequest {
       outScanTime: json['out_scan_time'] != null ? DateTime.tryParse(json['out_scan_time']) : null,
       inScanTime: json['in_scan_time'] != null ? DateTime.tryParse(json['in_scan_time']) : null,
       rejectionReason: json['rejection_reason'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now(),
       employeePosition: json['employee_position'],
       employeePhoto: json['employee_photo'],
     );
@@ -149,8 +149,9 @@ class LeaveRequest {
     final startParts = startTime.split(':');
     final endParts = endTime.split(':');
     if (startParts.length < 2 || endParts.length < 2) return 0;
-    final startMin = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
-    final endMin = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+    var startMin = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+    var endMin = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+    if (endMin < startMin) endMin += 1440;
     return endMin - startMin;
   }
 

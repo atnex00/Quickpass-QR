@@ -4,7 +4,6 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
-import '../../widgets/status_badge.dart';
 import 'request_leave_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
@@ -40,7 +39,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
@@ -50,7 +49,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
           indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
+          destinations: const [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined, color: QuickpassColors.onSurfaceVariant),
               selectedIcon: Icon(Icons.dashboard, color: QuickpassColors.darkPrimary),
@@ -110,10 +109,10 @@ class _DashboardTabState extends State<_DashboardTab> {
                             color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(Icons.qr_code_scanner, size: 22, color: QuickpassColors.darkOnPrimary),
+                          child: const Icon(Icons.qr_code_scanner, size: 22, color: QuickpassColors.darkOnPrimary),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        const Text(
                           'Quickpass',
                           style: TextStyle(
                             fontSize: 20,
@@ -123,7 +122,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                          icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -160,7 +159,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                             backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
                             child: Text(
                               (auth.user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
                                 color: QuickpassColors.primary,
@@ -172,7 +171,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'Welcome back,',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -182,7 +181,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                 ),
                                 Text(
                                   auth.user?.fullName ?? '',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
                                     color: QuickpassColors.onSurface,
@@ -194,15 +193,15 @@ class _DashboardTabState extends State<_DashboardTab> {
                                   children: [
                                     Text(
                                       auth.user?.position ?? '',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 0.01,
                                         color: QuickpassColors.secondary,
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 6),
                                       child: Text(
                                         '\u2022',
                                         style: TextStyle(fontSize: 10, color: QuickpassColors.outline),
@@ -210,7 +209,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                     ),
                                     Text(
                                       'ID: ${auth.user?.employeeId ?? ''}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.05,
@@ -244,9 +243,9 @@ class _DashboardTabState extends State<_DashboardTab> {
                               bottom: 0,
                               child: Container(
                                 width: 4,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: QuickpassColors.success,
-                                  borderRadius: const BorderRadius.only(
+                                  borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(12),
                                     bottomLeft: Radius.circular(12),
                                   ),
@@ -270,7 +269,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                               color: QuickpassColors.success.withValues(alpha: 0.1),
                                               borderRadius: BorderRadius.circular(999),
                                             ),
-                                            child: Text(
+                                            child: const Text(
                                               'ACTIVE PASS',
                                               style: TextStyle(
                                                 fontSize: 12,
@@ -282,7 +281,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                           const SizedBox(height: 8),
                                           Text(
                                             leaveProv.activeLeave!.reason,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 24,
                                               fontWeight: FontWeight.w700,
                                               color: QuickpassColors.onSurface,
@@ -292,7 +291,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                           ),
                                         ],
                                       ),
-                                      Icon(Icons.check_circle, color: QuickpassColors.success, size: 28),
+                                      const Icon(Icons.check_circle, color: QuickpassColors.success, size: 28),
                                     ],
                                   ),
                                   const SizedBox(height: 16),
@@ -330,12 +329,12 @@ class _DashboardTabState extends State<_DashboardTab> {
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                       ),
-                                      child: Row(
+                                      child: const Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(Icons.qr_code_2, size: 20, color: QuickpassColors.darkOnPrimary),
-                                          const SizedBox(width: 8),
-                                          const Text(
+                                          SizedBox(width: 8),
+                                          Text(
                                             'View QR Pass',
                                             style: TextStyle(
                                               fontSize: 14,
@@ -370,7 +369,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Recent Activity',
                           style: TextStyle(
                             fontSize: 16,
@@ -389,7 +388,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: Text(
+                          child: const Text(
                             'See All',
                             style: TextStyle(
                               fontSize: 12,
@@ -416,11 +415,11 @@ class _DashboardTabState extends State<_DashboardTab> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: QuickpassColors.outlineVariant),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
                             Icon(Icons.inbox_outlined, size: 40, color: QuickpassColors.outlineVariant),
-                            const SizedBox(height: 12),
-                            const Text('No recent activity', style: TextStyle(color: QuickpassColors.neutralGray)),
+                            SizedBox(height: 12),
+                            Text('No recent activity', style: TextStyle(color: QuickpassColors.neutralGray)),
                           ],
                         ),
                       )
@@ -460,7 +459,7 @@ Widget _infoRow(String label, String value) {
     children: [
       Text(
         label,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           color: QuickpassColors.onSurfaceVariant,
           height: 1.43,
@@ -468,7 +467,7 @@ Widget _infoRow(String label, String value) {
       ),
       Text(
         value,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: QuickpassColors.onSurface,
@@ -500,7 +499,7 @@ class _StatCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: QuickpassColors.outline,
@@ -577,7 +576,7 @@ class _ActivityCard extends StatelessWidget {
                 children: [
                   Text(
                     leave.reason,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: QuickpassColors.onSurface,
@@ -586,7 +585,7 @@ class _ActivityCard extends StatelessWidget {
                   ),
                   Text(
                     leave.leaveDate.toIso8601String().split('T').first,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: QuickpassColors.outline,
                       height: 1.43,

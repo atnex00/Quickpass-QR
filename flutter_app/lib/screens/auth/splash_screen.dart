@@ -18,7 +18,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _init() async {
-    await Future.delayed(const Duration(seconds: 1));
     if (mounted) {
       context.read<AuthProvider>().initialize();
     }
@@ -47,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: QuickpassColors.outlineVariant),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.qr_code_scanner,
                 size: 56,
                 color: QuickpassColors.primary,

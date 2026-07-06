@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
-import '../../services/qr_service.dart';
 
 class QrDisplayScreen extends StatefulWidget {
   final LeaveRequest leave;
@@ -87,7 +86,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        const Text(
                           'Quickpass',
                           style: TextStyle(
                             fontSize: 20,
@@ -97,7 +96,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                          icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -142,9 +141,9 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                             bottom: 0,
                             child: Container(
                               width: 4,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: QuickpassColors.success,
-                                borderRadius: const BorderRadius.only(
+                                borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(12),
                                   bottomLeft: Radius.circular(12),
                                 ),
@@ -169,7 +168,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                             color: QuickpassColors.success.withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(999),
                                           ),
-                                          child: Text(
+                                          child: const Text(
                                             'Approved',
                                             style: TextStyle(
                                               fontSize: 12,
@@ -181,7 +180,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                         const SizedBox(height: 8),
                                         Text(
                                           widget.leave.reason,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.w600,
                                             color: QuickpassColors.onSurface,
@@ -192,7 +191,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                     ),
                                     Text(
                                       'ID: #${widget.leave.leaveId}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: QuickpassColors.outline,
@@ -203,21 +202,21 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
-                                    Icon(Icons.calendar_today, size: 20, color: QuickpassColors.primary),
+                                    const Icon(Icons.calendar_today, size: 20, color: QuickpassColors.primary),
                                     const SizedBox(width: 8),
                                     Text(
                                       dateStr,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         color: QuickpassColors.onSurfaceVariant,
                                       ),
                                     ),
                                     const SizedBox(width: 24),
-                                    Icon(Icons.schedule, size: 20, color: QuickpassColors.primary),
+                                    const Icon(Icons.schedule, size: 20, color: QuickpassColors.primary),
                                     const SizedBox(width: 8),
                                     Text(
                                       '${widget.leave.startTime} - ${widget.leave.endTime}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         color: QuickpassColors.onSurfaceVariant,
                                       ),
@@ -242,14 +241,14 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: QuickpassColors.outlineVariant),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
                             Icon(Icons.qr_code, size: 64, color: QuickpassColors.outlineVariant),
-                            const SizedBox(height: 12),
-                            const Text('QR codes are not available yet',
+                            SizedBox(height: 12),
+                            Text('QR codes are not available yet',
                               style: TextStyle(color: QuickpassColors.onSurfaceVariant)),
-                            const SizedBox(height: 4),
-                            const Text('Approved leaves will show QR codes here',
+                            SizedBox(height: 4),
+                            Text('Approved leaves will show QR codes here',
                               style: TextStyle(color: QuickpassColors.neutralGray)),
                           ],
                         ),
@@ -304,10 +303,10 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             children: [
                               Icon(Icons.info_outline, size: 18, color: QuickpassColors.onSurface),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 'Pass Guidelines',
                                 style: TextStyle(
@@ -340,7 +339,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
             right: 0,
             child: Container(
               height: 88,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: QuickpassColors.surface,
                 border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
               ),
@@ -364,7 +363,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        const Text(
                           'VALID FOR',
                           style: TextStyle(
                             fontSize: 12,
@@ -377,11 +376,11 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.timer, size: 18, color: QuickpassColors.error),
+                            const Icon(Icons.timer, size: 18, color: QuickpassColors.error),
                             const SizedBox(width: 6),
                             Text(
                               _formatTime(_remainingSeconds),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: 'monospace',
@@ -406,7 +405,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           '\u2022',
           style: TextStyle(
             fontSize: 14,
@@ -418,7 +417,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: QuickpassColors.onSurfaceVariant,
             ),
@@ -544,7 +543,7 @@ class _QrPassCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: QuickpassColors.outline,
@@ -558,7 +557,7 @@ class _QrPassCard extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: QuickpassColors.surfaceContainerLow,
               border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
             ),
@@ -575,7 +574,7 @@ class _QrPassCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   'TOKEN: $token',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.05,

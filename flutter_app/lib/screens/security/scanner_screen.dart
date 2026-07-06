@@ -16,6 +16,7 @@ class ScannerScreen extends StatefulWidget {
 class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserver {
   MobileScannerController? _controller;
   bool _isProcessing = false;
+  bool _torchEnabled = false;
 
   @override
   void initState() {
@@ -87,7 +88,7 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
-                        Text(
+                        const Text(
                           'Scan QR Code',
                           style: TextStyle(
                             fontSize: 20,
@@ -97,9 +98,12 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: const Icon(Icons.flashlight_on),
+                          icon: Icon(_torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
                           color: QuickpassColors.darkOnPrimary,
-                          onPressed: () => _controller?.toggleTorch(),
+                          onPressed: () {
+                            setState(() => _torchEnabled = !_torchEnabled);
+                            _controller?.toggleTorch();
+                          },
                         ),
                       ],
                     ),
@@ -118,10 +122,10 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                      Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                      const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                      const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                      const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+                      const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
                     ],
                   ),
                 ),
@@ -185,8 +189,8 @@ class _BracketPainter extends CustomPainter {
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(Offset(0, size.height), Offset(0, 0), paint);
-    canvas.drawLine(Offset(0, 0), Offset(size.width, 0), paint);
+    canvas.drawLine(Offset(0, size.height), const Offset(0, 0), paint);
+    canvas.drawLine(const Offset(0, 0), Offset(size.width, 0), paint);
   }
 
   @override

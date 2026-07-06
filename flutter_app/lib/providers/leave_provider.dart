@@ -38,8 +38,9 @@ class LeaveProvider extends ChangeNotifier {
   Future<void> loadActiveLeave() async {
     try {
       _activeLeave = await _api.getActiveLeave();
-    } catch (_) {
+    } catch (e) {
       _activeLeave = null;
+      _error = e.toString().replaceFirst('Exception: ', '');
     }
     notifyListeners();
   }

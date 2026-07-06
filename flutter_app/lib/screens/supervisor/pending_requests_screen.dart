@@ -38,15 +38,15 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
         child: supProv.isLoading
             ? const Center(child: CircularProgressIndicator())
             : supProv.pendingRequests.isEmpty
-                ? Center(
+                ? const Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.check_circle_outline, size: 64, color: QuickpassColors.outlineVariant),
-                        const SizedBox(height: 12),
-                        const Text('No pending requests', style: TextStyle(color: QuickpassColors.onSurfaceVariant, fontSize: 16)),
-                        const SizedBox(height: 4),
-                        const Text('All caught up!', style: TextStyle(color: QuickpassColors.neutralGray)),
+                        SizedBox(height: 12),
+                        Text('No pending requests', style: TextStyle(color: QuickpassColors.onSurfaceVariant, fontSize: 16)),
+                        SizedBox(height: 4),
+                        Text('All caught up!', style: TextStyle(color: QuickpassColors.neutralGray)),
                       ],
                     ),
                   )
@@ -109,11 +109,11 @@ class _PendingCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
                 const SizedBox(width: 4),
                 Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
                 const SizedBox(width: 16),
-                Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
                 const SizedBox(width: 4),
                 Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
               ],

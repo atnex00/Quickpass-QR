@@ -59,10 +59,10 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                         color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
+                      child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    const Text(
                       'Scan History',
                       style: TextStyle(
                         fontSize: 20,
@@ -72,7 +72,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                      icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -97,7 +97,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, size: 48, color: QuickpassColors.error),
+                      const Icon(Icons.error_outline, size: 48, color: QuickpassColors.error),
                       const SizedBox(height: 16),
                       const Text('Failed to load history',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
@@ -118,16 +118,16 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
               ),
             )
           else if (_logs.isEmpty)
-            SliverFillRemaining(
+            const SliverFillRemaining(
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.qr_code_scanner_outlined, size: 64, color: QuickpassColors.outlineVariant),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Text('No scan history',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant)),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text('Scanned QR codes will appear here',
                       style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
                   ],

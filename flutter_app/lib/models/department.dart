@@ -15,8 +15,8 @@ class Department {
 
   factory Department.fromJson(Map<String, dynamic> json) {
     return Department(
-      departmentId: json['department_id'] ?? json['departmentId'] as String,
-      departmentName: json['department_name'] ?? json['departmentName'] as String,
+      departmentId: (json['department_id'] ?? json['departmentId'] ?? '').toString(),
+      departmentName: (json['department_name'] ?? json['departmentName'] ?? '').toString(),
       departmentCode: json['department_code'] as String?,
       headOfDepartment: json['head_of_department'] as String?,
       isActive: json['is_active'] as bool? ?? true,

@@ -4,8 +4,6 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
-import '../../widgets/status_badge.dart';
-import '../../utils/date_formatter.dart';
 import '../employee/profile_screen.dart';
 import 'pending_requests_screen.dart';
 
@@ -31,7 +29,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
@@ -41,7 +39,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
           indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           destinations: [
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.dashboard_outlined, color: QuickpassColors.onSurfaceVariant),
               selectedIcon: Icon(Icons.dashboard, color: QuickpassColors.darkPrimary),
               label: 'Overview',
@@ -50,7 +48,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               icon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.pending_actions_outlined, color: QuickpassColors.onSurfaceVariant),
+                  const Icon(Icons.pending_actions_outlined, color: QuickpassColors.onSurfaceVariant),
                   Positioned(
                     top: -2,
                     right: -4,
@@ -69,7 +67,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               selectedIcon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.pending_actions, color: QuickpassColors.darkPrimary),
+                  const Icon(Icons.pending_actions, color: QuickpassColors.darkPrimary),
                   Positioned(
                     top: -2,
                     right: -4,
@@ -87,7 +85,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               ),
               label: 'Requests',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.person_outline, color: QuickpassColors.onSurfaceVariant),
               selectedIcon: Icon(Icons.person, color: QuickpassColors.darkPrimary),
               label: 'Profile',
@@ -156,10 +154,10 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                             color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
+                          child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
                         ),
                         const SizedBox(width: 12),
-                        Text(
+                        const Text(
                           'Quickpass',
                           style: TextStyle(
                             fontSize: 20,
@@ -170,7 +168,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                          icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('No new notifications')),
@@ -187,7 +185,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                             backgroundColor: QuickpassColors.darkOnPrimary.withValues(alpha: 0.2),
                             child: Text(
                               (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: QuickpassColors.darkOnPrimary,
@@ -210,7 +208,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'COMMANDER VIEW',
                           style: TextStyle(
                             fontSize: 14,
@@ -223,7 +221,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                         const SizedBox(height: 4),
                         Text(
                           '$_greeting, ${userName.split(' ').first}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color: QuickpassColors.onSurface,
@@ -265,7 +263,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                             textBaseline: TextBaseline.alphabetic,
                             children: [
                               Text(
-                                '${supProv.pendingCount.toString().padLeft(2, '0')}',
+                                supProv.pendingCount.toString().padLeft(2, '0'),
                                 style: const TextStyle(
                                   fontSize: 60,
                                   fontWeight: FontWeight.w800,
@@ -305,14 +303,14 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Review Now',
                                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Icon(Icons.arrow_forward, size: 18, color: QuickpassColors.darkOnPrimary),
                                 ],
                               ),
@@ -379,7 +377,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: Text(
+                          child: const Text(
                             'View All',
                             style: TextStyle(
                               fontSize: 14,
@@ -623,7 +621,7 @@ class _HistoryCard extends StatelessWidget {
                           ),
                           Text(
                             'ID #${leave.employeeId}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -662,7 +660,7 @@ class _HistoryCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             '${leave.startTime} - ${leave.endTime}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10,
                               color: QuickpassColors.outline,
                             ),
@@ -674,7 +672,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 if (isApproved)
                   IconButton(
-                    icon: Icon(Icons.undo, size: 20, color: QuickpassColors.error),
+                    icon: const Icon(Icons.undo, size: 20, color: QuickpassColors.error),
                     onPressed: onRevoke,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 36, minHeight: 36),

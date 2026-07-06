@@ -106,12 +106,12 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                 ),
               ),
               if (_isUsed)
-                Row(
+                const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.check_circle, size: 14, color: QuickpassColors.neutralGray),
-                    const SizedBox(width: 4),
-                    const Text('Scanned', style: TextStyle(fontSize: 11, color: QuickpassColors.neutralGray)),
+                    SizedBox(width: 4),
+                    Text('Scanned', style: TextStyle(fontSize: 11, color: QuickpassColors.neutralGray)),
                   ],
                 ),
             ],
@@ -119,17 +119,17 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
           const SizedBox(height: 20),
 
           if (_isUsed)
-            Column(
+            const Column(
               children: [
                 Icon(Icons.check_circle, size: 48, color: QuickpassColors.neutralGray),
-                const SizedBox(height: 8),
-                const Text('Already Scanned', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 16)),
+                SizedBox(height: 8),
+                Text('Already Scanned', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 16)),
               ],
             )
           else if (_isExpired)
             Column(
               children: [
-                Icon(Icons.timer_off, size: 48, color: QuickpassColors.neutralGray),
+                const Icon(Icons.timer_off, size: 48, color: QuickpassColors.neutralGray),
                 const SizedBox(height: 8),
                 Text('QR Code Expired', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
                 const SizedBox(height: 4),

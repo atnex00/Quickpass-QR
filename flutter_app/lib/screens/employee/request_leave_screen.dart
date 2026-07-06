@@ -15,16 +15,16 @@ class RequestLeaveScreen extends StatefulWidget {
 class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
   final _formKey = GlobalKey<FormState>();
   DateTime _leaveDate = DateTime.now();
-  TimeOfDay _startTime = TimeOfDay(hour: DateTime.now().hour, minute: DateTime.now().minute);
-  TimeOfDay _endTime = TimeOfDay(hour: DateTime.now().hour + 2, minute: DateTime.now().minute);
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
   String _reason = '';
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    if (_startTime.hour > 23) _startTime = const TimeOfDay(hour: 23, minute: 0);
-    if (_endTime.hour > 23) _endTime = const TimeOfDay(hour: 23, minute: 59);
+    _startTime = TimeOfDay.fromDateTime(DateTime.now());
+    _endTime = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 2)));
   }
 
   Future<void> _pickDate() async {
@@ -34,7 +34,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() => _leaveDate = picked);
     }
   }
@@ -42,7 +42,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
     final picked = await showTimePicker(context: context, initialTime: initial);
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         if (isStart) {
           _startTime = picked;
@@ -114,7 +114,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    const Text(
                       'Request Leave',
                       style: TextStyle(
                         fontSize: 20,
@@ -149,7 +149,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           children: [
                             const Text('Employee Information',
                               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
-                            Divider(color: QuickpassColors.outlineVariant),
+                            const Divider(color: QuickpassColors.outlineVariant),
                             _readOnlyField('Employee ID', auth.user?.employeeId ?? ''),
                             _readOnlyField('Full Name', auth.user?.fullName ?? ''),
                             _readOnlyField('Position', auth.user?.position ?? ''),

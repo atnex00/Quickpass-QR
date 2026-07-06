@@ -25,10 +25,10 @@ Widget _buildAdminAppBar(BuildContext context) {
                 color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.admin_panel_settings, size: 22, color: QuickpassColors.darkOnPrimary),
+              child: const Icon(Icons.admin_panel_settings, size: 22, color: QuickpassColors.darkOnPrimary),
             ),
             const SizedBox(width: 8),
-            Text(
+            const Text(
               'Quickpass',
               style: TextStyle(
                 fontSize: 20,
@@ -38,7 +38,7 @@ Widget _buildAdminAppBar(BuildContext context) {
             ),
             const Spacer(),
             IconButton(
-              icon: Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+              icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(behavior: SnackBarBehavior.floating, content: Text('No new notifications')),
@@ -46,7 +46,7 @@ Widget _buildAdminAppBar(BuildContext context) {
               },
             ),
             IconButton(
-              icon: Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
+              icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
               onPressed: () => context.read<AuthProvider>().logout(),
             ),
           ],
@@ -82,7 +82,7 @@ class _AdminPanelState extends State<AdminPanel> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
@@ -92,7 +92,7 @@ class _AdminPanelState extends State<AdminPanel> {
           indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
+          destinations: const [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined, color: QuickpassColors.onSurfaceVariant),
               selectedIcon: Icon(Icons.dashboard, color: QuickpassColors.darkPrimary),
@@ -185,7 +185,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                             backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
                             child: Text(
                               (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
                                 color: QuickpassColors.darkPrimary,
@@ -197,7 +197,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'Admin Control',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -208,7 +208,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                                 const SizedBox(height: 2),
                                 Text(
                                   userName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
                                     color: QuickpassColors.onSurface,
@@ -223,7 +223,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                                     borderRadius: BorderRadius.circular(999),
                                     border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.3)),
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'Admin',
                                     style: TextStyle(
                                       fontSize: 11,
@@ -283,7 +283,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       ),
                       const SizedBox(height: 24),
 
-                      Text(
+                      const Text(
                         'Quick Actions',
                         style: TextStyle(
                           fontSize: 16,
@@ -346,7 +346,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       ),
                       const SizedBox(height: 24),
 
-                      Text(
+                      const Text(
                         'Leave Breakdown',
                         style: TextStyle(
                           fontSize: 16,
@@ -380,7 +380,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                       ),
                       const SizedBox(height: 24),
 
-                      Text(
+                      const Text(
                         'Recent Activity',
                         style: TextStyle(
                           fontSize: 16,
@@ -398,11 +398,11 @@ class _OverviewTabState extends State<_OverviewTab> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: QuickpassColors.outlineVariant),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Icon(Icons.info_outline, color: QuickpassColors.neutralGray),
-                            const SizedBox(width: 12),
-                            const Expanded(
+                            Icon(Icons.info_outline, color: QuickpassColors.neutralGray),
+                            SizedBox(width: 12),
+                            Expanded(
                               child: Text(
                                 'Detailed reporting with charts and export options coming soon.',
                                 style: TextStyle(color: QuickpassColors.neutralGray),
@@ -739,14 +739,14 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: QuickpassColors.outlineVariant),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
                             Icon(Icons.people_outline, size: 64, color: QuickpassColors.outlineVariant),
-                            const SizedBox(height: 12),
-                            const Text('No employees found',
+                            SizedBox(height: 12),
+                            Text('No employees found',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant)),
-                            const SizedBox(height: 4),
-                            const Text('Add an employee to get started',
+                            SizedBox(height: 4),
+                            Text('Add an employee to get started',
                               style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
                           ],
                         ),
@@ -757,10 +757,10 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                         final isActive = emp['is_active'] != false;
                         final badges = <Widget>[];
                         if (emp['is_admin'] == true) {
-                          badges.add(_RoleBadge(label: 'Admin', color: QuickpassColors.error));
+                          badges.add(const _RoleBadge(label: 'Admin', color: QuickpassColors.error));
                         }
                         if (emp['is_supervisor'] == true) {
-                          badges.add(_RoleBadge(label: 'Supervisor', color: QuickpassColors.tertiary));
+                          badges.add(const _RoleBadge(label: 'Supervisor', color: QuickpassColors.tertiary));
                         }
 
                         return Container(
@@ -819,7 +819,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                                             ),
                                             if (!isActive) ...[
                                               const SizedBox(width: 6),
-                                              Text('(inactive)',
+                                              const Text('(inactive)',
                                                 style: TextStyle(fontSize: 11, color: QuickpassColors.error, fontWeight: FontWeight.w500)),
                                             ],
                                           ],
@@ -997,14 +997,14 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: QuickpassColors.outlineVariant),
                         ),
-                        child: Column(
+                        child: const Column(
                           children: [
                             Icon(Icons.business_outlined, size: 64, color: QuickpassColors.outlineVariant),
-                            const SizedBox(height: 12),
-                            const Text('No departments yet',
+                            SizedBox(height: 12),
+                            Text('No departments yet',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant)),
-                            const SizedBox(height: 4),
-                            const Text('Add a department to get started',
+                            SizedBox(height: 4),
+                            Text('Add a department to get started',
                               style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
                           ],
                         ),
@@ -1165,7 +1165,7 @@ class _StatCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 8),
-            Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: QuickpassColors.onSurface)),
+            Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: QuickpassColors.onSurface)),
             Text(label, style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
           ],
         ),

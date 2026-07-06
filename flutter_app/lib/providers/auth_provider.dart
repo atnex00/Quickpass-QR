@@ -9,6 +9,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = true;
   bool _isAuthenticated = false;
   String? _error;
+  bool _isInitializing = false;
 
   Employee? get user => _user;
   bool get isLoading => _isLoading;
@@ -20,6 +21,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isScanner => _user?.isSecurity == true;
 
   Future<void> initialize() async {
+    if (_isInitializing) return;
+    _isInitializing = true;
     _isLoading = true;
     notifyListeners();
 
@@ -35,6 +38,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _isLoading = false;
+    _isInitializing = false;
     notifyListeners();
   }
 
@@ -45,6 +49,9 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final data = await _api.login(employeeId, password);
+      if (data['success'] != true) {
+        throw Exception(data['message'] ?? 'Login failed');
+      }
       _user = Employee.fromJson(data['user']);
       _isAuthenticated = true;
       _isLoading = false;
