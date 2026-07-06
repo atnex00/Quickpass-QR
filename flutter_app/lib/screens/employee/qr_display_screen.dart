@@ -542,10 +542,10 @@ class _BottomTimerState extends State<_BottomTimer> {
     final timeStr = widget.startTime.padLeft(5, '0');
     final hhmm = timeStr.split(':').take(2).join(':');
     final start = DateTime.parse('${dateStr}T$hhmm:00');
-    final windowEnd = start.add(const Duration(minutes: 30));
+    final windowEnd = start.add(const Duration(minutes: 15));
     final now = DateTime.now();
     final remaining = windowEnd.difference(now).inSeconds;
-    final total = const Duration(minutes: 30).inSeconds;
+    final total = const Duration(minutes: 15).inSeconds;
     if (!mounted) return;
     setState(() {
       _remainingSeconds = remaining.clamp(0, total);

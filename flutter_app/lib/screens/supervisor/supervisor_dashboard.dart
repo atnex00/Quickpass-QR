@@ -6,8 +6,11 @@ import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/status_badge.dart';
+import '../employee/dashboard_screen.dart';
 import '../employee/profile_screen.dart';
 import '../employee/request_leave_screen.dart';
+import '../security/scanner_screen.dart';
+import '../security/scan_history_screen.dart';
 import 'pending_requests_screen.dart';
 
 class SupervisorDashboard extends StatefulWidget {
@@ -319,34 +322,45 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     // ── Quick Actions Grid ──
                     Row(
                       children: [
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.calendar_month,
-                            title: 'Team Calendar',
-                            subtitle: 'Manage schedule',
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Team Calendar coming soon')),
-                              );
-                            },
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.qr_code_scanner,
+                              title: 'Scan QR',
+                              subtitle: 'Validate gate passes',
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
+                              },
+                            ),
                           ),
-                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _QuickActionCard(
-                            icon: Icons.analytics,
-                            title: 'Dept. Stats',
-                            subtitle: 'View reports',
+                            icon: Icons.dashboard,
+                            title: 'My Dashboard',
+                            subtitle: 'Employee overview',
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Department Stats coming soon')),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeeDashboard()));
                             },
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
+                        },
+                        icon: const Icon(Icons.history, size: 16),
+                        label: const Text('Scan History'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: QuickpassColors.outline,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
                     // ── Pending Requests ──
                     Row(

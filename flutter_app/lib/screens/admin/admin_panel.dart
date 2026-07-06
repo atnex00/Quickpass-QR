@@ -607,6 +607,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
   }
 
   void _showAddDialog() {
+    final idCtl = TextEditingController();
     final nameCtl = TextEditingController();
     final posCtl = TextEditingController();
     final emailCtl = TextEditingController();
@@ -625,6 +626,14 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextField(
+                  controller: idCtl,
+                  decoration: const InputDecoration(labelText: 'Employee ID', hintText: '000001', helperText: '6-digit ID'),
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                ),
+                const SizedBox(height: 12),
                 TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Full Name', hintText: 'e.g. Juan Dela Cruz')),
                 const SizedBox(height: 12),
                 TextField(controller: posCtl, decoration: const InputDecoration(labelText: 'Position', hintText: 'e.g. Software Engineer')),
@@ -671,9 +680,12 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
             FilledButton(
               onPressed: () async {
+                final empId = idCtl.text.trim();
+                if (empId.length != 6 || int.tryParse(empId) == null) return;
                 if (nameCtl.text.trim().isEmpty) return;
                 try {
                   await _api.createEmployee({
+                    'employee_id': empId,
                     'full_name': nameCtl.text.trim(),
                     'position': posCtl.text.trim(),
                     'email': emailCtl.text.trim(),
@@ -1527,6 +1539,191 @@ class _ReportsTabState extends State<_ReportsTab> {
     return counts;
   }
 
+  double get _maxDeptCount {
+    if (_departmentReport == null || _departmentReport!.isEmpty) return 10;
+    double max = 0;
+    for (final d in _departmentReport!) {
+      for (final key in ['pending', 'approved', 'rejected', 'completed']) {
+        final val = (d[key] as num?)?.toDouble() ?? 0;
+        if (val > max) max = val;
+      }
+    }
+    return max < 10 ? 10 : max;
+  }
+
+  List<BarChartGroupData> _buildBarGroups() {
+    if (_departmentReport == null) return [];
+    return List.generate(_departmentReport!.length, (i) {
+      final d = _departmentReport![i];
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: (d['pending'] as num?)?.toDouble() ?? 0,
+            color: QuickpassColors.warning,
+            width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+          ),
+          BarChartRodData(
+            toY: (d['approved'] as num?)?.toDouble() ?? 0,
+            color: QuickpassColors.primary,
+            width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+          ),
+          BarChartRodData(
+            toY: (d['rejected'] as num?)?.toDouble() ?? 0,
+            color: QuickpassColors.error,
+            width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+          ),
+          BarChartRodData(
+            toY: (d['completed'] as num?)?.toDouble() ?? 0,
+            color: QuickpassColors.success,
+            width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+          ),
+        ],
+        barsSpace: 3,
+      );
+    });
+  }
+
+  Widget _buildDepartmentBarChart() {
+    if (_departmentReport == null || _departmentReport!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Department Overview', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 280,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: _maxDeptCount * 1.3,
+                groupsSpace: 16,
+                barGroups: _buildBarGroups(),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: QuickpassColors.outlineVariant.withValues(alpha: 0.5),
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      getTitlesWidget: (value, meta) {
+                        final idx = value.toInt();
+                        if (idx < 0 || idx >= (_departmentReport?.length ?? 0)) {
+                          return const SizedBox.shrink();
+                        }
+                        final dept = _departmentReport![idx];
+                        final code = dept['department_code'] as String? ?? dept['department_name'] as String? ?? '';
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            code,
+                            style: const TextStyle(fontSize: 10, color: QuickpassColors.outline),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      getTitlesWidget: (value, meta) {
+                        if (value == meta.max) return const SizedBox.shrink();
+                        return Text(
+                          '${value.toInt()}',
+                          style: const TextStyle(fontSize: 10, color: QuickpassColors.outline),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(show: false),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final dept = _departmentReport![group.x.toInt()];
+                      final deptName = dept['department_name'] as String? ?? '';
+                      final statusLabels = ['Pending', 'Approved', 'Rejected', 'Completed'];
+                      final statusColors = [
+                        QuickpassColors.warning,
+                        QuickpassColors.primary,
+                        QuickpassColors.error,
+                        QuickpassColors.success,
+                      ];
+                      return BarTooltipItem(
+                        '$deptName\n',
+                        const TextStyle(color: QuickpassColors.onSurface, fontWeight: FontWeight.w600, fontSize: 12),
+                        children: [
+                          TextSpan(
+                            text: '${statusLabels[rodIndex]}: ',
+                            style: TextStyle(color: statusColors[rodIndex], fontWeight: FontWeight.w600, fontSize: 12),
+                          ),
+                          TextSpan(
+                            text: '${rod.toY.toInt()}',
+                            style: const TextStyle(color: QuickpassColors.onSurface, fontSize: 12),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildBarLegend(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBarLegend() {
+    final entries = [
+      ('Pending', QuickpassColors.warning),
+      ('Approved', QuickpassColors.primary),
+      ('Rejected', QuickpassColors.error),
+      ('Completed', QuickpassColors.success),
+    ];
+    return Wrap(
+      spacing: 16,
+      runSpacing: 4,
+      children: entries.map((e) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: e.$2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(e.$1, style: const TextStyle(fontSize: 11, color: QuickpassColors.outline)),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1614,6 +1811,9 @@ class _ReportsTabState extends State<_ReportsTab> {
                         ],
                       ),
                       const SizedBox(height: 16),
+
+                      // ── Department Bar Chart ──
+                      _buildDepartmentBarChart(),
 
                       // ── Leave List ──
                       const Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),

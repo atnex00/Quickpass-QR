@@ -25,7 +25,14 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 
   Future<void> _validate() async {
     final scanProv = context.read<ScanProvider>();
+    scanProv.clearResult();
     await scanProv.validateScan(widget.qrData);
+  }
+
+  @override
+  void dispose() {
+    context.read<ScanProvider>().clearResult();
+    super.dispose();
   }
 
   @override
