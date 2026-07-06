@@ -109,7 +109,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                             color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.qr_code_scanner, size: 22, color: QuickpassColors.darkOnPrimary),
+                          child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
                         ),
                         const SizedBox(width: 8),
                         const Text(
@@ -299,9 +299,9 @@ class _DashboardTabState extends State<_DashboardTab> {
                                     padding: const EdgeInsets.symmetric(vertical: 8),
                                     child: Column(
                                       children: [
-                                        _infoRow('Validity', '${leaveProv.activeLeave!.leaveDate.toIso8601String().split('T').first} \u2022 ${leaveProv.activeLeave!.startTime} - ${leaveProv.activeLeave!.endTime}'),
+                                        _InfoRow(label: 'Validity', value: '${leaveProv.activeLeave!.leaveDate.toIso8601String().split('T').first} \u2022 ${leaveProv.activeLeave!.startTime} - ${leaveProv.activeLeave!.endTime}'),
                                         const SizedBox(height: 8),
-                                        _infoRow('Gate Status', 'Authorized Out'),
+                                        const _InfoRow(label: 'Gate Status', value: 'Authorized Out'),
                                       ],
                                     ),
                                   ),
@@ -309,7 +309,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                                   SizedBox(
                                     width: double.infinity,
                                     height: 48,
-                                    child: ElevatedButton(
+                                    child: FilledButton(
                                       onPressed: () {
                                         if (leaveProv.activeLeave!.hasQrCodes) {
                                           Navigator.push(
@@ -320,15 +320,6 @@ class _DashboardTabState extends State<_DashboardTab> {
                                           );
                                         }
                                       },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: QuickpassColors.darkPrimary,
-                                        foregroundColor: QuickpassColors.darkOnPrimary,
-                                        elevation: 0,
-                                        shadowColor: Colors.transparent,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
                                       child: const Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -453,29 +444,21 @@ class _DashboardTabState extends State<_DashboardTab> {
   }
 }
 
-Widget _infoRow(String label, String value) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 14,
-          color: QuickpassColors.onSurfaceVariant,
-          height: 1.43,
-        ),
-      ),
-      Text(
-        value,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: QuickpassColors.onSurface,
-          height: 1.43,
-        ),
-      ),
-    ],
-  );
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _InfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, color: QuickpassColors.onSurfaceVariant, height: 1.43)),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.43)),
+      ],
+    );
+  }
 }
 
 class _StatCard extends StatelessWidget {

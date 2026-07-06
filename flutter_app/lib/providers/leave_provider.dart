@@ -9,15 +9,32 @@ class LeaveProvider extends ChangeNotifier {
   LeaveRequest? _activeLeave;
   bool _isLoading = false;
   String? _error;
+  int _pendingCount = 0;
+  int _approvedCount = 0;
+  int _completedCount = 0;
 
   List<LeaveRequest> get history => _history;
   LeaveRequest? get activeLeave => _activeLeave;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get pendingCount => _pendingCount;
+  int get approvedCount => _approvedCount;
+  int get completedCount => _completedCount;
 
-  int get pendingCount => _history.where((l) => l.status == LeaveStatus.pending).length;
-  int get approvedCount => _history.where((l) => l.status == LeaveStatus.approved).length;
-  int get completedCount => _history.where((l) => l.status == LeaveStatus.completed).length;
+  void _recomputeCounts() {
+    _pendingCount = 0;
+    _approvedCount = 0;
+    _completedCount = 0;
+    for (final l in _history) {
+      if (l.status == LeaveStatus.pending) {
+        _pendingCount++;
+      } else if (l.status == LeaveStatus.approved) {
+        _approvedCount++;
+      } else if (l.status == LeaveStatus.completed) {
+        _completedCount++;
+      }
+    }
+  }
 
   Future<void> loadHistory({String? status}) async {
     _isLoading = true;
@@ -26,6 +43,7 @@ class LeaveProvider extends ChangeNotifier {
     try {
       final data = await _api.getLeaveHistory(status: status);
       _history = (data['data'] as List).map((j) => LeaveRequest.fromJson(j)).toList();
+      _recomputeCounts();
       _error = null;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -63,6 +81,7 @@ class LeaveProvider extends ChangeNotifier {
         reason: reason,
       );
       _history = [leave, ..._history];
+      _recomputeCounts();
       _isLoading = false;
       notifyListeners();
       return leave;
@@ -71,6 +90,17 @@ class LeaveProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<void> deleteLeave(String leaveId) async {
+    try {
+      await _api.deleteLeave(leaveId);
+      _history.removeWhere((l) => l.leaveId == leaveId);
+      _recomputeCounts();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
     }
   }
 

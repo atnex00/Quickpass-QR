@@ -150,10 +150,10 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                             const Text('Employee Information',
                               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
                             const Divider(color: QuickpassColors.outlineVariant),
-                            _readOnlyField('Employee ID', auth.user?.employeeId ?? ''),
-                            _readOnlyField('Full Name', auth.user?.fullName ?? ''),
-                            _readOnlyField('Position', auth.user?.position ?? ''),
-                            _readOnlyField('Department', auth.user?.departmentName ?? ''),
+                            _ReadOnlyField(label: 'Employee ID', value: auth.user?.employeeId ?? ''),
+                            _ReadOnlyField(label: 'Full Name', value: auth.user?.fullName ?? ''),
+                            _ReadOnlyField(label: 'Position', value: auth.user?.position ?? ''),
+                            _ReadOnlyField(label: 'Department', value: auth.user?.departmentName ?? ''),
                           ],
                         ),
                       ),
@@ -273,7 +273,24 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
     );
   }
 
-  Widget _readOnlyField(String label, String value) {
+  String _calculateDuration() {
+    final startMin = _startTime.hour * 60 + _startTime.minute;
+    final endMin = _endTime.hour * 60 + _endTime.minute;
+    if (endMin <= startMin) return 'Invalid';
+    final diff = endMin - startMin;
+    final h = diff ~/ 60;
+    final m = diff % 60;
+    return h > 0 ? '${h}h ${m}m' : '${m}m';
+  }
+}
+
+class _ReadOnlyField extends StatelessWidget {
+  final String label;
+  final String value;
+  const _ReadOnlyField({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -283,16 +300,6 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
         ],
       ),
     );
-  }
-
-  String _calculateDuration() {
-    final startMin = _startTime.hour * 60 + _startTime.minute;
-    final endMin = _endTime.hour * 60 + _endTime.minute;
-    if (endMin <= startMin) return 'Invalid';
-    final diff = endMin - startMin;
-    final h = diff ~/ 60;
-    final m = diff % 60;
-    return h > 0 ? '${h}h ${m}m' : '${m}m';
   }
 }
 

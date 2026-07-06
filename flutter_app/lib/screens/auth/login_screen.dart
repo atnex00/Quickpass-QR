@@ -125,21 +125,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: QuickpassColors.outlineVariant),
                       ),
-                      child: const Icon(
-                        Icons.qr_code_scanner_rounded,
-                        size: 48,
-                        color: QuickpassColors.primary,
+                      child: Image.asset(
+                        'assets/icon/logo.png',
+                        width: 48,
+                        height: 48,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Quickpass',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: QuickpassColors.primary,
-                        letterSpacing: -0.01,
-                        height: 1.33,
+                      const Text(
+                        'Quickpass',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: QuickpassColors.darkPrimary,
+                          letterSpacing: -0.01,
+                          height: 1.33,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -319,19 +319,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             return SizedBox(
                               width: double.infinity,
                               height: 56,
-                              child: ElevatedButton(
-                                onPressed: auth.isLoading ? null : _login,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: QuickpassColors.darkPrimary,
-                                  foregroundColor: QuickpassColors.darkOnPrimary,
-                                  elevation: 0,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                                ),
-                                child: auth.isLoading
+                              child: FilledButton(
+                                onPressed: auth.loginLoading ? null : _login,
+                                child: auth.loginLoading
                                     ? const SizedBox(
                                         width: 24,
                                         height: 24,

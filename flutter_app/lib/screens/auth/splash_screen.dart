@@ -14,13 +14,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    if (mounted) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().initialize();
-    }
+    });
   }
 
   @override

@@ -4,63 +4,30 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 
-class QrDisplayScreen extends StatefulWidget {
+class QrDisplayScreen extends StatelessWidget {
   final LeaveRequest leave;
 
   const QrDisplayScreen({super.key, required this.leave});
-
-  @override
-  State<QrDisplayScreen> createState() => _QrDisplayScreenState();
-}
-
-class _QrDisplayScreenState extends State<QrDisplayScreen> {
-  late Timer _timer;
-  int _remainingSeconds = 0;
-  int _totalSeconds = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateTimer();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateTimer());
-  }
-
-  void _updateTimer() {
-    final dateStr = widget.leave.leaveDate.toIso8601String().split('T').first;
-    final start = DateTime.parse('${dateStr}T${widget.leave.startTime.padLeft(5, '0')}:00');
-    final windowEnd = start.add(const Duration(minutes: 30));
-    final now = DateTime.now();
-    final remaining = windowEnd.difference(now).inSeconds;
-    final total = const Duration(minutes: 30).inSeconds;
-
-    setState(() {
-      _remainingSeconds = remaining.clamp(0, total);
-      _totalSeconds = total;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  String _formatTime(int secs) {
-    final h = secs ~/ 3600;
-    final m = (secs % 3600) ~/ 60;
-    final s = secs % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
 
   String _qrToken(String? qrData) {
     if (qrData == null) return '---';
     return qrData.length > 8 ? qrData.substring(qrData.length - 8).toUpperCase() : qrData.toUpperCase();
   }
 
+  Widget _guidelineItem(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('\u2022', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: QuickpassColors.primary)),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: QuickpassColors.onSurfaceVariant))),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dateStr = widget.leave.leaveDate.toIso8601String().split('T').first;
-    final progress = _totalSeconds > 0 ? _remainingSeconds / _totalSeconds : 0.0;
+    final dateStr = leave.leaveDate.toIso8601String().split('T').first;
 
     return Scaffold(
       body: Stack(
@@ -179,7 +146,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          widget.leave.reason,
+                                          leave.reason,
                                           style: const TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.w600,
@@ -190,7 +157,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                       ],
                                     ),
                                     Text(
-                                      'ID: #${widget.leave.leaveId}',
+                                      'ID: #${leave.leaveId}',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -215,7 +182,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                     const Icon(Icons.schedule, size: 20, color: QuickpassColors.primary),
                                     const SizedBox(width: 8),
                                     Text(
-                                      '${widget.leave.startTime} - ${widget.leave.endTime}',
+                                      '${leave.startTime} - ${leave.endTime}',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: QuickpassColors.onSurfaceVariant,
@@ -232,7 +199,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                     const SizedBox(height: 16),
 
                     // ── QR Codes Grid ──
-                    if (!widget.leave.hasQrCodes)
+                    if (!leave.hasQrCodes)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(32),
@@ -257,34 +224,34 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                       Column(
                         children: [
                           // ── OUT PASS ──
-                          if (widget.leave.outQrCode != null)
+                          if (leave.outQrCode != null)
                             _QrPassCard(
                               label: 'Out Pass',
                               icon: Icons.logout,
                               headerColor: QuickpassColors.darkPrimary,
                               headerTextColor: QuickpassColors.darkOnPrimary,
-                              qrData: widget.leave.outQrCode!,
+                              qrData: leave.outQrCode!,
                               qrColor: QuickpassColors.primary,
                               scanLineColor: QuickpassColors.secondary.withValues(alpha: 0.4),
                               title: 'Exit Authorized',
                               subtitle: 'Scan at Main Gate (Exit)',
-                              token: _qrToken(widget.leave.outQrCode),
+                              token: _qrToken(leave.outQrCode),
                               pulseColor: QuickpassColors.primary,
                             ),
                           const SizedBox(height: 16),
                           // ── IN PASS ──
-                          if (widget.leave.inQrCode != null)
+                          if (leave.inQrCode != null)
                             _QrPassCard(
                               label: 'In Pass',
                               icon: Icons.login,
                               headerColor: QuickpassColors.success.withValues(alpha: 0.1),
                               headerTextColor: QuickpassColors.success,
-                              qrData: widget.leave.inQrCode!,
+                              qrData: leave.inQrCode!,
                               qrColor: QuickpassColors.success,
                               scanLineColor: QuickpassColors.success.withValues(alpha: 0.4),
                               title: 'Entry Authorized',
                               subtitle: 'Scan at Main Gate (Entry)',
-                              token: _qrToken(widget.leave.inQrCode),
+                              token: _qrToken(leave.inQrCode),
                               pulseColor: QuickpassColors.success,
                             ),
                         ],
@@ -337,93 +304,10 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
-              height: 88,
-              decoration: const BoxDecoration(
-                color: QuickpassColors.surface,
-                border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
-              ),
-              child: Stack(
-                children: [
-                  // Progress bar
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: ClipRRect(
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: QuickpassColors.surfaceContainer,
-                        color: QuickpassColors.error,
-                        minHeight: 4,
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'VALID FOR',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1,
-                            color: QuickpassColors.outline,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.timer, size: 18, color: QuickpassColors.error),
-                            const SizedBox(width: 6),
-                            Text(
-                              _formatTime(_remainingSeconds),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'monospace',
-                                color: QuickpassColors.error,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: _BottomTimer(leaveDate: leave.leaveDate, startTime: leave.startTime, endTime: leave.endTime),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _guidelineItem(String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '\u2022',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: QuickpassColors.primary,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: QuickpassColors.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -510,18 +394,14 @@ class _QrPassCard extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      QrImageView(
-                        data: qrData,
-                        version: QrVersions.auto,
-                        size: 208,
-                        backgroundColor: Colors.transparent,
-                        eyeStyle: QrEyeStyle(
-                          eyeShape: QrEyeShape.circle,
-                          color: qrColor,
-                        ),
-                        dataModuleStyle: QrDataModuleStyle(
-                          dataModuleShape: QrDataModuleShape.circle,
-                          color: qrColor,
+                      RepaintBoundary(
+                        child: QrImageView(
+                          data: qrData,
+                          version: QrVersions.auto,
+                          size: 208,
+                          backgroundColor: Colors.transparent,
+                          eyeStyle: QrEyeStyle(eyeShape: QrEyeShape.circle, color: qrColor),
+                          dataModuleStyle: QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle, color: qrColor),
                         ),
                       ),
                       // Scanning line animation
@@ -590,6 +470,95 @@ class _QrPassCard extends StatelessWidget {
   }
 }
 
+class _BottomTimer extends StatefulWidget {
+  final DateTime leaveDate;
+  final String startTime;
+  final String endTime;
+  const _BottomTimer({required this.leaveDate, required this.startTime, required this.endTime});
+
+  @override
+  State<_BottomTimer> createState() => _BottomTimerState();
+}
+
+class _BottomTimerState extends State<_BottomTimer> {
+  late Timer _timer;
+  int _remainingSeconds = 0;
+  int _totalSeconds = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  void _tick() {
+    final dateStr = widget.leaveDate.toIso8601String().split('T').first;
+    final start = DateTime.parse('${dateStr}T${widget.startTime.padLeft(5, '0')}:00');
+    final windowEnd = start.add(const Duration(minutes: 30));
+    final now = DateTime.now();
+    final remaining = windowEnd.difference(now).inSeconds;
+    final total = const Duration(minutes: 30).inSeconds;
+    if (!mounted) return;
+    setState(() {
+      _remainingSeconds = remaining.clamp(0, total);
+      _totalSeconds = total;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _fmt(int secs) {
+    final h = secs ~/ 3600;
+    final m = (secs % 3600) ~/ 60;
+    final s = secs % 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = _totalSeconds > 0 ? _remainingSeconds / _totalSeconds : 0.0;
+    return Container(
+      height: 88,
+      decoration: const BoxDecoration(
+        color: QuickpassColors.surface,
+        border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
+      ),
+      child: Stack(
+        children: [
+          Positioned(top: 0, left: 0, right: 0, child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: QuickpassColors.surfaceContainer,
+            color: QuickpassColors.error,
+            minHeight: 4,
+          )),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('VALID FOR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 1, color: QuickpassColors.outline)),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.timer, size: 18, color: QuickpassColors.error),
+                    const SizedBox(width: 6),
+                    Text(_fmt(_remainingSeconds), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, fontFamily: 'monospace', color: QuickpassColors.error)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ScanLine extends StatefulWidget {
   final Color color;
   const _ScanLine({required this.color});
@@ -622,34 +591,27 @@ class _ScanLineState extends State<_ScanLine> with SingleTickerProviderStateMixi
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Positioned(
-          top: _animation.value * (240 - 2),
-          left: 0,
-          right: 0,
-          child: Opacity(
-            opacity: _animation.value < 0.1
-                ? _animation.value * 10
-                : _animation.value > 0.9
-                    ? (1.0 - _animation.value) * 10
-                    : 1.0,
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Positioned(
+            top: _animation.value * (240 - 2),
+            left: 0,
+            right: 0,
             child: Container(
               height: 2,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    widget.color.withValues(alpha: 0),
-                    widget.color,
-                    widget.color.withValues(alpha: 0),
-                  ],
-                ),
+                gradient: LinearGradient(colors: [
+                  widget.color.withValues(alpha: 0),
+                  widget.color,
+                  widget.color.withValues(alpha: 0),
+                ]),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -7,12 +7,14 @@ class AuthProvider extends ChangeNotifier {
 
   Employee? _user;
   bool _isLoading = true;
+  bool _loginLoading = false;
   bool _isAuthenticated = false;
   String? _error;
   bool _isInitializing = false;
 
   Employee? get user => _user;
   bool get isLoading => _isLoading;
+  bool get loginLoading => _loginLoading;
   bool get isAuthenticated => _isAuthenticated;
   String? get error => _error;
   bool get isSupervisor => _user?.isSupervisor ?? false;
@@ -43,7 +45,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> login(String employeeId, String password) async {
-    _isLoading = true;
+    _loginLoading = true;
     _error = null;
     notifyListeners();
 
@@ -54,24 +56,24 @@ class AuthProvider extends ChangeNotifier {
       }
       _user = Employee.fromJson(data['user']);
       _isAuthenticated = true;
-      _isLoading = false;
+      _loginLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
       _isAuthenticated = false;
-      _isLoading = false;
+      _loginLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<void> logout() async {
-    await _api.logout();
-    _user = null;
     _isAuthenticated = false;
+    _user = null;
     _error = null;
     notifyListeners();
+    _api.logout();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {

@@ -4,6 +4,8 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
+import '../../utils/date_formatter.dart';
+import '../../widgets/status_badge.dart';
 import '../employee/profile_screen.dart';
 import 'pending_requests_screen.dart';
 
@@ -154,7 +156,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                             color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
+                          child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
                         ),
                         const SizedBox(width: 12),
                         const Text(
@@ -220,7 +222,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '$_greeting, ${userName.split(' ').first}',
+                          '${_greeting()}, ${userName.split(' ').first}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -289,20 +291,11 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                           SizedBox(
                             width: double.infinity,
                             height: 48,
-                            child: ElevatedButton(
+                            child: FilledButton(
                               onPressed: () {
                                 final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
                                 state?.setState(() => state._currentIndex = 1);
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: QuickpassColors.darkPrimary,
-                                foregroundColor: QuickpassColors.darkOnPrimary,
-                                elevation: 0,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -353,12 +346,12 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Recent History ──
+                    // ── Pending Requests ──
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Recent History',
+                          'Pending Requests',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -368,9 +361,8 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                         ),
                         TextButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Viewing all history...')),
-                            );
+                            final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
+                            state?.setState(() => state._currentIndex = 1);
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -393,13 +385,13 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     ),
                     const SizedBox(height: 8),
 
-                    // ── History Items ──
+                    // ── Pending Items ──
                     if (supProv.isLoading)
                       const Center(child: Padding(
                         padding: EdgeInsets.all(24),
                         child: CircularProgressIndicator(),
                       ))
-                    else if (supProv.approvedLeaves.isEmpty)
+                    else if (supProv.pendingRequests.isEmpty)
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(24),
@@ -410,16 +402,13 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                         ),
                         child: const Center(
                           child: Text(
-                            'No approved leaves yet',
+                            'No pending requests',
                             style: TextStyle(color: QuickpassColors.neutralGray),
                           ),
                         ),
                       )
                     else
-                      ...supProv.approvedLeaves.take(10).map((leave) => _HistoryCard(
-                        leave: leave,
-                        onRevoke: () => _revokeApproval(context, leave),
-                      )),
+                      ...supProv.pendingRequests.take(5).map((leave) => _PendingCard(leave: leave)),
                   ]),
                 ),
               ),
@@ -448,39 +437,6 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
     );
   }
 
-  Future<void> _revokeApproval(BuildContext context, LeaveRequest leave) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Revoke Approval'),
-        content: Text('Revoke approval for ${leave.employeeName}\'s leave?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
-            child: const Text('Revoke'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && context.mounted) {
-      final supProv = context.read<SupervisorProvider>();
-      final result = await supProv.revokeApproval(leave.leaveId);
-      if (result != null && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Approval revoked for ${leave.employeeName}')),
-        );
-        supProv.loadPendingRequests();
-      } else if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(supProv.error ?? 'Failed to revoke')),
-        );
-      }
-    }
-  }
 }
 
 class _QuickActionCard extends StatelessWidget {
@@ -547,18 +503,13 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-class _HistoryCard extends StatelessWidget {
+class _PendingCard extends StatelessWidget {
   final LeaveRequest leave;
-  final VoidCallback onRevoke;
 
-  const _HistoryCard({required this.leave, required this.onRevoke});
+  const _PendingCard({required this.leave});
 
   @override
   Widget build(BuildContext context) {
-    final isApproved = leave.status == LeaveStatus.approved;
-    final statusColor = isApproved ? QuickpassColors.success : QuickpassColors.error;
-    final statusLabel = isApproved ? 'Approved' : 'Revoked';
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -568,16 +519,15 @@ class _HistoryCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Status strip
           Positioned(
             left: 0,
             top: 0,
             bottom: 0,
             child: Container(
               width: 4,
-              decoration: BoxDecoration(
-                color: statusColor,
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                color: QuickpassColors.warning,
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
@@ -586,108 +536,189 @@ class _HistoryCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: QuickpassColors.surfaceVariant,
-                  child: Text(
-                    leave.employeeName.isNotEmpty ? leave.employeeName[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: QuickpassColors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              leave.employeeName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: QuickpassColors.onSurface,
-                                height: 1.5,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Text(
-                            'ID #${leave.employeeId}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                              color: QuickpassColors.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '${leave.reason.isNotEmpty ? leave.reason : 'Leave'} \u2022 ${leave.leaveDate.toIso8601String().split('T').first}',
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
+                      child: Text(
+                        leave.employeeName.isNotEmpty ? leave.employeeName[0].toUpperCase() : '?',
                         style: const TextStyle(
-                          fontSize: 14,
-                          color: QuickpassColors.outline,
-                          height: 1.43,
+                          color: QuickpassColors.darkPrimary,
+                          fontWeight: FontWeight.w700,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              statusLabel.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: statusColor,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${leave.startTime} - ${leave.endTime}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: QuickpassColors.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (isApproved)
-                  IconButton(
-                    icon: const Icon(Icons.undo, size: 20, color: QuickpassColors.error),
-                    onPressed: onRevoke,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                    style: IconButton.styleFrom(
-                      backgroundColor: QuickpassColors.error.withValues(alpha: 0.08),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            leave.employeeName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: QuickpassColors.onSurface,
+                            ),
+                          ),
+                          if (leave.employeePosition != null)
+                            Text(
+                              leave.employeePosition!,
+                              style: const TextStyle(
+                                color: QuickpassColors.neutralGray,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    StatusBadge(status: leave.status),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                    const SizedBox(width: 4),
+                    Text(
+                      DateFormatter.formatDate(leave.leaveDate),
+                      style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                    ),
+                    const SizedBox(width: 16),
+                    const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${leave.startTime} - ${leave.endTime}',
+                      style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  leave.reason,
+                  style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _showRejectDialog(context),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: const Text('Reject'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: QuickpassColors.error,
+                        side: const BorderSide(color: QuickpassColors.error),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: () => _approve(context),
+                      icon: const Icon(Icons.check, size: 18),
+                      label: const Text('Approve'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: QuickpassColors.darkPrimary,
+                        foregroundColor: QuickpassColors.darkOnPrimary,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _approve(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Approve Leave?'),
+        content: Text(
+          '${leave.employeeName} \u2014 ${leave.leaveDate.toIso8601String().split('T').first} (${leave.startTime} - ${leave.endTime})',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Approve'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && context.mounted) {
+      final supProv = context.read<SupervisorProvider>();
+      await supProv.approveLeave(leave.leaveId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Approved leave for ${leave.employeeName}'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showRejectDialog(BuildContext context) async {
+    final ctrl = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Reject Leave'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Reason for rejecting ${leave.employeeName}?'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              decoration: const InputDecoration(hintText: 'Enter reason...', labelText: 'Rejection reason'),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (ctrl.text.trim().isEmpty) return;
+              Navigator.pop(ctx, ctrl.text.trim());
+            },
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+
+    if (reason != null && context.mounted) {
+      final supProv = context.read<SupervisorProvider>();
+      await supProv.rejectLeave(leave.leaveId, reason);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Rejected leave for ${leave.employeeName}'),
+          ),
+        );
+      }
+    }
+
+    ctrl.dispose();
   }
 }

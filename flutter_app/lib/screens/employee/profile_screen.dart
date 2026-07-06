@@ -168,8 +168,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const Text('Account Information',
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
                       const Divider(color: QuickpassColors.outlineVariant),
-                      _readOnlyRow('Employee ID', user?.employeeId ?? ''),
-                      _readOnlyRow('Department', user?.departmentName ?? 'N/A'),
+                      _ReadOnlyRow(label: 'Employee ID', value: user?.employeeId ?? ''),
+                      _ReadOnlyRow(label: 'Department', value: user?.departmentName ?? 'N/A'),
                     ],
                   ),
                 ),
@@ -237,8 +237,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+}
 
-  Widget _readOnlyRow(String label, String value) {
+class _ReadOnlyRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _ReadOnlyRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

@@ -3,7 +3,7 @@ package com.quickpass.app
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
     override fun onStart() {
         super.onStart()
         window.setFlags(

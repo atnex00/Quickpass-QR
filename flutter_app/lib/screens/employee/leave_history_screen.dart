@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
 import 'qr_display_screen.dart';
@@ -33,6 +34,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final leaveProv = context.watch<LeaveProvider>();
+    final isAdmin = context.read<AuthProvider>().isAdmin;
 
     return Scaffold(
       body: CustomScrollView(
@@ -126,76 +128,85 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
               sliver: RefreshIndicator(
                 onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
                 child: SliverList(
-                  delegate: SliverChildListDelegate([
-                    ...leaveProv.history.map((leave) => _HistoryCard(
-                      leave: leave,
-                      onTap: () {
-                        if (leave.hasQrCodes) {
-                          Navigator.push(context, MaterialPageRoute(
-                            builder: (_) => QrDisplayScreen(leave: leave),
-                          ));
-                        }
-                      },
-                    )),
-                    const SizedBox(height: 16),
-
-                    // ── Promotion Banner ──
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: QuickpassColors.primaryContainer,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: QuickpassColors.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Planning ahead?',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: QuickpassColors.onPrimaryContainer,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Secure your holiday pass now to ensure quick approval from the command center.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: QuickpassColors.onPrimaryContainer,
-                              height: 1.43,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const RequestLeaveScreen()),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: QuickpassColors.darkPrimary,
-                              foregroundColor: QuickpassColors.darkOnPrimary,
-                              elevation: 0,
-                              shadowColor: Colors.transparent,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index < leaveProv.history.length) {
+                        final leave = leaveProv.history[index];
+                        return _HistoryCard(
+                          leave: leave,
+                          isAdmin: isAdmin,
+                          onTap: () {
+                            if (leave.hasQrCodes) {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (_) => QrDisplayScreen(leave: leave),
+                              ));
+                            }
+                          },
+                          onDelete: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Delete Leave'),
+                                content: Text('Delete leave #${leave.leaveId}? This cannot be undone.'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                  FilledButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
                               ),
-                            ),
-                            child: const Text(
-                              'New Request',
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
+                            );
+                            if (confirmed == true && context.mounted) {
+                              try {
+                                await context.read<LeaveProvider>().deleteLeave(leave.leaveId);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Leave deleted')),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(behavior: SnackBarBehavior.floating, content: Text('$e')),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                        );
+                      }
+                      final offset = index - leaveProv.history.length;
+                      if (offset == 0) return const SizedBox(height: 16);
+                      if (offset == 1) {
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: QuickpassColors.primaryContainer,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: QuickpassColors.primary.withValues(alpha: 0.2)),
                           ),
-                        ],
-                      ),
-                    ),
-                  ]),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Planning ahead?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onPrimaryContainer, height: 1.5)),
+                              const SizedBox(height: 8),
+                              const Text('Secure your holiday pass now to ensure quick approval from the command center.', style: TextStyle(fontSize: 14, color: QuickpassColors.onPrimaryContainer, height: 1.43)),
+                              const SizedBox(height: 16),
+                              FilledButton(
+                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RequestLeaveScreen())),
+                                child: const Text('New Request', style: TextStyle(fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                    childCount: leaveProv.history.length + 2,
+                  ),
                 ),
               ),
             ),
@@ -218,25 +229,19 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
     return Container(
       height: 56,
       color: QuickpassColors.surface.withValues(alpha: 0.95),
-      child: Row(
+      child: ListView(
+        padding: const EdgeInsets.only(left: 16),
+        scrollDirection: Axis.horizontal,
         children: [
-          const SizedBox(width: 16),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _FilterChip(label: 'All', selected: currentFilter == null, onTap: () => onFilterChanged(null)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Pending', selected: currentFilter == 'pending', onTap: () => onFilterChanged('pending')),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Approved', selected: currentFilter == 'approved', onTap: () => onFilterChanged('approved')),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Rejected', selected: currentFilter == 'rejected', onTap: () => onFilterChanged('rejected')),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Completed', selected: currentFilter == 'completed', onTap: () => onFilterChanged('completed')),
-              ],
-            ),
-          ),
+          Center(child: _FilterChip(label: 'All', selected: currentFilter == null, onTap: () => onFilterChanged(null))),
+          const SizedBox(width: 8),
+          Center(child: _FilterChip(label: 'Pending', selected: currentFilter == 'pending', onTap: () => onFilterChanged('pending'))),
+          const SizedBox(width: 8),
+          Center(child: _FilterChip(label: 'Approved', selected: currentFilter == 'approved', onTap: () => onFilterChanged('approved'))),
+          const SizedBox(width: 8),
+          Center(child: _FilterChip(label: 'Rejected', selected: currentFilter == 'rejected', onTap: () => onFilterChanged('rejected'))),
+          const SizedBox(width: 8),
+          Center(child: _FilterChip(label: 'Completed', selected: currentFilter == 'completed', onTap: () => onFilterChanged('completed'))),
         ],
       ),
     );
@@ -266,9 +271,9 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? QuickpassColors.primary : Colors.white,
+          color: selected ? QuickpassColors.primary : QuickpassColors.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: selected ? QuickpassColors.primary : QuickpassColors.outline,
@@ -293,8 +298,10 @@ class _FilterChip extends StatelessWidget {
 class _HistoryCard extends StatelessWidget {
   final LeaveRequest leave;
   final VoidCallback onTap;
+  final bool isAdmin;
+  final VoidCallback? onDelete;
 
-  const _HistoryCard({required this.leave, required this.onTap});
+  const _HistoryCard({required this.leave, required this.onTap, this.isAdmin = false, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +310,7 @@ class _HistoryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: QuickpassColors.outlineVariant),
       ),
@@ -416,6 +423,19 @@ class _HistoryCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (isAdmin)
+                        GestureDetector(
+                          onTap: onDelete,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: QuickpassColors.error.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Icon(Icons.delete_outline, size: 20, color: QuickpassColors.error),
+                          ),
+                        ),
+                      const SizedBox(width: 4),
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(

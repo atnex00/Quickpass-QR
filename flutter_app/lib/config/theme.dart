@@ -73,10 +73,10 @@ class QuickpassTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
-        primary: QuickpassColors.primary,
-        onPrimary: QuickpassColors.onPrimary,
-        primaryContainer: QuickpassColors.primary,
-        onPrimaryContainer: QuickpassColors.onPrimaryContainer,
+        primary: QuickpassColors.darkPrimary,
+        onPrimary: QuickpassColors.darkOnPrimary,
+        primaryContainer: QuickpassColors.darkPrimary,
+        onPrimaryContainer: QuickpassColors.darkOnPrimaryContainer,
         secondary: QuickpassColors.secondary,
         onSecondary: QuickpassColors.onSecondary,
         secondaryContainer: QuickpassColors.secondary,
@@ -97,14 +97,14 @@ class QuickpassTheme {
       textTheme: textTheme,
 
       appBarTheme: AppBarTheme(
-        backgroundColor: QuickpassColors.primary,
-        foregroundColor: QuickpassColors.onPrimary,
+        backgroundColor: QuickpassColors.darkPrimary,
+        foregroundColor: QuickpassColors.darkOnPrimary,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: QuickpassColors.onPrimary,
+          color: QuickpassColors.darkOnPrimary,
         ),
       ),
 
@@ -122,10 +122,10 @@ class QuickpassTheme {
 
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: QuickpassColors.primary,
-          foregroundColor: QuickpassColors.onPrimary,
+          backgroundColor: QuickpassColors.darkPrimary,
+          foregroundColor: QuickpassColors.darkOnPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: GoogleFonts.inter(
@@ -137,18 +137,18 @@ class QuickpassTheme {
 
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: QuickpassColors.primary,
-          side: const BorderSide(color: QuickpassColors.outline),
+          foregroundColor: QuickpassColors.darkPrimary,
+          side: const BorderSide(color: QuickpassColors.darkPrimary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: QuickpassColors.primary,
+          foregroundColor: QuickpassColors.darkPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
@@ -166,7 +166,7 @@ class QuickpassTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: QuickpassColors.primary, width: 2),
+          borderSide: const BorderSide(color: QuickpassColors.darkPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -183,16 +183,16 @@ class QuickpassTheme {
 
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: QuickpassColors.surface,
-        indicatorColor: QuickpassColors.primary.withValues(alpha: 0.12),
+        indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.12),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: QuickpassColors.primary);
+            return const IconThemeData(color: QuickpassColors.darkPrimary);
           }
           return const IconThemeData(color: QuickpassColors.onSurfaceVariant);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.primary);
+            return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.darkPrimary);
           }
           return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant);
         }),
@@ -202,7 +202,7 @@ class QuickpassTheme {
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: QuickpassColors.surface,
-        selectedItemColor: QuickpassColors.primary,
+        selectedItemColor: QuickpassColors.darkPrimary,
         unselectedItemColor: QuickpassColors.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
@@ -221,7 +221,7 @@ class QuickpassTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        actionTextColor: QuickpassColors.onPrimary,
+        actionTextColor: QuickpassColors.darkOnPrimary,
       ),
 
       dialogTheme: DialogThemeData(
@@ -237,8 +237,8 @@ class QuickpassTheme {
       ),
 
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: QuickpassColors.primary,
-        foregroundColor: QuickpassColors.onPrimary,
+        backgroundColor: QuickpassColors.darkPrimary,
+        foregroundColor: QuickpassColors.darkOnPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

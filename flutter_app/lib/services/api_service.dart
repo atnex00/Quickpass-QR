@@ -205,10 +205,12 @@ class ApiService {
     return res.data;
   }
 
-  Future<Map<String, dynamic>> listEmployees({String? search, String? departmentId, int page = 1}) async {
-    final params = <String, dynamic>{'page': page};
+  Future<Map<String, dynamic>> listEmployees({String? search, String? departmentId, String? status, String? role, int page = 1, int limit = 20}) async {
+    final params = <String, dynamic>{'page': page, 'limit': limit};
     if (search != null) params['search'] = search;
     if (departmentId != null) params['department_id'] = departmentId;
+    if (status != null) params['status'] = status;
+    if (role != null) params['role'] = role;
     final res = await _dio.get('/admin/employees', queryParameters: params);
     return res.data;
   }
@@ -223,12 +225,25 @@ class ApiService {
     return res.data;
   }
 
+  Future<Map<String, dynamic>> toggleAdmin(String id) async {
+    final res = await _dio.put('/admin/employees/$id/admin');
+    return res.data;
+  }
+
   Future<void> toggleActive(String id) async {
     await _dio.put('/admin/employees/$id/status');
   }
 
   Future<void> deleteEmployee(String id) async {
     await _dio.delete('/admin/employees/$id');
+  }
+
+  Future<void> resetPassword(String id, String password) async {
+    await _dio.put('/admin/employees/$id/reset-password', data: {'password': password});
+  }
+
+  Future<void> deleteLeave(String leaveId) async {
+    await _dio.delete('/leave/$leaveId');
   }
 
   Future<Map<String, dynamic>> importEmployees(List<Map<String, dynamic>> employees) async {
