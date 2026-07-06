@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
@@ -23,6 +25,8 @@ class ApiService {
         'Accept': 'application/json',
       },
     ));
+
+    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () => HttpClient();
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {

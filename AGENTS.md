@@ -9,100 +9,71 @@ QR-based gate pass and leave management system.
 
 ## Setup
 
-### Prerequisites
-- Node.js 20+, Flutter 3.27+, PostgreSQL 14+ (or Supabase)
-- Or use the dev container (`.devcontainer/`)
-
-### Quick Start
 ```bash
-# 1. Copy env file
 cp backend/.env.example backend/.env
-# 2. Install deps
 cd backend && npm install && cd ../flutter_app && flutter pub get
-# 3. Create database + run migrations + seed
 createdb passlynx
 cd backend && npm run migrate && npm run seed
-# 4. Start backend + Flutter (two terminals)
+```
+
+Two terminals:
+```bash
 cd backend && npm run dev
 cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
-The setup script (`scripts/setup.ps1` on Windows, `scripts/setup.sh` on macOS/Linux) installs Flutter and Android SDK into `tools/` without system-wide installs.
+Env: `NODE_ENV` selects `backend/.env.<NODE_ENV>` (defaults to `dev`). Knexfile loads the same way via dotenv.
 
-### Env Loading
-`NODE_ENV` determines which `.env.*` file the backend loads (defaults to `dev` → `.env.dev`). The knexfile loads via `require('dotenv').config({ path: \`.env.\${process.env.NODE_ENV || 'dev'}\` })`.
+Setup scripts (`scripts/setup.ps1` / `setup.sh`) install Flutter + Android SDK into `tools/` — no system-wide installs. `scripts/run_phone.ps1` uses ADB reverse tunnel (`localhost:3000`) for physical device testing.
+
+No local PostgreSQL needed — `docker-compose.yml` provides only the backend service, DB is Supabase cloud.
 
 ## Commands
 
-### Root
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Start backend + web concurrently (via `dev.sh`) |
-| `npm run prod` | Start in production mode |
-| `npm run dev:backend` | Backend only (nodemon) |
-| `npm run dev:web` | Web only (Vite dev server) |
-| `npm run migrate` | Run Knex migrations |
-| `npm run seed` | Run database seeds |
+| Location | Command | Purpose |
+|---|---|---|
+| root | `npm run dev` | Backend + web concurrently (`dev.sh`) |
+| root | `npm run prod` | Production mode |
+| root | `npm run build:web` | `cd web && vite build` |
+| root | `npm run migrate` / `seed` | Knex migrate:latest / seed:run |
+| backend | `npm run dev` | nodemon on `src/app.js` |
+| backend | `npm test` | Jest (`--coverage --forceExit --detectOpenHandles`) |
+| backend | `npm run lint` | ESLint on `src/` |
+| backend | `npm run migrate:rollback` | Knex migrate:rollback |
+| web | `npm run dev` | Vite on port 8080 (proxies `/api` → `localhost:3000`) |
+| web | `npm run build` | `tsc -b && vite build` |
+| flutter_app | `flutter run` | Run on connected device |
+| flutter_app | `flutter analyze` | Static analysis |
+| flutter_app | `flutter build apk` / `appbundle` / `ios` | Production builds |
 
-### Backend (`backend/`)
-| Command | Purpose |
-|---|---|
-| `npm run dev` | nodemon on `src/app.js` |
-| `npm start` | Production start |
-| `npm test` | Jest (`--coverage --forceExit --detectOpenHandles`) |
-| `npm run migrate` | Knex migrate:latest |
-| `npm run migrate:rollback` | Knex migrate:rollback |
-| `npm run seed` | Knex seed:run |
-| `npm run lint` | ESLint on `src/` |
-
-Seeds need `bcryptjs`. Run from `backend/` directory (resolves to `backend/node_modules/bcryptjs`). If running from root, `bcryptjs` is also installed at root level.
-
-### Web (`web/`)
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Vite dev server on port 8080 |
-| `npm run build` | `tsc -b && vite build` |
-| `npm run lint` | ESLint |
-
-Web dev server proxies `/api` → `http://localhost:3000` (defined in `vite.config.ts`).
-
-### Flutter (`flutter_app/`)
-| Command | Purpose |
-|---|---|
-| `flutter run` | Run on connected device |
-| `flutter build apk` | Build Android APK |
-| `flutter build appbundle` | Build Android App Bundle |
-| `flutter build ios` | Build iOS |
-| `flutter analyze` | Static analysis |
-
-API base URL is a compile-time env var (`API_BASE_URL`). Override with `--dart-define=API_BASE_URL=http://...`. Default fallback is `http://182.168.0.231:3000/api` (likely a typo for `192.168`).
+Seeds need `bcryptjs`. Run from `backend/` (resolves to `backend/node_modules/bcryptjs`). Root also has `bcryptjs` as fallback.
 
 ## Architecture
 
-### Roles
+### Roles & Workflow
 - `is_admin` — Full access
 - `is_supervisor` — Approve/reject department leave requests
 - `is_security` — Scan QR codes at gates
 - Regular employee — Submit leaves, view history
 
-### Workflow
 1. Employee requests leave → `pending`
-2. Supervisor approves → QR codes generated (OUT + IN)
+2. Supervisor approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min from scheduled time)
 3. Security scans OUT QR at exit → `active`
 4. Security scans IN QR at entry → `completed`
 
-QR valid ±15 minutes from scheduled time (start_time for OUT, end_time for IN). HMAC-SHA256 signed, one-time use. QR data: JSON with `leave_id`, `employee_id`, `type`, `timestamp`, `signature`.
+QR data: JSON with `leave_id`, `employee_id`, `type`, `timestamp`, `signature`.
 
 ### State & API
-- Web: Zustand stores → Axios (`@/lib/api`, cookie-based JWT)
-- Flutter: ChangeNotifier + Provider → singleton Dio ApiService (`FlutterSecureStorage` for JWT)
-- API: Express routes at `/api/*`, Joi validation, JWT auth middleware
+- **Web:** Zustand stores → Axios (`@/lib/api`, cookie-based JWT)
+- **Flutter:** ChangeNotifier + Provider → singleton Dio ApiService (`FlutterSecureStorage` for JWT)
+- **API:** Express routes at `/api/*`, Joi validation, JWT auth middleware (`authenticate`, `requireSupervisor`, `requireAdmin`, `requireSecurity` in `middleware/auth.js`). Rate limited (100 req / 15 min).
+- **Optional HTTPS server** on port 3443 for mobile camera access (reads key/cert from env paths, silently skipped if files missing).
 
 ### Backend Entry Points
-- **`src/app.js`** — Main entry (used by package.json). Loads env, sets up Express with CORS, rate limiting, Firebase init, serves `web/dist` in production, SPA fallback.
+- **`src/app.js`** — Main entry (used by package.json). Loads env, Express + CORS + rate limit + Firebase init, serves `web/dist` in prod, SPA fallback.
 - **`src/index.js`** — Refactored/alternate version (WIP, not used by package.json).
 
-### Web Routes
+### Web Routes (React Router v7)
 | Path | Guard | Component |
 |---|---|---|
 | `/login` | public | LoginPage |
@@ -114,16 +85,29 @@ QR valid ±15 minutes from scheduled time (start_time for OUT, end_time for IN).
 | `/security/**` | authenticated (SecurityShell) | ScannerPage, ScanResultPage, ScanHistoryPage |
 | `*` | — | Redirect to `/employee` |
 
+Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<SecurityShell />` (no sidebar). Admin/supervisor inside `<AppLayout />` with `<RequireRole>`.
+
 ### Flutter Navigation
-- `main.dart` routes by role: `isScanner` → ScannerScreen, `isAdmin` → AdminPanel, `isSupervisor` → SupervisorDashboard, else → EmployeeDashboard
-- No named routes; uses `Navigator.push` for all subscreens
+- `main.dart` role routing: `isScanner` → ScannerScreen, `isAdmin` → AdminPanel, `isSupervisor` → SupervisorDashboard, else → EmployeeDashboard
+- No named routes; uses `Navigator.push` for subscreens
+- MultiProvider (4 providers: Auth, Leave, Supervisor, Scan)
+
+### Flutter Admin Panel Visual Patterns
+- Bottom `NavigationBar` with gold (`darkPrimary`) indicator at 15% alpha, 80px height
+- `SliverAppBar` pinned, gold background, QR icon in rounded container + "Quickpass" title
+- Cards: `surfaceContainerLowest` / `surface`, 12px radius, 1px `outlineVariant` border, no shadows
+- Typography: Inter via `GoogleFonts.interTextTheme()`, hardcoded sizes (headings 20px w700, body 14px, labels 12px)
+- Buttons: gold fill (`darkPrimary`, 8-12px radius) for primary; red for destructive
+- Status badges: pill-shaped, 12% alpha bg + 30% alpha border
+- Spacing: 8px grid, cards 16px padding, section gaps 24px
 
 ### Database
-- Migrations in `database/migrations/` (8 files: departments, employees, sessions, leave_requests, qr_scan_logs, functions, add_is_security, optional_department)
-- Seeds in `database/seeds/` (departments + employees with password `pass1234`)
-- Auth: `employees` table with `password_hash`, `sessions` table with JWT session tracking
+- Migrations in `database/migrations/` (8 files, ordered: departments → employees → sessions → leave_requests → qr_scan_logs → functions → add_is_security → optional_department)
+- Seeds in `database/seeds/` (departments + employees, all passwords `pass1234`)
+- `employees` table: `password_hash` auth, `sessions` table for JWT tracking
+- Employee ID is auto-generated 6-digit zero-padded string via `generate_employee_id()` function
 
-### Test Users (all passwords: `pass1234`)
+### Test Users
 | ID | Name | Role |
 |---|---|---|
 | 000001 | Alice Chen | Employee (Engineering) |
@@ -143,62 +127,42 @@ QR valid ±15 minutes from scheduled time (start_time for OUT, end_time for IN).
 - Zustand stores with `create` + `set`
 - Axios from `@/lib/api` (cookie-based auth)
 - shadcn/ui from `@/components/ui/`
-- Tailwind utility classes + `cn()` from `@/lib/utils`
+- Tailwind v4 CSS-driven (`@theme` directive in `index.css`), no `tailwind.config.*`
 - Imports via `@/` path alias
 - Forms: controlled `useState` + native `<form>` + `onSubmit`
 - Error toast: `toast.error()` from sonner
-- Routing: React Router v7 with `<BrowserRouter>` + `<Routes>` + `<Route>`
-- Theme: Tailwind v4 CSS-driven (`@theme` directive in `index.css`), no `tailwind.config.*`
+- Icons: lucide-react
 
 ### Flutter (Dart)
-- State: `ChangeNotifier` + `Provider` (MultiProvider in `main.dart` with 4 providers)
+- State: `ChangeNotifier` + `Provider`
 - API: Singleton `ApiService` (Dio) with auth interceptor
 - Theme: `QuickpassTheme` with `QuickpassColors` from `config/theme.dart`
 - Forms: `Form` + `GlobalKey<FormState>` + `TextFormField` + validators
-- Screens: StatefulWidget with `Scaffold`, `QuickpassAppBar`, `RefreshIndicator`
+- Screens: `StatefulWidget` + `Scaffold`, `RefreshIndicator`
+- `API_BASE_URL` is compile-time `--dart-define`. Default fallback: `http://182.168.0.231:3000/api` (note: likely a typo for `192.168`)
 
 ### Backend (Node.js + Express)
 - Controllers in `controllers/`
-- Routes defined in `routes/index.js` with Joi validation
-- Auth middleware: `authenticate`, `requireSupervisor`, `requireAdmin` in `middleware/auth.js`
-- Database: Knex in `config/database.js`
-- Errors: `createError(status, message)` via `middleware/errorHandler.js`
+- Routes in `routes/index.js` with Joi validation
+- Error handling: `createError(status, message)` via `middleware/errorHandler.js`
 - Always use LEFT JOIN when querying leave_requests with employee joins
 
-## Web Color System
+## Design Language
 
-Tailwind v4 CSS variables in `src/index.css`. `@theme` maps them to utility classes.
+| Token | Light | Dark |
+|---|---|---|
+| Primary / AppBar | `#1E40AF` / `#FFD700` | `#B8C4FF` / `#FFD700` |
+| Surface | `#FFFFFF` / `#FBF8FF` | `#1E2020` / `#0F172A` |
+| Success / Error / Warning | `#16A34A` / `#DC2626` / `#F59E0B` | `#6EE7B7` / `#FFB4AB` / `#FBBF24` |
+| Outline variant | `#C4C5D5` | `#334155` |
 
-### Light (`:root`)
-| Token | Value |
-|---|---|
-| `--background` | `#fbf8ff` |
-| `--foreground` | `#1a1b22` |
-| `--primary` | `#1e40af` |
-| `--secondary` | `#2563eb` |
-| `--destructive` | `#dc2626` |
-| `--border` | `#c4c5d5` |
-
-### Dark (`.dark`)
-| Token | Value |
-|---|---|
-| `--background` | `#0f172a` |
-| `--foreground` | `#f1f0fa` |
-| `--primary` | `#b8c4ff` |
-| `--secondary` | `#b4c5ff` |
-| `--destructive` | `#ffb4ab` |
-| `--border` | `#334155` |
-
-## Typography
-
-- Web: Inter (Google Fonts, via `index.css`)
-- Flutter: Inter (`GoogleFonts.interTextTheme()` in `config/theme.dart`)
-
-## Design Principles
-
-- **"The Verified Path"** — structured, high-contrast, authoritative
-- **NO AI slop** — reject generic templates, every component needs a visual signature
-- 8px grid, 4px micro-adjustments
+- Inter font everywhere (Google Fonts)
 - Cards: white bg, 1px border, 12px radius
-- Status badges: soft-fill (10% opacity bg, 100% text)
-- Depth via tonal layers, not shadows
+- Status badges: soft-fill (10-12% opacity bg, 100% text), pill shape
+- Depth via tonal layering, not shadows
+
+## Misc
+- No CI/CD configured (no `.github/workflows/`)
+- Vite dev server on port 8080 (not the default 5173)
+- `npm run dev` at root runs `dev.sh` which starts backend + web concurrently
+- Web Color System defined in `web/src/index.css` via `@theme` — CSS-driven, no config file
