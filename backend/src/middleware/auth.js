@@ -20,7 +20,7 @@ async function authenticate(req, res, next) {
     }
 
     const employee = await db('employees')
-      .join('departments', 'employees.department_id', 'departments.department_id')
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', decoded.employee_id)
       .select(
         'employees.*',

@@ -1,15 +1,43 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'employee.g.dart';
+
+@JsonSerializable()
 class Employee {
+  @JsonKey(name: 'employee_id', defaultValue: '')
   final String employeeId;
+
+  @JsonKey(name: 'full_name', defaultValue: '')
   final String fullName;
+
+  @JsonKey(defaultValue: '')
   final String position;
+
+  @JsonKey(name: 'department_id', defaultValue: '')
   final String departmentId;
+
+  @JsonKey(name: 'department_name', defaultValue: '')
   final String departmentName;
+
+  @JsonKey(defaultValue: '')
   final String email;
+
+  @JsonKey(name: 'is_supervisor', fromJson: _boolFromJson)
   final bool isSupervisor;
+
+  @JsonKey(name: 'is_admin', fromJson: _boolFromJson)
   final bool isAdmin;
+
+  @JsonKey(name: 'is_security', fromJson: _boolFromJson)
   final bool isSecurity;
+
+  @JsonKey(name: 'is_active', fromJson: _boolActiveFromJson)
   final bool isActive;
+
+  @JsonKey(name: 'profile_photo')
   final String? profilePhoto;
+
+  @JsonKey(name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)
   final DateTime? hireDate;
 
   Employee({
@@ -27,37 +55,17 @@ class Employee {
     this.hireDate,
   });
 
-  factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      employeeId: json['employee_id'] ?? '',
-      fullName: json['full_name'] ?? '',
-      position: json['position'] ?? '',
-      departmentId: (json['department_id'] ?? '').toString(),
-      departmentName: json['department_name'] ?? '',
-      email: json['email'] ?? '',
-      isSupervisor: json['is_supervisor'] == true,
-      isAdmin: json['is_admin'] == true,
-      isSecurity: json['is_security'] == true,
-      isActive: json['is_active'] != false,
-      profilePhoto: json['profile_photo'],
-      hireDate: json['hire_date'] != null ? DateTime.tryParse(json['hire_date']) : null,
-    );
-  }
+  static bool _boolFromJson(dynamic v) => v == true || v == 1;
+  static bool _boolActiveFromJson(dynamic v) => v != false && v != 0;
+  static DateTime? _hireDateFromJson(dynamic v) =>
+      v != null ? DateTime.tryParse(v.toString()) : null;
+  static String? _hireDateToJson(DateTime? v) =>
+      v?.toIso8601String().split('T').first;
 
-  Map<String, dynamic> toJson() => {
-    'employee_id': employeeId,
-    'full_name': fullName,
-    'position': position,
-    'department_id': departmentId,
-    'department_name': departmentName,
-    'email': email,
-    'is_supervisor': isSupervisor,
-    'is_admin': isAdmin,
-    'is_security': isSecurity,
-    'is_active': isActive,
-    'profile_photo': profilePhoto,
-    'hire_date': hireDate?.toIso8601String().split('T').first,
-  };
+  factory Employee.fromJson(Map<String, dynamic> json) =>
+      _$EmployeeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EmployeeToJson(this);
 
   static bool isValidId(String id) => RegExp(r'^\d{6}$').hasMatch(id);
 

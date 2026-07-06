@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 import '../config/theme.dart';
+
+part 'leave_request.g.dart';
 
 enum LeaveStatus {
   pending,
@@ -11,34 +14,52 @@ enum LeaveStatus {
 
   String get label {
     switch (this) {
-      case LeaveStatus.pending: return 'Pending';
-      case LeaveStatus.approved: return 'Approved';
-      case LeaveStatus.rejected: return 'Rejected';
-      case LeaveStatus.active: return 'Active';
-      case LeaveStatus.completed: return 'Completed';
-      case LeaveStatus.cancelled: return 'Cancelled';
+      case LeaveStatus.pending:
+        return 'Pending';
+      case LeaveStatus.approved:
+        return 'Approved';
+      case LeaveStatus.rejected:
+        return 'Rejected';
+      case LeaveStatus.active:
+        return 'Active';
+      case LeaveStatus.completed:
+        return 'Completed';
+      case LeaveStatus.cancelled:
+        return 'Cancelled';
     }
   }
 
   Color get color {
     switch (this) {
-      case LeaveStatus.pending: return QuickpassColors.warning;
-      case LeaveStatus.approved: return QuickpassColors.primary;
-      case LeaveStatus.rejected: return QuickpassColors.error;
-      case LeaveStatus.active: return QuickpassColors.success;
-      case LeaveStatus.completed: return QuickpassColors.secondary;
-      case LeaveStatus.cancelled: return Colors.grey;
+      case LeaveStatus.pending:
+        return QuickpassColors.warning;
+      case LeaveStatus.approved:
+        return QuickpassColors.primary;
+      case LeaveStatus.rejected:
+        return QuickpassColors.error;
+      case LeaveStatus.active:
+        return QuickpassColors.success;
+      case LeaveStatus.completed:
+        return QuickpassColors.secondary;
+      case LeaveStatus.cancelled:
+        return Colors.grey;
     }
   }
 
   IconData get icon {
     switch (this) {
-      case LeaveStatus.pending: return Icons.hourglass_empty;
-      case LeaveStatus.approved: return Icons.check_circle;
-      case LeaveStatus.rejected: return Icons.cancel;
-      case LeaveStatus.active: return Icons.timer;
-      case LeaveStatus.completed: return Icons.check_circle_outline;
-      case LeaveStatus.cancelled: return Icons.close;
+      case LeaveStatus.pending:
+        return Icons.hourglass_empty;
+      case LeaveStatus.approved:
+        return Icons.check_circle;
+      case LeaveStatus.rejected:
+        return Icons.cancel;
+      case LeaveStatus.active:
+        return Icons.timer;
+      case LeaveStatus.completed:
+        return Icons.check_circle_outline;
+      case LeaveStatus.cancelled:
+        return Icons.close;
     }
   }
 
@@ -50,26 +71,74 @@ enum LeaveStatus {
   }
 }
 
+@JsonSerializable()
 class LeaveRequest {
+  @JsonKey(name: 'leave_id', defaultValue: '')
   final String leaveId;
+
+  @JsonKey(name: 'employee_id', defaultValue: '')
   final String employeeId;
+
+  @JsonKey(name: 'employee_name', defaultValue: '')
   final String employeeName;
+
+  @JsonKey(name: 'department_id', defaultValue: '')
   final String departmentId;
+
+  @JsonKey(name: 'supervisor_id', defaultValue: '')
   final String supervisorId;
+
+  @JsonKey(name: 'supervisor_name', defaultValue: '')
   final String supervisorName;
+
+  @JsonKey(name: 'leave_date', fromJson: _dateFromJson, toJson: _dateToJson)
   final DateTime leaveDate;
+
+  @JsonKey(name: 'start_time', defaultValue: '')
   final String startTime;
+
+  @JsonKey(name: 'end_time', defaultValue: '')
   final String endTime;
+
+  @JsonKey(defaultValue: '')
   final String reason;
+
+  @JsonKey(fromJson: _statusFromJson, toJson: _statusToJson)
   final LeaveStatus status;
+
+  @JsonKey(name: 'out_qr_code')
   final String? outQrCode;
+
+  @JsonKey(name: 'in_qr_code')
   final String? inQrCode;
+
+  @JsonKey(
+      name: 'out_scan_time',
+      fromJson: _dateTimeOrNullFromJson,
+      toJson: _dateTimeOrNullToJson)
   final DateTime? outScanTime;
+
+  @JsonKey(
+      name: 'in_scan_time',
+      fromJson: _dateTimeOrNullFromJson,
+      toJson: _dateTimeOrNullToJson)
   final DateTime? inScanTime;
+
+  @JsonKey(name: 'rejection_reason')
   final String? rejectionReason;
+
+  @JsonKey(
+      name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime createdAt;
+
+  @JsonKey(
+      name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
   final DateTime updatedAt;
+
+  @JsonKey(name: 'employee_position')
   final String? employeePosition;
+
+  @JsonKey(name: 'employee_photo')
   final String? employeePhoto;
 
   LeaveRequest({
@@ -95,53 +164,31 @@ class LeaveRequest {
     this.employeePhoto,
   });
 
-  factory LeaveRequest.fromJson(Map<String, dynamic> json) {
-    return LeaveRequest(
-      leaveId: json['leave_id'] ?? '',
-      employeeId: json['employee_id'] ?? '',
-      employeeName: json['employee_name'] ?? '',
-      departmentId: json['department_id'] ?? '',
-      supervisorId: json['supervisor_id'] ?? '',
-      supervisorName: json['supervisor_name'] ?? '',
-      leaveDate: DateTime.tryParse(json['leave_date'] ?? '') ?? DateTime.now(),
-      startTime: json['start_time'] ?? '',
-      endTime: json['end_time'] ?? '',
-      reason: json['reason'] ?? '',
-      status: LeaveStatus.fromString(json['status'] ?? 'pending'),
-      outQrCode: json['out_qr_code'],
-      inQrCode: json['in_qr_code'],
-      outScanTime: json['out_scan_time'] != null ? DateTime.tryParse(json['out_scan_time']) : null,
-      inScanTime: json['in_scan_time'] != null ? DateTime.tryParse(json['in_scan_time']) : null,
-      rejectionReason: json['rejection_reason'],
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now(),
-      employeePosition: json['employee_position'],
-      employeePhoto: json['employee_photo'],
-    );
-  }
+  static DateTime _dateFromJson(dynamic v) =>
+      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
 
-  Map<String, dynamic> toJson() => {
-    'leave_id': leaveId,
-    'employee_id': employeeId,
-    'employee_name': employeeName,
-    'department_id': departmentId,
-    'supervisor_id': supervisorId,
-    'supervisor_name': supervisorName,
-    'leave_date': leaveDate.toIso8601String().split('T').first,
-    'start_time': startTime,
-    'end_time': endTime,
-    'reason': reason,
-    'status': status.name,
-    'out_qr_code': outQrCode,
-    'in_qr_code': inQrCode,
-    'out_scan_time': outScanTime?.toIso8601String(),
-    'in_scan_time': inScanTime?.toIso8601String(),
-    'rejection_reason': rejectionReason,
-    'created_at': createdAt.toIso8601String(),
-    'updated_at': updatedAt.toIso8601String(),
-    'employee_position': employeePosition,
-    'employee_photo': employeePhoto,
-  };
+  static String _dateToJson(DateTime v) =>
+      v.toIso8601String().split('T').first;
+
+  static DateTime? _dateTimeOrNullFromJson(dynamic v) =>
+      v != null ? DateTime.tryParse(v.toString()) : null;
+
+  static String? _dateTimeOrNullToJson(DateTime? v) => v?.toIso8601String();
+
+  static DateTime _dateTimeFromJson(dynamic v) =>
+      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
+
+  static String _dateTimeToJson(DateTime v) => v.toIso8601String();
+
+  static LeaveStatus _statusFromJson(dynamic v) =>
+      LeaveStatus.fromString(v?.toString() ?? 'pending');
+
+  static String _statusToJson(LeaveStatus v) => v.name;
+
+  factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
+      _$LeaveRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$LeaveRequestToJson(this);
 
   bool get hasQrCodes => outQrCode != null && inQrCode != null;
 

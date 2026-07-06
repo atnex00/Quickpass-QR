@@ -1,13 +1,37 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'scan_log.g.dart';
+
+@JsonSerializable()
 class ScanLog {
+  @JsonKey(name: 'log_id', fromJson: _intFromJson)
   final int logId;
+
+  @JsonKey(name: 'leave_id', defaultValue: '')
   final String leaveId;
+
+  @JsonKey(name: 'qr_type', defaultValue: '')
   final String qrType;
+
+  @JsonKey(name: 'scanned_by')
   final String? scannedBy;
+
+  @JsonKey(name: 'scan_time', fromJson: _dateFromJson, toJson: _dateToJson)
   final DateTime scanTime;
+
+  @JsonKey(name: 'ip_address')
   final String? ipAddress;
+
+  @JsonKey(name: 'is_valid', fromJson: _boolFromJson)
   final bool isValid;
+
+  @JsonKey(name: 'validation_message')
   final String? validationMessage;
+
+  @JsonKey(name: 'employee_name')
   final String? employeeName;
+
+  @JsonKey(name: 'employee_id')
   final String? employeeId;
 
   ScanLog({
@@ -23,31 +47,13 @@ class ScanLog {
     this.employeeId,
   });
 
-  factory ScanLog.fromJson(Map<String, dynamic> json) {
-    return ScanLog(
-      logId: json['log_id'] ?? 0,
-      leaveId: json['leave_id'] ?? '',
-      qrType: json['qr_type'] ?? '',
-      scannedBy: json['scanned_by'],
-      scanTime: DateTime.parse(json['scan_time']),
-      ipAddress: json['ip_address'],
-      isValid: json['is_valid'] ?? true,
-      validationMessage: json['validation_message'],
-      employeeName: json['employee_name'],
-      employeeId: json['employee_id'],
-    );
-  }
+  static int _intFromJson(dynamic v) => v as int? ?? 0;
+  static bool _boolFromJson(dynamic v) => v as bool? ?? true;
+  static DateTime _dateFromJson(dynamic v) => DateTime.parse(v as String);
+  static String _dateToJson(DateTime v) => v.toIso8601String();
 
-  Map<String, dynamic> toJson() => {
-    'log_id': logId,
-    'leave_id': leaveId,
-    'qr_type': qrType,
-    'scanned_by': scannedBy,
-    'scan_time': scanTime.toIso8601String(),
-    'ip_address': ipAddress,
-    'is_valid': isValid,
-    'validation_message': validationMessage,
-    'employee_name': employeeName,
-    'employee_id': employeeId,
-  };
+  factory ScanLog.fromJson(Map<String, dynamic> json) =>
+      _$ScanLogFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ScanLogToJson(this);
 }

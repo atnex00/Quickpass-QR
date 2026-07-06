@@ -10,8 +10,9 @@ import '../../utils/constants.dart';
 import '../../widgets/loading_indicator.dart';
 import 'employee_detail_screen.dart';
 
-Widget _buildAdminAppBar(BuildContext context) {
+Widget _buildAdminAppBar(BuildContext context, String tabKey) {
   return SliverAppBar(
+    key: ValueKey(tabKey),
     pinned: true,
     toolbarHeight: 64,
     backgroundColor: QuickpassColors.darkPrimary,
@@ -148,7 +149,9 @@ class _OverviewTabState extends State<_OverviewTab> {
   void initState() {
     super.initState();
     _api = context.read<ApiService>();
-    _loadReports();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReports();
+    });
   }
 
   Future<void> _loadReports() async {
@@ -158,7 +161,7 @@ class _OverviewTabState extends State<_OverviewTab> {
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
     } catch (_) {}
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   Map<String, int> get _statusCounts {
@@ -295,7 +298,7 @@ class _OverviewTabState extends State<_OverviewTab> {
         children: [
           CustomScrollView(
             slivers: [
-              _buildAdminAppBar(context),
+              _buildAdminAppBar(context, 'overview'),
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
@@ -564,7 +567,10 @@ class _EmployeeTabState extends State<_EmployeeTab> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _api = context.read<ApiService>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {
@@ -722,7 +728,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 DropdownButtonFormField<String>(
                   initialValue: selectedDept.isNotEmpty ? selectedDept : null,
                   decoration: const InputDecoration(labelText: 'Department'),
-                  items: const [DropdownMenuItem<String>(value: '', child: Text('No department'))],
+                  items: [
+                    const DropdownMenuItem<String>(value: null, child: Text('No department')),
+                    ..._departments.map((d) => DropdownMenuItem<String>(
+                      value: d['department_id'] as String?,
+                      child: Text(d['department_name'] as String? ?? ''),
+                    )),
+                  ],
                   onChanged: (v) => setDialogState(() => selectedDept = v ?? ''),
                 ),
                 const SizedBox(height: 8),
@@ -951,7 +963,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
         children: [
           CustomScrollView(
             slivers: [
-              _buildAdminAppBar(context),
+              _buildAdminAppBar(context, 'employees'),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
                 sliver: SliverList(
@@ -991,9 +1003,9 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                           Container(
                             constraints: const BoxConstraints(maxWidth: 240),
                             child: DropdownButtonFormField<String>(
-                              initialValue: _filterDepartment,
-                              decoration: const InputDecoration(
-                                labelText: 'Dept',
+                            initialValue: _filterDepartment,
+                            decoration: const InputDecoration(
+                              labelText: 'Dept',
                                 isDense: false,
                                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                               ),
@@ -1458,7 +1470,9 @@ class _ReportsTabState extends State<_ReportsTab> {
   void initState() {
     super.initState();
     _api = context.read<ApiService>();
-    _loadReports();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReports();
+    });
   }
 
   @override
@@ -1479,7 +1493,7 @@ class _ReportsTabState extends State<_ReportsTab> {
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
     } catch (_) {}
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _pickDate(bool isStart) async {
@@ -1520,7 +1534,7 @@ class _ReportsTabState extends State<_ReportsTab> {
         children: [
           CustomScrollView(
             slivers: [
-              _buildAdminAppBar(context),
+              _buildAdminAppBar(context, 'reports'),
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
@@ -1702,7 +1716,9 @@ class _LeaveTabState extends State<_LeaveTab> {
   void initState() {
     super.initState();
     _api = context.read<ApiService>();
-    _loadLeaves();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLeaves();
+    });
   }
 
   Future<void> _loadLeaves() async {
@@ -1711,7 +1727,7 @@ class _LeaveTabState extends State<_LeaveTab> {
       final res = await _api.getReports();
       _leaves = res['data'] as List<dynamic>?;
     } catch (_) {}
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   List<dynamic> get _filteredLeaves {
@@ -1760,7 +1776,7 @@ class _LeaveTabState extends State<_LeaveTab> {
         children: [
           CustomScrollView(
             slivers: [
-              _buildAdminAppBar(context),
+              _buildAdminAppBar(context, 'leaves'),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
                 sliver: SliverList(
@@ -2094,7 +2110,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
         children: [
           CustomScrollView(
             slivers: [
-              _buildAdminAppBar(context),
+              _buildAdminAppBar(context, 'departments'),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
                 sliver: _departments.isEmpty

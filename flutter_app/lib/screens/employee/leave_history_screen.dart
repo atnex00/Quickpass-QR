@@ -38,7 +38,9 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
+        child: RefreshIndicator(
+          onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
+          child: CustomScrollView(
           slivers: [
             // ── Electric Yellow App Bar ──
             SliverAppBar(
@@ -135,9 +137,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
             else
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                sliver: RefreshIndicator(
-                  onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
-                  child: SliverList(
+                sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         if (index < leaveProv.history.length) {
@@ -253,10 +253,10 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                       childCount: leaveProv.history.length + 2,
                     ),
                   ),
-                ),
               ),
           ],
         ),
+      ),
       ),
     );
   }

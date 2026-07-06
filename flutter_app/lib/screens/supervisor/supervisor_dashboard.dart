@@ -7,6 +7,7 @@ import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/status_badge.dart';
 import '../employee/profile_screen.dart';
+import '../employee/request_leave_screen.dart';
 import 'pending_requests_screen.dart';
 
 class SupervisorDashboard extends StatefulWidget {
@@ -138,6 +139,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
             slivers: [
               // ── Electric Yellow App Bar ──
               SliverAppBar(
+                key: const ValueKey('supervisor-dashboard'),
                 pinned: true,
                 expandedHeight: 0,
                 toolbarHeight: 64,
@@ -419,10 +421,12 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
           Positioned(
             bottom: 24,
             right: 16,
-            child: FloatingActionButton(
+            child:             FloatingActionButton(
               onPressed: () {
-                final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                state?.setState(() => state._currentIndex = 1);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RequestLeaveScreen()),
+                );
               },
               backgroundColor: QuickpassColors.darkPrimary,
               foregroundColor: QuickpassColors.darkOnPrimary,

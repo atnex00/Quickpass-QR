@@ -75,7 +75,7 @@ class AuthProvider extends ChangeNotifier {
     _user = null;
     _error = null;
     notifyListeners();
-    _api.logout();
+    await _api.logout();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {

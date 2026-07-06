@@ -1,8 +1,22 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'department.g.dart';
+
+@JsonSerializable()
 class Department {
+  @JsonKey(name: 'department_id', fromJson: _stringFromJson)
   final String departmentId;
+
+  @JsonKey(name: 'department_name', fromJson: _stringFromJson)
   final String departmentName;
+
+  @JsonKey(name: 'department_code')
   final String? departmentCode;
+
+  @JsonKey(name: 'head_of_department')
   final String? headOfDepartment;
+
+  @JsonKey(name: 'is_active', fromJson: _boolFromJson)
   final bool isActive;
 
   Department({
@@ -13,21 +27,11 @@ class Department {
     required this.isActive,
   });
 
-  factory Department.fromJson(Map<String, dynamic> json) {
-    return Department(
-      departmentId: (json['department_id'] ?? json['departmentId'] ?? '').toString(),
-      departmentName: (json['department_name'] ?? json['departmentName'] ?? '').toString(),
-      departmentCode: json['department_code'] as String?,
-      headOfDepartment: json['head_of_department'] as String?,
-      isActive: json['is_active'] as bool? ?? true,
-    );
-  }
+  static String _stringFromJson(dynamic v) => v?.toString() ?? '';
+  static bool _boolFromJson(dynamic v) => v as bool? ?? true;
 
-  Map<String, dynamic> toJson() => {
-    'department_id': departmentId,
-    'department_name': departmentName,
-    'department_code': departmentCode,
-    'head_of_department': headOfDepartment,
-    'is_active': isActive,
-  };
+  factory Department.fromJson(Map<String, dynamic> json) =>
+      _$DepartmentFromJson(json);
+
+  Map<String, dynamic> toJson() => _$DepartmentToJson(this);
 }

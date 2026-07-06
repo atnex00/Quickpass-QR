@@ -107,7 +107,9 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
               toolbarHeight: 64,
               backgroundColor: QuickpassColors.darkPrimary,
               foregroundColor: QuickpassColors.darkOnPrimary,
-              flexibleSpace: SafeArea(
+              automaticallyImplyLeading: false,
+              flexibleSpace: SizedBox(
+                height: 64,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(

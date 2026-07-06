@@ -539,8 +539,9 @@ class _BottomTimerState extends State<_BottomTimer> {
 
   void _tick() {
     final dateStr = widget.leaveDate.toIso8601String().split('T').first;
-    final start =
-        DateTime.parse('${dateStr}T${widget.startTime.padLeft(5, '0')}:00');
+    final timeStr = widget.startTime.padLeft(5, '0');
+    final hhmm = timeStr.split(':').take(2).join(':');
+    final start = DateTime.parse('${dateStr}T$hhmm:00');
     final windowEnd = start.add(const Duration(minutes: 30));
     final now = DateTime.now();
     final remaining = windowEnd.difference(now).inSeconds;
@@ -655,25 +656,30 @@ class _ScanLineState extends State<_ScanLine>
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Positioned(
-            top: _animation.value * (240 - 2),
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 2,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  widget.color.withValues(alpha: 0),
-                  widget.color,
-                  widget.color.withValues(alpha: 0),
-                ]),
-              ),
-            ),
-          );
-        },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Positioned(
+                top: _animation.value * (240 - 2),
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      widget.color.withValues(alpha: 0),
+                      widget.color,
+                      widget.color.withValues(alpha: 0),
+                    ]),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

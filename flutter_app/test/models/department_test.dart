@@ -19,19 +19,6 @@ void main() {
       expect(dept.isActive, true);
     });
 
-    test('fromJson parses all fields with camelCase keys', () {
-      final dept = Department.fromJson({
-        'departmentId': '2',
-        'departmentName': 'HR',
-        'department_code': 'HR',
-        'head_of_department': 'Jane Doe',
-        'is_active': false,
-      });
-
-      expect(dept.departmentId, '2');
-      expect(dept.departmentName, 'HR');
-    });
-
     test('fromJson handles missing fields with defaults', () {
       final dept = Department.fromJson({});
 
@@ -57,6 +44,17 @@ void main() {
       expect(json['department_code'], 'ENG');
       expect(json['head_of_department'], 'David Kim');
       expect(json['is_active'], true);
+    });
+
+    test('fromJson handles nullable fields as null', () {
+      final dept = Department.fromJson({
+        'department_id': '1',
+        'department_name': 'Engineering',
+        'is_active': true,
+      });
+
+      expect(dept.departmentCode, isNull);
+      expect(dept.headOfDepartment, isNull);
     });
 
     test('toJson round-trips correctly', () {

@@ -100,6 +100,7 @@ class _DashboardTabState extends State<_DashboardTab> {
               slivers: [
                 // ── Electric Yellow App Bar ──
                 SliverAppBar(
+                  key: const ValueKey('employee-dashboard'),
                   pinned: true,
                   toolbarHeight: 64,
                   backgroundColor: QuickpassColors.darkPrimary,
