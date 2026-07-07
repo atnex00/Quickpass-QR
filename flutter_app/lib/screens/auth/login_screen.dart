@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/constants.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -98,11 +99,11 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text('Contact the IT Help Desk for support:'),
             SizedBox(height: 12),
-            Row(children: [Icon(Icons.email, size: 16), SizedBox(width: 8), Text('support@zaneco.com')]),
+            Row(children: [Icon(Icons.email, size: 16), SizedBox(width: 8), Text(AppConstants.supportEmail)]),
             SizedBox(height: 8),
-            Row(children: [Icon(Icons.phone, size: 16), SizedBox(width: 8), Text('Ext. 4200')]),
+            Row(children: [Icon(Icons.phone, size: 16), SizedBox(width: 8), Text(AppConstants.supportPhone)]),
             SizedBox(height: 8),
-            Row(children: [Icon(Icons.access_time, size: 16), SizedBox(width: 8), Text('8:00 AM - 6:00 PM')]),
+            Row(children: [Icon(Icons.access_time, size: 16), SizedBox(width: 8), Text(AppConstants.supportHours)]),
           ],
         ),
         actions: [

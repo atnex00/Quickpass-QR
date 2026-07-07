@@ -30,4 +30,8 @@ class AppConstants {
     'completed': 'Completed',
     'cancelled': 'Cancelled',
   };
+
+  static const String supportEmail = 'support@zaneco.com';
+  static const String supportPhone = 'Ext. 4200';
+  static const String supportHours = '8:00 AM - 6:00 PM';
 }

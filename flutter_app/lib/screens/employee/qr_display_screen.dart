@@ -58,10 +58,13 @@ class QrDisplayScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          color: QuickpassColors.darkOnPrimary,
-                          onPressed: () => Navigator.pop(context),
+                        Material(
+                          type: MaterialType.transparency,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            color: QuickpassColors.darkOnPrimary,
+                            onPressed: () => Navigator.pop(context),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         const Text(
@@ -140,39 +143,43 @@ class QrDisplayScreen extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: QuickpassColors.success
-                                                  .withValues(alpha: 0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
-                                            ),
-                                            child: const Text(
-                                              'Approved',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                                color: QuickpassColors.success,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 12, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: QuickpassColors.success
+                                                    .withValues(alpha: 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                              ),
+                                              child: const Text(
+                                                'Approved',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: QuickpassColors.success,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            leave.reason,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w600,
-                                              color: QuickpassColors.onSurface,
-                                              height: 1.4,
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              leave.reason,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600,
+                                                color: QuickpassColors.onSurface,
+                                                height: 1.4,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                       Text(
                                         'ID: #${leave.leaveId}',
@@ -185,34 +192,38 @@ class QrDisplayScreen extends StatelessWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.calendar_today,
-                                          size: 20,
-                                          color: QuickpassColors.primary),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        dateStr,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color:
-                                              QuickpassColors.onSurfaceVariant,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.calendar_today,
+                                            size: 20,
+                                            color: QuickpassColors.primary),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          dateStr,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color:
+                                                QuickpassColors.onSurfaceVariant,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      const Icon(Icons.schedule,
-                                          size: 20,
-                                          color: QuickpassColors.primary),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${leave.startTime} - ${leave.endTime}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color:
-                                              QuickpassColors.onSurfaceVariant,
+                                        const SizedBox(width: 24),
+                                        const Icon(Icons.schedule,
+                                            size: 20,
+                                            color: QuickpassColors.primary),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${leave.startTime} - ${leave.endTime}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color:
+                                                QuickpassColors.onSurfaceVariant,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -424,37 +435,40 @@ class _QrPassCard extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Container(
-                  width: 240,
-                  height: 240,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: qrColor.withValues(alpha: 0.2)),
-                    borderRadius: BorderRadius.circular(12),
-                    color: QuickpassColors.surfaceContainerLow,
-                  ),
-                  child: Stack(
-                    children: [
-                      RepaintBoundary(
-                        child: QrImageView(
-                          data: qrData,
-                          version: QrVersions.auto,
-                          size: 208,
-                          backgroundColor: Colors.transparent,
-                          eyeStyle: QrEyeStyle(
-                              eyeShape: QrEyeShape.circle, color: qrColor),
-                          dataModuleStyle: QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.circle,
-                              color: qrColor),
+                () {
+                  final qrSize = (MediaQuery.of(context).size.width - 80).clamp(180.0, 240.0);
+                  return Container(
+                    width: qrSize,
+                    height: qrSize,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: qrColor.withValues(alpha: 0.2)),
+                      borderRadius: BorderRadius.circular(12),
+                      color: QuickpassColors.surfaceContainerLow,
+                    ),
+                    child: Stack(
+                      children: [
+                        RepaintBoundary(
+                          child: QrImageView(
+                            data: qrData,
+                            version: QrVersions.auto,
+                            size: qrSize - 32,
+                            backgroundColor: Colors.transparent,
+                            eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.circle, color: qrColor),
+                            dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.circle,
+                                color: qrColor),
+                          ),
                         ),
-                      ),
-                      // Scanning line animation
-                      IgnorePointer(
-                        child: _ScanLine(color: scanLineColor),
-                      ),
-                    ],
-                  ),
-                ),
+                        // Scanning line animation
+                        IgnorePointer(
+                          child: _ScanLine(containerSize: qrSize, color: scanLineColor),
+                        ),
+                      ],
+                    ),
+                  );
+                }(),
                 const SizedBox(height: 16),
                 Text(
                   title,
@@ -626,8 +640,9 @@ class _BottomTimerState extends State<_BottomTimer> {
 }
 
 class _ScanLine extends StatefulWidget {
+  final double containerSize;
   final Color color;
-  const _ScanLine({required this.color});
+  const _ScanLine({required this.containerSize, required this.color});
 
   @override
   State<_ScanLine> createState() => _ScanLineState();
@@ -666,7 +681,7 @@ class _ScanLineState extends State<_ScanLine>
             animation: _animation,
             builder: (context, child) {
               return Positioned(
-                top: _animation.value * (240 - 2),
+                top: _animation.value * (widget.containerSize - 2),
                 left: 0,
                 right: 0,
                 child: Container(

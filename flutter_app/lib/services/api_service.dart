@@ -7,10 +7,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
+import 'certificate_pinner.dart';
 
 class ApiService {
   late Dio _dio;
   final _storage = const FlutterSecureStorage();
+  bool _isRefreshing = false;
+  final _pendingRequests = <_PendingRequest>[];
 
   void init() {
     _dio = Dio(BaseOptions(
@@ -23,8 +26,24 @@ class ApiService {
       },
     ));
 
+    if (AppConfig.apiBaseUrl.isEmpty) {
+      throw ArgumentError(
+        'API_BASE_URL is not set. Pass it via --dart-define=API_BASE_URL=https://...',
+      );
+    }
+    if (kReleaseMode && !AppConfig.apiBaseUrl.startsWith('https://')) {
+      throw ArgumentError(
+        'In release builds, API_BASE_URL must use HTTPS.\n'
+        'Current: ${AppConfig.apiBaseUrl}',
+      );
+    }
+
     if (!kIsWeb) {
-      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () => HttpClient();
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback = CertificatePinner.check;
+        return client;
+      };
     }
 
     _dio.interceptors.add(InterceptorsWrapper(
@@ -36,14 +55,69 @@ class ApiService {
         return handler.next(options);
       },
       onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          await _storage.deleteAll();
+        if (error.response?.statusCode != 401) {
+          return handler.next(error);
         }
-        return handler.next(error);
+
+        if (error.requestOptions.extra['_retry'] == true) {
+          await _storage.delete(key: 'auth_token');
+          return handler.next(error);
+        }
+
+        if (_isRefreshing) {
+          _pendingRequests.add(_PendingRequest(
+            options: error.requestOptions,
+            handler: handler,
+          ));
+          return;
+        }
+
+        _isRefreshing = true;
+        try {
+          final oldToken = await _storage.read(key: 'auth_token');
+          if (oldToken == null) {
+            return handler.next(error);
+          }
+
+          final refreshDio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+          final res = await refreshDio.post(
+            '/auth/refresh',
+            options: Options(headers: {'Authorization': 'Bearer $oldToken'}),
+          );
+          final newToken = res.data['token'] as String;
+          await _storage.write(key: 'auth_token', value: newToken);
+
+          error.requestOptions.extra['_retry'] = true;
+          error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+          try {
+            final retryResponse = await _dio.fetch(error.requestOptions);
+            handler.resolve(retryResponse);
+          } catch (retryError) {
+            handler.reject(retryError as DioException);
+          }
+
+          final pending = List<_PendingRequest>.from(_pendingRequests);
+          _pendingRequests.clear();
+          for (final p in pending) {
+            p.options.extra['_retry'] = true;
+            p.options.headers['Authorization'] = 'Bearer $newToken';
+            try {
+              final response = await _dio.fetch(p.options);
+              p.handler.resolve(response);
+            } catch (e) {
+              p.handler.reject(e as DioException);
+            }
+          }
+        } catch (_) {
+          await _storage.delete(key: 'auth_token');
+          return handler.next(error);
+        } finally {
+          _isRefreshing = false;
+        }
       },
       onResponse: (response, handler) async {
         if (response.data is Map && response.data['force_logout'] == true) {
-          await _storage.deleteAll();
+          await _storage.delete(key: 'auth_token');
         }
         return handler.next(response);
       },
@@ -272,4 +346,11 @@ class ApiService {
     final res = await _dio.get('/admin/reports', queryParameters: params);
     return res.data;
   }
+}
+
+class _PendingRequest {
+  final RequestOptions options;
+  final ErrorInterceptorHandler handler;
+
+  _PendingRequest({required this.options, required this.handler});
 }

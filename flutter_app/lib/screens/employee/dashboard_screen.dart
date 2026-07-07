@@ -206,37 +206,41 @@ class _DashboardTabState extends State<_DashboardTab> {
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
-                                    children: [
-                                      Text(
-                                        user?.position ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.01,
-                                          color: QuickpassColors.secondary,
-                                        ),
-                                      ),
-                                      const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 6),
-                                        child: Text(
-                                          '\u2022',
-                                          style: TextStyle(
-                                              fontSize: 10,
-                                              color: QuickpassColors.outline),
-                                        ),
-                                      ),
-                                      Text(
-                                        'ID: ${user?.employeeId ?? ''}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.05,
-                                          color: QuickpassColors.outline,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                     children: [
+                                       Expanded(
+                                         child: Text(
+                                           user?.position ?? '',
+                                           maxLines: 1,
+                                           overflow: TextOverflow.ellipsis,
+                                           style: const TextStyle(
+                                             fontSize: 14,
+                                             fontWeight: FontWeight.w600,
+                                             letterSpacing: 0.01,
+                                             color: QuickpassColors.secondary,
+                                           ),
+                                         ),
+                                       ),
+                                       const Padding(
+                                         padding:
+                                             EdgeInsets.symmetric(horizontal: 6),
+                                         child: Text(
+                                           '\u2022',
+                                           style: TextStyle(
+                                               fontSize: 10,
+                                               color: QuickpassColors.outline),
+                                         ),
+                                       ),
+                                       Text(
+                                         'ID: ${user?.employeeId ?? ''}',
+                                         style: const TextStyle(
+                                           fontSize: 14,
+                                           fontWeight: FontWeight.w700,
+                                           letterSpacing: 0.05,
+                                           color: QuickpassColors.outline,
+                                         ),
+                                       ),
+                                     ],
+                                   ),
                                 ],
                               ),
                             ),
@@ -308,8 +312,10 @@ class _DashboardTabState extends State<_DashboardTab> {
                                             ),
                                             const SizedBox(height: 8),
                                             Text(
-                                              leaveProv.activeLeave!.reason,
-                                              style: const TextStyle(
+                                               leaveProv.activeLeave!.reason,
+                                               maxLines: 2,
+                                               overflow: TextOverflow.ellipsis,
+                                               style: const TextStyle(
                                                 fontSize: 24,
                                                 fontWeight: FontWeight.w700,
                                                 color:
@@ -518,19 +524,24 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
             style: const TextStyle(
                 fontSize: 14,
                 color: QuickpassColors.onSurfaceVariant,
                 height: 1.43)),
-        Text(value,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: QuickpassColors.onSurface,
-                height: 1.43)),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(value,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: QuickpassColors.onSurface,
+                  height: 1.43)),
+        ),
       ],
     );
   }
@@ -609,7 +620,10 @@ class _ActivityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: QuickpassColors.outlineVariant),
       ),
-      child: InkWell(
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           if (leave.hasQrCodes) {
@@ -641,6 +655,8 @@ class _ActivityCard extends StatelessWidget {
                 children: [
                   Text(
                     leave.reason,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -675,6 +691,7 @@ class _ActivityCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     ),

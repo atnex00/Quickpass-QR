@@ -47,7 +47,7 @@ class ScanLog {
     this.employeeId,
   });
 
-  static int _intFromJson(dynamic v) => v as int? ?? 0;
+  static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
   static bool _boolFromJson(dynamic v) => v as bool? ?? true;
   static DateTime _dateFromJson(dynamic v) => DateTime.parse(v as String);
   static String _dateToJson(DateTime v) => v.toIso8601String();

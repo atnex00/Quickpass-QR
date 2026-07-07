@@ -5,12 +5,16 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/department.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/supervisor_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/debounce.dart';
 import '../../widgets/adaptive_scaffold.dart';
 import '../../widgets/loading_indicator.dart';
 import 'employee_detail_screen.dart';
+import '../employee/dashboard_screen.dart';
+import '../supervisor/supervisor_dashboard.dart';
+import '../security/scanner_screen.dart';
 
 Widget _buildAdminAppBar(BuildContext context, String tabKey) {
   return SliverAppBar(
@@ -54,7 +58,27 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
             ),
             IconButton(
               icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
-              onPressed: () => context.read<AuthProvider>().logout(),
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Logout'),
+                    content: const Text('Are you sure you want to logout?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                        child: const Text('Logout'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true && context.mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  context.read<AuthProvider>().logout();
+                }
+              },
             ),
           ],
         ),
@@ -261,7 +285,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                     width: 24,
                     child: Text('${dept['department_id'] ?? ''}', style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
                   ),
-                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
+                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
                   Expanded(flex: 1, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface))),
                   Expanded(flex: 1, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.warning))),
                 ],
@@ -470,6 +494,69 @@ class _OverviewTabState extends State<_OverviewTab> {
                       const SizedBox(height: 24),
 
                       const Text(
+                        'Switch View',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: QuickpassColors.onSurface,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.badge_outlined,
+                              title: 'Employee View',
+                              subtitle: 'Submit & track leaves',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EmployeeDashboard(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.rate_review_outlined,
+                              title: 'Supervisor View',
+                              subtitle: 'Approve & reject leaves',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SupervisorDashboard(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.qr_code_scanner_outlined,
+                              title: 'Security View',
+                              subtitle: 'Scan QR codes at gates',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ScannerScreen(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(child: SizedBox.shrink()),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      const Text(
                         'Leave Breakdown',
                         style: TextStyle(
                           fontSize: 16,
@@ -580,8 +667,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
       if (empRes['success']) {
         _employees = List<Map<String, dynamic>>.from(empRes['data'] ?? []);
         final pagination = empRes['pagination'] as Map<String, dynamic>?;
-        _totalPages = pagination?['pages'] as int? ?? 1;
-        _totalEmployees = pagination?['total'] as int? ?? _employees.length;
+        _totalPages = int.tryParse('${pagination?['pages']}') ?? 1;
+        _totalEmployees = int.tryParse('${pagination?['total']}') ?? _employees.length;
       }
       final deps = await _api.getDepartments();
       _departments = List<Map<String, dynamic>>.from(deps);
@@ -997,8 +1084,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 240),
+                  SizedBox(
+                    width: 280,
                     child: DropdownButtonFormField<String>(
                     initialValue: _filterDepartment,
                     decoration: const InputDecoration(
@@ -1023,8 +1110,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 220),
+                  SizedBox(
+                    width: 280,
                     child: DropdownButtonFormField<String>(
                       initialValue: _filterStatus.isEmpty ? null : _filterStatus,
                       decoration: const InputDecoration(
@@ -1047,8 +1134,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 240),
+                  SizedBox(
+                    width: 280,
                     child: DropdownButtonFormField<String>(
                       initialValue: _filterRole.isEmpty ? null : _filterRole,
                       decoration: const InputDecoration(
@@ -1553,7 +1640,7 @@ class _ReportsTabState extends State<_ReportsTab> {
     double max = 0;
     for (final d in _departmentReport!) {
       for (final key in ['pending', 'approved', 'rejected', 'completed']) {
-        final val = (d[key] as num?)?.toDouble() ?? 0;
+        final val = num.tryParse('${d[key]}')?.toDouble() ?? 0;
         if (val > max) max = val;
       }
     }
@@ -1568,25 +1655,25 @@ class _ReportsTabState extends State<_ReportsTab> {
         x: i,
         barRods: [
           BarChartRodData(
-            toY: (d['pending'] as num?)?.toDouble() ?? 0,
+            toY: num.tryParse('${d['pending']}')?.toDouble() ?? 0,
             color: QuickpassColors.warning,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
-            toY: (d['approved'] as num?)?.toDouble() ?? 0,
+            toY: num.tryParse('${d['approved']}')?.toDouble() ?? 0,
             color: QuickpassColors.primary,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
-            toY: (d['rejected'] as num?)?.toDouble() ?? 0,
+            toY: num.tryParse('${d['rejected']}')?.toDouble() ?? 0,
             color: QuickpassColors.error,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
-            toY: (d['completed'] as num?)?.toDouble() ?? 0,
+            toY: num.tryParse('${d['completed']}')?.toDouble() ?? 0,
             color: QuickpassColors.success,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
@@ -2056,6 +2143,104 @@ class _LeaveTabState extends State<_LeaveTab> {
     );
   }
 
+  void _approveLeave(Map<String, dynamic> leave) async {
+    final leaveId = leave['leave_id'] as String? ?? '';
+    final name = leave['employee_name'] as String? ?? 'Unknown';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Approve Leave?'),
+        content: Text('$name \u2014 ${leave['leave_date'] ?? ''} (${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''})'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Approve'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && leaveId.isNotEmpty && mounted) {
+      await context.read<SupervisorProvider>().approveLeave(leaveId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Approved leave for $name')));
+        _loadLeaves();
+      }
+    }
+  }
+
+  void _rejectLeave(Map<String, dynamic> leave) async {
+    final leaveId = leave['leave_id'] as String? ?? '';
+    final name = leave['employee_name'] as String? ?? 'Unknown';
+    final ctrl = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Reject Leave'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Reason for rejecting $name?'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              decoration: const InputDecoration(hintText: 'Enter reason...', labelText: 'Rejection reason'),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              if (ctrl.text.trim().isEmpty) return;
+              Navigator.pop(ctx, ctrl.text.trim());
+            },
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (reason != null && leaveId.isNotEmpty && mounted) {
+      await context.read<SupervisorProvider>().rejectLeave(leaveId, reason);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Rejected leave for $name')));
+        _loadLeaves();
+      }
+    }
+  }
+
+  void _revokeApproval(Map<String, dynamic> leave) async {
+    final leaveId = leave['leave_id'] as String? ?? '';
+    final name = leave['employee_name'] as String? ?? 'Unknown';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Revoke Approval?'),
+        content: Text("Move $name's leave back to pending?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Revoke'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && leaveId.isNotEmpty && mounted) {
+      await context.read<SupervisorProvider>().revokeApproval(leaveId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Revoked approval for $name')));
+        _loadLeaves();
+      }
+    }
+  }
+
   Widget _buildLeaveItem(BuildContext context, Map<String, dynamic> leave) {
     final status = leave['status'] as String? ?? 'pending';
     final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
@@ -2067,37 +2252,27 @@ class _LeaveTabState extends State<_LeaveTab> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: QuickpassColors.outlineVariant),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  leave['employee_name'] ?? 'Unknown',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${leave['department_name'] ?? ''}',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${leave['leave_date'] ?? ''} \u2022 ${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
-                ),
-                Text(
-                  leave['reason'] ?? '',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Column(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(leave['employee_name'] ?? 'Unknown',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+                    if ((leave['department_name'] as String?)?.isNotEmpty == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text('${leave['department_name'] ?? ''}',
+                          style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                      ),
+                  ],
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -2110,20 +2285,76 @@ class _LeaveTabState extends State<_LeaveTab> {
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
                 ),
               ),
-              if (status == 'pending' || status == 'approved' || status == 'active')
-                TextButton.icon(
-                  onPressed: () => _confirmDeleteLeave(leave),
-                  icon: const Icon(Icons.delete_outline, size: 14),
-                  label: const Text('Delete', style: TextStyle(fontSize: 11)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: QuickpassColors.error,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
             ],
           ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                const SizedBox(width: 4),
+                Text('${leave['leave_date'] ?? ''}',
+                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                const SizedBox(width: 12),
+                const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                const SizedBox(width: 4),
+                Text('${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
+                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+              ],
+            ),
+          ),
+          if ((leave['reason'] as String?)?.isNotEmpty == true) ...[
+            const SizedBox(height: 4),
+            Text(leave['reason'] as String? ?? '',
+              style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+          if (status == 'pending' || status == 'approved' || status == 'active') ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: QuickpassColors.error, size: 20),
+                  tooltip: 'Delete',
+                  onPressed: () => _confirmDeleteLeave(leave),
+                ),
+                if (status == 'pending') ...[
+                  OutlinedButton.icon(
+                    onPressed: () => _rejectLeave(leave),
+                    icon: const Icon(Icons.close, size: 18),
+                    label: const Text('Reject'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: QuickpassColors.error,
+                      side: const BorderSide(color: QuickpassColors.error),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.icon(
+                    onPressed: () => _approveLeave(leave),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('Approve'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: QuickpassColors.darkPrimary,
+                      foregroundColor: QuickpassColors.darkOnPrimary,
+                    ),
+                  ),
+                ],
+                if (status == 'approved')
+                  OutlinedButton.icon(
+                    onPressed: () => _revokeApproval(leave),
+                    icon: const Icon(Icons.undo, size: 18),
+                    label: const Text('Revoke'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: QuickpassColors.warning,
+                      side: const BorderSide(color: QuickpassColors.warning),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -2385,7 +2616,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                                             children: [
                                               Text(dept.departmentName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
                                               const SizedBox(height: 2),
-                                              Text('${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}', style: const TextStyle(fontSize: 14, color: QuickpassColors.outline)),
+                                              Text('${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, color: QuickpassColors.outline)),
                                             ],
                                           ),
                                         ),

@@ -9,6 +9,7 @@ import 'providers/supervisor_provider.dart';
 import 'providers/scan_provider.dart';
 import 'services/api_service.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/splash_screen.dart';
 import 'screens/employee/dashboard_screen.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
 import 'screens/admin/admin_panel.dart';
@@ -40,10 +41,6 @@ class _QuickpassAppState extends State<QuickpassApp> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      precacheImage(const AssetImage('assets/icon/app-icon.png'), context);
-      precacheImage(const AssetImage('assets/icon/logo.png'), context);
-    });
   }
 
   @override
@@ -75,7 +72,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
 
   Widget _buildHome(AuthProvider auth) {
     if (auth.isLoading) {
-      return const LoginScreen();
+      return const SplashScreen();
     }
 
     if (!auth.isAuthenticated) {

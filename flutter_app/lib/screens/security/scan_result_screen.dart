@@ -305,10 +305,12 @@ class _ResultRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: QuickpassColors.neutralGray)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(value, textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
+          ),
         ],
       ),
     );

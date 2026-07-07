@@ -131,19 +131,23 @@ class _PendingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
-                const SizedBox(width: 4),
-                Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
-                const SizedBox(width: 16),
-                const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
-                const SizedBox(width: 4),
-                Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
-              ],
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                  const SizedBox(width: 4),
+                  Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
+                  const SizedBox(width: 16),
+                  const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                  const SizedBox(width: 4),
+                  Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
+                ],
+              ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
+            Text(leave.reason, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -342,19 +346,23 @@ class _ApprovedCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
-                const SizedBox(width: 4),
-                Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
-                const SizedBox(width: 16),
-                const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
-                const SizedBox(width: 4),
-                Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
-              ],
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                  const SizedBox(width: 4),
+                  Text(DateFormatter.formatDate(leave.leaveDate), style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
+                  const SizedBox(width: 16),
+                  const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                  const SizedBox(width: 4),
+                  Text('${leave.startTime} - ${leave.endTime}', style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
+                ],
+              ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
+            Text(leave.reason, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

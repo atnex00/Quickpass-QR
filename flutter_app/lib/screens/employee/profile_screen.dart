@@ -109,7 +109,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
-                      onPressed: () => context.read<AuthProvider>().logout(),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Logout'),
+                            content: const Text('Are you sure you want to logout?'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                                child: const Text('Logout'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && context.mounted) {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          context.read<AuthProvider>().logout();
+                        }
+                      },
                     ),
                     ],
                   ),
