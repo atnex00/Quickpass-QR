@@ -127,15 +127,15 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
   Widget _buildCameraError() {
     return Container(
       color: Colors.black87,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.videocam_off, size: 64, color: QuickpassColors.error),
-            SizedBox(height: 12),
-            Text('Camera unavailable', style: TextStyle(color: Colors.white70, fontSize: 16)),
-            SizedBox(height: 4),
-            Text('Use the manual entry below to enter QR code', style: TextStyle(color: Colors.white38, fontSize: 13)),
+            Icon(Icons.videocam_off, size: 64, color: context.error),
+            const SizedBox(height: 12),
+            const Text('Camera unavailable', style: TextStyle(color: Colors.white70, fontSize: 16)),
+            const SizedBox(height: 4),
+            const Text('Use the manual entry below to enter QR code', style: TextStyle(color: Colors.white38, fontSize: 13)),
           ],
         ),
       ),
@@ -146,13 +146,13 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
     Color color;
     String text;
     if (_cameraError != null) {
-      color = QuickpassColors.error;
+      color = context.error;
       text = 'Camera error';
     } else if (_isProcessing) {
-      color = QuickpassColors.warning;
+      color = context.warning;
       text = 'Processing...';
     } else {
-      color = QuickpassColors.success;
+      color = context.success;
       text = 'Scanner ready';
     }
     return Row(
@@ -238,7 +238,7 @@ class _ScannerAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 64,
-      color: QuickpassColors.darkPrimary,
+      color: context.primary,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
@@ -247,34 +247,34 @@ class _ScannerAppBar extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
+                color: context.onPrimary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Quickpass',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: QuickpassColors.darkOnPrimary,
+                color: context.onPrimary,
               ),
             ),
             const Spacer(),
             IconButton(
               icon: const Icon(Icons.keyboard),
-              color: QuickpassColors.darkOnPrimary,
+              color: context.onPrimary,
               onPressed: onToggleManual,
             ),
             IconButton(
               icon: Icon(torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
-              color: QuickpassColors.darkOnPrimary,
+              color: context.onPrimary,
               onPressed: onToggleTorch,
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: QuickpassColors.darkOnPrimary),
-              color: QuickpassColors.surface,
+              icon: Icon(Icons.more_vert, color: context.onPrimary),
+              color: context.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               onSelected: (value) async {
                 switch (value) {
@@ -294,7 +294,7 @@ class _ScannerAppBar extends StatelessWidget {
                           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                           FilledButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                            style: FilledButton.styleFrom(backgroundColor: context.error),
                             child: const Text('Logout'),
                           ),
                         ],
@@ -311,28 +311,28 @@ class _ScannerAppBar extends StatelessWidget {
                   child: Consumer<AuthProvider>(
                     builder: (_, auth, __) => Text(
                       auth.user?.fullName ?? 'Guard',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: QuickpassColors.onSurface,
+                        color: context.onSurface,
                       ),
                     ),
                   ),
                 ),
                 const PopupMenuDivider(),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'history',
                   child: ListTile(
-                    leading: Icon(Icons.history, color: QuickpassColors.onSurface),
-                    title: Text('Scan History'),
+                    leading: Icon(Icons.history, color: context.onSurface),
+                    title: const Text('Scan History'),
                     contentPadding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'logout',
                   child: ListTile(
-                    leading: Icon(Icons.logout, color: QuickpassColors.error),
-                    title: Text('Logout', style: TextStyle(color: QuickpassColors.error)),
+                    leading: Icon(Icons.logout, color: context.error),
+                    title: Text('Logout', style: TextStyle(color: context.error)),
                     contentPadding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -363,16 +363,16 @@ class _QrScanFrame extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: cameraError != null ? QuickpassColors.error : QuickpassColors.secondary, width: 2),
+                  border: Border.all(color: cameraError != null ? context.error : context.secondary, width: 2),
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-              const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-              const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-              const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+              Positioned(top: -1, left: -1, child: _CornerBracket(context.secondary)),
+              Positioned(top: -1, right: -1, child: _CornerBracket(context.secondary)),
+              Positioned(bottom: -1, left: -1, child: _CornerBracket(context.secondary)),
+              Positioned(bottom: -1, right: -1, child: _CornerBracket(context.secondary)),
               if (cameraError != null)
-                const Icon(Icons.videocam_off, size: 48, color: QuickpassColors.error),
+                Icon(Icons.videocam_off, size: 48, color: context.error),
             ],
           ),
         );
