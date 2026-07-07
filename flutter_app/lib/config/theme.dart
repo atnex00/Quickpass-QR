@@ -66,6 +66,173 @@ class QuickpassColors {
   static const Color qrIn = Color(0xFF16A34A);
 }
 
+class StatusColors extends ThemeExtension<StatusColors> {
+  final Color success;
+  final Color onSuccess;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color onWarning;
+
+  const StatusColors({
+    required this.success,
+    required this.onSuccess,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warning,
+    required this.onWarning,
+  });
+
+  @override
+  StatusColors copyWith({
+    Color? success,
+    Color? onSuccess,
+    Color? successContainer,
+    Color? onSuccessContainer,
+    Color? warning,
+    Color? onWarning,
+  }) {
+    return StatusColors(
+      success: success ?? this.success,
+      onSuccess: onSuccess ?? this.onSuccess,
+      successContainer: successContainer ?? this.successContainer,
+      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+      warning: warning ?? this.warning,
+      onWarning: onWarning ?? this.onWarning,
+    );
+  }
+
+  @override
+  StatusColors lerp(ThemeExtension<StatusColors>? other, double t) {
+    if (other is! StatusColors) return this;
+    return StatusColors(
+      success: Color.lerp(success, other.success, t)!,
+      onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
+      successContainer: Color.lerp(successContainer, other.successContainer, t)!,
+      onSuccessContainer: Color.lerp(onSuccessContainer, other.onSuccessContainer, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      onWarning: Color.lerp(onWarning, other.onWarning, t)!,
+    );
+  }
+
+  static const StatusColors light = StatusColors(
+    success: QuickpassColors.success,
+    onSuccess: QuickpassColors.onSuccess,
+    successContainer: QuickpassColors.successContainer,
+    onSuccessContainer: QuickpassColors.onSuccessContainer,
+    warning: QuickpassColors.warning,
+    onWarning: QuickpassColors.onWarning,
+  );
+
+  static const StatusColors dark = StatusColors(
+    success: QuickpassColors.darkSuccess,
+    onSuccess: Color(0xFF003320),
+    successContainer: Color(0xFF064E3B),
+    onSuccessContainer: QuickpassColors.darkSuccess,
+    warning: QuickpassColors.darkWarning,
+    onWarning: Color(0xFF3A2E00),
+  );
+}
+
+class AppColors extends ThemeExtension<AppColors> {
+  final Color primaryBlue;
+  final Color neutralGray;
+  final Color qrOut;
+  final Color qrIn;
+  final Color surfaceNavy;
+
+  const AppColors({
+    required this.primaryBlue,
+    required this.neutralGray,
+    required this.qrOut,
+    required this.qrIn,
+    required this.surfaceNavy,
+  });
+
+  @override
+  AppColors copyWith({
+    Color? primaryBlue,
+    Color? neutralGray,
+    Color? qrOut,
+    Color? qrIn,
+    Color? surfaceNavy,
+  }) {
+    return AppColors(
+      primaryBlue: primaryBlue ?? this.primaryBlue,
+      neutralGray: neutralGray ?? this.neutralGray,
+      qrOut: qrOut ?? this.qrOut,
+      qrIn: qrIn ?? this.qrIn,
+      surfaceNavy: surfaceNavy ?? this.surfaceNavy,
+    );
+  }
+
+  @override
+  AppColors lerp(ThemeExtension<AppColors>? other, double t) {
+    if (other is! AppColors) return this;
+    return AppColors(
+      primaryBlue: Color.lerp(primaryBlue, other.primaryBlue, t)!,
+      neutralGray: Color.lerp(neutralGray, other.neutralGray, t)!,
+      qrOut: Color.lerp(qrOut, other.qrOut, t)!,
+      qrIn: Color.lerp(qrIn, other.qrIn, t)!,
+      surfaceNavy: Color.lerp(surfaceNavy, other.surfaceNavy, t)!,
+    );
+  }
+
+  static const AppColors light = AppColors(
+    primaryBlue: QuickpassColors.primary,
+    neutralGray: QuickpassColors.neutralGray,
+    qrOut: QuickpassColors.qrOut,
+    qrIn: QuickpassColors.qrIn,
+    surfaceNavy: QuickpassColors.surfaceNavy,
+  );
+
+  static const AppColors dark = AppColors(
+    primaryBlue: Color(0xFFB8C4FF),
+    neutralGray: Color(0xFF94A3B8),
+    qrOut: Color(0xFF60A5FA),
+    qrIn: QuickpassColors.darkSuccess,
+    surfaceNavy: Color(0xFF1E293B),
+  );
+}
+
+extension QuickpassColorsX on BuildContext {
+  ColorScheme get _cs => Theme.of(this).colorScheme;
+  StatusColors get _st => Theme.of(this).extension<StatusColors>()!;
+  AppColors get _ap => Theme.of(this).extension<AppColors>()!;
+
+  Color get surface => _cs.surface;
+  Color get onSurface => _cs.onSurface;
+  Color get surfaceContainerLowest => _cs.surfaceContainerLowest;
+  Color get surfaceContainerLow => _cs.surfaceContainerLow;
+  Color get surfaceContainer => _cs.surfaceContainer;
+  Color get surfaceContainerHigh => _cs.surfaceContainerHigh;
+  Color get surfaceVariant => _cs.surfaceContainerHighest;
+  Color get onSurfaceVariant => _cs.onSurfaceVariant;
+  Color get outline => _cs.outline;
+  Color get outlineVariant => _cs.outlineVariant;
+  Color get error => _cs.error;
+  Color get onError => _cs.onError;
+  Color get errorContainer => _cs.errorContainer;
+  Color get onErrorContainer => _cs.onErrorContainer;
+  Color get primary => _cs.primary;
+  Color get onPrimary => _cs.onPrimary;
+  Color get primaryContainer => _cs.primaryContainer;
+  Color get onPrimaryContainer => _cs.onPrimaryContainer;
+  Color get secondary => _cs.secondary;
+  Color get onSecondary => _cs.onSecondary;
+  Color get secondaryContainer => _cs.secondaryContainer;
+  Color get onSecondaryContainer => _cs.onSecondaryContainer;
+  Color get tertiary => _cs.tertiary;
+
+  Color get success => _st.success;
+  Color get warning => _st.warning;
+  Color get neutralGray => _ap.neutralGray;
+  Color get primaryBlue => _ap.primaryBlue;
+  Color get qrOut => _ap.qrOut;
+  Color get qrIn => _ap.qrIn;
+  Color get surfaceNavy => _ap.surfaceNavy;
+}
+
 class QuickpassTheme {
   static final TextTheme _lightTextTheme = GoogleFonts.interTextTheme();
   static final TextTheme _darkTextTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
@@ -94,11 +261,19 @@ class QuickpassTheme {
         onErrorContainer: QuickpassColors.onErrorContainer,
         surface: QuickpassColors.surface,
         onSurface: QuickpassColors.onSurface,
+        surfaceContainerLowest: QuickpassColors.surfaceContainerLowest,
+        surfaceContainerLow: QuickpassColors.surfaceContainerLow,
+        surfaceContainer: QuickpassColors.surfaceContainer,
+        surfaceContainerHigh: QuickpassColors.surfaceContainerHigh,
         surfaceContainerHighest: QuickpassColors.surfaceVariant,
         onSurfaceVariant: QuickpassColors.onSurfaceVariant,
         outline: QuickpassColors.outline,
         outlineVariant: QuickpassColors.outlineVariant,
       ),
+      extensions: const [
+        StatusColors.light,
+        AppColors.light,
+      ],
       scaffoldBackgroundColor: QuickpassColors.background,
 
       appBarTheme: AppBarTheme(
@@ -269,11 +444,18 @@ class QuickpassTheme {
         onErrorContainer: QuickpassColors.darkOnErrorContainer,
         surface: QuickpassColors.darkSurface,
         onSurface: QuickpassColors.darkOnSurface,
+        surfaceContainerLowest: QuickpassColors.darkSurfaceContainerLowest,
+        surfaceContainer: QuickpassColors.darkSurfaceContainer,
+        surfaceContainerHigh: QuickpassColors.darkSurfaceContainerHigh,
         surfaceContainerHighest: QuickpassColors.darkSurfaceVariant,
         onSurfaceVariant: QuickpassColors.darkOnSurfaceVariant,
         outline: QuickpassColors.darkOutline,
         outlineVariant: QuickpassColors.darkOutlineVariant,
       ),
+      extensions: const [
+        StatusColors.dark,
+        AppColors.dark,
+      ],
       scaffoldBackgroundColor: QuickpassColors.darkBackground,
 
       appBarTheme: AppBarTheme(
