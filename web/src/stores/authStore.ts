@@ -14,6 +14,7 @@ interface AuthState {
   logout: () => Promise<void>
   loadUser: () => Promise<void>
   updateProfile: (data: { full_name?: string; position?: string; email?: string; password?: string }) => Promise<boolean>
+  updateProfilePhoto: (file: File) => Promise<boolean>
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -34,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
           })
           const data = res.data
           if (data.success) {
-            Cookies.set("quickpass_token", data.token, { expires: 7, sameSite: "strict" })
+            Cookies.set("ZNCQP_token", data.token, { expires: 7, sameSite: "strict" })
             set({
               user: data.user,
               token: data.token,
@@ -56,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           await api.post("/auth/logout")
         } catch (_) {}
-        Cookies.remove("quickpass_token")
+        Cookies.remove("ZNCQP_token")
         set({ user: null, token: null, isAuthenticated: false, isLoading: false })
       },
 
@@ -69,7 +70,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await api.get("/auth/profile")
           set({ user: res.data.data, isAuthenticated: true, isLoading: false })
         } catch (_) {
-          Cookies.remove("quickpass_token")
+          Cookies.remove("ZNCQP_token")
           set({ user: null, token: null, isAuthenticated: false, isLoading: false })
         }
       },
@@ -83,9 +84,23 @@ export const useAuthStore = create<AuthState>()(
           return false
         }
       },
+
+      updateProfilePhoto: async (file) => {
+        try {
+          const formData = new FormData()
+          formData.append("photo", file)
+          const res = await api.post("/auth/profile/photo", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          })
+          set({ user: { ...get().user, ...res.data.data } })
+          return true
+        } catch (err: any) {
+          return false
+        }
+      },
     }),
     {
-      name: "quickpass-auth",
+      name: "ZNCQP-auth",
       partialize: (state) => ({ token: state.token }),
     }
   )

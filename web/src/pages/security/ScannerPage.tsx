@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { useNavigate, Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Scan, QrCode, Camera, CameraOff, Loader2, History, Shield, CheckCircle, LogOut } from "lucide-react"
+import { Scan, QrCode, Camera, CameraOff, Loader2, History, CheckCircle, LogOut, LayoutDashboard } from "lucide-react"
 import jsQR from "jsqr"
 import { toast } from "sonner"
 import { useScanStore } from "@/stores/scanStore"
@@ -57,11 +57,14 @@ export default function ScannerPage() {
 
   const doScan = useCallback(async (data: string) => {
     if (!data.trim()) return
+    console.log("[Scan] doScan called with data length:", data.length)
     setScanState("confirmed")
     const ok = await validateScan(data.trim())
+    console.log("[Scan] validateScan returned:", ok)
     if (ok) navigate("/security/result", { replace: true })
     else {
       const err = useScanStore.getState().error
+      console.log("[Scan] error from store:", err)
       if (err) toast.error(err)
       navigate("/security/result", { replace: true })
     }
@@ -106,9 +109,21 @@ export default function ScannerPage() {
         }
         if (!raw) {
           octx.drawImage(vid, 0, 0, scanW, scanH)
-          const imageData = octx.getImageData(0, 0, scanW, scanH)
-          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" })
+          let imageData = octx.getImageData(0, 0, scanW, scanH)
+          let code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" })
           raw = code?.data || null
+
+          if (!raw) {
+            octx.clearRect(0, 0, scanW, scanH)
+            octx.save()
+            octx.translate(scanW, 0)
+            octx.scale(-1, 1)
+            octx.drawImage(vid, 0, 0, scanW, scanH)
+            octx.restore()
+            imageData = octx.getImageData(0, 0, scanW, scanH)
+            code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" })
+            raw = code?.data || null
+          }
         }
         if (raw && !lockedRef.current) {
           if (detectedRef.current === raw) {
@@ -165,16 +180,14 @@ export default function ScannerPage() {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <span className="text-base font-bold text-primary">Quickpass</span>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Security Scanner</p>
-          </div>
+          <img src="/logo.png" alt="ZANECO QuickPass" className="h-8 w-auto" />
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Security Scanner</p>
         </div>
         <div className="flex items-center gap-2">
           {user && <span className="hidden text-sm text-muted-foreground sm:block">{user.full_name}</span>}
+          <Link to="/employee">
+            <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
+          </Link>
           <Link to="/security/history">
             <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
           </Link>
@@ -183,11 +196,11 @@ export default function ScannerPage() {
       </header>
 
       <main className="flex flex-1 items-start justify-center p-6">
-        <div className="w-full max-w-sm space-y-6">
+        <div className="w-full max-w-sm space-y-4">
 
           {/* Scanner Card */}
-          <div className="card-accent">
-            <div className="p-5">
+          <div className="panel-card">
+            <div className="p-4">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xs font-black uppercase tracking-[0.1em] text-muted-foreground">Camera Scanner</h2>
                 {cameraActive && isIdle && (
@@ -251,7 +264,7 @@ export default function ScannerPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                      <div className="relative size-48">
+                      <div className={`relative size-48 ${cameraActive && isIdle ? "amber-border-glow" : ""}`}>
                         <div className="absolute top-0 left-0 h-7 w-7 border-t-[3px] border-l-[3px] rounded-tl border-primary" />
                         <div className="absolute top-0 right-0 h-7 w-7 border-t-[3px] border-r-[3px] rounded-tr border-primary" />
                         <div className="absolute bottom-0 left-0 h-7 w-7 border-b-[3px] border-l-[3px] rounded-bl border-primary" />
@@ -266,7 +279,7 @@ export default function ScannerPage() {
                         </span>
                       )}
                       {isDetected && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 px-3 py-1.5 text-[11px] font-semibold text-success">
                           <CheckCircle className="h-3.5 w-3.5" />
                           QR found — scanning…
                         </span>
@@ -304,8 +317,8 @@ export default function ScannerPage() {
           </div>
 
           {/* Manual Entry */}
-          <div className="card-accent">
-            <div className="p-5">
+          <div className="panel-card">
+            <div className="p-4">
               <form onSubmit={handleManual} className="space-y-3">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">Paste QR Code Data</label>

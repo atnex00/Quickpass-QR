@@ -63,7 +63,7 @@ export default function RequestLeavePage() {
   }
 
   return (
-    <div className="page-enter mx-auto max-w-2xl space-y-6">
+    <div className="page-enter mx-auto max-w-2xl space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Request Leave</h1>
         <p className="text-muted-foreground">Submit a new temporary leave request</p>

@@ -1,116 +1,171 @@
-import { NavLink, useNavigate } from "react-router"
+import { useState, useEffect } from "react"
+import { NavLink, useNavigate, Link } from "react-router"
 import {
-  LayoutDashboard, Clock, QrCode, Users, Building2, BarChart3,
+  LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, History, User,
+  Scan, History, User, BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
-import { useState } from "react"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
+import MobileBottomBar from "./MobileBottomBar"
 
-const employeeLinks = [
-  { to: "/employee", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/employee/request", icon: FileText, label: "Request Leave" },
-  { to: "/employee/history", icon: Clock, label: "Leave History" },
-  { to: "/employee/profile", icon: User, label: "My Profile" },
-]
-
-const supervisorLinks = [
-  { to: "/supervisor", icon: UserCheck, label: "Supervisor Dashboard" },
-  { to: "/supervisor/pending", icon: ShieldCheck, label: "Pending Requests" },
-]
-
-const adminLinks = [
-  { to: "/admin/employees", icon: Users, label: "Employees" },
-  { to: "/admin/departments", icon: Building2, label: "Departments" },
-  { to: "/admin/reports", icon: BarChart3, label: "Reports" },
-]
-
-const scannerLinks = [
-  { to: "/security/scan", icon: Scan, label: "Scan QR" },
-  { to: "/security/history", icon: History, label: "Scan History" },
+const sections = [
+  {
+    label: "Operations",
+    links: [
+      { to: "/employee", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/security/scan", icon: Scan, label: "Gate Scanner" },
+    ],
+  },
+  {
+    label: "Requests",
+    links: [
+      { to: "/employee/request", icon: FileText, label: "Request Leave" },
+      { to: "/employee/history", icon: Clock, label: "Leave History" },
+    ],
+  },
+  {
+    label: "Management",
+    links: [
+      { to: "/supervisor", icon: UserCheck, label: "Supervisor" },
+      { to: "/supervisor/pending", icon: ShieldCheck, label: "Pending" },
+    ],
+  },
+  {
+    label: "Admin",
+    links: [
+      { to: "/admin/employees", icon: Users, label: "Employees" },
+      { to: "/admin/departments", icon: Building2, label: "Departments" },
+      { to: "/admin/reports", icon: BarChart3, label: "Reports" },
+    ],
+  },
+  {
+    label: "Help",
+    links: [
+      { to: "/guides", icon: BookOpen, label: "User Guide" },
+    ],
+  },
 ]
 
 export default function Sidebar() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
 
   const handleLogout = async () => {
     await logout()
     navigate("/login")
   }
 
-  const baseLinks = user?.is_admin
-    ? [...employeeLinks, ...supervisorLinks, ...adminLinks, ...scannerLinks]
-    : user?.is_supervisor
-      ? [...employeeLinks, ...supervisorLinks, ...scannerLinks]
-      : [...employeeLinks, ...scannerLinks]
+  const fmt = (n: number) => n.toString().padStart(2, "0")
+  const h = time.getHours(), m = time.getMinutes()
+
+  const isAdmin = !!user?.is_admin
+  const isSupervisor = !!user?.is_supervisor
+  const isSecurity = !!user?.is_security
+
+  const visibleSections = sections.filter((s) => {
+    if (s.label === "Admin" && !isAdmin) return false
+    if (s.label === "Management" && !isSupervisor && !isAdmin) return false
+    if (s.label === "Operations" && isSecurity) return s.links.filter(l => l.to === "/security/scan").length > 0
+    return true
+  })
+
+  const mobileNavItems = visibleSections
+    .flatMap((s) => s.links)
+    .filter((link) => {
+      if (link.to.startsWith("/security") && !isSecurity && !isAdmin) return false
+      if (link.to.startsWith("/supervisor") && !isSupervisor && !isAdmin) return false
+      if (link.to.startsWith("/admin") && !isAdmin) return false
+      return true
+    })
+
+  const isMobile = useMediaQuery("(max-width: 767px)")
+
+  if (isMobile) {
+    return <MobileBottomBar items={mobileNavItems} />
+  }
 
   return (
     <aside className={cn(
       "flex flex-col border-r border-border bg-card transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0",
-      collapsed ? "w-16" : "w-64"
+      collapsed ? "w-14" : "w-56"
     )}>
-      {/* Logo */}
+      {/* Logo + clock */}
       <div className={cn(
-        "flex h-16 items-center gap-3 border-b border-border px-4 transition-all duration-300",
-        collapsed && "justify-center px-2"
+        "flex items-center border-b border-border transition-all duration-300",
+        collapsed ? "h-14 justify-center px-1" : "h-14 gap-2 px-3"
       )}>
         {!collapsed ? (
           <>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg sidebar-active shadow-sm">
-              <QrCode className="h-5 w-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-lg font-black text-primary block leading-none">Quickpass</span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground leading-tight mt-0.5 truncate">
-                {user?.is_admin ? "Admin Console" : user?.is_supervisor ? "Supervisor Portal" : "Employee Portal"}
-              </p>
-            </div>
+            <img src="/logo.png" alt="ZANECO QuickPass" className="h-7 w-auto shrink-0" />
+            <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60 ml-auto">{fmt(h)}:{fmt(m)}</span>
           </>
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg sidebar-active shadow-sm">
-            <QrCode className="h-5 w-5 text-white" />
-          </div>
+          <img src="/app-icon.png" alt="ZANECO QuickPass" className="h-6 w-6" />
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn("rounded-lg p-1.5 hover:bg-accent transition-all duration-300", collapsed && "ml-0")}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </button>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-        {baseLinks.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) =>
-              cn(
-                "sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-all duration-200",
-                isActive
-                  ? "sidebar-active text-white shadow-sm"
-                  : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
-              )
-            }
-          >
-            <link.icon className="h-5 w-5 shrink-0" />
-            {!collapsed && <span className="truncate">{link.label}</span>}
-          </NavLink>
+      {/* Nav sections */}
+      <nav className="flex-1 overflow-y-auto">
+        {visibleSections.map((section) => (
+          <div key={section.label}>
+            {!collapsed && <p className="sidebar-section-label">{section.label}</p>}
+            {section.links
+              .filter((link) => {
+                if (link.to.startsWith("/security") && !isSecurity && !isAdmin) return false
+                if (link.to.startsWith("/supervisor") && !isSupervisor && !isAdmin) return false
+                if (link.to.startsWith("/admin") && !isAdmin) return false
+                return true
+              })
+              .map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.to === "/employee" || link.to === "/supervisor"}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 mx-2 rounded-sm px-2.5 py-2 text-xs font-semibold transition-all duration-200",
+                      isActive ? "sidebar-active text-primary" : "sidebar-inactive"
+                    )
+                  }
+                >
+                  <link.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{link.label}</span>}
+                </NavLink>
+              ))}
+          </div>
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t border-border p-3">
+      {/* Bottom controls */}
+      <div className="border-t border-border p-2">
+        <Link
+          to="/employee/profile"
+          className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground"
+        >
+          <User className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Profile</span>}
+        </Link>
         <button
           onClick={handleLogout}
-          className="sidebar-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:bg-accent/60 hover:text-destructive"
+          className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-destructive"
         >
-          <LogOut className="h-5 w-5 shrink-0" />
+          <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Logout</span>}
+        </button>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex w-full items-center justify-center rounded-sm py-1.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+        >
+          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
         </button>
       </div>
     </aside>

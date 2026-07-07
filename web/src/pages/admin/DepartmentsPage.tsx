@@ -63,7 +63,7 @@ export default function DepartmentsPage() {
   }
 
   return (
-    <div className="page-enter space-y-6">
+    <div className="page-enter space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Departments</h1>

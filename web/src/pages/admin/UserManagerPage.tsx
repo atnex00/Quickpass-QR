@@ -214,7 +214,7 @@ export default function UserManagerPage() {
   const pages = Math.ceil(total / 20)
 
   return (
-    <div className="page-enter space-y-6">
+    <div className="page-enter space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">User Manager</h1>
@@ -393,12 +393,12 @@ export default function UserManagerPage() {
                   <TableCell>
                     <div className="flex gap-1 flex-wrap">
                       {emp.is_admin && <Badge variant="default" className="text-xs">Admin</Badge>}
-                      {emp.is_security && <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300 bg-emerald-50">Security</Badge>}
+                      {emp.is_security && <Badge variant="outline" className="text-xs text-success border-success/30 bg-success/10">Security</Badge>}
                       {emp.is_supervisor && <Badge variant="secondary" className="text-xs">Supervisor</Badge>}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={emp.is_active ? "default" : "outline"} className={emp.is_active ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : ""}>
+                    <Badge variant={emp.is_active ? "default" : "outline"} className={emp.is_active ? "bg-success/15 text-success" : ""}>
                       {emp.is_active ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
@@ -414,13 +414,13 @@ export default function UserManagerPage() {
                         {emp.is_supervisor ? <UserCheck className="h-4 w-4 text-secondary" /> : <UserX className="h-4 w-4" />}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleToggleActive(emp)} title={emp.is_active ? "Deactivate" : "Activate"}>
-                        {emp.is_active ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
+                        {emp.is_active ? <CheckCircle2 className="h-4 w-4 text-success" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => openPassword(emp)} title="Reset password">
                         <KeyRound className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleDeleteEmployee(emp.employee_id)} title="Delete employee">
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                   </TableCell>

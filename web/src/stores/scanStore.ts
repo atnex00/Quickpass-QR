@@ -22,11 +22,15 @@ export const useScanStore = create<ScanState>((set) => ({
   validateScan: async (qrData) => {
     set({ isLoading: true, error: null, lastResult: null })
     try {
+      console.log("[Scan] Sending to /scan/validate...")
       const res = await api.post("/scan/validate", { qr_data: qrData })
+      console.log("[Scan] Success:", res.data)
       set({ lastResult: res.data, isLoading: false })
       return true
     } catch (err: any) {
-      const msg = err.response?.data?.message || "Could not validate QR code"
+      const status = err.response?.status
+      const msg = err.response?.data?.message || err.message || "Could not validate QR code"
+      console.log(`[Scan] Error (${status}):`, msg)
       set({ error: msg, lastResult: { success: false, message: msg }, isLoading: false })
       return false
     }

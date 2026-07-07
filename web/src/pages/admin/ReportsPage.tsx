@@ -17,7 +17,7 @@ import {
 } from "recharts"
 import { format } from "date-fns"
 
-const COLORS = ["#F59E0B", "#8B5CF6", "#EF4444", "#10B981", "#3B82F6"]
+const COLORS = ["#f59e0b", "#0d9488", "#dc2626", "#fbbf24", "#a8a29e"]
 
 export default function ReportsPage() {
   const [deptData, setDeptData] = useState<any[]>([])
@@ -54,7 +54,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Reports</h1>
         <p className="text-muted-foreground">Department-wise leave statistics</p>
@@ -68,14 +68,14 @@ export default function ReportsPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="Pending" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Approved" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Rejected" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Completed" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Approved" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Rejected" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Completed" fill="#fbbf24" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -131,10 +131,10 @@ export default function ReportsPage() {
                   <tr key={d.department_id} className="border-b last:border-0">
                     <td className="py-3 font-medium">{d.department_name}</td>
                     <td className="py-3">{d.total_requests}</td>
-                    <td className="py-3 text-orange-600">{d.pending || 0}</td>
-                    <td className="py-3 text-purple-600">{d.approved || 0}</td>
-                    <td className="py-3 text-red-600">{d.rejected || 0}</td>
-                    <td className="py-3 text-emerald-600">{d.completed || 0}</td>
+                    <td className="py-3 text-[#f59e0b]">{d.pending || 0}</td>
+                    <td className="py-3 text-[#0d9488]">{d.approved || 0}</td>
+                    <td className="py-3 text-destructive">{d.rejected || 0}</td>
+                    <td className="py-3 text-[#fbbf24]">{d.completed || 0}</td>
                   </tr>
                 ))}
               </tbody>

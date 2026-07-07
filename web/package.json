@@ -1,5 +1,5 @@
 {
-  "name": "quickpass-web",
+  "name": "zaneco-quickpass-web",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "tunnel": "ngrok http 8080 --domain="
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -34,6 +35,7 @@
     "qr-code-styling": "^1.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-easy-crop": "^6.1.0",
     "react-hook-form": "^7.54.2",
     "react-router": "^7.1.1",
     "recharts": "^2.15.0",
@@ -52,9 +54,13 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
+    "ngrok": "^5.0.0-beta.2",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.7.2",
     "vite": "^6.0.5"
+  },
+  "allowScripts": {
+    "ngrok@5.0.0-beta.2": true
   }
 }

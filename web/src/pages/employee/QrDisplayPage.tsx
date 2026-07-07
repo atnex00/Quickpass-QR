@@ -1,26 +1,44 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams } from "react-router"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import QrDisplay from "@/components/shared/QrDisplay"
 import { formatDate, formatTime } from "@/lib/utils"
 import type { LeaveRequest } from "@/types"
 import api from "@/lib/api"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { Loader2, ArrowLeft, RefreshCw, QrCode } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router"
+
+const POLL_INTERVAL = 5000
 
 export default function QrDisplayPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [leave, setLeave] = useState<LeaveRequest | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
+  const fetchLeave = (showLoading = true) => {
     if (!id) return
+    if (showLoading) setLoading(true)
+    setError(null)
     api.get(`/leave/${id}`)
       .then((res) => setLeave(res.data.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .catch((err) => {
+        const msg = err.response?.data?.message || err.message || "Could not load leave request"
+        setError(msg)
+      })
+      .finally(() => { if (showLoading) setLoading(false) })
+  }
+
+  useEffect(() => {
+    fetchLeave()
+
+    pollRef.current = setInterval(() => fetchLeave(false), POLL_INTERVAL)
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
   }, [id])
 
   if (loading) {
@@ -31,13 +49,35 @@ export default function QrDisplayPage() {
     )
   }
 
-  if (!leave) {
+  if (error) {
     return (
-      <div className="space-y-4">
+      <div className="page-enter space-y-4">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <p className="text-center text-muted-foreground">Leave request not found</p>
+        <div className="flex flex-col items-center gap-4 py-12 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded border border-destructive/30 bg-destructive/5">
+            <QrCode className="h-7 w-7 text-destructive/60" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-foreground">Could not load this pass</p>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </div>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fetchLeave(true)}>
+            <RefreshCw className="h-3.5 w-3.5" /> Try again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!leave) {
+    return (
+      <div className="page-enter space-y-4">
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
+        <p className="text-center text-muted-foreground py-12">Leave request not found</p>
       </div>
     )
   }
@@ -45,7 +85,7 @@ export default function QrDisplayPage() {
   const dateStr = leave.leave_date.split('T')[0]
 
   return (
-    <div className="page-enter mx-auto max-w-lg space-y-6">
+    <div className="page-enter mx-auto max-w-lg space-y-4">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
@@ -56,11 +96,11 @@ export default function QrDisplayPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Leave Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+      <div className="panel-card">
+        <div className="panel-card-header">
+          <h3>Leave Details</h3>
+        </div>
+        <div className="panel-card-body space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Date</span>
             <span className="font-medium">{formatDate(dateStr)}</span>
@@ -73,8 +113,8 @@ export default function QrDisplayPage() {
             <span className="text-muted-foreground">Reason</span>
             <span className="font-medium">{leave.reason}</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {leave.out_qr_code && (
         <QrDisplay
@@ -105,33 +145,18 @@ export default function QrDisplayPage() {
       )}
 
       {!leave.out_qr_code && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
-            <QrCode className="h-16 w-16" />
+        <div className="panel-card">
+          <div className="panel-card-body flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
+            <QrCode className="h-16 w-16 text-muted-foreground/30" />
             <p className="text-base font-medium text-foreground">QR codes not available yet</p>
             <p className="text-sm">QR codes appear once a supervisor approves your request</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <p className="text-center text-xs text-muted-foreground">
         QR codes are valid ±15 minutes from scheduled time
       </p>
     </div>
-  )
-}
-
-function QrCode(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="6" height="6"/>
-      <rect x="15" y="3" width="6" height="6"/>
-      <rect x="3" y="15" width="6" height="6"/>
-      <line x1="21" y1="15" x2="21" y2="21"/>
-      <line x1="15" y1="21" x2="21" y2="21"/>
-      <line x1="15" y1="15" x2="15" y2="17"/>
-      <line x1="17" y1="15" x2="17" y2="19"/>
-      <line x1="19" y1="17" x2="19" y2="21"/>
-    </svg>
   )
 }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router"
 import { useScanStore } from "@/stores/scanStore"
 import { useAuthStore } from "@/stores/authStore"
 import { Button } from "@/components/ui/button"
-import { Loader2, Scan, Shield, LogOut, ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react"
+import { Loader2, Scan, LogOut, ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react"
 import { formatDateTime } from "@/lib/utils"
 
 export default function ScanHistoryPage() {
@@ -23,13 +23,8 @@ export default function ScanHistoryPage() {
           <button onClick={() => navigate("/security/scan")} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <span className="text-base font-bold text-primary">Scan <span className="text-secondary">History</span></span>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Recent Gate Scans</p>
-          </div>
+          <img src="/logo.png" alt="ZANECO QuickPass" className="h-7 w-auto" />
+          <span className="text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground/60 leading-none pt-0.5">/ History</span>
         </div>
         <div className="flex items-center gap-2">
           {user && <span className="hidden text-sm text-muted-foreground sm:block">{user.full_name}</span>}
@@ -53,7 +48,7 @@ export default function ScanHistoryPage() {
               </div>
               <div>
                 <h3>No scans yet</h3>
-                <p>Scan your first QR code to see it here</p>
+                <p>Point your camera at a QR code to log your first gate scan</p>
               </div>
               <button onClick={() => navigate("/security/scan")} className="btn-primary">
                 <Scan className="h-4 w-4" /> Scan QR
@@ -76,8 +71,8 @@ export default function ScanHistoryPage() {
                     <div className="flex items-start gap-3">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold shrink-0 ${
                         log.is_valid
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-success/20 text-success"
+                          : "bg-destructive/20 text-destructive"
                       }`}>
                         {log.employee_name?.charAt(0) || "?"}
                       </div>
@@ -91,10 +86,10 @@ export default function ScanHistoryPage() {
                               {log.employee_id} &middot; {log.qr_type} scan
                             </p>
                           </div>
-                          <span className={`inline-flex items-center gap-1 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          <span className={`inline-flex items-center gap-1 shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
                             log.is_valid
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-red-100 text-red-700"
+                              ? "border-success/40 text-success"
+                              : "border-destructive/40 text-destructive"
                           }`}>
                             {log.is_valid
                               ? <><CheckCircle className="h-3 w-3" /> Valid</>

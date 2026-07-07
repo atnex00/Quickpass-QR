@@ -40,7 +40,7 @@ export default function LeaveHistoryPage() {
   ]
 
   return (
-    <div className="page-enter space-y-6">
+    <div className="page-enter space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Leave History</h1>
         <p className="text-muted-foreground">View all your leave requests</p>

@@ -18,6 +18,7 @@ import ScannerPage from "@/pages/security/ScannerPage"
 import ScanResultPage from "@/pages/security/ScanResultPage"
 import ScanHistoryPage from "@/pages/security/ScanHistoryPage"
 import SecurityShell from "@/components/layout/SecurityShell"
+import GuidesPage from "@/pages/guides/GuidesPage"
 
 function AppRoutes() {
   const { loadUser } = useAuthStore()
@@ -31,6 +32,9 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<AppLayout />}>
+        {/* Guides (all roles) */}
+        <Route path="/guides" element={<GuidesPage />} />
+
         {/* Employee */}
         <Route path="/employee" element={<EmployeeDashboard />} />
         <Route path="/employee/request" element={<RequestLeavePage />} />

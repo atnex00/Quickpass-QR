@@ -15,92 +15,58 @@ export default function SupervisorDashboard() {
   }, [])
 
   return (
-    <div className="page-enter space-y-6">
+    <div className="page-enter space-y-3">
       <div>
-        <h1 className="text-2xl font-bold">Supervisor Dashboard</h1>
-        <p className="text-muted-foreground">{user?.department_name}</p>
+        <h1 className="text-2xl font-bold font-display">Supervisor Dashboard</h1>
+        <p className="text-sm text-muted-foreground">{user?.department_name}</p>
       </div>
 
-      <Card className="bg-primary text-primary-foreground">
-        <CardContent className="flex items-center gap-6 p-8">
-          <div className="rounded-xl bg-white/15 p-4">
-            <ShieldCheck className="h-10 w-10" />
+      <div className="panel-card border-l-4 border-l-primary">
+        <div className="panel-card-body flex items-center gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded bg-primary/15">
+            <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-4xl font-bold">{pendingRequests.length}</p>
-            <p className="text-primary-foreground/70">Pending Requests</p>
+            <p className="text-3xl font-black text-foreground">{pendingRequests.length}</p>
+            <p className="text-[11px] font-semibold text-muted-foreground">Pending Requests</p>
           </div>
           <Link to="/supervisor/pending">
-            <Button variant="secondary" className="gap-2">
-              Review <ArrowRight className="h-4 w-4" />
+            <Button variant="outline" className="btn-secondary text-[10px] py-2">
+              Review <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardContent className="p-6">
-            <Link
-              to="/supervisor/pending"
-              className="flex items-center gap-4"
-            >
-              <div className="rounded-lg bg-orange-100 p-3">
-                <ShieldCheck className="h-6 w-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="font-semibold">Review Requests</p>
-                <p className="text-sm text-muted-foreground">
-                  {pendingRequests.length} pending
-                </p>
-              </div>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-lg bg-secondary/20 p-3">
-                <CalendarDays className="h-6 w-6 text-secondary" />
-              </div>
-              <div>
-                <p className="font-semibold">Team Calendar</p>
-                <p className="text-sm text-muted-foreground">View team schedule</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
 
       {pendingRequests.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="mb-3 font-semibold">Recent Pending Requests</h3>
-            <div className="space-y-2">
-              {pendingRequests.slice(0, 5).map((req) => (
-                <div
-                  key={req.leave_id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                      {req.employee_name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{req.employee_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {req.start_time} - {req.end_time}
-                      </p>
-                    </div>
+        <div className="panel-card">
+          <div className="panel-card-header">
+            <h3>Recent Pending Requests</h3>
+          </div>
+          <div className="panel-card-body space-y-1">
+            {pendingRequests.slice(0, 5).map((req) => (
+              <div
+                key={req.leave_id}
+                className="flex items-center justify-between rounded px-3 py-2 border border-transparent hover:border-border transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                    {req.employee_name.charAt(0)}
                   </div>
-                  <Link to="/supervisor/pending">
-                    <Button variant="ghost" size="sm">Review</Button>
-                  </Link>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">{req.employee_name}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {req.start_time} - {req.end_time}
+                    </p>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <Link to="/supervisor/pending">
+                  <Button variant="ghost" size="sm" className="text-[10px] h-7">Review</Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )
