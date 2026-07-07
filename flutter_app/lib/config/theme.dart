@@ -70,7 +70,10 @@ class QuickpassTheme {
   static final TextTheme _lightTextTheme = GoogleFonts.interTextTheme();
   static final TextTheme _darkTextTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
 
-  static ThemeData get light {
+  static final ThemeData light = _buildLight();
+  static final ThemeData dark = _buildDark();
+
+  static ThemeData _buildLight() {
     return ThemeData(
       textTheme: _lightTextTheme,
       useMaterial3: true,
@@ -248,7 +251,7 @@ class QuickpassTheme {
     );
   }
 
-  static ThemeData get dark {
+  static ThemeData _buildDark() {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,

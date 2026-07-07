@@ -83,9 +83,9 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
           ],
         ),
       ),
-    ),
-  );
-}
+      ),
+    );
+  }
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -158,6 +158,8 @@ class _OverviewTabState extends State<_OverviewTab> {
   Map<String, dynamic>? _reportData;
   List<dynamic>? _departmentReport;
   bool _isLoading = true;
+  Map<String, int> _cachedStatusCounts = {};
+  int _employeeCount = 0;
 
   @override
   void initState() {
@@ -174,66 +176,33 @@ class _OverviewTabState extends State<_OverviewTab> {
       _reportData = await _api.getReports();
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
+      _computeCounts();
     } catch (_) {}
     if (mounted) setState(() => _isLoading = false);
   }
 
-  Map<String, int> get _statusCounts {
-    if (_reportData == null) return {};
+  void _computeCounts() {
+    _cachedStatusCounts = {};
+    _employeeCount = 0;
+    if (_reportData == null) return;
     final data = _reportData!['data'] as List? ?? [];
-    final counts = <String, int>{};
+    final ids = <String>{};
     for (final entry in data) {
       final s = entry['status'] as String? ?? 'unknown';
-      counts[s] = (counts[s] ?? 0) + 1;
+      _cachedStatusCounts[s] = (_cachedStatusCounts[s] ?? 0) + 1;
+      final eid = entry['employee_id']?.toString();
+      if (eid != null) ids.add(eid);
     }
-    return counts;
+    _employeeCount = ids.length;
   }
 
-  int get _pendingCount => _statusCounts['pending'] ?? 0;
-  int get _approvedCount => _statusCounts['approved'] ?? 0;
-  int get _rejectedCount => _statusCounts['rejected'] ?? 0;
-  int get _completedCount => _statusCounts['completed'] ?? 0;
-  int get _activeCount => _statusCounts['active'] ?? 0;
-
-  int get _employeeCount {
-    if (_reportData == null) return 0;
-    final data = _reportData!['data'] as List? ?? [];
-    return data.map((e) => e['employee_id']).toSet().length;
-  }
+  int get _pendingCount => _cachedStatusCounts['pending'] ?? 0;
+  int get _approvedCount => _cachedStatusCounts['approved'] ?? 0;
+  int get _rejectedCount => _cachedStatusCounts['rejected'] ?? 0;
+  int get _completedCount => _cachedStatusCounts['completed'] ?? 0;
+  int get _activeCount => _cachedStatusCounts['active'] ?? 0;
 
   int get _departmentCount => _departmentReport?.length ?? 0;
-
-  Widget _buildPieChart() {
-    final sections = <PieChartSectionData>[];
-    final entries = [
-      ('Pending', _pendingCount, QuickpassColors.warning),
-      ('Approved', _approvedCount, QuickpassColors.primary),
-      ('Rejected', _rejectedCount, QuickpassColors.error),
-      ('Active', _activeCount, QuickpassColors.success),
-      ('Completed', _completedCount, QuickpassColors.secondary),
-    ];
-    for (final e in entries) {
-      if (e.$2 > 0) {
-        sections.add(PieChartSectionData(
-          value: e.$2.toDouble(),
-          title: '${e.$2}',
-          color: e.$3,
-          radius: 40,
-          titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
-        ));
-      }
-    }
-    if (sections.isEmpty) {
-      sections.add(PieChartSectionData(
-        value: 1,
-        title: '0',
-        color: QuickpassColors.neutralGray.withValues(alpha: 0.3),
-        radius: 40,
-        titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.neutralGray),
-      ));
-    }
-    return PieChart(PieChartData(sections: sections, centerSpaceRadius: 30));
-  }
 
   Widget _buildDepartmentTable() {
     if (_departmentReport == null || _departmentReport!.isEmpty) {
@@ -304,8 +273,7 @@ class _OverviewTabState extends State<_OverviewTab> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final userName = auth.user?.fullName ?? 'Admin';
+    final userName = context.select((AuthProvider a) => a.user?.fullName ?? 'Admin');
 
     return Scaffold(
       body: Stack(
@@ -317,284 +285,33 @@ class _OverviewTabState extends State<_OverviewTab> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: QuickpassColors.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: QuickpassColors.outlineVariant),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 32,
-                            backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
-                            child: Text(
-                              (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                                color: QuickpassColors.darkPrimary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Admin Control',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: QuickpassColors.outline,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  userName,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600,
-                                    color: QuickpassColors.onSurface,
-                                    height: 1.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: QuickpassColors.error.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.3)),
-                                  ),
-                                  child: const Text(
-                                    'Admin',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: QuickpassColors.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _AdminProfileCard(userName: userName),
                     const SizedBox(height: 16),
-
                     if (_isLoading)
                       const Padding(
                         padding: EdgeInsets.all(24),
                         child: Center(child: CircularProgressIndicator()),
                       )
                     else ...[
-                      Row(
-                        children: [
-                          _StatCard(
-                            icon: Icons.people,
-                            label: 'Employees',
-                            value: '$_employeeCount',
-                            color: QuickpassColors.secondary,
-                          ),
-                          const SizedBox(width: 8),
-                          _StatCard(
-                            icon: Icons.pending_actions,
-                            label: 'Pending',
-                            value: '$_pendingCount',
-                            color: QuickpassColors.warning,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          _StatCard(
-                            icon: Icons.verified_user,
-                            label: 'Active',
-                            value: '$_activeCount',
-                            color: QuickpassColors.success,
-                          ),
-                          const SizedBox(width: 8),
-                          _StatCard(
-                            icon: Icons.business,
-                            label: 'Departments',
-                            value: '$_departmentCount',
-                            color: QuickpassColors.primary,
-                          ),
-                        ],
+                      _OverviewStatGrid(
+                        employeeCount: _employeeCount,
+                        pendingCount: _pendingCount,
+                        activeCount: _activeCount,
+                        departmentCount: _departmentCount,
                       ),
                       const SizedBox(height: 24),
-
-                      const Text(
-                        'Quick Actions',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: QuickpassColors.onSurface,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.people,
-                              title: 'Manage Employees',
-                              subtitle: 'CRUD operations',
-                              onTap: () => _switchToTab(1),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.business,
-                              title: 'Departments',
-                              subtitle: 'Organize teams',
-                              onTap: () => _switchToTab(2),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.bar_chart,
-                              title: 'Reports',
-                              subtitle: 'View analytics',
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Scroll down to view leave breakdown')),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.settings,
-                              title: 'Settings',
-                              subtitle: 'Configuration',
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Settings coming soon')),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                      _QuickActionsSection(onSwitchTab: _switchToTab),
+                      const SizedBox(height: 24),
+                      const _SwitchViewSection(),
+                      const SizedBox(height: 24),
+                      _LeaveBreakdownSection(
+                        pendingCount: _pendingCount,
+                        approvedCount: _approvedCount,
+                        rejectedCount: _rejectedCount,
+                        activeCount: _activeCount,
+                        completedCount: _completedCount,
                       ),
                       const SizedBox(height: 24),
-
-                      const Text(
-                        'Switch View',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: QuickpassColors.onSurface,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.badge_outlined,
-                              title: 'Employee View',
-                              subtitle: 'Submit & track leaves',
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const EmployeeDashboard(),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.rate_review_outlined,
-                              title: 'Supervisor View',
-                              subtitle: 'Approve & reject leaves',
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SupervisorDashboard(),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.qr_code_scanner_outlined,
-                              title: 'Security View',
-                              subtitle: 'Scan QR codes at gates',
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ScannerScreen(),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(child: SizedBox.shrink()),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      const Text(
-                        'Leave Breakdown',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: QuickpassColors.onSurface,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: QuickpassColors.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: QuickpassColors.outlineVariant),
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 180,
-                              child: _buildPieChart(),
-                            ),
-                            const SizedBox(height: 16),
-_StatusLegend(label: 'Pending', count: _pendingCount, color: QuickpassColors.warning),
-                            const SizedBox(height: 4),
-                            _StatusLegend(label: 'Approved', count: _approvedCount, color: QuickpassColors.primary),
-                            const SizedBox(height: 4),
-                            _StatusLegend(label: 'Rejected', count: _rejectedCount, color: QuickpassColors.error),
-                            const SizedBox(height: 4),
-                            _StatusLegend(label: 'Active', count: _activeCount, color: QuickpassColors.success),
-                            const SizedBox(height: 4),
-                            _StatusLegend(label: 'Completed', count: _completedCount, color: QuickpassColors.secondary),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
                       const Text(
                         'Department Summary',
                         style: TextStyle(
@@ -615,6 +332,379 @@ _StatusLegend(label: 'Pending', count: _pendingCount, color: QuickpassColors.war
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AdminProfileCard extends StatelessWidget {
+  final String userName;
+  const _AdminProfileCard({required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: QuickpassColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: QuickpassColors.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
+            child: Text(
+              (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.darkPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Admin Control',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: QuickpassColors.outline,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: QuickpassColors.onSurface,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: QuickpassColors.error.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.3)),
+                  ),
+                  child: const Text(
+                    'Admin',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: QuickpassColors.error,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OverviewStatGrid extends StatelessWidget {
+  final int employeeCount;
+  final int pendingCount;
+  final int activeCount;
+  final int departmentCount;
+
+  const _OverviewStatGrid({
+    required this.employeeCount,
+    required this.pendingCount,
+    required this.activeCount,
+    required this.departmentCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _StatCard(
+              icon: Icons.people,
+              label: 'Employees',
+              value: '$employeeCount',
+              color: QuickpassColors.secondary,
+            ),
+            const SizedBox(width: 8),
+            _StatCard(
+              icon: Icons.pending_actions,
+              label: 'Pending',
+              value: '$pendingCount',
+              color: QuickpassColors.warning,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _StatCard(
+              icon: Icons.verified_user,
+              label: 'Active',
+              value: '$activeCount',
+              color: QuickpassColors.success,
+            ),
+            const SizedBox(width: 8),
+            _StatCard(
+              icon: Icons.business,
+              label: 'Departments',
+              value: '$departmentCount',
+              color: QuickpassColors.primary,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickActionsSection extends StatelessWidget {
+  final void Function(int) onSwitchTab;
+  const _QuickActionsSection({required this.onSwitchTab});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Quick Actions',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: QuickpassColors.onSurface,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.people,
+                title: 'Manage Employees',
+                subtitle: 'CRUD operations',
+                onTap: () => onSwitchTab(1),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.business,
+                title: 'Departments',
+                subtitle: 'Organize teams',
+                onTap: () => onSwitchTab(2),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.bar_chart,
+                title: 'Reports',
+                subtitle: 'View analytics',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Scroll down to view leave breakdown')),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.settings,
+                title: 'Settings',
+                subtitle: 'Configuration',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Settings coming soon')),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SwitchViewSection extends StatelessWidget {
+  const _SwitchViewSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Switch View',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: QuickpassColors.onSurface,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.badge_outlined,
+                title: 'Employee View',
+                subtitle: 'Submit & track leaves',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const EmployeeDashboard(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.rate_review_outlined,
+                title: 'Supervisor View',
+                subtitle: 'Approve & reject leaves',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SupervisorDashboard(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.qr_code_scanner_outlined,
+                title: 'Security View',
+                subtitle: 'Scan QR codes at gates',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ScannerScreen(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: SizedBox.shrink()),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _LeaveBreakdownSection extends StatelessWidget {
+  final int pendingCount;
+  final int approvedCount;
+  final int rejectedCount;
+  final int activeCount;
+  final int completedCount;
+
+  const _LeaveBreakdownSection({
+    required this.pendingCount,
+    required this.approvedCount,
+    required this.rejectedCount,
+    required this.activeCount,
+    required this.completedCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sections = <PieChartSectionData>[];
+    final entries = [
+      ('Pending', pendingCount, QuickpassColors.warning),
+      ('Approved', approvedCount, QuickpassColors.primary),
+      ('Rejected', rejectedCount, QuickpassColors.error),
+      ('Active', activeCount, QuickpassColors.success),
+      ('Completed', completedCount, QuickpassColors.secondary),
+    ];
+    for (final e in entries) {
+      if (e.$2 > 0) {
+        sections.add(PieChartSectionData(
+          value: e.$2.toDouble(),
+          title: '${e.$2}',
+          color: e.$3,
+          radius: 40,
+          titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+        ));
+      }
+    }
+    if (sections.isEmpty) {
+      sections.add(PieChartSectionData(
+        value: 1,
+        title: '0',
+        color: QuickpassColors.neutralGray.withValues(alpha: 0.3),
+        radius: 40,
+        titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.neutralGray),
+      ));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Leave Breakdown',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: QuickpassColors.onSurface,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: QuickpassColors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: QuickpassColors.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 180,
+                child: PieChart(PieChartData(sections: sections, centerSpaceRadius: 30)),
+              ),
+              const SizedBox(height: 16),
+              _StatusLegend(label: 'Pending', count: pendingCount, color: QuickpassColors.warning),
+              const SizedBox(height: 4),
+              _StatusLegend(label: 'Approved', count: approvedCount, color: QuickpassColors.primary),
+              const SizedBox(height: 4),
+              _StatusLegend(label: 'Rejected', count: rejectedCount, color: QuickpassColors.error),
+              const SizedBox(height: 4),
+              _StatusLegend(label: 'Active', count: activeCount, color: QuickpassColors.success),
+              const SizedBox(height: 4),
+              _StatusLegend(label: 'Completed', count: completedCount, color: QuickpassColors.secondary),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -786,7 +876,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           ],
         ),
       ),
-    );
+    ).then((_) {
+      idCtl.dispose();
+      nameCtl.dispose();
+      posCtl.dispose();
+      emailCtl.dispose();
+      passCtl.dispose();
+    });
   }
 
   void _showEditDialog(Map<String, dynamic> emp) {
@@ -961,7 +1057,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           ),
         ],
       ),
-    );
+    ).then((_) => ctl.dispose());
   }
 
   void _showPasswordResetDialog(Map<String, dynamic> emp) {
@@ -1007,7 +1103,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           ),
         ],
       ),
-    );
+    ).then((_) => passCtl.dispose());
   }
 
   void _confirmDelete(Map<String, dynamic> emp) async {
@@ -1573,6 +1669,7 @@ class _ReportsTabState extends State<_ReportsTab> {
   DateTime? _endDate;
   final _startCtl = TextEditingController();
   final _endCtl = TextEditingController();
+  List<BarChartGroupData>? _cachedBarGroups;
 
   @override
   void initState() {
@@ -1600,8 +1697,19 @@ class _ReportsTabState extends State<_ReportsTab> {
       _reportData = (await _api.getReports(type: params['type'], startDate: params['start_date'], endDate: params['end_date']))['data'] as List?;
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
+      _computeCounts();
     } catch (_) {}
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  void _computeCounts() {
+    _statusCounts = {};
+    _cachedBarGroups = null;
+    if (_reportData == null) return;
+    for (final entry in _reportData!) {
+      final s = entry['status'] as String? ?? 'unknown';
+      _statusCounts[s] = (_statusCounts[s] ?? 0) + 1;
+    }
   }
 
   Future<void> _pickDate(bool isStart) async {
@@ -1625,15 +1733,7 @@ class _ReportsTabState extends State<_ReportsTab> {
     }
   }
 
-  Map<String, int> get _statusCounts {
-    if (_reportData == null) return {};
-    final counts = <String, int>{};
-    for (final entry in _reportData!) {
-      final s = entry['status'] as String? ?? 'unknown';
-      counts[s] = (counts[s] ?? 0) + 1;
-    }
-    return counts;
-  }
+  Map<String, int> _statusCounts = {};
 
   double get _maxDeptCount {
     if (_departmentReport == null || _departmentReport!.isEmpty) return 10;
@@ -1648,8 +1748,9 @@ class _ReportsTabState extends State<_ReportsTab> {
   }
 
   List<BarChartGroupData> _buildBarGroups() {
+    if (_cachedBarGroups != null) return _cachedBarGroups!;
     if (_departmentReport == null) return [];
-    return List.generate(_departmentReport!.length, (i) {
+    _cachedBarGroups = List.generate(_departmentReport!.length, (i) {
       final d = _departmentReport![i];
       return BarChartGroupData(
         x: i,
@@ -1682,6 +1783,7 @@ class _ReportsTabState extends State<_ReportsTab> {
         barsSpace: 3,
       );
     });
+    return _cachedBarGroups!;
   }
 
   Widget _buildDepartmentBarChart() {
@@ -1832,86 +1934,29 @@ class _ReportsTabState extends State<_ReportsTab> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // ── Date Range & Filter ──
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _startCtl,
-                            readOnly: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Start Date',
-                              prefixIcon: Icon(Icons.calendar_today, size: 18),
-                              isDense: true,
-                            ),
-                            onTap: () => _pickDate(true),
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Text('to', style: TextStyle(color: QuickpassColors.neutralGray)),
-                        ),
-                        Expanded(
-                          child: TextField(
-                            controller: _endCtl,
-                            readOnly: true,
-                            decoration: const InputDecoration(
-                              labelText: 'End Date',
-                              prefixIcon: Icon(Icons.calendar_today, size: 18),
-                              isDense: true,
-                            ),
-                            onTap: () => _pickDate(false),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _FilterChip(label: 'All', selected: _reportType.isEmpty, onTap: () { setState(() => _reportType = ''); _loadReports(); }),
-                          const SizedBox(width: 8),
-                          _FilterChip(label: 'Department', selected: _reportType == 'department', onTap: () { setState(() => _reportType = 'department'); _loadReports(); }),
-                          const SizedBox(width: 8),
-                          _FilterChip(label: 'Employee', selected: _reportType == 'employee', onTap: () { setState(() => _reportType = 'employee'); _loadReports(); }),
-                        ],
-                      ),
+                    _ReportsFilterBar(
+                      startCtl: _startCtl,
+                      endCtl: _endCtl,
+                      reportType: _reportType,
+                      onPickDate: _pickDate,
+                      onFilterChanged: (type) {
+                        setState(() => _reportType = type);
+                        _loadReports();
+                      },
                     ),
                     const SizedBox(height: 16),
-
                     if (_isLoading)
                       const Center(child: Padding(
                         padding: EdgeInsets.all(24),
                         child: CircularProgressIndicator(),
                       ))
                     else ...[
-                      // ── Stats Summary ──
-                      Row(
-                        children: [
-                          _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${_statusCounts['pending'] ?? 0}', color: QuickpassColors.warning),
-                          const SizedBox(width: 8),
-                          _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${_statusCounts['approved'] ?? 0}', color: QuickpassColors.success),
-                          const SizedBox(width: 8),
-                          _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${_statusCounts['rejected'] ?? 0}', color: QuickpassColors.error),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          _StatCard(icon: Icons.timer, label: 'Active', value: '${_statusCounts['active'] ?? 0}', color: QuickpassColors.primary),
-                          const SizedBox(width: 8),
-                          _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${_statusCounts['completed'] ?? 0}', color: QuickpassColors.secondary),
-                          const SizedBox(width: 8),
-                          _StatCard(icon: Icons.business, label: 'Departments', value: '${_departmentReport?.length ?? 0}', color: QuickpassColors.tertiary),
-                        ],
+                      _ReportsStatSummary(
+                        statusCounts: _statusCounts,
+                        departmentCount: _departmentReport?.length ?? 0,
                       ),
                       const SizedBox(height: 16),
-
-                      // ── Department Bar Chart ──
                       _buildDepartmentBarChart(),
-
-                      // ── Leave List ──
                       const Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
                       const SizedBox(height: 8),
                       if (_reportData == null || _reportData!.isEmpty)
@@ -1930,67 +1975,182 @@ class _ReportsTabState extends State<_ReportsTab> {
                               Text('No leave requests found', style: TextStyle(color: QuickpassColors.neutralGray)),
                             ],
                           ),
-                        )
-                      else
-                        ...(_reportData!.take(50).map((entry) {
-                          final status = entry['status'] as String? ?? 'pending';
-                          final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: QuickpassColors.surfaceContainerLowest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: QuickpassColors.outlineVariant),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${entry['employee_name'] ?? 'Unknown'}',
-                                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
-                                        style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
-                                      ),
-                                      Text(
-                                        entry['reason'] ?? '',
-                                        style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                                  ),
-                                  child: Text(
-                                    AppConstants.statusLabels[status] ?? status,
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        })),
+                        ),
                     ],
                   ]),
                 ),
               ),
+              if (_reportData != null && _reportData!.isNotEmpty)
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final entry = _reportData![index];
+                        final status = entry['status'] as String? ?? 'pending';
+                        final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: QuickpassColors.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: QuickpassColors.outlineVariant),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${entry['employee_name'] ?? 'Unknown'}',
+                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
+                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
+                                    ),
+                                    Text(
+                                      entry['reason'] ?? '',
+                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                                ),
+                                child: Text(
+                                  AppConstants.statusLabels[status] ?? status,
+                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      childCount: _reportData!.length.clamp(0, 50),
+                    ),
+                  ),
+                ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ReportsFilterBar extends StatelessWidget {
+  final TextEditingController startCtl;
+  final TextEditingController endCtl;
+  final String reportType;
+  final void Function(bool isStart) onPickDate;
+  final void Function(String type) onFilterChanged;
+
+  const _ReportsFilterBar({
+    required this.startCtl,
+    required this.endCtl,
+    required this.reportType,
+    required this.onPickDate,
+    required this.onFilterChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: startCtl,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Start Date',
+                  prefixIcon: Icon(Icons.calendar_today, size: 18),
+                  isDense: true,
+                ),
+                onTap: () => onPickDate(true),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text('to', style: TextStyle(color: QuickpassColors.neutralGray)),
+            ),
+            Expanded(
+              child: TextField(
+                controller: endCtl,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'End Date',
+                  prefixIcon: Icon(Icons.calendar_today, size: 18),
+                  isDense: true,
+                ),
+                onTap: () => onPickDate(false),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _FilterChip(label: 'All', selected: reportType.isEmpty, onTap: () => onFilterChanged('')),
+              const SizedBox(width: 8),
+              _FilterChip(label: 'Department', selected: reportType == 'department', onTap: () => onFilterChanged('department')),
+              const SizedBox(width: 8),
+              _FilterChip(label: 'Employee', selected: reportType == 'employee', onTap: () => onFilterChanged('employee')),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportsStatSummary extends StatelessWidget {
+  final Map<String, int> statusCounts;
+  final int departmentCount;
+
+  const _ReportsStatSummary({
+    required this.statusCounts,
+    required this.departmentCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${statusCounts['pending'] ?? 0}', color: QuickpassColors.warning),
+            const SizedBox(width: 8),
+            _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${statusCounts['approved'] ?? 0}', color: QuickpassColors.success),
+            const SizedBox(width: 8),
+            _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${statusCounts['rejected'] ?? 0}', color: QuickpassColors.error),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _StatCard(icon: Icons.timer, label: 'Active', value: '${statusCounts['active'] ?? 0}', color: QuickpassColors.primary),
+            const SizedBox(width: 8),
+            _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${statusCounts['completed'] ?? 0}', color: QuickpassColors.secondary),
+            const SizedBox(width: 8),
+            _StatCard(icon: Icons.business, label: 'Departments', value: '$departmentCount', color: QuickpassColors.tertiary),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -2469,7 +2629,12 @@ class _DepartmentTabState extends State<_DepartmentTab> {
           ),
         ],
       ),
-    );
+    ).then((_) {
+      idCtl.dispose();
+      nameCtl.dispose();
+      codeCtl.dispose();
+      hodCtl.dispose();
+    });
   }
 
   void _showEditDialog(Department dept) {
@@ -2514,7 +2679,11 @@ class _DepartmentTabState extends State<_DepartmentTab> {
           ),
         ],
       ),
-    );
+    ).then((_) {
+      nameCtl.dispose();
+      codeCtl.dispose();
+      hodCtl.dispose();
+    });
   }
 
   void _confirmDelete(Department dept) async {

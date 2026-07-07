@@ -98,399 +98,37 @@ class _DashboardTabState extends State<_DashboardTab> {
           children: [
             CustomScrollView(
               slivers: [
-                // ── Electric Yellow App Bar ──
-                SliverAppBar(
-                  key: const ValueKey('employee-dashboard'),
-                  pinned: true,
-                  toolbarHeight: 64,
-                  backgroundColor: QuickpassColors.darkPrimary,
-                  foregroundColor: QuickpassColors.darkOnPrimary,
-                  automaticallyImplyLeading: false,
-                  flexibleSpace: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: QuickpassColors.darkOnPrimary
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Image.asset('assets/icon/app-icon.png',
-                                width: 22, height: 22),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Quickpass',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: QuickpassColors.darkOnPrimary,
-                            ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.notifications_outlined,
-                                color: QuickpassColors.darkOnPrimary),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  behavior: SnackBarBehavior.floating,
-                                  content: Text('No new notifications'),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // ── Body ──
+                const _DashboardAppBar(),
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      // ── User Profile Card ──
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: QuickpassColors.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: QuickpassColors.outlineVariant),
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 32,
-                              backgroundColor: QuickpassColors.primary
-                                  .withValues(alpha: 0.1),
-                              child: Text(
-                                (user?.fullName ?? 'U')
-                                    .substring(0, 1)
-                                    .toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                  color: QuickpassColors.primary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Welcome back,',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: QuickpassColors.outline,
-                                    ),
-                                  ),
-                                  Text(
-                                    user?.fullName ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                      color: QuickpassColors.onSurface,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                     children: [
-                                       Expanded(
-                                         child: Text(
-                                           user?.position ?? '',
-                                           maxLines: 1,
-                                           overflow: TextOverflow.ellipsis,
-                                           style: const TextStyle(
-                                             fontSize: 14,
-                                             fontWeight: FontWeight.w600,
-                                             letterSpacing: 0.01,
-                                             color: QuickpassColors.secondary,
-                                           ),
-                                         ),
-                                       ),
-                                       const Padding(
-                                         padding:
-                                             EdgeInsets.symmetric(horizontal: 6),
-                                         child: Text(
-                                           '\u2022',
-                                           style: TextStyle(
-                                               fontSize: 10,
-                                               color: QuickpassColors.outline),
-                                         ),
-                                       ),
-                                       Text(
-                                         'ID: ${user?.employeeId ?? ''}',
-                                         style: const TextStyle(
-                                           fontSize: 14,
-                                           fontWeight: FontWeight.w700,
-                                           letterSpacing: 0.05,
-                                           color: QuickpassColors.outline,
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _UserProfileCard(user: user),
                       const SizedBox(height: 16),
-
-                      // ── Active Leave Hero Card ──
-                      if (leaveProv.activeLeave != null)
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: QuickpassColors.surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: QuickpassColors.outlineVariant),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                child: Container(
-                                  width: 4,
-                                  decoration: const BoxDecoration(
-                                    color: QuickpassColors.success,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(12),
-                                      bottomLeft: Radius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: QuickpassColors.success
-                                                    .withValues(alpha: 0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(999),
-                                              ),
-                                              child: const Text(
-                                                'ACTIVE PASS',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color:
-                                                      QuickpassColors.success,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                               leaveProv.activeLeave!.reason,
-                                               maxLines: 2,
-                                               overflow: TextOverflow.ellipsis,
-                                               style: const TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.w700,
-                                                color:
-                                                    QuickpassColors.onSurface,
-                                                letterSpacing: -0.01,
-                                                height: 1.33,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const Icon(Icons.check_circle,
-                                            color: QuickpassColors.success,
-                                            size: 28),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8),
-                                      child: Column(
-                                        children: [
-                                          _InfoRow(
-                                              label: 'Validity',
-                                              value:
-                                                  '${leaveProv.activeLeave!.leaveDate.toIso8601String().split('T').first} \u2022 ${leaveProv.activeLeave!.startTime} - ${leaveProv.activeLeave!.endTime}'),
-                                          const SizedBox(height: 8),
-                                          const _InfoRow(
-                                              label: 'Gate Status',
-                                              value: 'Authorized Out'),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 48,
-                                      child: FilledButton(
-                                        onPressed: () {
-                                          if (leaveProv
-                                              .activeLeave!.hasQrCodes) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => QrDisplayScreen(
-                                                    leave:
-                                                        leaveProv.activeLeave!),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.qr_code_2,
-                                                size: 20,
-                                                color: QuickpassColors
-                                                    .darkOnPrimary),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              'View QR Pass',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if (leaveProv.activeLeave != null)
+                      if (leaveProv.activeLeave != null) ...[
+                        _ActiveLeaveCard(leave: leaveProv.activeLeave!),
                         const SizedBox(height: 16),
-
-                      // ── Stat Grid ──
-                      Row(
-                        children: [
-                          _StatCard(
-                              'Pending',
-                              leaveProv.pendingCount.toString(),
-                              QuickpassColors.warning),
-                          const SizedBox(width: 8),
-                          _StatCard(
-                              'Approved',
-                              leaveProv.approvedCount.toString(),
-                              QuickpassColors.success),
-                          const SizedBox(width: 8),
-                          _StatCard(
-                              'Completed',
-                              leaveProv.completedCount.toString(),
-                              QuickpassColors.primary),
-                        ],
+                      ],
+                      _StatGrid(
+                        pendingCount: leaveProv.pendingCount,
+                        approvedCount: leaveProv.approvedCount,
+                        completedCount: leaveProv.completedCount,
                       ),
                       const SizedBox(height: 24),
-
-                      // ── Recent Activity ──
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Recent Activity',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: QuickpassColors.onSurface,
-                              height: 1.5,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              final state = context.findAncestorStateOfType<
-                                  _EmployeeDashboardState>();
-                              state?.setState(() => state._currentIndex = 1);
-                            },
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            ),
-                            child: const Text(
-                              'See All',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: QuickpassColors.secondary,
-                              ),
-                            ),
-                          ),
-                        ],
+                      _RecentActivitySection(
+                        isLoading: leaveProv.isLoading,
+                        history: leaveProv.history,
+                        onSeeAll: () {
+                          final state = context.findAncestorStateOfType<
+                              _EmployeeDashboardState>();
+                          state?.setState(() => state._currentIndex = 1);
+                        },
                       ),
-                      const SizedBox(height: 8),
-
-                      if (leaveProv.isLoading)
-                        const Center(
-                            child: Padding(
-                          padding: EdgeInsets.all(24),
-                          child: CircularProgressIndicator(),
-                        ))
-                      else if (leaveProv.history.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: QuickpassColors.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: QuickpassColors.outlineVariant),
-                          ),
-                          child: const Column(
-                            children: [
-                              Icon(Icons.inbox_outlined,
-                                  size: 40,
-                                  color: QuickpassColors.outlineVariant),
-                              SizedBox(height: 12),
-                              Text('No recent activity',
-                                  style: TextStyle(
-                                      color: QuickpassColors.neutralGray)),
-                            ],
-                          ),
-                        )
-                      else
-                        ...leaveProv.history
-                            .take(10)
-                            .map((leave) => _ActivityCard(leave: leave)),
                     ]),
                   ),
                 ),
               ],
             ),
-
-            // ── FAB ──
             Positioned(
               bottom: 24,
               right: 16,
@@ -512,6 +150,412 @@ class _DashboardTabState extends State<_DashboardTab> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DashboardAppBar extends StatelessWidget {
+  const _DashboardAppBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      key: const ValueKey('employee-dashboard'),
+      pinned: true,
+      toolbarHeight: 64,
+      backgroundColor: QuickpassColors.darkPrimary,
+      foregroundColor: QuickpassColors.darkOnPrimary,
+      automaticallyImplyLeading: false,
+      flexibleSpace: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset('assets/icon/app-icon.png',
+                    width: 22, height: 22),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Quickpass',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: QuickpassColors.darkOnPrimary,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined,
+                    color: QuickpassColors.darkOnPrimary),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text('No new notifications'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UserProfileCard extends StatelessWidget {
+  final dynamic user;
+  const _UserProfileCard({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: QuickpassColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: QuickpassColors.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
+            child: Text(
+              (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Welcome back,',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: QuickpassColors.outline,
+                  ),
+                ),
+                Text(
+                  user?.fullName ?? '',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: QuickpassColors.onSurface,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                   children: [
+                     Expanded(
+                       child: Text(
+                         user?.position ?? '',
+                         maxLines: 1,
+                         overflow: TextOverflow.ellipsis,
+                         style: const TextStyle(
+                           fontSize: 14,
+                           fontWeight: FontWeight.w600,
+                           letterSpacing: 0.01,
+                           color: QuickpassColors.secondary,
+                         ),
+                       ),
+                     ),
+                     const Padding(
+                       padding:
+                           EdgeInsets.symmetric(horizontal: 6),
+                       child: Text(
+                         '\u2022',
+                         style: TextStyle(
+                             fontSize: 10,
+                             color: QuickpassColors.outline),
+                       ),
+                     ),
+                     Text(
+                       'ID: ${user?.employeeId ?? ''}',
+                       style: const TextStyle(
+                         fontSize: 14,
+                         fontWeight: FontWeight.w700,
+                         letterSpacing: 0.05,
+                         color: QuickpassColors.outline,
+                       ),
+                     ),
+                   ],
+                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveLeaveCard extends StatelessWidget {
+  final dynamic leave;
+  const _ActiveLeaveCard({required this.leave});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: QuickpassColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: QuickpassColors.outlineVariant),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 4,
+              decoration: const BoxDecoration(
+                color: QuickpassColors.success,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding:
+                              const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2),
+                          decoration: BoxDecoration(
+                            color: QuickpassColors.success
+                                .withValues(alpha: 0.1),
+                            borderRadius:
+                                BorderRadius.circular(999),
+                          ),
+                          child: const Text(
+                            'ACTIVE PASS',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  QuickpassColors.success,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                           leave.reason,
+                           maxLines: 2,
+                           overflow: TextOverflow.ellipsis,
+                           style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                QuickpassColors.onSurface,
+                            letterSpacing: -0.01,
+                            height: 1.33,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.check_circle,
+                        color: QuickpassColors.success,
+                        size: 28),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8),
+                  child: Column(
+                    children: [
+                      _InfoRow(
+                          label: 'Validity',
+                          value:
+                              '${leave.leaveDate.toIso8601String().split('T').first} \u2022 ${leave.startTime} - ${leave.endTime}'),
+                      const SizedBox(height: 8),
+                      const _InfoRow(
+                          label: 'Gate Status',
+                          value: 'Authorized Out'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: () {
+                      if (leave.hasQrCodes) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => QrDisplayScreen(
+                                leave: leave),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.qr_code_2,
+                            size: 20,
+                            color: QuickpassColors
+                                .darkOnPrimary),
+                        SizedBox(width: 8),
+                        Text(
+                          'View QR Pass',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatGrid extends StatelessWidget {
+  final int pendingCount;
+  final int approvedCount;
+  final int completedCount;
+
+  const _StatGrid({
+    required this.pendingCount,
+    required this.approvedCount,
+    required this.completedCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _StatCard('Pending', pendingCount.toString(), QuickpassColors.warning),
+        const SizedBox(width: 8),
+        _StatCard('Approved', approvedCount.toString(), QuickpassColors.success),
+        const SizedBox(width: 8),
+        _StatCard('Completed', completedCount.toString(), QuickpassColors.primary),
+      ],
+    );
+  }
+}
+
+class _RecentActivitySection extends StatelessWidget {
+  final bool isLoading;
+  final List<dynamic> history;
+  final VoidCallback onSeeAll;
+
+  const _RecentActivitySection({
+    required this.isLoading,
+    required this.history,
+    required this.onSeeAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recent Activity',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.onSurface,
+                height: 1.5,
+              ),
+            ),
+            TextButton(
+              onPressed: onSeeAll,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'See All',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: QuickpassColors.secondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (isLoading)
+          const Center(
+              child: Padding(
+            padding: EdgeInsets.all(24),
+            child: CircularProgressIndicator(),
+          ))
+        else if (history.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: QuickpassColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: QuickpassColors.outlineVariant),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.inbox_outlined,
+                    size: 40,
+                    color: QuickpassColors.outlineVariant),
+                SizedBox(height: 12),
+                Text('No recent activity',
+                    style: TextStyle(
+                        color: QuickpassColors.neutralGray)),
+              ],
+            ),
+          )
+        else
+          ...history.take(10).map((leave) => _ActivityCard(leave: leave)),
+      ],
     );
   }
 }

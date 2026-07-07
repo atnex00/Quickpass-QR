@@ -25,12 +25,12 @@ class QrService {
 
   /// Returns a map with window state info for the QR code timer.
   /// Keys: 'state' ('before', 'during', 'after'), 'seconds' (int).
-  static Map<String, dynamic> windowSeconds(String date, String time) {
+  static Map<String, dynamic> windowSeconds(String date, String time, {DateTime? now}) {
     final t = time.split(':').take(2).join(':');
     final target = DateTime.parse('${date}T$t:00');
     final windowStart = target.subtract(const Duration(minutes: 15));
     final windowEnd = target.add(const Duration(minutes: 15));
-    final now = DateTime.now();
+    now ??= DateTime.now();
 
     if (now.isBefore(windowStart)) {
       return {'state': 'before', 'seconds': windowStart.difference(now).inSeconds};
@@ -41,8 +41,8 @@ class QrService {
     }
   }
 
-  static int remainingSeconds(String date, String time) {
-    final result = windowSeconds(date, time);
+  static int remainingSeconds(String date, String time, {DateTime? now}) {
+    final result = windowSeconds(date, time, now: now);
     return result['seconds'] as int;
   }
 }

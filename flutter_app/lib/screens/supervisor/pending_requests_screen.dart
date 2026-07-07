@@ -29,6 +29,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     final supProv = context.watch<SupervisorProvider>();
+    final isAdmin = context.select((AuthProvider a) => a.isAdmin);
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +70,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                           child: Text('Pending Requests',
                               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
                         ),
-                        ...supProv.pendingRequests.map((leave) => _PendingCard(leave: leave)),
+                        ...supProv.pendingRequests.map((leave) => _PendingCard(leave: leave, isAdmin: isAdmin)),
                         const SizedBox(height: 16),
                       ],
                       if (supProv.approvedLeaves.isNotEmpty) ...[
@@ -78,7 +79,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                           child: Text('Approved Leaves',
                               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
                         ),
-                        ...supProv.approvedLeaves.map((leave) => _ApprovedCard(leave: leave)),
+                        ...supProv.approvedLeaves.map((leave) => _ApprovedCard(leave: leave, isAdmin: isAdmin)),
                       ],
                     ],
                   ),
@@ -89,8 +90,9 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
 
 class _PendingCard extends StatelessWidget {
   final LeaveRequest leave;
+  final bool isAdmin;
 
-  const _PendingCard({required this.leave});
+  const _PendingCard({required this.leave, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +154,7 @@ class _PendingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (context.watch<AuthProvider>().isAdmin)
+                if (isAdmin)
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: QuickpassColors.error, size: 20),
                     tooltip: 'Delete',
@@ -304,8 +306,9 @@ class _PendingCard extends StatelessWidget {
 
 class _ApprovedCard extends StatelessWidget {
   final LeaveRequest leave;
+  final bool isAdmin;
 
-  const _ApprovedCard({required this.leave});
+  const _ApprovedCard({required this.leave, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -367,7 +370,7 @@ class _ApprovedCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (context.watch<AuthProvider>().isAdmin)
+                if (isAdmin)
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: QuickpassColors.error, size: 20),
                     tooltip: 'Delete',

@@ -96,7 +96,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final user = context.select((AuthProvider a) => a.user);
 
     return Scaffold(
       body: SafeArea(
@@ -163,16 +163,16 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                                   color: QuickpassColors.outlineVariant),
                               _ReadOnlyField(
                                   label: 'Employee ID',
-                                  value: auth.user?.employeeId ?? ''),
+                                  value: user?.employeeId ?? ''),
                               _ReadOnlyField(
                                   label: 'Full Name',
-                                  value: auth.user?.fullName ?? ''),
+                                  value: user?.fullName ?? ''),
                               _ReadOnlyField(
                                   label: 'Position',
-                                  value: auth.user?.position ?? ''),
+                                  value: user?.position ?? ''),
                               _ReadOnlyField(
                                   label: 'Department',
-                                  value: auth.user?.departmentName ?? ''),
+                                  value: user?.departmentName ?? ''),
                             ],
                           ),
                         ),

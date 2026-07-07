@@ -121,13 +121,6 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
     });
   }
 
-  String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = context.select((AuthProvider p) => p.user);
@@ -137,305 +130,48 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
     return Scaffold(
       body: Stack(
         children: [
-          // Main scrollable content
           CustomScrollView(
             slivers: [
-              // ── Electric Yellow App Bar ──
-              SliverAppBar(
-                key: const ValueKey('supervisor-dashboard'),
-                pinned: true,
-                expandedHeight: 0,
-                toolbarHeight: 64,
-                backgroundColor: QuickpassColors.darkPrimary,
-                foregroundColor: QuickpassColors.darkOnPrimary,
-                automaticallyImplyLeading: false,
-                flexibleSpace: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Quickpass',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: QuickpassColors.darkOnPrimary,
-                            height: 1.4,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No new notifications')),
-                            );
-                          },
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                            state?.setState(() => state._currentIndex = 2);
-                          },
-                          child: CircleAvatar(
-                            radius: 16,
-                            backgroundColor: QuickpassColors.darkOnPrimary.withValues(alpha: 0.2),
-                            child: Text(
-                              (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: QuickpassColors.darkOnPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              _SupervisorAppBar(
+                userName: userName,
+                onProfileTap: () {
+                  final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
+                  state?.setState(() => state._currentIndex = 2);
+                },
               ),
-
-              // ── Body ──
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    // Welcome
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'COMMANDER VIEW',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.01,
-                            color: QuickpassColors.outline,
-                            height: 1.43,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_greeting()}, ${userName.split(' ').first}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: QuickpassColors.onSurface,
-                            letterSpacing: -0.01,
-                            height: 1.33,
-                          ),
-                        ),
-                      ],
+                    _WelcomeSection(userName: userName),
+                    const SizedBox(height: 16),
+                    _PendingApprovalsHero(
+                      pendingCount: supProv.pendingCount,
+                      onReviewNow: () {
+                        final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
+                        state?.setState(() => state._currentIndex = 1);
+                      },
                     ),
                     const SizedBox(height: 16),
-
-                    // ── Hero: Pending Approvals ──
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF1E3A5F), Color(0xFF0F1E33)],
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'PENDING APPROVALS',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                              color: Colors.white.withValues(alpha: 0.8),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                supProv.pendingCount.toString().padLeft(2, '0'),
-                                style: const TextStyle(
-                                  fontSize: 60,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: -0.05,
-                                  height: 1,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Requests',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: FilledButton(
-                              onPressed: () {
-                                final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                                state?.setState(() => state._currentIndex = 1);
-                              },
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Review Now',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, size: 18, color: QuickpassColors.darkOnPrimary),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const _QuickActionsRow(),
                     const SizedBox(height: 16),
-
-                    // ── Quick Actions Grid ──
-                    Row(
-                      children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.qr_code_scanner,
-                              title: 'Scan QR',
-                              subtitle: 'Validate gate passes',
-                              onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
-                              },
-                            ),
-                          ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionCard(
-                            icon: Icons.dashboard,
-                            title: 'My Dashboard',
-                            subtitle: 'Employee overview',
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeeDashboard()));
-                            },
-                          ),
-                        ),
-                      ],
+                    _PendingRequestsSection(
+                      isLoading: supProv.isLoading,
+                      pendingRequests: supProv.pendingRequests,
+                      onViewAll: () {
+                        final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
+                        state?.setState(() => state._currentIndex = 1);
+                      },
                     ),
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
-                        },
-                        icon: const Icon(Icons.history, size: 16),
-                        label: const Text('Scan History'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: QuickpassColors.outline,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Pending Requests ──
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Pending Requests',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: QuickpassColors.onSurface,
-                            height: 1.5,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                            state?.setState(() => state._currentIndex = 1);
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'View All',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: QuickpassColors.onSurface,
-                              decoration: TextDecoration.underline,
-                              decorationColor: QuickpassColors.darkPrimary,
-                              decorationThickness: 2,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // ── Pending Items ──
-                    if (supProv.isLoading)
-                      const Center(child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
-                      ))
-                    else if (supProv.pendingRequests.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: QuickpassColors.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: QuickpassColors.outlineVariant),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'No pending requests',
-                            style: TextStyle(color: QuickpassColors.neutralGray),
-                          ),
-                        ),
-                      )
-                    else
-                      ...supProv.pendingRequests.take(5).map((leave) => _PendingCard(leave: leave)),
                   ]),
                 ),
               ),
             ],
           ),
-
-          // ── FAB ──
           Positioned(
             bottom: 24,
             right: 16,
-            child:             FloatingActionButton(
+            child: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -454,7 +190,332 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
       ),
     );
   }
+}
 
+class _SupervisorAppBar extends StatelessWidget {
+  final String userName;
+  final VoidCallback onProfileTap;
+  const _SupervisorAppBar({required this.userName, required this.onProfileTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      key: const ValueKey('supervisor-dashboard'),
+      pinned: true,
+      expandedHeight: 0,
+      toolbarHeight: 64,
+      backgroundColor: QuickpassColors.darkPrimary,
+      foregroundColor: QuickpassColors.darkOnPrimary,
+      automaticallyImplyLeading: false,
+      flexibleSpace: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Quickpass',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: QuickpassColors.darkOnPrimary,
+                  height: 1.4,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No new notifications')),
+                  );
+                },
+              ),
+              GestureDetector(
+                onTap: onProfileTap,
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: QuickpassColors.darkOnPrimary.withValues(alpha: 0.2),
+                  child: Text(
+                    (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: QuickpassColors.darkOnPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WelcomeSection extends StatelessWidget {
+  final String userName;
+  const _WelcomeSection({required this.userName});
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'COMMANDER VIEW',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.01,
+            color: QuickpassColors.outline,
+            height: 1.43,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${_greeting()}, ${userName.split(' ').first}',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: QuickpassColors.onSurface,
+            letterSpacing: -0.01,
+            height: 1.33,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PendingApprovalsHero extends StatelessWidget {
+  final int pendingCount;
+  final VoidCallback onReviewNow;
+  const _PendingApprovalsHero({required this.pendingCount, required this.onReviewNow});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E3A5F), Color(0xFF0F1E33)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PENDING APPROVALS',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                pendingCount.toString().padLeft(2, '0'),
+                style: const TextStyle(
+                  fontSize: 60,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -0.05,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Requests',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: onReviewNow,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Review Now',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 18, color: QuickpassColors.darkOnPrimary),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.qr_code_scanner,
+                title: 'Scan QR',
+                subtitle: 'Validate gate passes',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.dashboard,
+                title: 'My Dashboard',
+                subtitle: 'Employee overview',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeeDashboard()));
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
+            },
+            icon: const Icon(Icons.history, size: 16),
+            label: const Text('Scan History'),
+            style: TextButton.styleFrom(
+              foregroundColor: QuickpassColors.outline,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PendingRequestsSection extends StatelessWidget {
+  final bool isLoading;
+  final List<dynamic> pendingRequests;
+  final VoidCallback onViewAll;
+
+  const _PendingRequestsSection({
+    required this.isLoading,
+    required this.pendingRequests,
+    required this.onViewAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Pending Requests',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.onSurface,
+                height: 1.5,
+              ),
+            ),
+            TextButton(
+              onPressed: onViewAll,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text(
+                'View All',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: QuickpassColors.onSurface,
+                  decoration: TextDecoration.underline,
+                  decorationColor: QuickpassColors.darkPrimary,
+                  decorationThickness: 2,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (isLoading)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(24),
+            child: CircularProgressIndicator(),
+          ))
+        else if (pendingRequests.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: QuickpassColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: QuickpassColors.outlineVariant),
+            ),
+            child: const Center(
+              child: Text(
+                'No pending requests',
+                style: TextStyle(color: QuickpassColors.neutralGray),
+              ),
+            ),
+          )
+        else
+          ...pendingRequests.take(5).map((leave) => _PendingCard(leave: leave)),
+      ],
+    );
+  }
 }
 
 class _QuickActionCard extends StatelessWidget {

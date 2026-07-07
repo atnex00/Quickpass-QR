@@ -101,143 +101,17 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
           SafeArea(
             child: Column(
               children: [
-                Container(
-                  height: 64,
-                  color: QuickpassColors.darkPrimary,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Quickpass',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: QuickpassColors.darkOnPrimary,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.keyboard),
-                          color: QuickpassColors.darkOnPrimary,
-                          onPressed: () => setState(() => _showManualEntry = !_showManualEntry),
-                        ),
-                        IconButton(
-                          icon: Icon(_torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
-                          color: QuickpassColors.darkOnPrimary,
-                          onPressed: () {
-                            setState(() => _torchEnabled = !_torchEnabled);
-                            _controller?.toggleTorch();
-                          },
-                        ),
-                        PopupMenuButton<String>(
-                          icon: const Icon(Icons.more_vert, color: QuickpassColors.darkOnPrimary),
-                          color: QuickpassColors.surface,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          onSelected: (value) async {
-                            switch (value) {
-                              case 'history':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const ScanHistoryScreen()),
-                                );
-                              case 'logout':
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    title: const Text('Logout'),
-                                    content: const Text('Are you sure you want to logout?'),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                      FilledButton(
-                                        onPressed: () => Navigator.pop(ctx, true),
-                                        style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
-                                        child: const Text('Logout'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirm == true && context.mounted) {
-                                  context.read<AuthProvider>().logout();
-                                }
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem<String>(
-                              enabled: false,
-                              child: Consumer<AuthProvider>(
-                                builder: (_, auth, __) => Text(
-                                  auth.user?.fullName ?? 'Guard',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: QuickpassColors.onSurface,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const PopupMenuDivider(),
-                            const PopupMenuItem(
-                              value: 'history',
-                              child: ListTile(
-                                leading: Icon(Icons.history, color: QuickpassColors.onSurface),
-                                title: Text('Scan History'),
-                                contentPadding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'logout',
-                              child: ListTile(
-                                leading: Icon(Icons.logout, color: QuickpassColors.error),
-                                title: Text('Logout', style: TextStyle(color: QuickpassColors.error)),
-                                contentPadding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final frameSize = (constraints.maxWidth).clamp(200.0, 260.0);
-                    return SizedBox(
-                      width: frameSize,
-                      height: frameSize,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: _cameraError != null ? QuickpassColors.error : QuickpassColors.secondary, width: 2),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                          const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                          const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                          const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
-                          if (_cameraError != null)
-                            const Icon(Icons.videocam_off, size: 48, color: QuickpassColors.error),
-                        ],
-                      ),
-                    );
+                _ScannerAppBar(
+                  torchEnabled: _torchEnabled,
+                  showManualEntry: _showManualEntry,
+                  onToggleManual: () => setState(() => _showManualEntry = !_showManualEntry),
+                  onToggleTorch: () {
+                    setState(() => _torchEnabled = !_torchEnabled);
+                    _controller?.toggleTorch();
                   },
                 ),
+                const Spacer(),
+                _QrScanFrame(cameraError: _cameraError),
                 const SizedBox(height: 12),
                 _buildStatusIndicator(),
                 const Spacer(),
@@ -247,8 +121,8 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
           ),
         ],
       ),
-    );
-  }
+      );
+    }
 
   Widget _buildCameraError() {
     return Container(
@@ -343,6 +217,166 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
           ],
         ],
       ),
+    );
+  }
+}
+
+class _ScannerAppBar extends StatelessWidget {
+  final bool torchEnabled;
+  final bool showManualEntry;
+  final VoidCallback onToggleManual;
+  final VoidCallback onToggleTorch;
+
+  const _ScannerAppBar({
+    required this.torchEnabled,
+    required this.showManualEntry,
+    required this.onToggleManual,
+    required this.onToggleTorch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      color: QuickpassColors.darkPrimary,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Quickpass',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: QuickpassColors.darkOnPrimary,
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.keyboard),
+              color: QuickpassColors.darkOnPrimary,
+              onPressed: onToggleManual,
+            ),
+            IconButton(
+              icon: Icon(torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
+              color: QuickpassColors.darkOnPrimary,
+              onPressed: onToggleTorch,
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: QuickpassColors.darkOnPrimary),
+              color: QuickpassColors.surface,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onSelected: (value) async {
+                switch (value) {
+                  case 'history':
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ScanHistoryScreen()),
+                    );
+                  case 'logout':
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                            child: const Text('Logout'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && context.mounted) {
+                      context.read<AuthProvider>().logout();
+                    }
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  enabled: false,
+                  child: Consumer<AuthProvider>(
+                    builder: (_, auth, __) => Text(
+                      auth.user?.fullName ?? 'Guard',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: QuickpassColors.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'history',
+                  child: ListTile(
+                    leading: Icon(Icons.history, color: QuickpassColors.onSurface),
+                    title: Text('Scan History'),
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: ListTile(
+                    leading: Icon(Icons.logout, color: QuickpassColors.error),
+                    title: Text('Logout', style: TextStyle(color: QuickpassColors.error)),
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QrScanFrame extends StatelessWidget {
+  final String? cameraError;
+  const _QrScanFrame({this.cameraError});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final frameSize = (constraints.maxWidth).clamp(200.0, 260.0);
+        return SizedBox(
+          width: frameSize,
+          height: frameSize,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: cameraError != null ? QuickpassColors.error : QuickpassColors.secondary, width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const Positioned(top: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+              const Positioned(top: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+              const Positioned(bottom: -1, left: -1, child: _CornerBracket(QuickpassColors.secondary)),
+              const Positioned(bottom: -1, right: -1, child: _CornerBracket(QuickpassColors.secondary)),
+              if (cameraError != null)
+                const Icon(Icons.videocam_off, size: 48, color: QuickpassColors.error),
+            ],
+          ),
+        );
+      },
     );
   }
 }

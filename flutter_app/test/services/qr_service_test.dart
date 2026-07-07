@@ -25,19 +25,19 @@ void main() {
 
     group('windowSeconds', () {
       test('returns before state when now is before window', () {
-        final future = DateTime.now().add(const Duration(hours: 2));
-        final date = future.toIso8601String().substring(0, 10);
-        final result = QrService.windowSeconds(date, '12:00');
+        final date = '2025-01-01';
+        final now = DateTime.parse('${date}T08:00:00');
+        final result = QrService.windowSeconds(date, '12:00', now: now);
         expect(result['state'], 'before');
         expect(result['seconds'], isPositive);
       });
 
       test('returns after state when now is after window', () {
-        final past = DateTime.now().subtract(const Duration(hours: 2));
-        final date = past.toIso8601String().substring(0, 10);
-        final result = QrService.windowSeconds(date, '12:00');
-        // May be 'after' or 0 if we're within 15 min of noon
-        expect(result['seconds'], greaterThanOrEqualTo(0));
+        final date = '2025-01-01';
+        final now = DateTime.parse('${date}T13:00:00');
+        final result = QrService.windowSeconds(date, '12:00', now: now);
+        expect(result['state'], 'after');
+        expect(result['seconds'], 0);
       });
     });
 

@@ -542,26 +542,42 @@ class _BottomTimer extends StatefulWidget {
   State<_BottomTimer> createState() => _BottomTimerState();
 }
 
-class _BottomTimerState extends State<_BottomTimer> {
+class _BottomTimerState extends State<_BottomTimer> with WidgetsBindingObserver {
   late Timer _timer;
+  late DateTime _windowEnd;
   int _remainingSeconds = 0;
   int _totalSeconds = 1;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _windowEnd = _computeWindowEnd();
     _tick();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
-  void _tick() {
+  DateTime _computeWindowEnd() {
     final dateStr = widget.leaveDate.toIso8601String().split('T').first;
     final timeStr = widget.startTime.padLeft(5, '0');
     final hhmm = timeStr.split(':').take(2).join(':');
     final start = DateTime.parse('${dateStr}T$hhmm:00');
-    final windowEnd = start.add(const Duration(minutes: 15));
+    return start.add(const Duration(minutes: 15));
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _timer.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      _tick();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
+  }
+
+  void _tick() {
     final now = DateTime.now();
-    final remaining = windowEnd.difference(now).inSeconds;
+    final remaining = _windowEnd.difference(now).inSeconds;
     final total = const Duration(minutes: 15).inSeconds;
     if (!mounted) return;
     setState(() {
@@ -573,6 +589,7 @@ class _BottomTimerState extends State<_BottomTimer> {
   @override
   void dispose() {
     _timer.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
