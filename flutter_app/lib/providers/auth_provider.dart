@@ -95,4 +95,12 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  @visibleForTesting
+  void setUserForTest(Employee user) {
+    _user = user;
+    _isAuthenticated = true;
+    _isLoading = false;
+    notifyListeners();
+  }
 }
