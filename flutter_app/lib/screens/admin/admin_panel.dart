@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -162,6 +163,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   bool _isLoading = true;
   Map<String, int> _cachedStatusCounts = {};
   int _employeeCount = 0;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
@@ -170,6 +172,15 @@ class _OverviewTabState extends State<_OverviewTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadReports();
     });
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(seconds: 60), (_) => _loadReports(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadReports() async {
@@ -1382,6 +1393,7 @@ class _ReportsTabState extends State<_ReportsTab> {
   final _startCtl = TextEditingController();
   final _endCtl = TextEditingController();
   List<BarChartGroupData>? _cachedBarGroups;
+  Timer? _autoRefreshTimer;
 
   @override
   void initState() {
@@ -1390,10 +1402,14 @@ class _ReportsTabState extends State<_ReportsTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadReports();
     });
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(seconds: 60), (_) => _loadReports(),
+    );
   }
 
   @override
   void dispose() {
+    _autoRefreshTimer?.cancel();
     _startCtl.dispose();
     _endCtl.dispose();
     super.dispose();
