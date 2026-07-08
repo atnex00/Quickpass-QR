@@ -570,6 +570,7 @@ class _BottomTimerState extends State<_BottomTimer> with WidgetsBindingObserver 
     if (state == AppLifecycleState.paused) {
       _timer.cancel();
     } else if (state == AppLifecycleState.resumed) {
+      _timer.cancel();
       _tick();
       _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
     }

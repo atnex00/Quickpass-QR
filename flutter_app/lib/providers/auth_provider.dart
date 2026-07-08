@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 class AuthProvider extends ChangeNotifier {
   final ApiService _api;
 
-  AuthProvider({ApiService? api}) : _api = api ?? ApiService();
+  AuthProvider({required ApiService api}) : _api = api;
 
   Employee? _user;
   bool _isLoading = true;

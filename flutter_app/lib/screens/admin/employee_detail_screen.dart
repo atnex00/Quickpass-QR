@@ -163,7 +163,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: ctx.error),
             child: const Text('Delete'),
           ),
         ],

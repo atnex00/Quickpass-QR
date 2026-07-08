@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/validators.dart';
 
 class RequestLeaveScreen extends StatefulWidget {
   const RequestLeaveScreen({super.key});
@@ -62,9 +63,10 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
     final et =
         '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}:00';
 
-    if (st.compareTo(et) >= 0) {
+    final timeError = Validators.timeRange(st, et);
+    if (timeError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End time must be after start time')),
+        SnackBar(content: Text(timeError)),
       );
       return;
     }

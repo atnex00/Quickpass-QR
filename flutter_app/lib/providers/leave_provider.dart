@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 class LeaveProvider extends ChangeNotifier {
   final ApiService _api;
 
-  LeaveProvider({ApiService? api}) : _api = api ?? ApiService();
+  LeaveProvider({required ApiService api}) : _api = api;
 
   List<LeaveRequest> _history = [];
   LeaveRequest? _activeLeave;
@@ -40,6 +40,7 @@ class LeaveProvider extends ChangeNotifier {
 
   Future<void> loadHistory({String? status}) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
@@ -56,12 +57,18 @@ class LeaveProvider extends ChangeNotifier {
   }
 
   Future<void> loadActiveLeave() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       _activeLeave = await _api.getActiveLeave();
+      _error = null;
     } catch (e) {
       _activeLeave = null;
       _error = e.toString().replaceFirst('Exception: ', '');
     }
+
+    _isLoading = false;
     notifyListeners();
   }
 

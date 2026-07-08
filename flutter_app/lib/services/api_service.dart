@@ -14,6 +14,7 @@ class ApiService {
   final _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
   final _pendingRequests = <_PendingRequest>[];
+  int _refreshRetryCount = 0;
 
   void init() {
     _dio = Dio(BaseOptions(
@@ -86,6 +87,7 @@ class ApiService {
           );
           final newToken = res.data['token'] as String;
           await _storage.write(key: 'auth_token', value: newToken);
+          _refreshRetryCount = 0;
 
           error.requestOptions.extra['_retry'] = true;
           error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
@@ -109,7 +111,22 @@ class ApiService {
             }
           }
         } catch (_) {
+          _refreshRetryCount++;
+          if (_refreshRetryCount >= 3) {
+            _pendingRequests.clear();
+            _refreshRetryCount = 0;
+            await _storage.delete(key: 'auth_token');
+            handler.resolve(Response(
+              requestOptions: error.requestOptions,
+              data: {'force_logout': true},
+            ));
+            return;
+          }
           await _storage.delete(key: 'auth_token');
+          for (final p in _pendingRequests) {
+            p.handler.next(error);
+          }
+          _pendingRequests.clear();
           return handler.next(error);
         } finally {
           _isRefreshing = false;

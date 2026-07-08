@@ -114,7 +114,7 @@ class _PendingCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: context.primary.withValues(alpha: 0.2),
                   child: Text(
-                    leave.employeeName.substring(0, 1).toUpperCase(),
+                    leave.employeeName.isNotEmpty ? leave.employeeName.substring(0, 1).toUpperCase() : '?',
                     style: TextStyle(color: context.primary, fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -330,7 +330,7 @@ class _ApprovedCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: context.success.withValues(alpha: 0.15),
                   child: Text(
-                    leave.employeeName.substring(0, 1).toUpperCase(),
+                    leave.employeeName.isNotEmpty ? leave.employeeName.substring(0, 1).toUpperCase() : '?',
                     style: TextStyle(color: context.success, fontWeight: FontWeight.w700),
                   ),
                 ),

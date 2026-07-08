@@ -69,7 +69,7 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                       FilledButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+                        style: FilledButton.styleFrom(backgroundColor: context.error),
                         child: const Text('Logout'),
                       ),
                     ],
@@ -818,7 +818,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: ctx.error),
             child: const Text('Delete'),
           ),
         ],
@@ -1904,7 +1904,7 @@ class _LeaveTabState extends State<_LeaveTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: ctx.error),
             child: const Text('Delete'),
           ),
         ],
@@ -2060,7 +2060,7 @@ class _LeaveTabState extends State<_LeaveTab> {
               if (ctrl.text.trim().isEmpty) return;
               Navigator.pop(ctx, ctrl.text.trim());
             },
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: ctx.error),
             child: const Text('Reject'),
           ),
         ],
@@ -2313,7 +2313,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: ctx.error),
             child: const Text('Delete'),
           ),
         ],

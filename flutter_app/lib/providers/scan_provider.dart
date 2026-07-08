@@ -4,7 +4,7 @@ import '../services/api_service.dart';
 class ScanProvider extends ChangeNotifier {
   final ApiService _api;
 
-  ScanProvider({ApiService? api}) : _api = api ?? ApiService();
+  ScanProvider({required ApiService api}) : _api = api;
 
   Map<String, dynamic>? _lastResult;
   bool _isScanning = false;

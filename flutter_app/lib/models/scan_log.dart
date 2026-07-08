@@ -49,7 +49,8 @@ class ScanLog {
 
   static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
   static bool _boolFromJson(dynamic v) => v as bool? ?? true;
-  static DateTime _dateFromJson(dynamic v) => DateTime.parse(v as String);
+  static DateTime _dateFromJson(dynamic v) =>
+      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
   static String _dateToJson(DateTime v) => v.toIso8601String();
 
   factory ScanLog.fromJson(Map<String, dynamic> json) =>

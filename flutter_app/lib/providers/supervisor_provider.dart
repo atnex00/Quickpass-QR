@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 class SupervisorProvider extends ChangeNotifier {
   final ApiService _api;
 
-  SupervisorProvider({ApiService? api}) : _api = api ?? ApiService();
+  SupervisorProvider({required ApiService api}) : _api = api;
 
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];
@@ -48,11 +48,17 @@ class SupervisorProvider extends ChangeNotifier {
   }
 
   Future<void> loadApprovedLeaves() async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
       _approvedLeaves = await _api.getApprovedLeaves();
+      _error = null;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     }
+
+    _isLoading = false;
     notifyListeners();
   }
 
