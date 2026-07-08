@@ -190,23 +190,25 @@ class _OverviewTabState extends State<_OverviewTab> {
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
       _computeCounts();
+
+      final empRes = await _api.listEmployees(limit: 1);
+      final pagination = empRes['pagination'] as Map<String, dynamic>?;
+      _employeeCount = int.tryParse('${pagination?['total']}') ?? 0;
+
+      final depts = await _api.getDepartments();
+      _departmentCount = depts.length;
     } catch (_) {}
     if (mounted) setState(() => _isLoading = false);
   }
 
   void _computeCounts() {
     _cachedStatusCounts = {};
-    _employeeCount = 0;
     if (_reportData == null) return;
     final data = _reportData!['data'] as List? ?? [];
-    final ids = <String>{};
     for (final entry in data) {
       final s = entry['status'] as String? ?? 'unknown';
       _cachedStatusCounts[s] = (_cachedStatusCounts[s] ?? 0) + 1;
-      final eid = entry['employee_id']?.toString();
-      if (eid != null) ids.add(eid);
     }
-    _employeeCount = ids.length;
   }
 
   int get _pendingCount => _cachedStatusCounts['pending'] ?? 0;
@@ -215,7 +217,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   int get _completedCount => _cachedStatusCounts['completed'] ?? 0;
   int get _activeCount => _cachedStatusCounts['active'] ?? 0;
 
-  int get _departmentCount => _departmentReport?.length ?? 0;
+  int _departmentCount = 0;
 
   Widget _buildDepartmentTable() {
     if (_departmentReport == null || _departmentReport!.isEmpty) {

@@ -32,12 +32,6 @@ class ApiService {
         'API_BASE_URL is not set. Pass it via --dart-define=API_BASE_URL=https://...',
       );
     }
-    if (kReleaseMode && !AppConfig.apiBaseUrl.startsWith('https://')) {
-      throw ArgumentError(
-        'In release builds, API_BASE_URL must use HTTPS.\n'
-        'Current: ${AppConfig.apiBaseUrl}',
-      );
-    }
 
     if (!kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
