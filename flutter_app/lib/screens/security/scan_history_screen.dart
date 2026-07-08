@@ -44,7 +44,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
+        child: RefreshIndicator(
+          onRefresh: _loadHistory,
+          child: CustomScrollView(
           slivers: [
             SliverAppBar(
               pinned: true,
@@ -380,6 +382,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

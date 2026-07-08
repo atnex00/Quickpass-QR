@@ -98,7 +98,9 @@ class _DashboardTabState extends State<_DashboardTab> {
       body: SafeArea(
         child: Stack(
           children: [
-            CustomScrollView(
+            RefreshIndicator(
+              onRefresh: () => context.read<LeaveProvider>().refresh(),
+              child: CustomScrollView(
               slivers: [
                 const _DashboardAppBar(),
                 SliverPadding(
@@ -126,6 +128,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                   ),
                 ),
               ],
+            ),
             ),
             Positioned(
               bottom: 24,

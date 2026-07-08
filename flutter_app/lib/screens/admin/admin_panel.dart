@@ -279,7 +279,9 @@ class _OverviewTabState extends State<_OverviewTab> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(
+          RefreshIndicator(
+            onRefresh: _loadReports,
+            child: CustomScrollView(
             slivers: [
               _buildAdminAppBar(context, 'overview'),
               SliverPadding(
@@ -330,6 +332,7 @@ class _OverviewTabState extends State<_OverviewTab> {
                 ),
               ),
             ],
+            ),
           ),
         ],
       ),
@@ -1060,7 +1063,10 @@ class _EmployeeTabState extends State<_EmployeeTab> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(slivers: slivers),
+          RefreshIndicator(
+            onRefresh: _loadData,
+            child: CustomScrollView(slivers: slivers),
+          ),
           Positioned(
             bottom: 24,
             right: 16,
@@ -1633,7 +1639,9 @@ class _ReportsTabState extends State<_ReportsTab> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(
+          RefreshIndicator(
+            onRefresh: _loadReports,
+            child: CustomScrollView(
             slivers: [
               _buildAdminAppBar(context, 'reports'),
               SliverPadding(
@@ -1748,6 +1756,7 @@ class _ReportsTabState extends State<_ReportsTab> {
                   ),
                 ),
             ],
+          ),
           ),
         ],
       ),
@@ -2003,7 +2012,10 @@ class _LeaveTabState extends State<_LeaveTab> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(slivers: slivers),
+          RefreshIndicator(
+            onRefresh: _loadLeaves,
+            child: CustomScrollView(slivers: slivers),
+          ),
         ],
       ),
     );
@@ -2348,7 +2360,9 @@ class _DepartmentTabState extends State<_DepartmentTab> {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(
+          RefreshIndicator(
+            onRefresh: _loadDepartments,
+            child: CustomScrollView(
             slivers: [
               _buildAdminAppBar(context, 'departments'),
               SliverPadding(
@@ -2431,6 +2445,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                       ),
               ),
             ],
+          ),
           ),
 
           Positioned(
