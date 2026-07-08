@@ -12,13 +12,13 @@ class LoadingIndicator extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: QuickpassColors.primary),
+          CircularProgressIndicator(color: context.primaryBlue),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
-                color: QuickpassColors.neutralGray,
+              style: TextStyle(
+                color: context.neutralGray,
                 fontSize: 14,
               ),
             ),
@@ -36,19 +36,19 @@ class ShimmerLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shimmerBase = QuickpassColors.outlineVariant.withValues(alpha: 0.3);
+    final shimmerBase = context.outlineVariant.withValues(alpha: 0.3);
     return ListView.builder(
       itemCount: itemCount,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
+      itemBuilder: (ctx, index) {
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: QuickpassColors.surface,
+            color: context.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: QuickpassColors.outlineVariant),
+            border: Border.all(color: context.outlineVariant),
           ),
           child: Row(
             children: [

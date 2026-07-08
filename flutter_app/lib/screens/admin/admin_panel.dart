@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/department.dart';
@@ -21,8 +22,8 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
     key: ValueKey(tabKey),
     pinned: true,
     toolbarHeight: 64,
-    backgroundColor: QuickpassColors.darkPrimary,
-    foregroundColor: QuickpassColors.darkOnPrimary,
+    backgroundColor: context.primary,
+    foregroundColor: context.onPrimary,
     automaticallyImplyLeading: false,
     flexibleSpace: SafeArea(
       child: Padding(
@@ -33,23 +34,23 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
+                color: context.onPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Quickpass',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: QuickpassColors.darkOnPrimary,
+                color: context.onPrimary,
               ),
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
+              icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(behavior: SnackBarBehavior.floating, content: Text('No new notifications')),
@@ -57,7 +58,7 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
+              icon: Icon(Icons.logout, color: context.onPrimary),
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
@@ -68,14 +69,13 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                       FilledButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                        style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
                         child: const Text('Logout'),
                       ),
                     ],
                   ),
                 );
                 if (confirmed == true && context.mounted) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
                   context.read<AuthProvider>().logout();
                 }
               },
@@ -210,16 +210,16 @@ class _OverviewTabState extends State<_OverviewTab> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: QuickpassColors.surface,
+          color: context.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: QuickpassColors.outlineVariant),
+          border: Border.all(color: context.outlineVariant),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.info_outline, color: QuickpassColors.neutralGray),
-            SizedBox(width: 12),
+            Icon(Icons.info_outline, color: context.neutralGray),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text('No department data available.', style: TextStyle(color: QuickpassColors.neutralGray)),
+              child: Text('No department data available.', style: TextStyle(color: context.neutralGray)),
             ),
           ],
         ),
@@ -229,19 +229,19 @@ class _OverviewTabState extends State<_OverviewTab> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: QuickpassColors.surface,
+        color: context.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: QuickpassColors.outlineVariant),
+        border: Border.all(color: context.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              SizedBox(width: 24, child: Text('ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              Expanded(flex: 3, child: Text('Department', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              Expanded(flex: 1, child: Text('Total', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
-              Expanded(flex: 1, child: Text('Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.outline))),
+              SizedBox(width: 24, child: Text('ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
+              Expanded(flex: 3, child: Text('Department', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
+              Expanded(flex: 1, child: Text('Total', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
+              Expanded(flex: 1, child: Text('Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
             ],
           ),
           const SizedBox(height: 8),
@@ -252,11 +252,11 @@ class _OverviewTabState extends State<_OverviewTab> {
                 children: [
                   SizedBox(
                     width: 24,
-                    child: Text('${dept['department_id'] ?? ''}', style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                    child: Text('${dept['department_id'] ?? ''}', style: TextStyle(fontSize: 12, color: context.neutralGray)),
                   ),
-                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
-                  Expanded(flex: 1, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface))),
-                  Expanded(flex: 1, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.warning))),
+                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.onSurface))),
+                  Expanded(flex: 1, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.onSurface))),
+                  Expanded(flex: 1, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.warning))),
                 ],
               ),
             );
@@ -312,12 +312,12 @@ class _OverviewTabState extends State<_OverviewTab> {
                         completedCount: _completedCount,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Department Summary',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: QuickpassColors.onSurface,
+                          color: context.onSurface,
                           height: 1.5,
                         ),
                       ),
@@ -346,21 +346,21 @@ class _AdminProfileCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: QuickpassColors.surfaceContainerLowest,
+        color: context.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: QuickpassColors.outlineVariant),
+        border: Border.all(color: context.outlineVariant),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
+            backgroundColor: context.primary.withValues(alpha: 0.2),
             child: Text(
               (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: QuickpassColors.darkPrimary,
+                color: context.primary,
               ),
             ),
           ),
@@ -369,21 +369,21 @@ class _AdminProfileCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Admin Control',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: QuickpassColors.outline,
+                    color: context.outline,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   userName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: QuickpassColors.onSurface,
+                    color: context.onSurface,
                     height: 1.4,
                   ),
                 ),
@@ -391,16 +391,16 @@ class _AdminProfileCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: QuickpassColors.error.withValues(alpha: 0.12),
+                    color: context.error.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: QuickpassColors.error.withValues(alpha: 0.3)),
+                    border: Border.all(color: context.error.withValues(alpha: 0.3)),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Admin',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: QuickpassColors.error,
+                      color: context.error,
                     ),
                   ),
                 ),
@@ -436,14 +436,14 @@ class _OverviewStatGrid extends StatelessWidget {
               icon: Icons.people,
               label: 'Employees',
               value: '$employeeCount',
-              color: QuickpassColors.secondary,
+              color: context.secondary,
             ),
             const SizedBox(width: 8),
             _StatCard(
               icon: Icons.pending_actions,
               label: 'Pending',
               value: '$pendingCount',
-              color: QuickpassColors.warning,
+              color: context.warning,
             ),
           ],
         ),
@@ -454,14 +454,14 @@ class _OverviewStatGrid extends StatelessWidget {
               icon: Icons.verified_user,
               label: 'Active',
               value: '$activeCount',
-              color: QuickpassColors.success,
+              color: context.success,
             ),
             const SizedBox(width: 8),
             _StatCard(
               icon: Icons.business,
               label: 'Departments',
               value: '$departmentCount',
-              color: QuickpassColors.primary,
+              color: context.primaryBlue,
             ),
           ],
         ),
@@ -479,12 +479,12 @@ class _QuickActionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Quick Actions',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: QuickpassColors.onSurface,
+            color: context.onSurface,
             height: 1.5,
           ),
         ),
@@ -553,12 +553,12 @@ class _SwitchViewSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Switch View',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: QuickpassColors.onSurface,
+            color: context.onSurface,
             height: 1.5,
           ),
         ),
@@ -638,11 +638,11 @@ class _LeaveBreakdownSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final sections = <PieChartSectionData>[];
     final entries = [
-      ('Pending', pendingCount, QuickpassColors.warning),
-      ('Approved', approvedCount, QuickpassColors.primary),
-      ('Rejected', rejectedCount, QuickpassColors.error),
-      ('Active', activeCount, QuickpassColors.success),
-      ('Completed', completedCount, QuickpassColors.secondary),
+      ('Pending', pendingCount, context.warning),
+      ('Approved', approvedCount, context.primaryBlue),
+      ('Rejected', rejectedCount, context.error),
+      ('Active', activeCount, context.success),
+      ('Completed', completedCount, context.secondary),
     ];
     for (final e in entries) {
       if (e.$2 > 0) {
@@ -659,20 +659,20 @@ class _LeaveBreakdownSection extends StatelessWidget {
       sections.add(PieChartSectionData(
         value: 1,
         title: '0',
-        color: QuickpassColors.neutralGray.withValues(alpha: 0.3),
+        color: context.neutralGray.withValues(alpha: 0.3),
         radius: 40,
-        titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: QuickpassColors.neutralGray),
+        titleStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.neutralGray),
       ));
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Leave Breakdown',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: QuickpassColors.onSurface,
+            color: context.onSurface,
             height: 1.5,
           ),
         ),
@@ -681,9 +681,9 @@ class _LeaveBreakdownSection extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: QuickpassColors.surfaceContainerLowest,
+            color: context.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: QuickpassColors.outlineVariant),
+            border: Border.all(color: context.outlineVariant),
           ),
           child: Column(
             children: [
@@ -692,15 +692,15 @@ class _LeaveBreakdownSection extends StatelessWidget {
                 child: PieChart(PieChartData(sections: sections, centerSpaceRadius: 30)),
               ),
               const SizedBox(height: 16),
-              _StatusLegend(label: 'Pending', count: pendingCount, color: QuickpassColors.warning),
+              _StatusLegend(label: 'Pending', count: pendingCount, color: context.warning),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Approved', count: approvedCount, color: QuickpassColors.primary),
+              _StatusLegend(label: 'Approved', count: approvedCount, color: context.primaryBlue),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Rejected', count: rejectedCount, color: QuickpassColors.error),
+              _StatusLegend(label: 'Rejected', count: rejectedCount, color: context.error),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Active', count: activeCount, color: QuickpassColors.success),
+              _StatusLegend(label: 'Active', count: activeCount, color: context.success),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Completed', count: completedCount, color: QuickpassColors.secondary),
+              _StatusLegend(label: 'Completed', count: completedCount, color: context.secondary),
             ],
           ),
         ),
@@ -775,335 +775,37 @@ class _EmployeeTabState extends State<_EmployeeTab> {
   }
 
   void _showAddDialog() {
-    final idCtl = TextEditingController();
-    final nameCtl = TextEditingController();
-    final posCtl = TextEditingController();
-    final emailCtl = TextEditingController();
-    final passCtl = TextEditingController();
-    String selectedDept = _departments.isNotEmpty ? _departments.first['department_id'] ?? '' : '';
-    bool isSupervisor = false;
-    bool isAdmin = false;
-    bool isSecurity = false;
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Add Employee'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: idCtl,
-                  decoration: const InputDecoration(labelText: 'Employee ID', hintText: '000001', helperText: '6-digit ID'),
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-                ),
-                const SizedBox(height: 12),
-                TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Full Name', hintText: 'e.g. Juan Dela Cruz')),
-                const SizedBox(height: 12),
-                TextField(controller: posCtl, decoration: const InputDecoration(labelText: 'Position', hintText: 'e.g. Software Engineer')),
-                const SizedBox(height: 12),
-                TextField(controller: emailCtl, decoration: const InputDecoration(labelText: 'Email', hintText: 'e.g. juan@company.com')),
-                const SizedBox(height: 12),
-                TextField(controller: passCtl, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedDept.isNotEmpty ? selectedDept : null,
-                  decoration: const InputDecoration(labelText: 'Department'),
-                  items: _departments.map<DropdownMenuItem<String>>((d) => DropdownMenuItem<String>(
-                    value: d['department_id'] as String?,
-                    child: Text(d['department_name'] as String? ?? ''),
-                  )).toList(),
-                  onChanged: (v) => setDialogState(() => selectedDept = v ?? ''),
-                ),
-                const SizedBox(height: 8),
-                CheckboxListTile(
-                  title: const Text('Supervisor access'),
-                  value: isSupervisor,
-                  onChanged: (v) => setDialogState(() => isSupervisor = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Admin access'),
-                  value: isAdmin,
-                  onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Security access'),
-                  value: isSecurity,
-                  onChanged: (v) => setDialogState(() => isSecurity = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            FilledButton(
-              onPressed: () async {
-                final empId = idCtl.text.trim();
-                if (empId.length != 6 || int.tryParse(empId) == null) return;
-                if (nameCtl.text.trim().isEmpty) return;
-                try {
-                  await _api.createEmployee({
-                    'employee_id': empId,
-                    'full_name': nameCtl.text.trim(),
-                    'position': posCtl.text.trim(),
-                    'email': emailCtl.text.trim(),
-                    'password': passCtl.text,
-                    'department_id': selectedDept,
-                    'is_supervisor': isSupervisor,
-                    'is_admin': isAdmin,
-                    'is_security': isSecurity,
-                  });
-                  if (!ctx.mounted) return;
-                  Navigator.pop(ctx);
-                  _loadData();
-                } catch (e) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-                }
-              },
-              child: const Text('Create'),
-            ),
-          ],
-        ),
-      ),
-    ).then((_) {
-      idCtl.dispose();
-      nameCtl.dispose();
-      posCtl.dispose();
-      emailCtl.dispose();
-      passCtl.dispose();
+      builder: (_) => _AddEmployeeDialog(departments: _departments),
+    ).then((created) {
+      if (created == true) _loadData();
     });
   }
 
   void _showEditDialog(Map<String, dynamic> emp) {
-    final nameCtl = TextEditingController(text: emp['full_name'] ?? '');
-    final posCtl = TextEditingController(text: emp['position'] ?? '');
-    final emailCtl = TextEditingController(text: emp['email'] ?? '');
-    String selectedDept = emp['department_id'] ?? '';
-    bool isSupervisor = emp['is_supervisor'] == true;
-    bool isAdmin = emp['is_admin'] == true;
-    bool isSecurity = emp['is_security'] == true;
-    bool isActive = emp['is_active'] != false;
-    final empId = emp['employee_id'] as String;
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text('Edit ${emp['full_name']}'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Full Name')),
-                const SizedBox(height: 12),
-                TextField(controller: posCtl, decoration: const InputDecoration(labelText: 'Position')),
-                const SizedBox(height: 12),
-                TextField(controller: emailCtl, decoration: const InputDecoration(labelText: 'Email')),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedDept.isNotEmpty ? selectedDept : null,
-                  decoration: const InputDecoration(labelText: 'Department'),
-                  items: [
-                    const DropdownMenuItem<String>(value: null, child: Text('No department')),
-                    ..._departments.map((d) => DropdownMenuItem<String>(
-                      value: d['department_id'] as String?,
-                      child: Text(d['department_name'] as String? ?? ''),
-                    )),
-                  ],
-                  onChanged: (v) => setDialogState(() => selectedDept = v ?? ''),
-                ),
-                const SizedBox(height: 8),
-                CheckboxListTile(
-                  title: const Text('Supervisor access'),
-                  value: isSupervisor,
-                  onChanged: (v) => setDialogState(() => isSupervisor = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Admin access'),
-                  value: isAdmin,
-                  onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Security access'),
-                  value: isSecurity,
-                  onChanged: (v) => setDialogState(() => isSecurity = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: Text('Active', style: TextStyle(color: isActive ? QuickpassColors.success : QuickpassColors.error)),
-                  value: isActive,
-                  onChanged: (v) => setDialogState(() => isActive = v ?? true),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            FilledButton(
-              onPressed: () async {
-                try {
-                  await _api.updateEmployee(empId, {
-                    'full_name': nameCtl.text,
-                    'position': posCtl.text,
-                    'email': emailCtl.text,
-                    'department_id': selectedDept,
-                  });
-                  if (emp['is_supervisor'] != isSupervisor) {
-                    await _api.toggleSupervisor(empId);
-                  }
-                  if (emp['is_admin'] != isAdmin) {
-                    await _api.toggleAdmin(empId);
-                  }
-                  if ((emp['is_active'] ?? true) != isActive) {
-                    await _api.toggleActive(empId);
-                  }
-                  if (!ctx.mounted) return;
-                  Navigator.pop(ctx);
-                  _loadData();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Employee updated')),
-                    );
-                  }
-                } catch (e) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-                }
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
-      ),
-    );
+      builder: (_) => _EditEmployeeDialog(emp: emp, departments: _departments),
+    ).then((updated) {
+      if (updated == true) _loadData();
+    });
   }
 
   void _showImportDialog() {
-    final ctl = TextEditingController();
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Import Employees'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Paste employee JSON array:', style: TextStyle(fontSize: 13, color: QuickpassColors.onSurfaceVariant)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: ctl,
-                maxLines: 10,
-                decoration: const InputDecoration(
-                  hintText: '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.all(12),
-                ),
-                style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-              ),
-              const SizedBox(height: 8),
-              const Text('Required: employee_id, full_name, position, department_id, email, password', style: TextStyle(fontSize: 11, color: QuickpassColors.neutralGray)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              final trimmed = ctl.text.trim();
-              if (trimmed.isEmpty) return;
-              try {
-                final list = (jsonDecode(trimmed) as List).cast<Map<String, dynamic>>();
-                if (list.isEmpty) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('No employees found in data')));
-                  return;
-                }
-                final result = await _api.importEmployees(list);
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                _loadData();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Imported ${result['imported'] ?? list.length} employees')),
-                  );
-                }
-              } catch (e) {
-                if (!ctx.mounted) return;
-                ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Import'),
-          ),
-        ],
-      ),
-    ).then((_) => ctl.dispose());
+      builder: (_) => const _ImportEmployeesDialog(),
+    ).then((imported) {
+      if (imported == true) _loadData();
+    });
   }
 
   void _showPasswordResetDialog(Map<String, dynamic> emp) {
-    final passCtl = TextEditingController();
-    final empId = emp['employee_id'] as String;
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reset Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('New password for ${emp['full_name']}'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: passCtl,
-              decoration: const InputDecoration(labelText: 'New Password', hintText: 'Min 4 characters'),
-              obscureText: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (passCtl.text.length < 4) return;
-              try {
-                await _api.resetPassword(empId, passCtl.text);
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Password reset successfully')),
-                  );
-                }
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    ).then((_) => passCtl.dispose());
+      builder: (_) => _ResetPasswordDialog(emp: emp),
+    );
   }
 
   void _confirmDelete(Map<String, dynamic> emp) async {
@@ -1116,7 +818,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
             child: const Text('Delete'),
           ),
         ],
@@ -1167,8 +869,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   icon: const Icon(Icons.upload_file, size: 18),
                   label: const Text('Import HR Data'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: QuickpassColors.darkPrimary,
-                    side: const BorderSide(color: QuickpassColors.darkPrimary),
+                    foregroundColor: context.primary,
+                    side: BorderSide(color: context.primary),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
                 ),
@@ -1264,7 +966,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   '$_totalEmployees employee${_totalEmployees == 1 ? '' : 's'}',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray),
                 ),
               ),
             // ── Error / Loading / Empty states ──
@@ -1273,13 +975,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: QuickpassColors.surface,
+                  color: context.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: QuickpassColors.outlineVariant),
+                  border: Border.all(color: context.outlineVariant),
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: QuickpassColors.error),
+                    Icon(Icons.error_outline, size: 48, color: context.error),
                     const SizedBox(height: 12),
                     const Text('Failed to load employees',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
@@ -1301,19 +1003,19 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: QuickpassColors.surface,
+                  color: context.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: QuickpassColors.outlineVariant),
+                  border: Border.all(color: context.outlineVariant),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Icon(Icons.people_outline, size: 64, color: QuickpassColors.outlineVariant),
-                    SizedBox(height: 12),
+                    Icon(Icons.people_outline, size: 64, color: context.outlineVariant),
+                    const SizedBox(height: 12),
                     Text('No employees found',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant)),
-                    SizedBox(height: 4),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.onSurfaceVariant)),
+                    const SizedBox(height: 4),
                     Text('Try adjusting your search or filters',
-                      style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
+                      style: TextStyle(color: context.neutralGray, fontSize: 13)),
                   ],
                 ),
               ),
@@ -1360,8 +1062,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             right: 16,
             child: FloatingActionButton(
               onPressed: _showAddDialog,
-              backgroundColor: QuickpassColors.darkPrimary,
-              foregroundColor: QuickpassColors.darkOnPrimary,
+              backgroundColor: context.primary,
+              foregroundColor: context.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1377,22 +1079,22 @@ class _EmployeeTabState extends State<_EmployeeTab> {
     final isActive = emp['is_active'] != false;
     final badges = <Widget>[];
     if (emp['is_admin'] == true) {
-      badges.add(const _RoleBadge(label: 'Admin', color: QuickpassColors.error));
+      badges.add(_RoleBadge(label: 'Admin', color: context.error));
     }
     if (emp['is_supervisor'] == true) {
-      badges.add(const _RoleBadge(label: 'Supervisor', color: QuickpassColors.tertiary));
+      badges.add(_RoleBadge(label: 'Supervisor', color: context.tertiary));
     }
     if (emp['is_security'] == true) {
-      badges.add(const _RoleBadge(label: 'Security', color: QuickpassColors.warning));
+      badges.add(_RoleBadge(label: 'Security', color: context.warning));
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isActive ? QuickpassColors.surfaceContainerLowest : QuickpassColors.surfaceVariant,
+        color: isActive ? context.surfaceContainerLowest : context.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? QuickpassColors.outlineVariant : QuickpassColors.error.withValues(alpha: 0.3),
+          color: isActive ? context.outlineVariant : context.error.withValues(alpha: 0.3),
         ),
       ),
       child: InkWell(
@@ -1414,8 +1116,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   height: 44,
                   decoration: BoxDecoration(
                     color: isActive
-                        ? QuickpassColors.darkPrimary.withValues(alpha: 0.2)
-                        : QuickpassColors.outlineVariant.withValues(alpha: 0.3),
+                        ? context.primary.withValues(alpha: 0.2)
+                        : context.outlineVariant.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Center(
@@ -1424,7 +1126,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? QuickpassColors.darkPrimary : QuickpassColors.neutralGray,
+                        color: isActive ? context.primary : context.neutralGray,
                       ),
                     ),
                   ),
@@ -1442,7 +1144,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: isActive ? QuickpassColors.onSurface : QuickpassColors.neutralGray,
+                                color: isActive ? context.onSurface : context.neutralGray,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1450,19 +1152,19 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                           const SizedBox(width: 4),
                           InkWell(
                             onTap: () => _showEditDialog(emp),
-                            child: const Icon(Icons.edit, size: 16, color: QuickpassColors.neutralGray),
+                            child: Icon(Icons.edit, size: 16, color: context.neutralGray),
                           ),
                           if (!isActive) ...[
                             const SizedBox(width: 6),
-                            const Text('inactive',
-                              style: TextStyle(fontSize: 11, color: QuickpassColors.error, fontWeight: FontWeight.w500)),
+                            Text('inactive',
+                              style: TextStyle(fontSize: 11, color: context.error, fontWeight: FontWeight.w500)),
                           ],
                         ],
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${emp['employee_id']} | ${emp['position'] ?? ''}',
-                        style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
+                        style: TextStyle(fontSize: 12, color: context.outline),
                       ),
                       if (badges.isNotEmpty)
                         Padding(
@@ -1474,7 +1176,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 18),
-                  color: QuickpassColors.error,
+                  color: context.error,
                   onPressed: () => _confirmDelete(emp),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -1488,7 +1190,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   icon: Icons.admin_panel_settings,
                   label: 'Admin',
                   active: emp['is_admin'] == true,
-                  color: QuickpassColors.error,
+                  color: context.error,
                   onTap: () async {
                     final messenger = ScaffoldMessenger.of(context);
                     try {
@@ -1506,7 +1208,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   icon: Icons.supervisor_account,
                   label: 'Supervisor',
                   active: emp['is_supervisor'] == true,
-                  color: QuickpassColors.tertiary,
+                  color: context.tertiary,
                   onTap: () async {
                     final messenger = ScaffoldMessenger.of(context);
                     try {
@@ -1524,7 +1226,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   icon: Icons.check_circle_outline,
                   label: emp['is_active'] != false ? 'Active' : 'Inactive',
                   active: emp['is_active'] != false,
-                  color: emp['is_active'] != false ? QuickpassColors.success : QuickpassColors.error,
+                  color: emp['is_active'] != false ? context.success : context.error,
                   onTap: () async {
                     try {
                       await _api.toggleActive(emp['employee_id']);
@@ -1537,7 +1239,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   icon: Icons.key,
                   label: 'Password',
                   active: false,
-                  color: QuickpassColors.warning,
+                  color: context.warning,
                   onTap: () => _showPasswordResetDialog(emp),
                 ),
               ],
@@ -1565,8 +1267,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             icon: const Icon(Icons.chevron_left, size: 18),
             label: const Text('Prev'),
             style: FilledButton.styleFrom(
-              backgroundColor: QuickpassColors.darkPrimary,
-              foregroundColor: QuickpassColors.darkOnPrimary,
+              backgroundColor: context.primary,
+              foregroundColor: context.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               textStyle: const TextStyle(fontSize: 13),
             ),
@@ -1575,7 +1277,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'Page $_currentPage of $_totalPages',
-              style: const TextStyle(fontSize: 13, color: QuickpassColors.onSurfaceVariant),
+              style: TextStyle(fontSize: 13, color: context.onSurfaceVariant),
             ),
           ),
           FilledButton.icon(
@@ -1588,8 +1290,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
             icon: const Icon(Icons.chevron_right, size: 18),
             label: const Text('Next'),
             style: FilledButton.styleFrom(
-              backgroundColor: QuickpassColors.darkPrimary,
-              foregroundColor: QuickpassColors.darkOnPrimary,
+              backgroundColor: context.primary,
+              foregroundColor: context.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               textStyle: const TextStyle(fontSize: 13),
             ),
@@ -1612,7 +1314,7 @@ class _StatusLegend extends StatelessWidget {
       children: [
         Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 8),
-        Expanded(child: Text(label, style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray))),
+        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray))),
         Text('$count', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: color)),
       ],
     );
@@ -1642,8 +1344,8 @@ class _ActionButton extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(icon, size: 16, color: active ? color : QuickpassColors.neutralGray),
-              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active ? color : QuickpassColors.neutralGray), overflow: TextOverflow.ellipsis, maxLines: 1),
+              Icon(icon, size: 16, color: active ? color : context.neutralGray),
+              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active ? color : context.neutralGray), overflow: TextOverflow.ellipsis, maxLines: 1),
             ],
           ),
         ),
@@ -1757,25 +1459,25 @@ class _ReportsTabState extends State<_ReportsTab> {
         barRods: [
           BarChartRodData(
             toY: num.tryParse('${d['pending']}')?.toDouble() ?? 0,
-            color: QuickpassColors.warning,
+            color: context.warning,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
             toY: num.tryParse('${d['approved']}')?.toDouble() ?? 0,
-            color: QuickpassColors.primary,
+            color: context.primaryBlue,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
             toY: num.tryParse('${d['rejected']}')?.toDouble() ?? 0,
-            color: QuickpassColors.error,
+            color: context.error,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
             toY: num.tryParse('${d['completed']}')?.toDouble() ?? 0,
-            color: QuickpassColors.success,
+            color: context.success,
             width: 8,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
@@ -1795,7 +1497,7 @@ class _ReportsTabState extends State<_ReportsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Department Overview', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
+          Text('Department Overview', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
           const SizedBox(height: 12),
           SizedBox(
             height: 280,
@@ -1809,7 +1511,7 @@ class _ReportsTabState extends State<_ReportsTab> {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: QuickpassColors.outlineVariant.withValues(alpha: 0.5),
+                    color: context.outlineVariant.withValues(alpha: 0.5),
                     strokeWidth: 1,
                   ),
                 ),
@@ -1829,7 +1531,7 @@ class _ReportsTabState extends State<_ReportsTab> {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             code,
-                            style: const TextStyle(fontSize: 10, color: QuickpassColors.outline),
+                            style: TextStyle(fontSize: 10, color: context.outline),
                             overflow: TextOverflow.ellipsis,
                           ),
                         );
@@ -1844,7 +1546,7 @@ class _ReportsTabState extends State<_ReportsTab> {
                         if (value == meta.max) return const SizedBox.shrink();
                         return Text(
                           '${value.toInt()}',
-                          style: const TextStyle(fontSize: 10, color: QuickpassColors.outline),
+                          style: TextStyle(fontSize: 10, color: context.outline),
                         );
                       },
                     ),
@@ -1860,14 +1562,14 @@ class _ReportsTabState extends State<_ReportsTab> {
                       final deptName = dept['department_name'] as String? ?? '';
                       final statusLabels = ['Pending', 'Approved', 'Rejected', 'Completed'];
                       final statusColors = [
-                        QuickpassColors.warning,
-                        QuickpassColors.primary,
-                        QuickpassColors.error,
-                        QuickpassColors.success,
+                        context.warning,
+                        context.primaryBlue,
+                        context.error,
+                        context.success,
                       ];
                       return BarTooltipItem(
                         '$deptName\n',
-                        const TextStyle(color: QuickpassColors.onSurface, fontWeight: FontWeight.w600, fontSize: 12),
+                        TextStyle(color: context.onSurface, fontWeight: FontWeight.w600, fontSize: 12),
                         children: [
                           TextSpan(
                             text: '${statusLabels[rodIndex]}: ',
@@ -1875,7 +1577,7 @@ class _ReportsTabState extends State<_ReportsTab> {
                           ),
                           TextSpan(
                             text: '${rod.toY.toInt()}',
-                            style: const TextStyle(color: QuickpassColors.onSurface, fontSize: 12),
+                            style: TextStyle(color: context.onSurface, fontSize: 12),
                           ),
                         ],
                       );
@@ -1894,10 +1596,10 @@ class _ReportsTabState extends State<_ReportsTab> {
 
   Widget _buildBarLegend() {
     final entries = [
-      ('Pending', QuickpassColors.warning),
-      ('Approved', QuickpassColors.primary),
-      ('Rejected', QuickpassColors.error),
-      ('Completed', QuickpassColors.success),
+      ('Pending', context.warning),
+      ('Approved', context.primaryBlue),
+      ('Rejected', context.error),
+      ('Completed', context.success),
     ];
     return Wrap(
       spacing: 16,
@@ -1915,7 +1617,7 @@ class _ReportsTabState extends State<_ReportsTab> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(e.$1, style: const TextStyle(fontSize: 11, color: QuickpassColors.outline)),
+            Text(e.$1, style: TextStyle(fontSize: 11, color: context.outline)),
           ],
         );
       }).toList(),
@@ -1957,22 +1659,22 @@ class _ReportsTabState extends State<_ReportsTab> {
                       ),
                       const SizedBox(height: 16),
                       _buildDepartmentBarChart(),
-                      const Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
+                      Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
                       const SizedBox(height: 8),
                       if (_reportData == null || _reportData!.isEmpty)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: QuickpassColors.surface,
+                            color: context.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: QuickpassColors.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
-                          child: const Column(
+                          child: Column(
                             children: [
-                              Icon(Icons.inbox_outlined, size: 48, color: QuickpassColors.outlineVariant),
-                              SizedBox(height: 12),
-                              Text('No leave requests found', style: TextStyle(color: QuickpassColors.neutralGray)),
+                              Icon(Icons.inbox_outlined, size: 48, color: context.outlineVariant),
+                              const SizedBox(height: 12),
+                              Text('No leave requests found', style: TextStyle(color: context.neutralGray)),
                             ],
                           ),
                         ),
@@ -1988,14 +1690,14 @@ class _ReportsTabState extends State<_ReportsTab> {
                       (context, index) {
                         final entry = _reportData![index];
                         final status = entry['status'] as String? ?? 'pending';
-                        final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
+                        final statusColor = AppConstants.statusColors[status] ?? context.neutralGray;
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: QuickpassColors.surfaceContainerLowest,
+                            color: context.surfaceContainerLowest,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: QuickpassColors.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
                           child: Row(
                             children: [
@@ -2005,16 +1707,16 @@ class _ReportsTabState extends State<_ReportsTab> {
                                   children: [
                                     Text(
                                       '${entry['employee_name'] ?? 'Unknown'}',
-                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface),
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
-                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.outline),
+                        style: TextStyle(fontSize: 12, color: context.outline),
                                     ),
                                     Text(
                                       entry['reason'] ?? '',
-                                      style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -2082,9 +1784,9 @@ class _ReportsFilterBar extends StatelessWidget {
                 onTap: () => onPickDate(true),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text('to', style: TextStyle(color: QuickpassColors.neutralGray)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text('to', style: TextStyle(color: context.neutralGray)),
             ),
             Expanded(
               child: TextField(
@@ -2133,21 +1835,21 @@ class _ReportsStatSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${statusCounts['pending'] ?? 0}', color: QuickpassColors.warning),
+            _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${statusCounts['pending'] ?? 0}', color: context.warning),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${statusCounts['approved'] ?? 0}', color: QuickpassColors.success),
+            _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${statusCounts['approved'] ?? 0}', color: context.success),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${statusCounts['rejected'] ?? 0}', color: QuickpassColors.error),
+            _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${statusCounts['rejected'] ?? 0}', color: context.error),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            _StatCard(icon: Icons.timer, label: 'Active', value: '${statusCounts['active'] ?? 0}', color: QuickpassColors.primary),
+            _StatCard(icon: Icons.timer, label: 'Active', value: '${statusCounts['active'] ?? 0}', color: context.primaryBlue),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${statusCounts['completed'] ?? 0}', color: QuickpassColors.secondary),
+            _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${statusCounts['completed'] ?? 0}', color: context.secondary),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.business, label: 'Departments', value: '$departmentCount', color: QuickpassColors.tertiary),
+            _StatCard(icon: Icons.business, label: 'Departments', value: '$departmentCount', color: context.tertiary),
           ],
         ),
       ],
@@ -2202,7 +1904,7 @@ class _LeaveTabState extends State<_LeaveTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
             child: const Text('Delete'),
           ),
         ],
@@ -2254,7 +1956,7 @@ class _LeaveTabState extends State<_LeaveTab> {
             ),
             const SizedBox(height: 12),
             Text('${filtered.length} leave${filtered.length == 1 ? '' : 's'}',
-              style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+              style: TextStyle(fontSize: 12, color: context.neutralGray)),
             const SizedBox(height: 8),
             if (_isLoading)
               const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
@@ -2263,15 +1965,15 @@ class _LeaveTabState extends State<_LeaveTab> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: QuickpassColors.surface,
+                  color: context.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: QuickpassColors.outlineVariant),
+                  border: Border.all(color: context.outlineVariant),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Icon(Icons.inbox_outlined, size: 48, color: QuickpassColors.outlineVariant),
-                    SizedBox(height: 12),
-                    Text('No leave requests', style: TextStyle(color: QuickpassColors.neutralGray)),
+                    Icon(Icons.inbox_outlined, size: 48, color: context.outlineVariant),
+                    const SizedBox(height: 12),
+                    Text('No leave requests', style: TextStyle(color: context.neutralGray)),
                   ],
                 ),
               ),
@@ -2358,7 +2060,7 @@ class _LeaveTabState extends State<_LeaveTab> {
               if (ctrl.text.trim().isEmpty) return;
               Navigator.pop(ctx, ctrl.text.trim());
             },
-            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
             child: const Text('Reject'),
           ),
         ],
@@ -2403,14 +2105,14 @@ class _LeaveTabState extends State<_LeaveTab> {
 
   Widget _buildLeaveItem(BuildContext context, Map<String, dynamic> leave) {
     final status = leave['status'] as String? ?? 'pending';
-    final statusColor = AppConstants.statusColors[status] ?? QuickpassColors.neutralGray;
+    final statusColor = AppConstants.statusColors[status] ?? context.neutralGray;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: QuickpassColors.surfaceContainerLowest,
+        color: context.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: QuickpassColors.outlineVariant),
+        border: Border.all(color: context.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2423,12 +2125,12 @@ class _LeaveTabState extends State<_LeaveTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(leave['employee_name'] ?? 'Unknown',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
                     if ((leave['department_name'] as String?)?.isNotEmpty == true)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text('${leave['department_name'] ?? ''}',
-                          style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                          style: TextStyle(fontSize: 12, color: context.neutralGray)),
                       ),
                   ],
                 ),
@@ -2453,22 +2155,22 @@ class _LeaveTabState extends State<_LeaveTab> {
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
+                Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
                 const SizedBox(width: 4),
                 Text('${leave['leave_date'] ?? ''}',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
                 const SizedBox(width: 12),
-                const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
+                Icon(Icons.access_time, size: 14, color: context.neutralGray),
                 const SizedBox(width: 4),
                 Text('${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
-                  style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray)),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
               ],
             ),
           ),
           if ((leave['reason'] as String?)?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
             Text(leave['reason'] as String? ?? '',
-              style: const TextStyle(fontSize: 12, color: QuickpassColors.neutralGray),
+              style: TextStyle(fontSize: 12, color: context.neutralGray),
               maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
           if (status == 'pending' || status == 'approved' || status == 'active') ...[
@@ -2477,7 +2179,7 @@ class _LeaveTabState extends State<_LeaveTab> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: QuickpassColors.error, size: 20),
+                  icon: Icon(Icons.delete_outline, color: context.error, size: 20),
                   tooltip: 'Delete',
                   onPressed: () => _confirmDeleteLeave(leave),
                 ),
@@ -2487,8 +2189,8 @@ class _LeaveTabState extends State<_LeaveTab> {
                     icon: const Icon(Icons.close, size: 18),
                     label: const Text('Reject'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: QuickpassColors.error,
-                      side: const BorderSide(color: QuickpassColors.error),
+                      foregroundColor: context.error,
+                      side: BorderSide(color: context.error),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -2497,8 +2199,8 @@ class _LeaveTabState extends State<_LeaveTab> {
                     icon: const Icon(Icons.check, size: 18),
                     label: const Text('Approve'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: QuickpassColors.darkPrimary,
-                      foregroundColor: QuickpassColors.darkOnPrimary,
+                      backgroundColor: context.primary,
+                      foregroundColor: context.onPrimary,
                     ),
                   ),
                 ],
@@ -2508,8 +2210,8 @@ class _LeaveTabState extends State<_LeaveTab> {
                     icon: const Icon(Icons.undo, size: 18),
                     label: const Text('Revoke'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: QuickpassColors.warning,
-                      side: const BorderSide(color: QuickpassColors.warning),
+                      foregroundColor: context.warning,
+                      side: BorderSide(color: context.warning),
                     ),
                   ),
               ],
@@ -2535,10 +2237,10 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? QuickpassColors.darkPrimary.withValues(alpha: 0.15) : QuickpassColors.surfaceContainerLow,
+          color: selected ? context.primary.withValues(alpha: 0.15) : context.surfaceContainerLow,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? QuickpassColors.darkPrimary : QuickpassColors.outlineVariant,
+            color: selected ? context.primary : context.outlineVariant,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -2547,7 +2249,7 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? QuickpassColors.darkPrimary : QuickpassColors.onSurfaceVariant,
+            color: selected ? context.primary : context.onSurfaceVariant,
           ),
         ),
       ),
@@ -2584,105 +2286,20 @@ class _DepartmentTabState extends State<_DepartmentTab> {
   }
 
   void _showAddDialog() {
-    final idCtl = TextEditingController();
-    final nameCtl = TextEditingController();
-    final codeCtl = TextEditingController();
-    final hodCtl = TextEditingController();
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add Department'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: idCtl, decoration: const InputDecoration(labelText: 'Department ID')),
-            const SizedBox(height: 12),
-            TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Department Name')),
-            const SizedBox(height: 12),
-            TextField(controller: codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
-            const SizedBox(height: 12),
-            TextField(controller: hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (idCtl.text.trim().isEmpty || nameCtl.text.trim().isEmpty) return;
-              try {
-                await _api.createDepartment({
-                  'department_id': idCtl.text.trim(),
-                  'department_name': nameCtl.text.trim(),
-                  'department_code': codeCtl.text.trim(),
-                  'head_of_department': hodCtl.text.trim(),
-                });
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                _loadDepartments();
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Create'),
-          ),
-        ],
-      ),
-    ).then((_) {
-      idCtl.dispose();
-      nameCtl.dispose();
-      codeCtl.dispose();
-      hodCtl.dispose();
+      builder: (_) => const _AddDepartmentDialog(),
+    ).then((created) {
+      if (created == true) _loadDepartments();
     });
   }
 
   void _showEditDialog(Department dept) {
-    final nameCtl = TextEditingController(text: dept.departmentName);
-    final codeCtl = TextEditingController(text: dept.departmentCode ?? '');
-    final hodCtl = TextEditingController(text: dept.headOfDepartment ?? '');
-
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Edit ${dept.departmentName}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Department Name')),
-            const SizedBox(height: 12),
-            TextField(controller: codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
-            const SizedBox(height: 12),
-            TextField(controller: hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (nameCtl.text.trim().isEmpty) return;
-              try {
-                await _api.updateDepartment(dept.departmentId, {
-                  'department_name': nameCtl.text.trim(),
-                  'department_code': codeCtl.text.trim(),
-                  'head_of_department': hodCtl.text.trim(),
-                });
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                _loadDepartments();
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    ).then((_) {
-      nameCtl.dispose();
-      codeCtl.dispose();
-      hodCtl.dispose();
+      builder: (_) => _EditDepartmentDialog(dept: dept),
+    ).then((updated) {
+      if (updated == true) _loadDepartments();
     });
   }
 
@@ -2696,7 +2313,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
             child: const Text('Delete'),
           ),
         ],
@@ -2739,17 +2356,17 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: QuickpassColors.surface,
+                              color: context.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: QuickpassColors.outlineVariant),
+                              border: Border.all(color: context.outlineVariant),
                             ),
-                            child: const Column(
+                            child: Column(
                               children: [
-                                Icon(Icons.business_outlined, size: 64, color: QuickpassColors.outlineVariant),
-                                SizedBox(height: 12),
-                                Text('No departments yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant)),
-                                SizedBox(height: 4),
-                                Text('Add a department to get started', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
+                                Icon(Icons.business_outlined, size: 64, color: context.outlineVariant),
+                                const SizedBox(height: 12),
+                                Text('No departments yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.onSurfaceVariant)),
+                                const SizedBox(height: 4),
+                                Text('Add a department to get started', style: TextStyle(color: context.neutralGray, fontSize: 13)),
                               ],
                             ),
                           ),
@@ -2759,13 +2376,13 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final dept = _departments[index];
-                            final statusColor = dept.isActive ? QuickpassColors.success : QuickpassColors.error;
+                            final statusColor = dept.isActive ? context.success : context.error;
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
-                                color: QuickpassColors.surfaceContainerLowest,
+                                color: context.surfaceContainerLowest,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: QuickpassColors.outlineVariant),
+                                border: Border.all(color: context.outlineVariant),
                               ),
                               child: Stack(
                                 children: [
@@ -2777,15 +2394,15 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                                     padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
                                     child: Row(
                                       children: [
-                                        CircleAvatar(radius: 24, backgroundColor: QuickpassColors.secondary.withValues(alpha: 0.12), child: const Icon(Icons.business, color: QuickpassColors.secondary)),
+                                        CircleAvatar(radius: 24, backgroundColor: context.secondary.withValues(alpha: 0.12), child: Icon(Icons.business, color: context.secondary)),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(dept.departmentName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
+                                              Text(dept.departmentName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface)),
                                               const SizedBox(height: 2),
-                                              Text('${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, color: QuickpassColors.outline)),
+                                              Text('${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, color: context.outline)),
                                             ],
                                           ),
                                         ),
@@ -2795,9 +2412,9 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                                           child: Text(dept.isActive ? 'Active' : 'Inactive', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
                                         ),
                                         const SizedBox(width: 4),
-                                        IconButton(icon: const Icon(Icons.edit_outlined, size: 20), color: QuickpassColors.neutralGray, onPressed: () => _showEditDialog(dept)),
+                                        IconButton(icon: const Icon(Icons.edit_outlined, size: 20), color: context.neutralGray, onPressed: () => _showEditDialog(dept)),
                                         const SizedBox(width: 4),
-                                        IconButton(icon: const Icon(Icons.delete_outline, size: 20), color: QuickpassColors.error, onPressed: () => _confirmDelete(dept)),
+                                        IconButton(icon: const Icon(Icons.delete_outline, size: 20), color: context.error, onPressed: () => _confirmDelete(dept)),
                                       ],
                                     ),
                                   ),
@@ -2817,8 +2434,8 @@ class _DepartmentTabState extends State<_DepartmentTab> {
             right: 16,
             child: FloatingActionButton(
               onPressed: _showAddDialog,
-              backgroundColor: QuickpassColors.darkPrimary,
-              foregroundColor: QuickpassColors.darkOnPrimary,
+              backgroundColor: context.primary,
+              foregroundColor: context.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -2851,6 +2468,671 @@ class _RoleBadge extends StatelessWidget {
   }
 }
 
+class _AddDepartmentDialog extends StatefulWidget {
+  const _AddDepartmentDialog();
+
+  @override
+  State<_AddDepartmentDialog> createState() => _AddDepartmentDialogState();
+}
+
+class _AddDepartmentDialogState extends State<_AddDepartmentDialog> {
+  final _idCtl = TextEditingController();
+  final _nameCtl = TextEditingController();
+  final _codeCtl = TextEditingController();
+  final _hodCtl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _idCtl.dispose();
+    _nameCtl.dispose();
+    _codeCtl.dispose();
+    _hodCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Department'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _idCtl,
+              decoration: const InputDecoration(labelText: 'Department ID'),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _nameCtl,
+              decoration: const InputDecoration(labelText: 'Department Name'),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(controller: _codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
+            const SizedBox(height: 12),
+            TextFormField(controller: _hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _create,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Create'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _create() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isLoading = true);
+    try {
+      final api = context.read<ApiService>();
+      await api.createDepartment({
+        'department_id': _idCtl.text.trim(),
+        'department_name': _nameCtl.text.trim(),
+        'department_code': _codeCtl.text.trim(),
+        'head_of_department': _hodCtl.text.trim(),
+      });
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to create department';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
+class _EditDepartmentDialog extends StatefulWidget {
+  final Department dept;
+
+  const _EditDepartmentDialog({required this.dept});
+
+  @override
+  State<_EditDepartmentDialog> createState() => _EditDepartmentDialogState();
+}
+
+class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
+  late final _nameCtl = TextEditingController(text: widget.dept.departmentName);
+  late final _codeCtl = TextEditingController(text: widget.dept.departmentCode ?? '');
+  late final _hodCtl = TextEditingController(text: widget.dept.headOfDepartment ?? '');
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _nameCtl.dispose();
+    _codeCtl.dispose();
+    _hodCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit ${widget.dept.departmentName}'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _nameCtl,
+              decoration: const InputDecoration(labelText: 'Department Name'),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(controller: _codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
+            const SizedBox(height: 12),
+            TextFormField(controller: _hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _save,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Save'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isLoading = true);
+    try {
+      final api = context.read<ApiService>();
+      await api.updateDepartment(widget.dept.departmentId, {
+        'department_name': _nameCtl.text.trim(),
+        'department_code': _codeCtl.text.trim(),
+        'head_of_department': _hodCtl.text.trim(),
+      });
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to update department';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
+class _AddEmployeeDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> departments;
+
+  const _AddEmployeeDialog({required this.departments});
+
+  @override
+  State<_AddEmployeeDialog> createState() => _AddEmployeeDialogState();
+}
+
+class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
+  final _idCtl = TextEditingController();
+  final _nameCtl = TextEditingController();
+  final _posCtl = TextEditingController();
+  final _emailCtl = TextEditingController();
+  final _passCtl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String _selectedDept = '';
+  bool _isSupervisor = false;
+  bool _isAdmin = false;
+  bool _isSecurity = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.departments.isNotEmpty) {
+      _selectedDept = widget.departments.first['department_id'] as String? ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _idCtl.dispose();
+    _nameCtl.dispose();
+    _posCtl.dispose();
+    _emailCtl.dispose();
+    _passCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Employee'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _idCtl,
+                decoration: const InputDecoration(labelText: 'Employee ID', hintText: '000001', helperText: '6-digit ID'),
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Required';
+                  if (v.trim().length != 6 || int.tryParse(v.trim()) == null) return 'Must be 6 digits';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(controller: _nameCtl, decoration: const InputDecoration(labelText: 'Full Name', hintText: 'e.g. Juan Dela Cruz'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              TextFormField(controller: _posCtl, decoration: const InputDecoration(labelText: 'Position', hintText: 'e.g. Software Engineer'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              TextFormField(controller: _emailCtl, decoration: const InputDecoration(labelText: 'Email', hintText: 'e.g. juan@company.com'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              TextFormField(controller: _passCtl, decoration: const InputDecoration(labelText: 'Password'), obscureText: true, validator: (v) => v == null || v.length < 4 ? 'Min 4 characters' : null),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
+                decoration: const InputDecoration(labelText: 'Department'),
+                items: widget.departments.map<DropdownMenuItem<String>>((d) => DropdownMenuItem<String>(
+                  value: d['department_id'] as String?,
+                  child: Text(d['department_name'] as String? ?? ''),
+                )).toList(),
+                onChanged: (v) => setState(() => _selectedDept = v ?? ''),
+              ),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                title: const Text('Supervisor access'),
+                value: _isSupervisor,
+                onChanged: (v) => setState(() => _isSupervisor = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: const Text('Admin access'),
+                value: _isAdmin,
+                onChanged: (v) => setState(() => _isAdmin = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: const Text('Security access'),
+                value: _isSecurity,
+                onChanged: (v) => setState(() => _isSecurity = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _create,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Create'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _create() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isLoading = true);
+    try {
+      final api = context.read<ApiService>();
+      await api.createEmployee({
+        'employee_id': _idCtl.text.trim(),
+        'full_name': _nameCtl.text.trim(),
+        'position': _posCtl.text.trim(),
+        'email': _emailCtl.text.trim(),
+        'password': _passCtl.text,
+        'department_id': _selectedDept,
+        'is_supervisor': _isSupervisor,
+        'is_admin': _isAdmin,
+        'is_security': _isSecurity,
+      });
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to create employee';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
+class _EditEmployeeDialog extends StatefulWidget {
+  final Map<String, dynamic> emp;
+  final List<Map<String, dynamic>> departments;
+
+  const _EditEmployeeDialog({required this.emp, required this.departments});
+
+  @override
+  State<_EditEmployeeDialog> createState() => _EditEmployeeDialogState();
+}
+
+class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
+  late final TextEditingController _nameCtl;
+  late final TextEditingController _posCtl;
+  late final TextEditingController _emailCtl;
+  final _formKey = GlobalKey<FormState>();
+  late String _selectedDept;
+  late bool _isSupervisor;
+  late bool _isAdmin;
+  late bool _isSecurity;
+  late bool _isActive;
+  late final String _empId;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtl = TextEditingController(text: widget.emp['full_name'] ?? '');
+    _posCtl = TextEditingController(text: widget.emp['position'] ?? '');
+    _emailCtl = TextEditingController(text: widget.emp['email'] ?? '');
+    _selectedDept = widget.emp['department_id'] ?? '';
+    _isSupervisor = widget.emp['is_supervisor'] == true;
+    _isAdmin = widget.emp['is_admin'] == true;
+    _isSecurity = widget.emp['is_security'] == true;
+    _isActive = widget.emp['is_active'] != false;
+    _empId = widget.emp['employee_id'] as String;
+  }
+
+  @override
+  void dispose() {
+    _nameCtl.dispose();
+    _posCtl.dispose();
+    _emailCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Edit ${widget.emp['full_name']}'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(controller: _nameCtl, decoration: const InputDecoration(labelText: 'Full Name'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              TextFormField(controller: _posCtl, decoration: const InputDecoration(labelText: 'Position'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              TextFormField(controller: _emailCtl, decoration: const InputDecoration(labelText: 'Email'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
+                decoration: const InputDecoration(labelText: 'Department'),
+                items: [
+                  const DropdownMenuItem<String>(value: null, child: Text('No department')),
+                  ...widget.departments.map((d) => DropdownMenuItem<String>(
+                    value: d['department_id'] as String?,
+                    child: Text(d['department_name'] as String? ?? ''),
+                  )),
+                ],
+                onChanged: (v) => setState(() => _selectedDept = v ?? ''),
+              ),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                title: const Text('Supervisor access'),
+                value: _isSupervisor,
+                onChanged: (v) => setState(() => _isSupervisor = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: const Text('Admin access'),
+                value: _isAdmin,
+                onChanged: (v) => setState(() => _isAdmin = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: const Text('Security access'),
+                value: _isSecurity,
+                onChanged: (v) => setState(() => _isSecurity = v ?? false),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+              CheckboxListTile(
+                title: Text('Active', style: TextStyle(color: _isActive ? context.success : context.error)),
+                value: _isActive,
+                onChanged: (v) => setState(() => _isActive = v ?? true),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _save,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Save'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _isLoading = true);
+    try {
+      final api = context.read<ApiService>();
+      await api.updateEmployee(_empId, {
+        'full_name': _nameCtl.text.trim(),
+        'position': _posCtl.text.trim(),
+        'email': _emailCtl.text.trim(),
+        'department_id': _selectedDept,
+      });
+      if (widget.emp['is_supervisor'] != _isSupervisor) {
+        await api.toggleSupervisor(_empId);
+      }
+      if (widget.emp['is_admin'] != _isAdmin) {
+        await api.toggleAdmin(_empId);
+      }
+      if ((widget.emp['is_active'] ?? true) != _isActive) {
+        await api.toggleActive(_empId);
+      }
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Employee updated')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to update employee';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
+class _ImportEmployeesDialog extends StatefulWidget {
+  const _ImportEmployeesDialog();
+
+  @override
+  State<_ImportEmployeesDialog> createState() => _ImportEmployeesDialogState();
+}
+
+class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
+  final _ctl = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _ctl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Import Employees'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Paste employee JSON array:', style: TextStyle(fontSize: 13, color: context.onSurfaceVariant)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _ctl,
+              maxLines: 10,
+              decoration: const InputDecoration(
+                hintText: '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.all(12),
+              ),
+              style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+            ),
+            const SizedBox(height: 8),
+            Text('Required: employee_id, full_name, position, department_id, email, password', style: TextStyle(fontSize: 11, color: context.neutralGray)),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _import,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Import'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _import() async {
+    final trimmed = _ctl.text.trim();
+    if (trimmed.isEmpty) return;
+    setState(() => _isLoading = true);
+    try {
+      final list = (jsonDecode(trimmed) as List).cast<Map<String, dynamic>>();
+      if (list.isEmpty) {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No employees found in data')));
+        return;
+      }
+      final api = context.read<ApiService>();
+      final result = await api.importEmployees(list);
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Imported ${result['imported'] ?? list.length} employees')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to import employees';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
+class _ResetPasswordDialog extends StatefulWidget {
+  final Map<String, dynamic> emp;
+
+  const _ResetPasswordDialog({required this.emp});
+
+  @override
+  State<_ResetPasswordDialog> createState() => _ResetPasswordDialogState();
+}
+
+class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
+  final _passCtl = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _passCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('New password for ${widget.emp['full_name']}'),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _passCtl,
+            decoration: const InputDecoration(labelText: 'New Password', hintText: 'Min 4 characters'),
+            obscureText: true,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _reset,
+          child: _isLoading
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Reset'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _reset() async {
+    if (_passCtl.text.length < 4) return;
+    setState(() => _isLoading = true);
+    try {
+      final api = context.read<ApiService>();
+      await api.resetPassword(widget.emp['employee_id'] as String, _passCtl.text);
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset successfully')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      String msg;
+      if (e is DioException && e.response?.data is Map) {
+        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to reset password';
+      } else {
+        msg = e.toString();
+      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
+  }
+}
+
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -2865,17 +3147,17 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: QuickpassColors.surfaceContainerLowest,
+          color: context.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: QuickpassColors.outlineVariant),
+          border: Border.all(color: context.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: QuickpassColors.onSurface)),
-            Text(label, style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray)),
+            Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: context.onSurface)),
+            Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray)),
           ],
         ),
       ),
@@ -2900,9 +3182,9 @@ class _QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: QuickpassColors.surface,
+        color: context.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: QuickpassColors.outlineVariant),
+        border: Border.all(color: context.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -2915,28 +3197,28 @@ class _QuickActionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
+                  color: context.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Icon(icon, size: 22, color: QuickpassColors.darkPrimary),
+                child: Icon(icon, size: 22, color: context.primary),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: QuickpassColors.onSurface,
+                  color: context.onSurface,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: QuickpassColors.outline,
+                  color: context.outline,
                 ),
               ),
             ],

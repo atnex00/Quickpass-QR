@@ -93,12 +93,12 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                 ),
               ),
               if (_used)
-                const Row(
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle, size: 14, color: QuickpassColors.neutralGray),
-                    SizedBox(width: 4),
-                    Text('Scanned', style: TextStyle(fontSize: 11, color: QuickpassColors.neutralGray)),
+                    Icon(Icons.check_circle, size: 14, color: context.neutralGray),
+                    const SizedBox(width: 4),
+                    Text('Scanned', style: TextStyle(fontSize: 11, color: context.neutralGray)),
                   ],
                 ),
             ],
@@ -106,21 +106,21 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
           const SizedBox(height: 20),
 
           if (_used)
-            const Column(
+            Column(
               children: [
-                Icon(Icons.check_circle, size: 48, color: QuickpassColors.neutralGray),
-                SizedBox(height: 8),
-                Text('Already Scanned', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 16)),
+                Icon(Icons.check_circle, size: 48, color: context.neutralGray),
+                const SizedBox(height: 8),
+                Text('Already Scanned', style: TextStyle(color: context.neutralGray, fontSize: 16)),
               ],
             )
           else if (_expired)
             Column(
               children: [
-                const Icon(Icons.timer_off, size: 48, color: QuickpassColors.neutralGray),
+                Icon(Icons.timer_off, size: 48, color: context.neutralGray),
                 const SizedBox(height: 8),
                 Text('QR Code Expired', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
                 const SizedBox(height: 4),
-                const Text('The 15-minute validity window has passed', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 12)),
+                Text('The 15-minute validity window has passed', style: TextStyle(color: context.neutralGray, fontSize: 12)),
               ],
             )
           else ...[
@@ -156,9 +156,9 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.employeeName != null)
-                          Text(widget.employeeName!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: QuickpassColors.onSurface)),
+                          Text(widget.employeeName!, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: context.onSurface)),
                         if (widget.employeePosition != null)
-                          Text(widget.employeePosition!, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 12)),
+                          Text(widget.employeePosition!, style: TextStyle(color: context.neutralGray, fontSize: 12)),
                       ],
                     ),
                   ),
