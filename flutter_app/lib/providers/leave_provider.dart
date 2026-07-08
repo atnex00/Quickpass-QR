@@ -45,7 +45,8 @@ class LeaveProvider extends ChangeNotifier {
 
     try {
       final data = await _api.getLeaveHistory(status: status);
-      _history = (data['data'] as List).map((j) => LeaveRequest.fromJson(j)).toList();
+      final list = data['data'] as List? ?? [];
+      _history = list.map((j) => LeaveRequest.fromJson(j)).toList();
       _recomputeCounts();
       _error = null;
     } catch (e) {
@@ -119,7 +120,6 @@ class LeaveProvider extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    await loadHistory();
-    await loadActiveLeave();
+    await Future.wait([loadHistory(), loadActiveLeave()]);
   }
 }

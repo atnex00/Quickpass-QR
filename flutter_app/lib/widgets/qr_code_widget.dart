@@ -43,6 +43,16 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
+  @override
+  void didUpdateWidget(covariant QrCodeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.date != oldWidget.date || widget.time != oldWidget.time) {
+      _timer?.cancel();
+      _tick();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
+  }
+
   void _tick() {
     final result = QrService.windowSeconds(widget.date, widget.time);
     setState(() {
@@ -195,6 +205,16 @@ class _TimerRowState extends State<_TimerRow> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
+  @override
+  void didUpdateWidget(covariant _TimerRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.date != oldWidget.date || widget.time != oldWidget.time) {
+      _timer?.cancel();
+      _tick();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
+  }
+
   void _tick() {
     final result = QrService.windowSeconds(widget.date, widget.time);
     if (!mounted) return;
@@ -222,9 +242,8 @@ class _TimerRowState extends State<_TimerRow> {
 
   @override
   Widget build(BuildContext context) {
-    const used = false;
     final expired = widget.isOut && _windowState == 'after';
-    if (used || expired) return const SizedBox.shrink();
+    if (expired) return const SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

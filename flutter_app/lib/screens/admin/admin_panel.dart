@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/date_formatter.dart';
 import '../../utils/debounce.dart';
 import '../../widgets/adaptive_scaffold.dart';
 import '../../widgets/loading_indicator.dart';
@@ -133,12 +134,12 @@ class _AdminPanelState extends State<AdminPanel> {
         top: false,
         child: IndexedStack(
           index: _currentIndex,
-          children: const [
-            _OverviewTab(),
-            _EmployeeTab(),
-            _DepartmentTab(),
-            _ReportsTab(),
-            _LeaveTab(),
+          children: [
+            _OverviewTab(onSwitchTab: (i) => setState(() => _currentIndex = i)),
+            const _EmployeeTab(),
+            const _DepartmentTab(),
+            const _ReportsTab(),
+            const _LeaveTab(),
           ],
         ),
       ),
@@ -147,7 +148,8 @@ class _AdminPanelState extends State<AdminPanel> {
 }
 
 class _OverviewTab extends StatefulWidget {
-  const _OverviewTab();
+  final ValueChanged<int>? onSwitchTab;
+  const _OverviewTab({this.onSwitchTab});
 
   @override
   State<_OverviewTab> createState() => _OverviewTabState();
@@ -267,8 +269,7 @@ class _OverviewTabState extends State<_OverviewTab> {
   }
 
   void _switchToTab(int index) {
-    final parent = context.findAncestorStateOfType<_AdminPanelState>();
-    parent?.setState(() => parent._currentIndex = index);
+    widget.onSwitchTab?.call(index);
   }
 
   @override
@@ -1394,8 +1395,8 @@ class _ReportsTabState extends State<_ReportsTab> {
     try {
       final params = <String, dynamic>{};
       if (_reportType.isNotEmpty) params['type'] = _reportType;
-      if (_startDate != null) params['start_date'] = _startDate!.toIso8601String().split('T').first;
-      if (_endDate != null) params['end_date'] = _endDate!.toIso8601String().split('T').first;
+      if (_startDate != null) params['start_date'] = DateFormatter.formatDateApi(_startDate!);
+      if (_endDate != null) params['end_date'] = DateFormatter.formatDateApi(_endDate!);
       _reportData = (await _api.getReports(type: params['type'], startDate: params['start_date'], endDate: params['end_date']))['data'] as List?;
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
@@ -1425,10 +1426,10 @@ class _ReportsTabState extends State<_ReportsTab> {
       setState(() {
         if (isStart) {
           _startDate = picked;
-          _startCtl.text = picked.toIso8601String().split('T').first;
+          _startCtl.text = DateFormatter.formatDateApi(picked);
         } else {
           _endDate = picked;
-          _endCtl.text = picked.toIso8601String().split('T').first;
+          _endCtl.text = DateFormatter.formatDateApi(picked);
         }
       });
       _loadReports();

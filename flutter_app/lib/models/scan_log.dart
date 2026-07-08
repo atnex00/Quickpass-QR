@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'scan_log.g.dart';
@@ -48,9 +49,15 @@ class ScanLog {
   });
 
   static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
-  static bool _boolFromJson(dynamic v) => v as bool? ?? true;
-  static DateTime _dateFromJson(dynamic v) =>
-      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
+  static bool _boolFromJson(dynamic v) => v as bool? ?? false;
+  static DateTime _dateFromJson(dynamic v) {
+    final result = DateTime.tryParse(v?.toString() ?? '');
+    if (result == null) {
+      debugPrint('Warning: Failed to parse scan_time from "$v", using current time');
+      return DateTime.now();
+    }
+    return result;
+  }
   static String _dateToJson(DateTime v) => v.toIso8601String();
 
   factory ScanLog.fromJson(Map<String, dynamic> json) =>

@@ -78,11 +78,13 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
               child: MobileScanner(
                 controller: _controller,
                 onDetect: _onDetect,
-                errorBuilder: (context, error) {
-                  final msg = error.errorDetails?.message ?? error.errorCode.name;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() => _cameraError = msg);
-                  });
+                errorBuilder: (context, error, _) {
+                  if (_cameraError == null) {
+                    final msg = error.errorDetails?.message ?? error.errorCode.name;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) setState(() => _cameraError = msg);
+                    });
+                  }
                   return _buildCameraError();
                 },
               ),

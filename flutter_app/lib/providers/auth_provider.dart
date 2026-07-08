@@ -37,7 +37,8 @@ class AuthProvider extends ChangeNotifier {
         _user = user;
         _isAuthenticated = true;
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Auth initialization failed: $e');
       await _api.logout();
     }
 

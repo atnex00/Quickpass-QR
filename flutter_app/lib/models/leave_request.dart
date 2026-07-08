@@ -164,8 +164,14 @@ class LeaveRequest {
     this.employeePhoto,
   });
 
-  static DateTime _dateFromJson(dynamic v) =>
-      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
+  static DateTime _dateFromJson(dynamic v) {
+    final result = DateTime.tryParse(v?.toString() ?? '');
+    if (result == null) {
+      debugPrint('Warning: Failed to parse date from "$v", using current time');
+      return DateTime.now();
+    }
+    return result;
+  }
 
   static String _dateToJson(DateTime v) =>
       v.toIso8601String().split('T').first;
@@ -175,8 +181,14 @@ class LeaveRequest {
 
   static String? _dateTimeOrNullToJson(DateTime? v) => v?.toIso8601String();
 
-  static DateTime _dateTimeFromJson(dynamic v) =>
-      DateTime.tryParse(v?.toString() ?? '') ?? DateTime.now();
+  static DateTime _dateTimeFromJson(dynamic v) {
+    final result = DateTime.tryParse(v?.toString() ?? '');
+    if (result == null) {
+      debugPrint('Warning: Failed to parse datetime from "$v", using current time');
+      return DateTime.now();
+    }
+    return result;
+  }
 
   static String _dateTimeToJson(DateTime v) => v.toIso8601String();
 

@@ -1,6 +1,9 @@
 class QrService {
+  static DateTime? _tryParse(String s) => DateTime.tryParse(s);
+
   static bool isWithinWindow(String qrTimestamp, int windowMinutes) {
-    final qrTime = DateTime.parse(qrTimestamp);
+    final qrTime = _tryParse(qrTimestamp);
+    if (qrTime == null) return false;
     final now = DateTime.now();
     final diff = now.difference(qrTime).inMilliseconds.abs();
     return diff <= windowMinutes * 60 * 1000;
@@ -8,7 +11,8 @@ class QrService {
 
   static bool isOutQrValid(String date, String startTime, DateTime? outScanTime) {
     if (outScanTime != null) return false;
-    final start = DateTime.parse('${date}T${startTime.padLeft(5, '0')}:00');
+    final start = _tryParse('${date}T${startTime.padLeft(5, '0')}:00');
+    if (start == null) return false;
     final now = DateTime.now();
     final diff = now.difference(start).inMinutes.abs();
     return diff <= 15;
@@ -17,17 +21,19 @@ class QrService {
   static bool isInQrValid(String date, String endTime, DateTime? inScanTime, DateTime? outScanTime) {
     if (inScanTime != null) return false;
     if (outScanTime == null) return false;
-    final end = DateTime.parse('${date}T${endTime.padLeft(5, '0')}:00');
+    final end = _tryParse('${date}T${endTime.padLeft(5, '0')}:00');
+    if (end == null) return false;
     final now = DateTime.now();
     final diff = now.difference(end).inMinutes.abs();
     return diff <= 15;
   }
 
-  /// Returns a map with window state info for the QR code timer.
-  /// Keys: 'state' ('before', 'during', 'after'), 'seconds' (int).
   static Map<String, dynamic> windowSeconds(String date, String time, {DateTime? now}) {
     final t = time.split(':').take(2).join(':');
-    final target = DateTime.parse('${date}T$t:00');
+    final target = _tryParse('${date}T$t:00');
+    if (target == null) {
+      return {'state': 'after', 'seconds': 0};
+    }
     final windowStart = target.subtract(const Duration(minutes: 15));
     final windowEnd = target.add(const Duration(minutes: 15));
     now ??= DateTime.now();

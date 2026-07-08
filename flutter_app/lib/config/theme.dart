@@ -197,8 +197,8 @@ class AppColors extends ThemeExtension<AppColors> {
 
 extension QuickpassColorsX on BuildContext {
   ColorScheme get _cs => Theme.of(this).colorScheme;
-  StatusColors get _st => Theme.of(this).extension<StatusColors>()!;
-  AppColors get _ap => Theme.of(this).extension<AppColors>()!;
+  StatusColors get _st => Theme.of(this).extension<StatusColors>() ?? StatusColors.light;
+  AppColors get _ap => Theme.of(this).extension<AppColors>() ?? AppColors.light;
 
   Color get surface => _cs.surface;
   Color get onSurface => _cs.onSurface;

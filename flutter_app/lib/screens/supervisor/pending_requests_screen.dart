@@ -193,7 +193,7 @@ class _PendingCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
-        content: Text('${leave.employeeName} \u2014 ${leave.leaveDate.toIso8601String().split('T').first} (${leave.startTime} - ${leave.endTime})'),
+        content: Text('${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(

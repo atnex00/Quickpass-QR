@@ -28,10 +28,13 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
     return Scaffold(
       body: SafeArea(top: false, child: IndexedStack(
         index: _currentIndex,
-        children: const [
-          _SupervisorOverview(),
-          PendingRequestsScreen(),
-          ProfileScreen(),
+        children: [
+          _SupervisorOverview(
+            onViewRequests: () => setState(() => _currentIndex = 1),
+            onViewProfile: () => setState(() => _currentIndex = 2),
+          ),
+          const PendingRequestsScreen(),
+          const ProfileScreen(),
         ],
       )),
       bottomNavigationBar: Container(
@@ -104,7 +107,12 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
 }
 
 class _SupervisorOverview extends StatefulWidget {
-  const _SupervisorOverview();
+  final VoidCallback onViewRequests;
+  final VoidCallback onViewProfile;
+  const _SupervisorOverview({
+    required this.onViewRequests,
+    required this.onViewProfile,
+  });
 
   @override
   State<_SupervisorOverview> createState() => _SupervisorOverviewState();
@@ -134,10 +142,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
             slivers: [
               _SupervisorAppBar(
                 userName: userName,
-                onProfileTap: () {
-                  final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                  state?.setState(() => state._currentIndex = 2);
-                },
+                onProfileTap: widget.onViewProfile,
               ),
               SliverPadding(
                 padding: const EdgeInsets.all(16),
@@ -147,10 +152,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     const SizedBox(height: 16),
                     _PendingApprovalsHero(
                       pendingCount: supProv.pendingCount,
-                      onReviewNow: () {
-                        final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                        state?.setState(() => state._currentIndex = 1);
-                      },
+                      onReviewNow: widget.onViewRequests,
                     ),
                     const SizedBox(height: 16),
                     const _QuickActionsRow(),
@@ -158,10 +160,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     _PendingRequestsSection(
                       isLoading: supProv.isLoading,
                       pendingRequests: supProv.pendingRequests,
-                      onViewAll: () {
-                        final state = context.findAncestorStateOfType<_SupervisorDashboardState>();
-                        state?.setState(() => state._currentIndex = 1);
-                      },
+                      onViewAll: widget.onViewRequests,
                     ),
                   ]),
                 ),
@@ -726,7 +725,7 @@ class _PendingCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
         content: Text(
-          '${leave.employeeName} \u2014 ${leave.leaveDate.toIso8601String().split('T').first} (${leave.startTime} - ${leave.endTime})',
+          '${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})',
         ),
         actions: [
           TextButton(

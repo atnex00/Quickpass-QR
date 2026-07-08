@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
+import '../../utils/date_formatter.dart';
 import 'request_leave_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
@@ -32,10 +33,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
-          _DashboardTab(),
-          LeaveHistoryScreen(),
-          ProfileScreen(),
+        children: [
+          _DashboardTab(onViewHistory: () => setState(() => _currentIndex = 1)),
+          const LeaveHistoryScreen(),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -80,7 +81,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
 }
 
 class _DashboardTab extends StatefulWidget {
-  const _DashboardTab();
+  final VoidCallback? onViewHistory;
+  const _DashboardTab({this.onViewHistory});
 
   @override
   State<_DashboardTab> createState() => _DashboardTabState();
@@ -118,11 +120,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                       _RecentActivitySection(
                         isLoading: leaveProv.isLoading,
                         history: leaveProv.history,
-                        onSeeAll: () {
-                          final state = context.findAncestorStateOfType<
-                              _EmployeeDashboardState>();
-                          state?.setState(() => state._currentIndex = 1);
-                        },
+                        onSeeAll: widget.onViewHistory ?? () {},
                       ),
                     ]),
                   ),
@@ -401,7 +399,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                       _InfoRow(
                           label: 'Validity',
                           value:
-                              '${leave.leaveDate.toIso8601String().split('T').first} \u2022 ${leave.startTime} - ${leave.endTime}'),
+                              '${DateFormatter.formatDateApi(leave.leaveDate)} \u2022 ${leave.startTime} - ${leave.endTime}'),
                       const SizedBox(height: 8),
                       const _InfoRow(
                           label: 'Gate Status',
@@ -709,7 +707,7 @@ class _ActivityCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    leave.leaveDate.toIso8601String().split('T').first,
+                    DateFormatter.formatDateApi(leave.leaveDate),
                     style: TextStyle(
                       fontSize: 14,
                       color: context.outline,

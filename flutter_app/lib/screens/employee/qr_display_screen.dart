@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
+import '../../utils/date_formatter.dart';
 
 class QrDisplayScreen extends StatelessWidget {
   final LeaveRequest leave;
@@ -36,7 +37,7 @@ class QrDisplayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = leave.leaveDate.toIso8601String().split('T').first;
+    final dateStr = DateFormatter.formatDateApi(leave.leaveDate);
 
     return Scaffold(
       body: SafeArea(
@@ -355,7 +356,8 @@ class QrDisplayScreen extends StatelessWidget {
               child: _BottomTimer(
                   leaveDate: leave.leaveDate,
                   startTime: leave.startTime,
-                  endTime: leave.endTime),
+                  endTime: leave.endTime,
+                  isOut: true),
             ),
           ],
         ),
@@ -533,10 +535,12 @@ class _BottomTimer extends StatefulWidget {
   final DateTime leaveDate;
   final String startTime;
   final String endTime;
+  final bool isOut;
   const _BottomTimer(
       {required this.leaveDate,
       required this.startTime,
-      required this.endTime});
+      required this.endTime,
+      this.isOut = true});
 
   @override
   State<_BottomTimer> createState() => _BottomTimerState();
@@ -558,8 +562,8 @@ class _BottomTimerState extends State<_BottomTimer> with WidgetsBindingObserver 
   }
 
   DateTime _computeWindowEnd() {
-    final dateStr = widget.leaveDate.toIso8601String().split('T').first;
-    final timeStr = widget.startTime.padLeft(5, '0');
+    final dateStr = DateFormatter.formatDateApi(widget.leaveDate);
+    final timeStr = (widget.isOut ? widget.startTime : widget.endTime).padLeft(5, '0');
     final hhmm = timeStr.split(':').take(2).join(':');
     final start = DateTime.parse('${dateStr}T$hhmm:00');
     return start.add(const Duration(minutes: 15));
