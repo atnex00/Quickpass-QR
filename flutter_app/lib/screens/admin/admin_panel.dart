@@ -785,11 +785,14 @@ class _EmployeeTabState extends State<_EmployeeTab> {
   }
 
   void _showEditDialog(Map<String, dynamic> emp) {
-    showDialog<bool>(
-      context: context,
-      builder: (_) => _EditEmployeeDialog(emp: emp, departments: _departments),
-    ).then((updated) {
-      if (updated == true) _loadData();
+    _loadData().then((_) {
+      if (!mounted) return;
+      showDialog<bool>(
+        context: context,
+        builder: (_) => _EditEmployeeDialog(emp: emp, departments: _departments),
+      ).then((updated) {
+        if (updated == true) if (mounted) _loadData();
+      });
     });
   }
 
