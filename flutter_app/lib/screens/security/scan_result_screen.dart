@@ -99,7 +99,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
           const Spacer(),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white70),
-            color: QuickpassColors.surface,
+            color: context.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) async {
               switch (value) {
@@ -116,7 +116,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                         TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                         FilledButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
+                          style: FilledButton.styleFrom(backgroundColor: context.error),
                           child: const Text('Logout'),
                         ),
                       ],
@@ -133,25 +133,25 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 child: Consumer<AuthProvider>(
                   builder: (_, auth, __) => Text(
                     auth.user?.fullName ?? 'Guard',
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: QuickpassColors.onSurface),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface),
                   ),
                 ),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'history',
                 child: ListTile(
-                  leading: Icon(Icons.history, color: QuickpassColors.onSurface),
-                  title: Text('Scan History'),
+                  leading: Icon(Icons.history, color: context.onSurface),
+                  title: const Text('Scan History'),
                   contentPadding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'logout',
                 child: ListTile(
-                  leading: Icon(Icons.logout, color: QuickpassColors.error),
-                  title: Text('Logout', style: TextStyle(color: QuickpassColors.error)),
+                  leading: Icon(Icons.logout, color: context.error),
+                  title: Text('Logout', style: TextStyle(color: context.error)),
                   contentPadding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
                 ),
@@ -176,10 +176,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: QuickpassColors.success.withValues(alpha: 0.2),
+                color: context.success.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle, size: 60, color: QuickpassColors.success),
+              child: Icon(Icons.check_circle, size: 60, color: context.success),
             ),
             const SizedBox(height: 24),
             Text(
@@ -190,13 +190,13 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: (isOut ? QuickpassColors.primary : QuickpassColors.success).withValues(alpha: 0.2),
+                color: (isOut ? context.primaryBlue : context.success).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 isOut ? 'OUT SCAN' : 'IN SCAN',
                 style: TextStyle(
-                  color: isOut ? QuickpassColors.primary : QuickpassColors.success,
+                  color: isOut ? context.primaryBlue : context.success,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
                 ),
@@ -253,10 +253,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: QuickpassColors.error.withValues(alpha: 0.2),
+                color: context.error.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.cancel, size: 60, color: QuickpassColors.error),
+              child: Icon(Icons.cancel, size: 60, color: context.error),
             ),
             const SizedBox(height: 24),
             const Text('Invalid QR Code', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
@@ -306,10 +306,10 @@ class _ResultRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(color: QuickpassColors.neutralGray)),
+          Text(label, style: TextStyle(color: context.neutralGray)),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(value, textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, color: QuickpassColors.onSurface)),
+            child: Text(value, textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface)),
           ),
         ],
       ),

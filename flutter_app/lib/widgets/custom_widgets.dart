@@ -26,17 +26,17 @@ class LoadingOverlay extends StatelessWidget {
                 margin: const EdgeInsets.all(32),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: QuickpassColors.surface,
+                  color: context.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: QuickpassColors.outlineVariant),
+                  border: Border.all(color: context.outlineVariant),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(color: QuickpassColors.primary),
+                    CircularProgressIndicator(color: context.primaryBlue),
                     if (message != null) ...[
                       const SizedBox(height: 16),
-                      Text(message!, style: const TextStyle(color: QuickpassColors.onSurfaceVariant)),
+                      Text(message!, style: TextStyle(color: context.onSurfaceVariant)),
                     ],
                   ],
                 ),
@@ -70,14 +70,14 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: QuickpassColors.outlineVariant),
+            Icon(icon, size: 64, color: context.outlineVariant),
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: QuickpassColors.onSurfaceVariant,
+                color: context.onSurfaceVariant,
               ),
             ),
             if (subtitle != null) ...[
@@ -85,7 +85,7 @@ class EmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: QuickpassColors.neutralGray),
+                style: TextStyle(color: context.neutralGray),
               ),
             ],
             if (action != null) ...[

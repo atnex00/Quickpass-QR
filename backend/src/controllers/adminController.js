@@ -230,6 +230,18 @@ async function createDepartment(req, res, next) {
       throw createError(409, 'Department ID already exists');
     }
 
+    const nameConflict = await db('departments').where({ department_name }).first();
+    if (nameConflict) {
+      throw createError(409, 'Department name already exists');
+    }
+
+    if (department_code) {
+      const codeConflict = await db('departments').where({ department_code }).first();
+      if (codeConflict) {
+        throw createError(409, 'Department code already exists');
+      }
+    }
+
     await db('departments').insert({
       department_id,
       department_name,

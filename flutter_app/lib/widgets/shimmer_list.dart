@@ -10,8 +10,8 @@ class AnimatedShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: QuickpassColors.outlineVariant.withValues(alpha: 0.25),
-      highlightColor: QuickpassColors.outlineVariant.withValues(alpha: 0.5),
+      baseColor: context.outlineVariant.withValues(alpha: 0.25),
+      highlightColor: context.outlineVariant.withValues(alpha: 0.5),
       child: ListView.builder(
         itemCount: itemCount,
         shrinkWrap: true,
@@ -21,9 +21,9 @@ class AnimatedShimmerList extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: QuickpassColors.surface,
+              color: context.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: QuickpassColors.outlineVariant),
+              border: Border.all(color: context.outlineVariant),
             ),
             child: Row(
               children: [
