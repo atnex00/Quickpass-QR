@@ -71,13 +71,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    try {
-      await _api.logout();
-    } catch (_) {}
     _isAuthenticated = false;
     _user = null;
     _error = null;
     notifyListeners();
+    await _api.logout();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {

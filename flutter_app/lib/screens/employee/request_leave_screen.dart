@@ -105,8 +105,8 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
             SliverAppBar(
               pinned: true,
               toolbarHeight: 64,
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
               automaticallyImplyLeading: false,
               flexibleSpace: SizedBox(
                 height: 64,
@@ -116,16 +116,16 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back),
-                        color: context.onPrimary,
+                        color: QuickpassColors.darkOnPrimary,
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      const Text(
                         'Request Leave',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: context.onPrimary,
+                          color: QuickpassColors.darkOnPrimary,
                         ),
                       ),
                     ],
@@ -146,21 +146,21 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: context.surface,
+                            color: QuickpassColors.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: context.outlineVariant),
+                                color: QuickpassColors.outlineVariant),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Employee Information',
+                              const Text('Employee Information',
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
-                                      color: context.onSurface)),
-                              Divider(
-                                  color: context.outlineVariant),
+                                      color: QuickpassColors.onSurface)),
+                              const Divider(
+                                  color: QuickpassColors.outlineVariant),
                               _ReadOnlyField(
                                   label: 'Employee ID',
                                   value: user?.employeeId ?? ''),
@@ -184,33 +184,33 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: context.surface,
+                              color: QuickpassColors.surface,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                  color: context.outlineVariant),
+                                  color: QuickpassColors.outlineVariant),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.calendar_today,
-                                    color: context.primaryBlue, size: 20),
+                                const Icon(Icons.calendar_today,
+                                    color: QuickpassColors.primary, size: 20),
                                 const SizedBox(width: 12),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Date',
+                                    const Text('Date',
                                         style: TextStyle(
                                             fontSize: 12,
                                             color:
-                                                context.neutralGray)),
+                                                QuickpassColors.neutralGray)),
                                     Text(DateFormatter.formatDate(_leaveDate),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.w600,
-                                            color: context.onSurface)),
+                                            color: QuickpassColors.onSurface)),
                                   ],
                                 ),
                                 const Spacer(),
-                                Icon(Icons.edit_calendar,
-                                    size: 16, color: context.primaryBlue),
+                                const Icon(Icons.edit_calendar,
+                                    size: 16, color: QuickpassColors.primary),
                               ],
                             ),
                           ),
@@ -242,35 +242,35 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: context.surface,
+                            color: QuickpassColors.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: context.outlineVariant),
+                                color: QuickpassColors.outlineVariant),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time,
-                                  color: context.secondary),
+                              const Icon(Icons.access_time,
+                                  color: QuickpassColors.secondary),
                               const SizedBox(width: 12),
-                              Text('Duration: ',
+                              const Text('Duration: ',
                                   style: TextStyle(
                                       fontWeight: FontWeight.w500,
-                                      color: context.onSurface)),
+                                      color: QuickpassColors.onSurface)),
                               Text(
                                 _calculateDuration(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: context.secondary),
+                                    color: QuickpassColors.secondary),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Text('Reason for Leave',
+                        const Text('Reason for Leave',
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: context.onSurface)),
+                                color: QuickpassColors.onSurface)),
                         const SizedBox(height: 8),
                         TextFormField(
                           initialValue: _reason,
@@ -297,8 +297,8 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           child: FilledButton(
                             onPressed: _isSubmitting ? null : _submit,
                             style: FilledButton.styleFrom(
-                              backgroundColor: context.primary,
-                              foregroundColor: context.onPrimary,
+                              backgroundColor: QuickpassColors.darkPrimary,
+                              foregroundColor: QuickpassColors.darkOnPrimary,
                             ),
                             child: _isSubmitting
                                 ? const SizedBox(
@@ -347,14 +347,14 @@ class _ReadOnlyField extends StatelessWidget {
           SizedBox(
               width: 110,
               child: Text(label,
-                  style: TextStyle(
-                      color: context.neutralGray, fontSize: 13))),
+                  style: const TextStyle(
+                      color: QuickpassColors.neutralGray, fontSize: 13))),
           Expanded(
               child: Text(value,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
-                      color: context.onSurface))),
+                      color: QuickpassColors.onSurface))),
         ],
       ),
     );
@@ -373,9 +373,9 @@ class _TimePickerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -386,19 +386,19 @@ class _TimePickerCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(
-                      fontSize: 12, color: context.neutralGray)),
+                  style: const TextStyle(
+                      fontSize: 12, color: QuickpassColors.neutralGray)),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.access_time,
-                      size: 18, color: context.primaryBlue),
+                  const Icon(Icons.access_time,
+                      size: 18, color: QuickpassColors.primary),
                   const SizedBox(width: 6),
                   Text(time,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: context.onSurface)),
+                          color: QuickpassColors.onSurface)),
                 ],
               ),
             ],

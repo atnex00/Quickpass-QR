@@ -46,8 +46,8 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
             SliverAppBar(
               pinned: true,
               toolbarHeight: 64,
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
               automaticallyImplyLeading: false,
               flexibleSpace: SafeArea(
                 child: Padding(
@@ -58,26 +58,26 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: context.onPrimary
+                          color: QuickpassColors.darkOnPrimary
                               .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(Icons.qr_code_scanner,
-                            size: 18, color: context.onPrimary),
+                        child: const Icon(Icons.qr_code_scanner,
+                            size: 18, color: QuickpassColors.darkOnPrimary),
                       ),
                       const SizedBox(width: 12),
-                      Text(
+                      const Text(
                         'Gate History',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: context.onPrimary,
+                          color: QuickpassColors.darkOnPrimary,
                         ),
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: Icon(Icons.notifications_outlined,
-                            color: context.onPrimary),
+                        icon: const Icon(Icons.notifications_outlined,
+                            color: QuickpassColors.darkOnPrimary),
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -111,23 +111,23 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.inbox_outlined,
-                            size: 64, color: context.outlineVariant),
+                        const Icon(Icons.inbox_outlined,
+                            size: 64, color: QuickpassColors.outlineVariant),
                         const SizedBox(height: 12),
-                        Text(
+                        const Text(
                           'No leave requests found',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: context.onSurfaceVariant),
+                              color: QuickpassColors.onSurfaceVariant),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _statusFilter != null
                               ? 'No $_statusFilter requests match your filter'
                               : 'Submit a leave request to get started',
-                          style: TextStyle(
-                              color: context.neutralGray, fontSize: 13),
+                          style: const TextStyle(
+                              color: QuickpassColors.neutralGray, fontSize: 13),
                         ),
                       ],
                     ),
@@ -171,7 +171,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                       onPressed: () => Navigator.pop(ctx, true),
                                       style: FilledButton.styleFrom(
                                           backgroundColor:
-                                              context.error),
+                                              QuickpassColors.error),
                                       child: const Text('Delete'),
                                     ),
                                   ],
@@ -209,29 +209,29 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: context.primaryContainer,
+                              color: QuickpassColors.primaryContainer,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                  color: context.primaryBlue
+                                  color: QuickpassColors.primary
                                       .withValues(alpha: 0.2)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Planning ahead?',
+                                const Text('Planning ahead?',
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color:
-                                            context.onPrimaryContainer,
+                                            QuickpassColors.onPrimaryContainer,
                                         height: 1.5)),
                                 const SizedBox(height: 8),
-                                Text(
+                                const Text(
                                     'Secure your holiday pass now to ensure quick approval from the command center.',
                                     style: TextStyle(
                                         fontSize: 14,
                                         color:
-                                            context.onPrimaryContainer,
+                                            QuickpassColors.onPrimaryContainer,
                                         height: 1.43)),
                                 const SizedBox(height: 16),
                                 FilledButton(
@@ -275,7 +275,7 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       height: 56,
-      color: context.surface.withValues(alpha: 0.95),
+      color: QuickpassColors.surface.withValues(alpha: 0.95),
       child: ListView(
         padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -341,10 +341,10 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? context.primaryBlue : context.surface,
+          color: selected ? QuickpassColors.primary : QuickpassColors.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? context.primaryBlue : context.outline,
+            color: selected ? QuickpassColors.primary : QuickpassColors.outline,
           ),
         ),
         child: Text(
@@ -353,7 +353,7 @@ class _FilterChip extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.01,
-            color: selected ? Colors.white : context.onSurface,
+            color: selected ? Colors.white : QuickpassColors.onSurface,
           ),
         ),
       ),
@@ -382,9 +382,9 @@ class _HistoryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -417,10 +417,10 @@ class _HistoryCard extends StatelessWidget {
                                 Flexible(
                                   child: Text(
                                     leave.reason,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: context.onSurface,
+                                      color: QuickpassColors.onSurface,
                                       height: 1.5,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -449,15 +449,15 @@ class _HistoryCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                Icon(Icons.calendar_month,
+                                const Icon(Icons.calendar_month,
                                     size: 16,
-                                    color: context.onSurfaceVariant),
+                                    color: QuickpassColors.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   DateFormatter.formatDate(leave.leaveDate),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
-                                    color: context.onSurfaceVariant,
+                                    color: QuickpassColors.onSurfaceVariant,
                                     height: 1.43,
                                   ),
                                 ),
@@ -466,10 +466,10 @@ class _HistoryCard extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               'ID: #${leave.leaveId} \u2022 ${leave.durationText}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: context.neutralGray,
+                                color: QuickpassColors.neutralGray,
                               ),
                             ),
                             if (leave.rejectionReason != null) ...[
@@ -477,20 +477,20 @@ class _HistoryCard extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: context.errorContainer,
+                                  color: QuickpassColors.errorContainer,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.info_outline,
-                                        size: 14, color: context.error),
+                                    const Icon(Icons.info_outline,
+                                        size: 14, color: QuickpassColors.error),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         leave.rejectionReason!,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontSize: 12,
-                                            color: context
+                                            color: QuickpassColors
                                                 .onErrorContainer),
                                       ),
                                     ),
@@ -509,24 +509,24 @@ class _HistoryCard extends StatelessWidget {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color:
-                                  context.error.withValues(alpha: 0.12),
+                                  QuickpassColors.error.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(999),
                             ),
-                            child: Icon(Icons.delete_outline,
-                                size: 20, color: context.error),
+                            child: const Icon(Icons.delete_outline,
+                                size: 20, color: QuickpassColors.error),
                           ),
                         ),
                       const SizedBox(width: 4),
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: context.surfaceContainer,
+                          color: QuickpassColors.surfaceContainer,
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.chevron_right,
                           size: 20,
-                          color: context.onSurface,
+                          color: QuickpassColors.onSurface,
                         ),
                       ),
                     ],

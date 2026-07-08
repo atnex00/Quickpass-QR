@@ -163,7 +163,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
             child: const Text('Delete'),
           ),
         ],
@@ -213,7 +213,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            color: context.error,
+            color: QuickpassColors.error,
             onPressed: _confirmDelete,
           ),
         ],
@@ -229,35 +229,35 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: context.surfaceContainerLowest,
+                      color: QuickpassColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.outlineVariant),
+                      border: Border.all(color: QuickpassColors.outlineVariant),
                     ),
                     child: Column(
                       children: [
                         CircleAvatar(
                           radius: 44,
-                          backgroundColor: context.primary.withValues(alpha: 0.2),
+                          backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
                           child: Text(
                             ((emp['full_name'] as String?) ?? '?')[0].toUpperCase(),
-                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: context.primary),
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: QuickpassColors.darkPrimary),
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(emp['full_name'] ?? '', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: context.onSurface)),
+                        Text(emp['full_name'] ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: QuickpassColors.onSurface)),
                         const SizedBox(height: 4),
-                        Text(emp['employee_id'] ?? '', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.outline, letterSpacing: 0.5)),
+                        Text(emp['employee_id'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: QuickpassColors.outline, letterSpacing: 0.5)),
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: (isActive ? context.success : context.error).withValues(alpha: 0.12),
+                            color: (isActive ? QuickpassColors.success : QuickpassColors.error).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: (isActive ? context.success : context.error).withValues(alpha: 0.3)),
+                            border: Border.all(color: (isActive ? QuickpassColors.success : QuickpassColors.error).withValues(alpha: 0.3)),
                           ),
                           child: Text(
                             isActive ? 'Active' : 'Inactive',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isActive ? context.success : context.error),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isActive ? QuickpassColors.success : QuickpassColors.error),
                           ),
                         ),
                       ],
@@ -270,14 +270,14 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: context.surfaceContainerLowest,
+                      color: QuickpassColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.outlineVariant),
+                      border: Border.all(color: QuickpassColors.outlineVariant),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Employee Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        const Text('Employee Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
                         const SizedBox(height: 12),
                         _InfoItem(label: 'Position', value: emp['position'] ?? 'N/A'),
                         _InfoItem(label: 'Email', value: emp['email'] ?? 'N/A'),
@@ -293,22 +293,22 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: context.surfaceContainerLowest,
+                      color: QuickpassColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.outlineVariant),
+                      border: Border.all(color: QuickpassColors.outlineVariant),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Roles & Permissions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        const Text('Roles & Permissions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
                         const SizedBox(height: 12),
                         Wrap(
                           children: [
-                            if (emp['is_admin'] == true) _badge('Admin', context.error),
+                            if (emp['is_admin'] == true) _badge('Admin', QuickpassColors.error),
                             if (emp['is_supervisor'] == true) _badge('Supervisor', QuickpassColors.tertiary),
-                            if (emp['is_security'] == true) _badge('Security', context.warning),
+                            if (emp['is_security'] == true) _badge('Security', QuickpassColors.warning),
                             if (emp['is_admin'] != true && emp['is_supervisor'] != true && emp['is_security'] != true)
-                              Text('Standard Employee', style: TextStyle(color: context.neutralGray, fontSize: 14)),
+                              const Text('Standard Employee', style: TextStyle(color: QuickpassColors.neutralGray, fontSize: 14)),
                           ],
                         ),
                       ],
@@ -321,14 +321,14 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: context.surfaceContainerLowest,
+                      color: QuickpassColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.outlineVariant),
+                      border: Border.all(color: QuickpassColors.outlineVariant),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        const Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: QuickpassColors.onSurface, height: 1.5)),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -356,8 +356,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                             icon: Icon(isActive ? Icons.block : Icons.check_circle_outline, size: 18),
                             label: Text(isActive ? 'Deactivate' : 'Activate'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: isActive ? context.error : context.success,
-                              side: BorderSide(color: isActive ? context.error : context.success),
+                              foregroundColor: isActive ? QuickpassColors.error : QuickpassColors.success,
+                              side: BorderSide(color: isActive ? QuickpassColors.error : QuickpassColors.success),
                             ),
                           ),
                         ),
@@ -384,8 +384,8 @@ class _InfoItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.32, child: Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray))),
-          Expanded(child: Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.onSurface))),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.32, child: Text(label, style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray))),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: QuickpassColors.onSurface))),
         ],
       ),
     );

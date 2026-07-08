@@ -27,8 +27,10 @@ class AdaptiveScaffold extends StatelessWidget {
             selectedIndex: selectedIndex,
             onDestinationSelected: onDestinationSelected,
             labelType: NavigationRailLabelType.all,
-            backgroundColor: context.surface,
-            indicatorColor: context.primary.withValues(alpha: 0.15),
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? QuickpassColors.surface
+                : QuickpassColors.darkSurface,
+            indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
@@ -36,7 +38,7 @@ class AdaptiveScaffold extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: context.onPrimary.withValues(alpha: 0.1),
+                    color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
@@ -45,8 +47,8 @@ class AdaptiveScaffold extends StatelessWidget {
             ),
             destinations: destinations
                 .map((d) => NavigationRailDestination(
-                      icon: Icon(d.icon, color: context.onSurfaceVariant),
-                      selectedIcon: Icon(d.selectedIcon, color: context.primary),
+                      icon: Icon(d.icon, color: QuickpassColors.onSurfaceVariant),
+                      selectedIcon: Icon(d.selectedIcon, color: QuickpassColors.darkPrimary),
                       label: Text(d.label, style: const TextStyle(fontSize: 12)),
                     ))
                 .toList(),
@@ -60,20 +62,20 @@ class AdaptiveScaffold extends StatelessWidget {
     return Scaffold(
       body: body,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: context.outlineVariant)),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: onDestinationSelected,
-          backgroundColor: context.surface,
-          indicatorColor: context.primary.withValues(alpha: 0.15),
+          backgroundColor: QuickpassColors.surface,
+          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: destinations
               .map((d) => NavigationDestination(
-                    icon: Icon(d.icon, color: context.onSurfaceVariant),
-                    selectedIcon: Icon(d.selectedIcon, color: context.primary),
+                    icon: Icon(d.icon, color: QuickpassColors.onSurfaceVariant),
+                    selectedIcon: Icon(d.selectedIcon, color: QuickpassColors.darkPrimary),
                     label: d.label,
                   ))
               .toList(),

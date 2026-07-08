@@ -35,26 +35,26 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
         ],
       )),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: context.outlineVariant)),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: (i) => setState(() => _currentIndex = i),
-          backgroundColor: context.surface,
-          indicatorColor: context.primary.withValues(alpha: 0.15),
+          backgroundColor: QuickpassColors.surface,
+          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined, color: context.onSurfaceVariant),
-              selectedIcon: Icon(Icons.dashboard, color: context.primary),
+            const NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined, color: QuickpassColors.onSurfaceVariant),
+              selectedIcon: Icon(Icons.dashboard, color: QuickpassColors.darkPrimary),
               label: 'Overview',
             ),
             NavigationDestination(
               icon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.pending_actions_outlined, color: context.onSurfaceVariant),
+                  const Icon(Icons.pending_actions_outlined, color: QuickpassColors.onSurfaceVariant),
                   Positioned(
                     top: -2,
                     right: -4,
@@ -62,9 +62,9 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: context.error,
+                        color: QuickpassColors.error,
                         shape: BoxShape.circle,
-                        border: Border.all(color: context.surface, width: 2),
+                        border: Border.all(color: QuickpassColors.surface, width: 2),
                       ),
                     ),
                   ),
@@ -73,7 +73,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               selectedIcon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.pending_actions, color: context.primary),
+                  const Icon(Icons.pending_actions, color: QuickpassColors.darkPrimary),
                   Positioned(
                     top: -2,
                     right: -4,
@@ -81,9 +81,9 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: context.error,
+                        color: QuickpassColors.error,
                         shape: BoxShape.circle,
-                        border: Border.all(color: context.surface, width: 2),
+                        border: Border.all(color: QuickpassColors.surface, width: 2),
                       ),
                     ),
                   ),
@@ -91,9 +91,9 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               ),
               label: 'Requests',
             ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline, color: context.onSurfaceVariant),
-              selectedIcon: Icon(Icons.person, color: context.primary),
+            const NavigationDestination(
+              icon: Icon(Icons.person_outline, color: QuickpassColors.onSurfaceVariant),
+              selectedIcon: Icon(Icons.person, color: QuickpassColors.darkPrimary),
               label: 'Profile',
             ),
           ],
@@ -178,8 +178,8 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                   MaterialPageRoute(builder: (_) => const RequestLeaveScreen()),
                 );
               },
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -204,8 +204,8 @@ class _SupervisorAppBar extends StatelessWidget {
       pinned: true,
       expandedHeight: 0,
       toolbarHeight: 64,
-      backgroundColor: context.primary,
-      foregroundColor: context.onPrimary,
+      backgroundColor: QuickpassColors.darkPrimary,
+      foregroundColor: QuickpassColors.darkOnPrimary,
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: Padding(
@@ -216,24 +216,24 @@ class _SupervisorAppBar extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: context.onPrimary.withValues(alpha: 0.15),
+                  color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
               ),
               const SizedBox(width: 12),
-              Text(
+              const Text(
                 'Quickpass',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: context.onPrimary,
+                  color: QuickpassColors.darkOnPrimary,
                   height: 1.4,
                 ),
               ),
               const Spacer(),
               IconButton(
-                icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
+                icon: const Icon(Icons.notifications_outlined, color: QuickpassColors.darkOnPrimary),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('No new notifications')),
@@ -244,13 +244,13 @@ class _SupervisorAppBar extends StatelessWidget {
                 onTap: onProfileTap,
                 child: CircleAvatar(
                   radius: 16,
-                  backgroundColor: context.onPrimary.withValues(alpha: 0.2),
+                  backgroundColor: QuickpassColors.darkOnPrimary.withValues(alpha: 0.2),
                   child: Text(
                     (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: context.onPrimary,
+                      color: QuickpassColors.darkOnPrimary,
                     ),
                   ),
                 ),
@@ -279,23 +279,23 @@ class _WelcomeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'COMMANDER VIEW',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.01,
-            color: context.outline,
+            color: QuickpassColors.outline,
             height: 1.43,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           '${_greeting()}, ${userName.split(' ').first}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: context.onSurface,
+            color: QuickpassColors.onSurface,
             letterSpacing: -0.01,
             height: 1.33,
           ),
@@ -369,15 +369,15 @@ class _PendingApprovalsHero extends StatelessWidget {
             height: 48,
             child: FilledButton(
               onPressed: onReviewNow,
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Review Now',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 18, color: context.onPrimary),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 18, color: QuickpassColors.darkOnPrimary),
                 ],
               ),
             ),
@@ -430,7 +430,7 @@ class _QuickActionsRow extends StatelessWidget {
             icon: const Icon(Icons.history, size: 16),
             label: const Text('Scan History'),
             style: TextButton.styleFrom(
-              foregroundColor: context.outline,
+              foregroundColor: QuickpassColors.outline,
               padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
           ),
@@ -459,12 +459,12 @@ class _PendingRequestsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Pending Requests',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: context.onSurface,
+                color: QuickpassColors.onSurface,
                 height: 1.5,
               ),
             ),
@@ -475,14 +475,14 @@ class _PendingRequestsSection extends StatelessWidget {
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text(
+              child: const Text(
                 'View All',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: context.onSurface,
+                  color: QuickpassColors.onSurface,
                   decoration: TextDecoration.underline,
-                  decorationColor: context.primary,
+                  decorationColor: QuickpassColors.darkPrimary,
                   decorationThickness: 2,
                 ),
               ),
@@ -500,14 +500,14 @@ class _PendingRequestsSection extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: context.surface,
+              color: QuickpassColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.outlineVariant),
+              border: Border.all(color: QuickpassColors.outlineVariant),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
                 'No pending requests',
-                style: TextStyle(color: context.neutralGray),
+                style: TextStyle(color: QuickpassColors.neutralGray),
               ),
             ),
           )
@@ -535,9 +535,9 @@ class _QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -550,28 +550,28 @@ class _QuickActionCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: context.primary.withValues(alpha: 0.2),
+                  color: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Icon(icon, size: 22, color: context.primary),
+                child: Icon(icon, size: 22, color: QuickpassColors.darkPrimary),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: context.onSurface,
+                  color: QuickpassColors.onSurface,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: context.outline,
+                  color: QuickpassColors.outline,
                 ),
               ),
             ],
@@ -592,9 +592,9 @@ class _PendingCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Stack(
         children: [
@@ -604,9 +604,9 @@ class _PendingCard extends StatelessWidget {
             bottom: 0,
             child: Container(
               width: 4,
-              decoration: BoxDecoration(
-                color: context.warning,
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                color: QuickpassColors.warning,
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
@@ -622,11 +622,11 @@ class _PendingCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: context.primary.withValues(alpha: 0.2),
+                      backgroundColor: QuickpassColors.darkPrimary.withValues(alpha: 0.2),
                       child: Text(
                         leave.employeeName.isNotEmpty ? leave.employeeName[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          color: context.primary,
+                        style: const TextStyle(
+                          color: QuickpassColors.darkPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -638,16 +638,16 @@ class _PendingCard extends StatelessWidget {
                         children: [
                           Text(
                             leave.employeeName,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: context.onSurface,
+                              color: QuickpassColors.onSurface,
                             ),
                           ),
                           if (leave.employeePosition != null)
                             Text(
                               leave.employeePosition!,
-                              style: TextStyle(
-                                color: context.neutralGray,
+                              style: const TextStyle(
+                                color: QuickpassColors.neutralGray,
                                 fontSize: 12,
                               ),
                             ),
@@ -660,22 +660,22 @@ class _PendingCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
+                    const Icon(Icons.calendar_today, size: 14, color: QuickpassColors.neutralGray),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         DateFormatter.formatDate(leave.leaveDate),
-                        style: TextStyle(fontSize: 13, color: context.neutralGray),
+                        style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.access_time, size: 14, color: context.neutralGray),
+                    const Icon(Icons.access_time, size: 14, color: QuickpassColors.neutralGray),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         '${leave.startTime} - ${leave.endTime}',
-                        style: TextStyle(fontSize: 13, color: context.neutralGray),
+                        style: const TextStyle(fontSize: 13, color: QuickpassColors.neutralGray),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -684,7 +684,7 @@ class _PendingCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   leave.reason,
-                  style: TextStyle(color: context.neutralGray, fontSize: 13),
+                  style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -695,8 +695,8 @@ class _PendingCard extends StatelessWidget {
                       icon: const Icon(Icons.close, size: 18),
                       label: const Text('Reject'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: context.error,
-                        side: BorderSide(color: context.error),
+                        foregroundColor: QuickpassColors.error,
+                        side: const BorderSide(color: QuickpassColors.error),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -705,8 +705,8 @@ class _PendingCard extends StatelessWidget {
                       icon: const Icon(Icons.check, size: 18),
                       label: const Text('Approve'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: context.primary,
-                        foregroundColor: context.onPrimary,
+                        backgroundColor: QuickpassColors.darkPrimary,
+                        foregroundColor: QuickpassColors.darkOnPrimary,
                       ),
                     ),
                   ],
@@ -784,7 +784,7 @@ class _PendingCard extends StatelessWidget {
               if (ctrl.text.trim().isEmpty) return;
               Navigator.pop(ctx, ctrl.text.trim());
             },
-            style: FilledButton.styleFrom(backgroundColor: context.error),
+            style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
             child: const Text('Reject'),
           ),
         ],

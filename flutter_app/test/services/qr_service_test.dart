@@ -25,7 +25,7 @@ void main() {
 
     group('windowSeconds', () {
       test('returns before state when now is before window', () {
-        const date = '2025-01-01';
+        final date = '2025-01-01';
         final now = DateTime.parse('${date}T08:00:00');
         final result = QrService.windowSeconds(date, '12:00', now: now);
         expect(result['state'], 'before');
@@ -33,7 +33,7 @@ void main() {
       });
 
       test('returns after state when now is after window', () {
-        const date = '2025-01-01';
+        final date = '2025-01-01';
         final now = DateTime.parse('${date}T13:00:00');
         final result = QrService.windowSeconds(date, '12:00', now: now);
         expect(result['state'], 'after');

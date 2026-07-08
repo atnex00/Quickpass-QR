@@ -39,37 +39,37 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border:
-              Border(top: BorderSide(color: context.outlineVariant)),
+              Border(top: BorderSide(color: QuickpassColors.outlineVariant)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: (i) => setState(() => _currentIndex = i),
-          backgroundColor: context.surface,
-          indicatorColor: context.primary.withValues(alpha: 0.15),
+          backgroundColor: QuickpassColors.surface,
+          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           height: 80,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
+          destinations: const [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined,
-                  color: context.onSurfaceVariant),
+                  color: QuickpassColors.onSurfaceVariant),
               selectedIcon:
-                  Icon(Icons.dashboard, color: context.primary),
+                  Icon(Icons.dashboard, color: QuickpassColors.darkPrimary),
               label: 'Dashboard',
             ),
             NavigationDestination(
               icon: Icon(Icons.history_outlined,
-                  color: context.onSurfaceVariant),
+                  color: QuickpassColors.onSurfaceVariant),
               selectedIcon:
-                  Icon(Icons.history, color: context.primary),
+                  Icon(Icons.history, color: QuickpassColors.darkPrimary),
               label: 'History',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline,
-                  color: context.onSurfaceVariant),
+                  color: QuickpassColors.onSurfaceVariant),
               selectedIcon:
-                  Icon(Icons.person, color: context.primary),
+                  Icon(Icons.person, color: QuickpassColors.darkPrimary),
               label: 'Profile',
             ),
           ],
@@ -139,8 +139,8 @@ class _DashboardTabState extends State<_DashboardTab> {
                       MaterialPageRoute(
                           builder: (_) => const RequestLeaveScreen()));
                 },
-                backgroundColor: context.primary,
-                foregroundColor: context.onPrimary,
+                backgroundColor: QuickpassColors.darkPrimary,
+                foregroundColor: QuickpassColors.darkOnPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -163,8 +163,8 @@ class _DashboardAppBar extends StatelessWidget {
       key: const ValueKey('employee-dashboard'),
       pinned: true,
       toolbarHeight: 64,
-      backgroundColor: context.primary,
-      foregroundColor: context.onPrimary,
+      backgroundColor: QuickpassColors.darkPrimary,
+      foregroundColor: QuickpassColors.darkOnPrimary,
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: Padding(
@@ -175,25 +175,25 @@ class _DashboardAppBar extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: context.onPrimary.withValues(alpha: 0.1),
+                  color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Image.asset('assets/icon/app-icon.png',
                     width: 22, height: 22),
               ),
               const SizedBox(width: 8),
-              Text(
+              const Text(
                 'Quickpass',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: context.onPrimary,
+                  color: QuickpassColors.darkOnPrimary,
                 ),
               ),
               const Spacer(),
               IconButton(
-                icon: Icon(Icons.notifications_outlined,
-                    color: context.onPrimary),
+                icon: const Icon(Icons.notifications_outlined,
+                    color: QuickpassColors.darkOnPrimary),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -221,21 +221,21 @@ class _UserProfileCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.surfaceContainerLowest,
+        color: QuickpassColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
+            backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
             child: Text(
               (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: context.primaryBlue,
+                color: QuickpassColors.primary,
               ),
             ),
           ),
@@ -244,20 +244,20 @@ class _UserProfileCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Welcome back,',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: context.outline,
+                    color: QuickpassColors.outline,
                   ),
                 ),
                 Text(
                   user?.fullName ?? '',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: context.onSurface,
+                    color: QuickpassColors.onSurface,
                     height: 1.4,
                   ),
                 ),
@@ -269,31 +269,31 @@ class _UserProfileCard extends StatelessWidget {
                          user?.position ?? '',
                          maxLines: 1,
                          overflow: TextOverflow.ellipsis,
-                         style: TextStyle(
+                         style: const TextStyle(
                            fontSize: 14,
                            fontWeight: FontWeight.w600,
                            letterSpacing: 0.01,
-                           color: context.secondary,
+                           color: QuickpassColors.secondary,
                          ),
                        ),
                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 6),
+                     const Padding(
+                       padding:
+                           EdgeInsets.symmetric(horizontal: 6),
                        child: Text(
                          '\u2022',
                          style: TextStyle(
                              fontSize: 10,
-                             color: context.outline),
+                             color: QuickpassColors.outline),
                        ),
                      ),
                      Text(
                        'ID: ${user?.employeeId ?? ''}',
-                       style: TextStyle(
+                       style: const TextStyle(
                          fontSize: 14,
                          fontWeight: FontWeight.w700,
                          letterSpacing: 0.05,
-                         color: context.outline,
+                         color: QuickpassColors.outline,
                        ),
                      ),
                    ],
@@ -316,9 +316,9 @@ class _ActiveLeaveCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: context.surfaceContainerLowest,
+        color: QuickpassColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Stack(
         children: [
@@ -328,9 +328,9 @@ class _ActiveLeaveCard extends StatelessWidget {
             bottom: 0,
             child: Container(
               width: 4,
-              decoration: BoxDecoration(
-                color: context.success,
-                borderRadius: const BorderRadius.only(
+              decoration: const BoxDecoration(
+                color: QuickpassColors.success,
+                borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),
                 ),
@@ -356,18 +356,18 @@ class _ActiveLeaveCard extends StatelessWidget {
                                   horizontal: 8,
                                   vertical: 2),
                           decoration: BoxDecoration(
-                            color: context.success
+                            color: QuickpassColors.success
                                 .withValues(alpha: 0.1),
                             borderRadius:
                                 BorderRadius.circular(999),
                           ),
-                          child: Text(
+                          child: const Text(
                             'ACTIVE PASS',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                               color:
-                                  context.success,
+                                  QuickpassColors.success,
                             ),
                           ),
                         ),
@@ -376,19 +376,19 @@ class _ActiveLeaveCard extends StatelessWidget {
                            leave.reason,
                            maxLines: 2,
                            overflow: TextOverflow.ellipsis,
-                           style: TextStyle(
+                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color:
-                                context.onSurface,
+                                QuickpassColors.onSurface,
                             letterSpacing: -0.01,
                             height: 1.33,
-                           ),
+                          ),
                         ),
                       ],
                     ),
-                    Icon(Icons.check_circle,
-                        color: context.success,
+                    const Icon(Icons.check_circle,
+                        color: QuickpassColors.success,
                         size: 28),
                   ],
                 ),
@@ -425,15 +425,15 @@ class _ActiveLeaveCard extends StatelessWidget {
                         );
                       }
                     },
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.qr_code_2,
                             size: 20,
-                            color: context
-                                .onPrimary),
-                        const SizedBox(width: 8),
-                        const Text(
+                            color: QuickpassColors
+                                .darkOnPrimary),
+                        SizedBox(width: 8),
+                        Text(
                           'View QR Pass',
                           style: TextStyle(
                             fontSize: 14,
@@ -468,11 +468,11 @@ class _StatGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _StatCard('Pending', pendingCount.toString(), context.warning),
+        _StatCard('Pending', pendingCount.toString(), QuickpassColors.warning),
         const SizedBox(width: 8),
-        _StatCard('Approved', approvedCount.toString(), context.success),
+        _StatCard('Approved', approvedCount.toString(), QuickpassColors.success),
         const SizedBox(width: 8),
-        _StatCard('Completed', completedCount.toString(), context.primaryBlue),
+        _StatCard('Completed', completedCount.toString(), QuickpassColors.primary),
       ],
     );
   }
@@ -497,12 +497,12 @@ class _RecentActivitySection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Recent Activity',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: context.onSurface,
+                color: QuickpassColors.onSurface,
                 height: 1.5,
               ),
             ),
@@ -513,12 +513,12 @@ class _RecentActivitySection extends StatelessWidget {
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text(
+              child: const Text(
                 'See All',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: context.secondary,
+                  color: QuickpassColors.secondary,
                 ),
               ),
             ),
@@ -536,20 +536,20 @@ class _RecentActivitySection extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: context.surface,
+              color: QuickpassColors.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: context.outlineVariant),
+                  color: QuickpassColors.outlineVariant),
             ),
-            child: Column(
+            child: const Column(
               children: [
                 Icon(Icons.inbox_outlined,
                     size: 40,
-                    color: context.outlineVariant),
-                const SizedBox(height: 12),
+                    color: QuickpassColors.outlineVariant),
+                SizedBox(height: 12),
                 Text('No recent activity',
                     style: TextStyle(
-                        color: context.neutralGray)),
+                        color: QuickpassColors.neutralGray)),
               ],
             ),
           )
@@ -570,9 +570,9 @@ class _InfoRow extends StatelessWidget {
     return Row(
       children: [
         Text(label,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 14,
-                color: context.onSurfaceVariant,
+                color: QuickpassColors.onSurfaceVariant,
                 height: 1.43)),
         const SizedBox(width: 8),
         Flexible(
@@ -580,10 +580,10 @@ class _InfoRow extends StatelessWidget {
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: context.onSurface,
+                  color: QuickpassColors.onSurface,
                   height: 1.43)),
         ),
       ],
@@ -604,18 +604,18 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: context.surfaceContainerLowest,
+          color: QuickpassColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.outlineVariant),
+          border: Border.all(color: QuickpassColors.outlineVariant),
         ),
         child: Column(
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: context.outline,
+                color: QuickpassColors.outline,
               ),
             ),
             const SizedBox(height: 4),
@@ -660,9 +660,9 @@ class _ActivityCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.surfaceContainerLowest,
+        color: QuickpassColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -683,7 +683,7 @@ class _ActivityCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: context.surfaceContainerHigh,
+                color: QuickpassColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Icon(
@@ -701,18 +701,18 @@ class _ActivityCard extends StatelessWidget {
                     leave.reason,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: context.onSurface,
+                      color: QuickpassColors.onSurface,
                       height: 1.43,
                     ),
                   ),
                   Text(
                     leave.leaveDate.toIso8601String().split('T').first,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: context.outline,
+                      color: QuickpassColors.outline,
                       height: 1.43,
                     ),
                   ),

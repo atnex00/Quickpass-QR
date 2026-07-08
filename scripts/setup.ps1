@@ -1,4 +1,4 @@
-﻿# ═══════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════
 # Quickpass Setup Script — Windows (PowerShell)
 #
 # Installs system dependencies and optionally Android SDK + Flutter
@@ -15,7 +15,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$ProjectDir = Split-Path -Parent $PSScriptRoot
+$ProjectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $ToolsDir = Join-Path $ProjectDir "tools"
 $AndroidSdkDir = Join-Path $ToolsDir "android-sdk"
 $FlutterDir = Join-Path $ToolsDir "flutter"
@@ -57,7 +57,7 @@ if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
 $JavaOk = $false
 $JavaCmd = Get-Command "java" -ErrorAction SilentlyContinue
 if ($JavaCmd) {
-    $JavaVer = cmd.exe /c "java -version 2>&1" | Out-String
+    $JavaVer = (& java -version 2>&1) -join "`n"
     if ($JavaVer -match '"(\d+)') {
         $JavaOk = [int]$Matches[1] -ge 17
     }
@@ -138,9 +138,9 @@ Write-Info "Accepting Android licenses..."
 Start-Process -FilePath $SdkManager -ArgumentList "--licenses" -NoNewWindow -Wait 2>&1 | Out-Null
 Write-Log "Licenses accepted"
 
-Write-Info "Installing Android SDK platform, build tools and platform-tools..."
-Start-Process -FilePath $SdkManager -ArgumentList "platforms;android-34", "build-tools;34.0.0", "platform-tools" -NoNewWindow -Wait
-Write-Log "Android SDK platform (34), build-tools and platform-tools installed"
+Write-Info "Installing Android SDK platform and build tools..."
+Start-Process -FilePath $SdkManager -ArgumentList "platforms;android-34", "build-tools;34.0.0" -NoNewWindow -Wait
+Write-Log "Android SDK platform (34) and build-tools installed"
 
 # Write local.properties for the Flutter project
 $Props = Join-Path $ProjectDir "flutter_app\android\local.properties"

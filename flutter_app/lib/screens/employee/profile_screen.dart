@@ -113,8 +113,8 @@ class _ProfileAppBar extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       toolbarHeight: 64,
-      backgroundColor: context.primary,
-      foregroundColor: context.onPrimary,
+      backgroundColor: QuickpassColors.darkPrimary,
+      foregroundColor: QuickpassColors.darkOnPrimary,
       automaticallyImplyLeading: false,
       flexibleSpace: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -124,23 +124,23 @@ class _ProfileAppBar extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: context.onPrimary.withValues(alpha: 0.1),
+                color: QuickpassColors.darkOnPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.qr_code_scanner, size: 18, color: context.onPrimary),
+              child: const Icon(Icons.qr_code_scanner, size: 18, color: QuickpassColors.darkOnPrimary),
             ),
             const SizedBox(width: 12),
-            Text(
+            const Text(
               'My Profile',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: context.onPrimary,
+                color: QuickpassColors.darkOnPrimary,
               ),
             ),
             const Spacer(),
             IconButton(
-              icon: Icon(Icons.logout, color: context.onPrimary),
+              icon: const Icon(Icons.logout, color: QuickpassColors.darkOnPrimary),
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
@@ -151,13 +151,14 @@ class _ProfileAppBar extends StatelessWidget {
                       TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                       FilledButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        style: FilledButton.styleFrom(backgroundColor: context.error),
+                        style: FilledButton.styleFrom(backgroundColor: QuickpassColors.error),
                         child: const Text('Logout'),
                       ),
                     ],
                   ),
                 );
                 if (confirmed == true && context.mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                   context.read<AuthProvider>().logout();
                 }
               },
@@ -179,18 +180,18 @@ class _UserAvatarCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.surfaceContainerLowest,
+        color: QuickpassColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
+            backgroundColor: QuickpassColors.primary.withValues(alpha: 0.1),
             child: Text(
               (user?.fullName ?? 'U')[0].toUpperCase(),
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: context.primaryBlue),
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: QuickpassColors.primary),
             ),
           ),
           const SizedBox(width: 16),
@@ -199,9 +200,9 @@ class _UserAvatarCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user?.fullName ?? '',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: context.onSurface)),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: QuickpassColors.onSurface)),
                 Text(user?.position ?? '',
-                  style: TextStyle(color: context.neutralGray, fontSize: 13)),
+                  style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13)),
               ],
             ),
           ),
@@ -221,16 +222,16 @@ class _AccountInfoCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Account Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
-          Divider(color: context.outlineVariant),
+          const Text('Account Information',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+          const Divider(color: QuickpassColors.outlineVariant),
           _ReadOnlyRow(label: 'Employee ID', value: user?.employeeId ?? ''),
           _ReadOnlyRow(label: 'Department', value: user?.departmentName ?? 'N/A'),
         ],
@@ -262,16 +263,16 @@ class _PersonalInfoForm extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.surface,
+        color: QuickpassColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
+        border: Border.all(color: QuickpassColors.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Personal Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
-          Divider(color: context.outlineVariant),
+          const Text('Personal Information',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: QuickpassColors.onSurface)),
+          const Divider(color: QuickpassColors.outlineVariant),
           const SizedBox(height: 4),
           TextField(
             controller: nameCtl,
@@ -303,8 +304,8 @@ class _PersonalInfoForm extends StatelessWidget {
             child: FilledButton(
               onPressed: saving ? null : onSave,
               style: FilledButton.styleFrom(
-                backgroundColor: context.primary,
-                foregroundColor: context.onPrimary,
+                backgroundColor: QuickpassColors.darkPrimary,
+                foregroundColor: QuickpassColors.darkOnPrimary,
               ),
               child: saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
@@ -328,8 +329,8 @@ class _ReadOnlyRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.3, child: Text(label, style: TextStyle(color: context.neutralGray, fontSize: 13))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.onSurface))),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.3, child: Text(label, style: const TextStyle(color: QuickpassColors.neutralGray, fontSize: 13))),
+          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: QuickpassColors.onSurface))),
         ],
       ),
     );

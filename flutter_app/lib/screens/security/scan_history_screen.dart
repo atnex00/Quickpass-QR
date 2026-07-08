@@ -49,8 +49,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
             SliverAppBar(
               pinned: true,
               toolbarHeight: 64,
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
+              backgroundColor: QuickpassColors.darkPrimary,
+              foregroundColor: QuickpassColors.darkOnPrimary,
               automaticallyImplyLeading: false,
               flexibleSpace: SafeArea(
                 child: Padding(
@@ -58,8 +58,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back,
-                            color: context.onPrimary),
+                        icon: const Icon(Icons.arrow_back,
+                            color: QuickpassColors.darkOnPrimary),
                         onPressed: () => Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -70,7 +70,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: context.onPrimary
+                          color: QuickpassColors.darkOnPrimary
                               .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -78,18 +78,18 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                             width: 16, height: 16),
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      const Text(
                         'Quickpass',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: context.onPrimary),
+                            color: QuickpassColors.darkOnPrimary),
                       ),
                       const Spacer(),
                       PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert,
-                            color: context.onPrimary),
-                        color: context.surface,
+                        icon: const Icon(Icons.more_vert,
+                            color: QuickpassColors.darkOnPrimary),
+                        color: QuickpassColors.surface,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         onSelected: (value) async {
@@ -110,7 +110,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                   FilledButton(
                                     onPressed: () => Navigator.pop(ctx, true),
                                     style: FilledButton.styleFrom(
-                                        backgroundColor: context.error),
+                                        backgroundColor: QuickpassColors.error),
                                     child: const Text('Logout'),
                                   ),
                                 ],
@@ -127,21 +127,21 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                             child: Consumer<AuthProvider>(
                               builder: (_, auth, __) => Text(
                                 auth.user?.fullName ?? 'Guard',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    color: context.onSurface),
+                                    color: QuickpassColors.onSurface),
                               ),
                             ),
                           ),
                           const PopupMenuDivider(),
-                          PopupMenuItem(
+                          const PopupMenuItem(
                             value: 'logout',
                             child: ListTile(
                               leading: Icon(Icons.logout,
-                                  color: context.error),
+                                  color: QuickpassColors.error),
                               title: Text('Logout',
                                   style:
-                                      TextStyle(color: context.error)),
+                                      TextStyle(color: QuickpassColors.error)),
                               contentPadding: EdgeInsets.zero,
                               visualDensity: VisualDensity.compact,
                             ),
@@ -164,24 +164,24 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.error_outline,
-                            size: 48, color: context.error),
+                        const Icon(Icons.error_outline,
+                            size: 48, color: QuickpassColors.error),
                         const SizedBox(height: 16),
-                        Text('Failed to load history',
+                        const Text('Failed to load history',
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: context.onSurface)),
+                                color: QuickpassColors.onSurface)),
                         const SizedBox(height: 8),
                         Text(_error!,
-                            style: TextStyle(
-                                color: context.neutralGray)),
+                            style: const TextStyle(
+                                color: QuickpassColors.neutralGray)),
                         const SizedBox(height: 24),
                         FilledButton(
                           onPressed: _loadHistory,
                           style: FilledButton.styleFrom(
-                            backgroundColor: context.primary,
-                            foregroundColor: context.onPrimary,
+                            backgroundColor: QuickpassColors.darkPrimary,
+                            foregroundColor: QuickpassColors.darkOnPrimary,
                           ),
                           child: const Text('Retry'),
                         ),
@@ -196,18 +196,18 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.qr_code_scanner_outlined,
-                          size: 64, color: context.outlineVariant),
+                      const Icon(Icons.qr_code_scanner_outlined,
+                          size: 64, color: QuickpassColors.outlineVariant),
                       const SizedBox(height: 12),
-                      Text('No scan history',
+                      const Text('No scan history',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: context.onSurfaceVariant)),
+                              color: QuickpassColors.onSurfaceVariant)),
                       const SizedBox(height: 4),
-                      Text('Scanned QR codes will appear here',
+                      const Text('Scanned QR codes will appear here',
                           style: TextStyle(
-                              color: context.neutralGray,
+                              color: QuickpassColors.neutralGray,
                               fontSize: 13)),
                       const SizedBox(height: 24),
                       FilledButton.icon(
@@ -219,8 +219,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                         icon: const Icon(Icons.qr_code_scanner, size: 18),
                         label: const Text('Scan QR'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: context.primary,
-                          foregroundColor: context.onPrimary,
+                          backgroundColor: QuickpassColors.darkPrimary,
+                          foregroundColor: QuickpassColors.darkOnPrimary,
                         ),
                       ),
                     ],
@@ -239,28 +239,28 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
-                            color: context.surfaceContainerLowest,
+                            color: QuickpassColors.surfaceContainerLowest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: context.outlineVariant),
+                                color: QuickpassColors.outlineVariant),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.qr_code_scanner,
-                                  size: 28, color: context.primaryBlue),
+                              const Icon(Icons.qr_code_scanner,
+                                  size: 28, color: QuickpassColors.primary),
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('${_logs.length}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.w700,
-                                          color: context.onSurface)),
-                                  Text('Total Scans',
+                                          color: QuickpassColors.onSurface)),
+                                  const Text('Total Scans',
                                       style: TextStyle(
                                           fontSize: 13,
-                                          color: context.neutralGray)),
+                                          color: QuickpassColors.neutralGray)),
                                 ],
                               ),
                             ],
@@ -273,10 +273,10 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: context.surface,
+                          color: QuickpassColors.surface,
                           borderRadius: BorderRadius.circular(12),
                           border:
-                              Border.all(color: context.outlineVariant),
+                              Border.all(color: QuickpassColors.outlineVariant),
                         ),
                         child: IntrinsicHeight(
                           child: Row(
@@ -285,8 +285,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                 width: 4,
                                 decoration: BoxDecoration(
                                   color: isSuccess
-                                      ? context.success
-                                      : context.error,
+                                      ? QuickpassColors.success
+                                      : QuickpassColors.error,
                                   borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(12),
                                       bottomLeft: Radius.circular(12)),
@@ -302,9 +302,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                         height: 40,
                                         decoration: BoxDecoration(
                                           color: isSuccess
-                                              ? context.success
+                                              ? QuickpassColors.success
                                                   .withValues(alpha: 0.12)
-                                              : context.error
+                                              : QuickpassColors.error
                                                   .withValues(alpha: 0.12),
                                           borderRadius:
                                               BorderRadius.circular(10),
@@ -314,8 +314,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                                 ? Icons.check_circle
                                                 : Icons.cancel,
                                             color: isSuccess
-                                                ? context.success
-                                                : context.error,
+                                                ? QuickpassColors.success
+                                                : QuickpassColors.error,
                                             size: 20),
                                       ),
                                       const SizedBox(width: 12),
@@ -325,23 +325,27 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(log.employeeName ?? 'Unknown',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14,
-                                                    color: context.onSurface)),
+                                                    color: QuickpassColors
+                                                        .onSurface)),
                                             const SizedBox(height: 2),
                                             Text(
                                                 '${log.qrType} \u2022 ${DateFormatter.formatDateTime(log.scanTime)}',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     fontSize: 12,
-                                                    color: context.neutralGray)),
+                                                    color: QuickpassColors
+                                                        .neutralGray)),
                                             if (log.validationMessage != null)
                                               Text(log.validationMessage!,
                                                   style: TextStyle(
                                                       fontSize: 11,
-                                                    color: isSuccess
-                                                        ? context.success
-                                                        : context.error)),
+                                                      color: isSuccess
+                                                          ? QuickpassColors
+                                                              .success
+                                                          : QuickpassColors
+                                                              .error)),
                                           ],
                                         ),
                                       ),
@@ -350,9 +354,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                             horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
                                           color: isSuccess
-                                              ? context.success
+                                              ? QuickpassColors.success
                                                   .withValues(alpha: 0.12)
-                                              : context.error
+                                              : QuickpassColors.error
                                                   .withValues(alpha: 0.12),
                                           borderRadius:
                                               BorderRadius.circular(999),
@@ -363,8 +367,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w600,
                                                 color: isSuccess
-                                                    ? context.success
-                                                    : context.error)),
+                                                    ? QuickpassColors.success
+                                                    : QuickpassColors.error)),
                                       ),
                                     ],
                                   ),
