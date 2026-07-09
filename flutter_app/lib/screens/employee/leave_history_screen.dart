@@ -52,41 +52,46 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
               automaticallyImplyLeading: false,
               flexibleSpace: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: context.onPrimary
-                              .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.qr_code_scanner,
-                            size: 18, color: context.onPrimary),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Gate History',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: context.onPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(Icons.notifications_outlined,
-                            color: context.onPrimary),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              behavior: SnackBarBehavior.floating,
-                              content: Text('No new notifications'),
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: context.onPrimary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          );
-                        },
+                            child: Image.asset('assets/icon/app-icon.png',
+                                width: 22, height: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Gate History',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: context.onPrimary,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: Icon(Icons.notifications_outlined,
+                                color: context.onPrimary),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text('No new notifications'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

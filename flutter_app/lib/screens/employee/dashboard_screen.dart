@@ -60,17 +60,17 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               label: 'Dashboard',
             ),
             NavigationDestination(
-              icon: Icon(Icons.history_outlined,
+              icon: Icon(Icons.receipt_long_outlined,
                   color: context.onSurfaceVariant),
               selectedIcon:
-                  Icon(Icons.history, color: context.primary),
+                  Icon(Icons.receipt_long, color: context.primary),
               label: 'History',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline,
+              icon: Icon(Icons.account_circle_outlined,
                   color: context.onSurfaceVariant),
               selectedIcon:
-                  Icon(Icons.person, color: context.primary),
+                  Icon(Icons.account_circle, color: context.primary),
               label: 'Profile',
             ),
           ],
@@ -169,7 +169,7 @@ class _DashboardAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
