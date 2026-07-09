@@ -1,15 +1,16 @@
-# Quickpass — Smart Gatepass & Leave Management
+# ZANECO QuickPass — Smart Gatepass & Leave Management
 
 <p align="center">
   <strong>A QR code-based employee leave management system</strong><br />
-  Flutter (Android) + Node.js/Express + Supabase (PostgreSQL)
+  React 19 (Web) + Flutter (Android) + Node.js/Express + Supabase (PostgreSQL)
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Android-brightgreen" alt="Platform: Android" />
+  <img src="https://img.shields.io/badge/platform-Android%20%7C%20Web-brightgreen" alt="Platform: Android + Web" />
   <img src="https://img.shields.io/badge/backend-Node.js%2020-339933" alt="Backend: Node.js 20" />
   <img src="https://img.shields.io/badge/database-PostgreSQL-4169E1" alt="Database: PostgreSQL" />
   <img src="https://img.shields.io/badge/flutter-3.x-02569B" alt="Flutter: 3.x" />
+  <img src="https://img.shields.io/badge/react-19-61DAFB" alt="React: 19" />
 </p>
 
 ---
@@ -21,12 +22,15 @@
   - [Windows](#windows)
   - [macOS](#macos)
   - [Linux](#linux)
+- [Environment Switching](#environment-switching)
 - [Supabase Setup](#supabase-setup)
 - [Project Structure](#project-structure)
 - [Environment Variables](#environment-variables)
 - [Available Commands](#available-commands)
 - [Architecture Overview](#architecture-overview)
+- [Web Routes](#web-routes)
 - [API Endpoints](#api-endpoints)
+- [Test Users](#test-users)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -36,8 +40,8 @@
 **Requires**: [VS Code](https://code.visualstudio.com/) + [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ```bash
-git clone <repo-url> QRpass
-cd QRpass
+git clone <repo-url> Quickpass-QR
+cd Quickpass-QR
 code .
 ```
 
@@ -59,26 +63,29 @@ First build takes ~5 minutes. The container includes:
 ### After Container Opens
 
 ```bash
-# 1. Set up Supabase credentials (see Supabase Setup section)
+# 1. Set up environment (dev uses local DB, prod uses Supabase)
 cp backend/.env.example backend/.env
-# Edit backend/.env with your Supabase connection string
+# Edit backend/.env with your credentials
 
-# 2. Install dependencies (runs automatically via postCreateCommand)
+# 2. Install dependencies
 cd backend && npm install
+cd ../web && npm install
 cd ../flutter_app && flutter pub get
 
 # 3. Run database migrations
 cd ../backend
-npx knex migrate:latest
-npx knex seed:run
+npm run migrate
+npm run seed
 
-# 4. Start development
-# Terminal 1 — Backend
+# 4. Start development (backend + web concurrently)
+cd ..
 npm run dev
+# Backend → http://localhost:3000
+# Web     → http://localhost:8080
 
-# Terminal 2 — Flutter app
-cd ../flutter_app
-flutter run
+# Terminal 3 — Flutter app
+cd flutter_app
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
 ---
@@ -112,43 +119,51 @@ flutter doctor
 #### Clone & Install
 
 ```powershell
-git clone <repo-url> QRpass
-cd QRpass
+git clone <repo-url> Quickpass-QR
+cd Quickpass-QR
 
-# Backend
+# Install backend
 cd backend
 copy .env.example .env
 npm install
 
-# Flutter app
+# Install web frontend
+cd ..\web
+npm install
+
+# Install Flutter app
 cd ..\flutter_app
 flutter pub get
 ```
 
 #### Configure Environment
 
-Edit `backend\.env` with your Supabase credentials (see [Supabase Setup](#supabase-setup)).
+Edit `backend\.env` with your Supabase credentials (see [Supabase Setup](#supabase-setup)). The project uses `.env.dev` (local DB) and `.env.prod` (Supabase) — see [Environment Switching](#environment-switching).
 
 #### Run Migrations
 
 ```powershell
 cd backend
-npx knex migrate:latest --knexfile knexfile.js
-npx knex seed:run --knexfile knexfile.js
+npm run migrate
+npm run seed
 ```
 
 #### Start Development
 
-Open **two terminals**:
+Open **three terminals**:
 
 ```powershell
-# Terminal 1 — Backend API
+# Terminal 1 — Backend API (port 3000)
 cd backend
 npm run dev
 
-# Terminal 2 — Flutter App
+# Terminal 2 — Web Frontend (port 8080, proxies /api → :3000)
+cd web
+npm run dev
+
+# Terminal 3 — Flutter App
 cd flutter_app
-flutter run
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
 ---
@@ -182,35 +197,27 @@ flutter doctor
 #### Clone & Install
 
 ```bash
-git clone <repo-url> QRpass
-cd QRpass
+git clone <repo-url> Quickpass-QR
+cd Quickpass-QR
 
-# Backend
-cd backend
-cp .env.example .env
-npm install
-
-# Flutter app
-cd ../flutter_app
-flutter pub get
+cd backend && cp .env.example .env && npm install
+cd ../web && npm install
+cd ../flutter_app && flutter pub get
 ```
 
-#### Run Migrations
+#### Run Migrations & Start
 
 ```bash
 cd ../backend
-npx knex migrate:latest
-npx knex seed:run
-```
+npm run migrate
+npm run seed
+npm run dev
 
-#### Start Development
+# Terminal 2 — Web (port 8080)
+cd web && npm run dev
 
-```bash
-# Terminal 1
-cd backend && npm run dev
-
-# Terminal 2
-cd flutter_app && flutter run
+# Terminal 3 — Flutter
+cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
 ---
@@ -258,29 +265,63 @@ flutter doctor
 #### Clone & Install
 
 ```bash
-git clone <repo-url> QRpass
-cd QRpass
+git clone <repo-url> Quickpass-QR
+cd Quickpass-QR
 
 cd backend && cp .env.example .env && npm install
+cd ../web && npm install
 cd ../flutter_app && flutter pub get
 ```
 
 #### Run Migrations & Start
 
 ```bash
-cd ../backend
-npx knex migrate:latest
-npx knex seed:run
+cd backend
+npm run migrate
+npm run seed
 npm run dev
-# In another terminal:
-cd flutter_app && flutter run
+
+# Terminal 2
+cd web && npm run dev
+
+# Terminal 3
+cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
+
+---
+
+## Environment Switching
+
+The project supports **dev** (local PostgreSQL) and **production** (Supabase cloud) environments via `NODE_ENV`. The backend loads the corresponding `.env.<env>` file.
+
+| Env | File | DB Target | Command |
+|-----|------|-----------|---------|
+| dev | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
+| prod | `backend/.env.prod` | Supabase cloud | `npm run prod` |
+
+### Quick Switch
+
+```bash
+# Dev mode (local DB + Vite dev server + nodemon)
+npm run dev
+
+# Production mode (Supabase DB + built frontend)
+npm run build:web   # first build the web frontend
+npm run prod        # runs backend serving web/dist
+```
+
+### Docker Production Deployment
+
+```bash
+docker-compose up --build
+```
+This uses `NODE_ENV=production` and reads `backend/.env` (copy from `.env.prod`).
 
 ---
 
 ## Supabase Setup
 
-Quickpass uses **Supabase** for its PostgreSQL database. No local PostgreSQL is needed.
+Quickpass uses **Supabase** for its PostgreSQL database. No local PostgreSQL is needed in production.
 
 ### Step 1: Create a Supabase Project
 
@@ -304,19 +345,21 @@ Quickpass uses **Supabase** for its PostgreSQL database. No local PostgreSQL is 
 
 ### Step 3: Configure Environment
 
-Replace the placeholder in `backend/.env`:
+Edit `backend/.env.prod`:
 
 ```env
 DB_CONNECTION=postgresql://postgres:YOUR_PASSWORD@db.YOUR_REF.supabase.co:5432/postgres
 DB_SSL=true
+JWT_SECRET=your-strong-random-secret
+QR_SECRET=your-strong-random-qr-secret
 ```
 
 ### Step 4: Run Migrations
 
 ```bash
 cd backend
-npx knex migrate:latest
-npx knex seed:run
+npm run migrate
+npm run seed
 ```
 
 ### Step 5: Verify
@@ -331,172 +374,328 @@ psql "$DB_CONNECTION" -c "\dt"
 ## Project Structure
 
 ```
-QRpass/
+Quickpass-QR/
 ├── .devcontainer/
 │   ├── devcontainer.json      # VS Code dev container config
 │   └── Dockerfile             # Container image (Node, Flutter, .NET, Docker CLI)
-├── backend/
+├── .agents/                   # AI agent skill definitions
+├── .opencode/                 # AI agent configuration
+├── backend/                   # Node.js + Express API
 │   ├── src/
 │   │   ├── app.js             # Express app entry point
+│   │   ├── index.js           # Refactored entry (WIP, unused)
 │   │   ├── config/            # DB, Firebase configuration
-│   │   ├── controllers/       # Route handlers (auth, leave, supervisor, scan, admin)
-│   │   ├── middleware/        # Auth, validation, error handling
-│   │   ├── routes/            # Express route definitions
-│   │   └── services/          # QR generation, push notifications
-│   ├── knexfile.js            # DB connection config
-│   ├── Dockerfile             # Production container
-│   └── .env.example           # Environment template
-├── flutter_app/
+│   │   ├── controllers/       # auth, leave, supervisor, scan, admin
+│   │   ├── middleware/        # auth (JWT), validate (Joi), errorHandler
+│   │   ├── routes/            # All API route definitions
+│   │   └── services/          # QR generation (HMAC-SHA256), push notifications
+│   ├── knexfile.js            # DB connection config (4 environments)
+│   ├── Dockerfile             # Production container (node:20-alpine)
+│   └── .env.dev / .env.prod  # Environment-specific configs
+├── web/                       # React 19 + TypeScript + Vite 6
+│   ├── src/
+│   │   ├── App.tsx            # React Router v7 route definitions
+│   │   ├── main.tsx           # Entry point
+│   │   ├── components/
+│   │   │   ├── layout/        # AppLayout, Sidebar, SecurityShell, RequireRole, MobileBottomBar
+│   │   │   ├── ui/            # shadcn/ui primitives (button, card, dialog, input, etc.)
+│   │   │   └── shared/        # QrDisplay, StatusBadge
+│   │   ├── pages/
+│   │   │   ├── auth/          # LoginPage
+│   │   │   ├── employee/      # Dashboard, RequestLeave, LeaveHistory, QrDisplay, MyProfile
+│   │   │   ├── supervisor/    # SupervisorDashboard, PendingRequests
+│   │   │   ├── admin/         # UserManager, Departments, Reports
+│   │   │   ├── security/      # Scanner, ScanResult, ScanHistory
+│   │   │   └── guides/        # GuidesPage
+│   │   ├── stores/            # Zustand (authStore, leaveStore, scanStore)
+│   │   ├── lib/               # Axios client, utilities
+│   │   ├── types/             # TypeScript interfaces
+│   │   └── hooks/             # useMediaQuery
+│   └── vite.config.ts         # Port 8080, /api proxy → :3000
+├── flutter_app/               # Flutter 3.27+ mobile app
 │   └── lib/
-│       ├── main.dart          # App entry point with MultiProvider
+│       ├── main.dart          # Entry + MultiProvider
 │       ├── config/            # Theme (Quickpass branding), app config
-│       ├── models/            # Employee, LeaveRequest, ScanLog
-│       ├── providers/         # Auth, Leave, Supervisor, Scan state
-│       ├── services/          # API, Auth, QR, Notification services
+│       ├── models/            # Employee, LeaveRequest, ScanLog (json_serializable)
+│       ├── providers/         # Auth, Leave, Supervisor, Scan (ChangeNotifier)
+│       ├── services/          # API (Dio), QR, CertificatePinner
 │       ├── screens/
 │       │   ├── auth/          # Login, Splash
-│       │   ├── employee/      # Dashboard, Request Leave, History, QR Display
-│       │   ├── supervisor/    # Dashboard, Pending Requests, Approve/Reject
-│       │   └── security/      # QR Scanner, Scan Result
-│       ├── widgets/           # StatusBadge, QrCodeWidget, LoadingIndicator
-│       └── utils/             # Validators, DateFormatter, Constants
+│       │   ├── employee/      # Dashboard, RequestLeave, History, QR Display, Profile
+│       │   ├── supervisor/    # Dashboard, PendingRequests
+│       │   ├── admin/         # AdminPanel, EmployeeDetail
+│       │   └── security/      # Scanner, ScanResult, ScanHistory
+│       ├── widgets/           # StatusBadge, QrCodeWidget, LoadingIndicator, etc.
+│       └── utils/             # Validators, DateFormatter, Constants, Debounce, Responsive
 ├── database/
-│   ├── migrations/            # Knex migration files (6 tables)
-│   └── seeds/                 # Sample data (8 departments, 10 employees)
-├── assets/
-│   └── brand/                 # Logo and icon SVGs
-├── docker-compose.yml         # Production services (backend)
-└── README.md                  # You are here
+│   ├── migrations/            # 8 Knex migration files (see below)
+│   └── seeds/                 # 2 seed files (departments + employees)
+├── scripts/                   # Setup and utility scripts (PowerShell + Bash)
+│   ├── setup.ps1 / setup.sh   # Install Flutter + Android SDK into tools/
+│   ├── setup_db.ps1 / .sh     # Database setup
+│   └── run_phone.ps1 / .sh    # ADB reverse tunnel for physical device testing
+├── assets/brand/              # Logo and icon SVGs/PNGs
+├── docs/design/               # Design documentation
+├── docker-compose.yml         # Production backend service only (DB = Supabase cloud)
+├── dev.sh                     # Dev launcher (backend + web concurrently)
+├── AGENTS.md                  # AI agent project guide
+└── package.json               # Root scripts (dev, prod, build:web, migrate, seed)
 ```
+
+### Database Migrations (8 files)
+
+| # | File | Purpose |
+|---|------|---------|
+| 1 | `001_create_departments.js` | Departments table |
+| 2 | `002_create_employees.js` | Employees table (with password_hash) |
+| 3 | `003_create_sessions.js` | JWT session tracking |
+| 4 | `004_create_leave_requests.js` | Leave requests with QR code columns |
+| 5 | `005_create_qr_scan_logs.js` | QR scan audit log |
+| 6 | `006_create_functions.js` | `generate_employee_id()` function |
+| 7 | `007_add_is_security.js` | Security role column |
+| 8 | `008_optional_department.js` | Make department optional |
 
 ---
 
 ## Environment Variables
 
-### `backend/.env`
+### `backend/.env.dev` — Development
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PORT` | API server port | `3000` |
 | `NODE_ENV` | Environment | `development` |
-| `DB_CONNECTION` | Supabase PostgreSQL connection string | *(required)* |
-| `DB_SSL` | Enable SSL for DB connection | `true` |
-| `JWT_SECRET` | JWT signing secret | *(change in production)* |
+| `DB_CONNECTION` | PostgreSQL connection string | `postgresql://postgres:admin@localhost:5432/passlynx` |
+| `DB_SSL` | Enable SSL for DB connection | `false` |
+| `JWT_SECRET` | JWT signing secret | `passlynx-dev-secret...` |
 | `JWT_EXPIRES_IN` | Token expiration | `24h` |
 | `SESSION_EXPIRES_IN` | Session duration | `7d` |
-| `QR_SECRET` | QR code HMAC signing secret | *(change in production)* |
+| `QR_SECRET` | QR code HMAC signing secret | `passlynx-qr-dev-secret...` |
 | `QR_VALIDITY_WINDOW_MINUTES` | QR code validity window | `15` |
-| `FCM_*` | Firebase Cloud Messaging credentials | *(optional)* |
+
+### `backend/.env.prod` — Production
+
+Same variables as dev, plus:
+
+| Variable | Description |
+|----------|-------------|
+| `FCM_*` | Firebase Cloud Messaging credentials (optional) |
+| `HTTPS_KEY` / `HTTPS_CERT` | Optional HTTPS server paths (port 3443 for camera access) |
 
 ---
 
 ## Available Commands
 
-### Backend
+### Root
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Backend + web concurrently (`dev.sh`, env: dev) |
+| `npm run prod` | Production mode (`dev.sh`, env: prod) |
+| `npm run build:web` | Build web frontend (`web/dist`) |
+| `npm run migrate` | Run database migrations |
+| `npm run seed` | Seed database with sample data |
+| `npm run dev:backend` | Start backend only |
+
+### Backend (`backend/`)
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start API in watch mode (nodemon) |
 | `npm start` | Start API in production |
-| `npm test` | Run tests (Jest) |
+| `npm test` | Run tests (Jest + Supertest, coverage) |
+| `npm run lint` | ESLint on `src/` |
 | `npm run migrate` | Run database migrations |
 | `npm run migrate:rollback` | Rollback last migration |
 | `npm run seed` | Seed database with sample data |
 
-### Flutter
+### Web (`web/`)
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Vite dev server on port 8080 |
+| `npm run build` | TypeScript check + Vite build |
+| `npm run preview` | Preview production build |
+| `npm run tunnel` | Start ngrok tunnel (requires ngrok config) |
+
+### Flutter (`flutter_app/`)
 
 | Command | Description |
 |---------|-------------|
 | `flutter run` | Run on connected device |
+| `flutter analyze` | Static analysis |
 | `flutter test` | Run tests |
 | `flutter build apk` | Build release APK |
 | `flutter build appbundle` | Build Android App Bundle |
+| `flutter build ios` | Build iOS (macOS only) |
 
 ### Database
 
 | Command | Description |
 |---------|-------------|
-| `npx knex migrate:latest` | Apply all pending migrations |
-| `npx knex migrate:rollback` | Rollback last batch |
-| `npx knex seed:run` | Insert sample data |
+| `npm run migrate` | Apply all pending migrations |
+| `npm run migrate:rollback` | Rollback last batch |
+| `npm run seed` | Insert sample data |
 
 ---
 
 ## Architecture Overview
 
 ```
-┌────────────────┐     REST/JSON     ┌──────────────────┐     SQL      ┌─────────────┐
-│  Flutter App   │ ◄──────────────►  │  Node.js API     │ ◄──────────► │  Supabase   │
-│  (Android)     │    JWT Auth        │  (Express)       │   Knex.js    │  PostgreSQL │
-│                │                    │                  │              │             │
-│ • Employee UI  │                    │ • Controllers    │              │ • Employees │
-│ • Supervisor   │                    │ • QR Service     │              │ • Leave Req │
-│ • QR Scanner   │                    │ • Push Notifs    │              │ • Scan Logs │
-│ • QR Display   │                    │ • Auth (JWT)     │              │             │
-└────────────────┘                    └────────┬─────────┘              └─────────────┘
-                                               │
-                                               ▼
-                                      ┌──────────────────┐
-                                      │  Firebase Cloud   │
-                                      │  Messaging        │
-                                      │  (Push Notifs)    │
-                                      └──────────────────┘
+┌───────────────────┐                              ┌──────────────────┐     SQL      ┌─────────────┐
+│   Web App (React) │                              │  Node.js API     │ ◄──────────► │  Supabase   │
+│   Port 8080       │     REST/JSON (via proxy)     │  (Express)       │   Knex.js    │  PostgreSQL │
+│                   │ ◄───────────────────────────► │                  │              │             │
+│ • Employee UI     │                              │ • Controllers    │              │ • Employees │
+│ • Supervisor      │                              │ • QR Service     │              │ • Leave Req │
+│ • Admin Panel     │                              │ • Push Notifs    │              │ • Scan Logs │
+│ • Security Scanner│                              │ • Auth (JWT)     │              │ • Sessions  │
+│ • QR Display      │                              │                  │              │             │
+└───────────────────┘                              └────────┬─────────┘              └─────────────┘
+                                                             │
+                          REST/JSON (direct)                 │
+┌───────────────────┐                                        │
+│ Flutter App       │ ◄──────────────────────────────────────┘
+│ (Android)         │
+│                   │                              ┌──────────────────┐
+│ • Employee UI     │                              │  Firebase Cloud  │
+│ • Supervisor      │                              │  Messaging       │
+│ • Admin Panel     │                              │  (Push Notifs)   │
+│ • QR Scanner      │                              └──────────────────┘
+│ • QR Display      │
+└───────────────────┘
 ```
+
+### State Management
+
+- **Web**: Zustand stores (authStore, leaveStore, scanStore) → Axios (`@/lib/api`, cookie-based JWT with `ZNCQP_token`)
+- **Flutter**: ChangeNotifier + Provider (Auth, Leave, Supervisor, Scan) → singleton Dio ApiService (`FlutterSecureStorage` for JWT)
 
 ### Workflow
 
 1. **Employee** requests leave → status: `pending`
-2. **Supervisor** approves → QR codes generated (OUT + IN)
+2. **Supervisor** approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min)
 3. **Security** scans OUT QR at exit → status: `active`
 4. **Security** scans IN QR at entry → status: `completed`
 
-QR codes are valid ±15 minutes from the scheduled time and use HMAC-SHA256 signing to prevent tampering. Each QR is one-time use.
+### Roles
+
+| Role | Access |
+|------|--------|
+| `is_admin` | Full access (all routes, employee management, departments, reports) |
+| `is_supervisor` | Approve/reject department leave requests, view team calendar |
+| `is_security` | Scan QR codes at gates, view scan history |
+| Regular employee | Submit leaves, view history, view QR codes |
+
+---
+
+## Web Routes
+
+| Path | Guard | Component | Layout |
+|------|-------|-----------|--------|
+| `/login` | Public | LoginPage | None |
+| `/employee` | Any | EmployeeDashboard | AppLayout (sidebar) |
+| `/employee/request` | Any | RequestLeavePage | AppLayout |
+| `/employee/history` | Any | LeaveHistoryPage | AppLayout |
+| `/employee/qr/:id` | Any | QrDisplayPage | AppLayout |
+| `/employee/profile` | Any | MyProfilePage | AppLayout |
+| `/supervisor` | is_supervisor/is_admin | SupervisorDashboard | AppLayout |
+| `/supervisor/pending` | is_supervisor/is_admin | PendingRequestsPage | AppLayout |
+| `/admin/employees` | is_admin | UserManagerPage | AppLayout |
+| `/admin/departments` | is_admin | DepartmentsPage | AppLayout |
+| `/admin/reports` | is_admin | ReportsPage | AppLayout |
+| `/security/scan` | Authenticated | ScannerPage | SecurityShell (no sidebar) |
+| `/security/result` | Authenticated | ScanResultPage | SecurityShell |
+| `/security/history` | Authenticated | ScanHistoryPage | SecurityShell |
+| `/guides` | Any | GuidesPage | AppLayout |
+| `*` | — | Redirect → `/employee` | — |
 
 ---
 
 ## API Endpoints
 
-### Auth
+### Health
+
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/auth/login` | Login with employee ID + password |
-| POST | `/api/auth/logout` | Invalidate session |
-| POST | `/api/auth/refresh` | Refresh JWT token |
-| GET | `/api/auth/profile` | Get current user profile |
-| PUT | `/api/auth/fcm-token` | Update FCM push token |
+| GET | `/api/health` | API health check |
+
+### Auth
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/login` | — | Login with employee ID + password |
+| POST | `/api/auth/logout` | ✓ | Invalidate session |
+| POST | `/api/auth/refresh` | — | Refresh JWT token |
+| GET | `/api/auth/profile` | ✓ | Get current user profile |
+| PUT | `/api/auth/profile` | ✓ | Update profile (name, position, email, password) |
+| PUT | `/api/auth/fcm-token` | ✓ | Update FCM push token |
 
 ### Leave Requests
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/leave/request` | Submit new leave request |
-| GET | `/api/leave/history` | Get user's leave history |
-| GET | `/api/leave/active` | Get current active leave |
-| GET | `/api/leave/:id` | Get leave by ID |
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/leave/request` | ✓ | Submit new leave request |
+| GET | `/api/leave/history` | ✓ | Get user's leave history (filterable by status) |
+| GET | `/api/leave/active` | ✓ | Get current active leave |
+| GET | `/api/leave/:id` | ✓ | Get leave by ID |
+| DELETE | `/api/leave/:id` | admin | Delete a leave request |
 
 ### Supervisor
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/supervisor/pending` | Pending requests (department-scoped) |
-| POST | `/api/supervisor/approve/:leaveId` | Approve and generate QR codes |
-| POST | `/api/supervisor/reject/:leaveId` | Reject with reason |
-| GET | `/api/supervisor/team-leaves` | Team leave calendar |
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/supervisor/pending` | supervisor | Pending requests (department-scoped) |
+| POST | `/api/supervisor/approve/:leaveId` | supervisor | Approve and generate QR codes |
+| POST | `/api/supervisor/reject/:leaveId` | supervisor | Reject with reason |
+| GET | `/api/supervisor/approved` | supervisor | List approved leaves |
+| POST | `/api/supervisor/revoke/:leaveId` | supervisor | Revoke approval |
+| GET | `/api/supervisor/team-leaves` | supervisor | Team leave calendar |
 
 ### Scanning
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/scan/validate` | Validate scanned QR code |
-| GET | `/api/scan/history` | Scan log history |
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/scan/validate` | security | Validate scanned QR code |
+| GET | `/api/scan/history` | security | Scan log history |
 
 ### Admin
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/admin/employees` | List employees (search/filter) |
-| POST | `/api/admin/employees` | Create employee |
-| PUT | `/api/admin/employees/:id` | Update employee |
-| PUT | `/api/admin/employees/:id/supervisor` | Toggle supervisor status |
-| POST | `/api/admin/import/hr` | Bulk import from CSV/HR system |
-| GET | `/api/admin/departments` | List departments |
-| GET | `/api/admin/reports` | Generate reports |
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/admin/employees` | admin | List employees (search/filter) |
+| POST | `/api/admin/employees` | admin | Create employee |
+| PUT | `/api/admin/employees/:id` | admin | Update employee |
+| PUT | `/api/admin/employees/:id/supervisor` | admin | Toggle supervisor status |
+| PUT | `/api/admin/employees/:id/admin` | admin | Toggle admin status |
+| PUT | `/api/admin/employees/:id/status` | admin | Toggle active status |
+| DELETE | `/api/admin/employees/:id` | admin | Delete employee |
+| POST | `/api/admin/import/hr` | admin | Bulk import from CSV/HR system |
+| GET | `/api/admin/departments` | admin | List departments |
+| POST | `/api/admin/departments` | admin | Create department |
+| PUT | `/api/admin/departments/:id` | admin | Update department |
+| DELETE | `/api/admin/departments/:id` | admin | Delete department |
+| GET | `/api/admin/reports` | admin | Generate reports |
+
+---
+
+## Test Users
+
+All passwords are `pass1234`.
+
+| ID | Name | Role | Department |
+|----|------|------|------------|
+| 000001 | Alice Chen | Employee | Engineering |
+| 000002 | Bob Santos | Employee | Engineering |
+| 000003 | Charlie Reyes | Employee | Engineering |
+| 000004 | David Kim | Supervisor | Engineering |
+| 000005 | Eva Martinez | Employee | Human Resources |
+| 000006 | Frank Tan | Employee | Human Resources |
+| 000007 | Grace Lim | Employee | Finance |
+| 000008 | Henry Cruz | Employee | Finance |
+| 000009 | Irene Gonzales | Employee | Administration |
+| 090901 | Guard Mike | Security | — |
+| 999999 | System Admin | Admin + Supervisor + Security | — |
 
 ---
 
@@ -507,10 +706,11 @@ QR codes are valid ±15 minutes from the scheduled time and use HMAC-SHA256 sign
 | Problem | Solution |
 |---------|----------|
 | `flutter doctor` shows missing Android SDK | Set `ANDROID_HOME` env var and install Android Studio |
-| `knex migrate:latest` fails | Check `DB_CONNECTION` in `.env` and that Supabase allows your IP (Settings → Database → Network) |
+| `npm run migrate` fails | Check `DB_CONNECTION` in `.env.<env>` and that Supabase allows your IP |
 | `flutter pub get` fails | Ensure you're in the `flutter_app` directory |
 | QR scanner not working | Grant camera permission in Android Settings → Apps → Quickpass |
-| Backend won't start | Check that port 3000 is free: `lsof -i :3000` |
+| Backend won't start | Check that port 3000 is free: `lsof -i :3000` (macOS/Linux) or `netstat -ano \| findstr :3000` (Windows) |
+| Web app shows blank page | Run `npm run build:web` first if using production mode, or check Vite dev server is running on port 8080 |
 
 ### Supabase Connection Issues
 
@@ -520,7 +720,7 @@ Error: connect ECONNREFUSED db.xxxxx.supabase.co:5432
 
 1. Go to **Supabase Dashboard → Project Settings → Database → Network**
 2. Add your IP address to the allowlist
-3. Ensure `DB_SSL=true` is set in `.env`
+3. Ensure `DB_SSL=true` is set in `.env.prod`
 
 ### Dev Container Issues
 
@@ -536,53 +736,16 @@ Error: connect ECONNREFUSED db.xxxxx.supabase.co:5432
 If port 3000 is in use:
 
 ```bash
-# Find what's using port 3000
+# Find what's using port 3000 (macOS/Linux)
 lsof -i :3000
+
+# Find what's using port 3000 (Windows PowerShell)
+netstat -ano | findstr :3000
+
 # Kill it or use a different port:
-export PORT=3001 && npm run dev
+$env:PORT=3001; npm run dev  # Windows PowerShell
+export PORT=3001 && npm run dev  # macOS/Linux
 ```
-
----
-
-## Cleanup
-
-When you're done with the project, remove the locally installed SDKs:
-
-### Linux / macOS
-
-```bash
-# Remove Android SDK (symlink + real dir)
-rm tools/android-sdk
-rm -rf ~/.local/share/quickpass-android-sdk
-
-# Remove Flutter SDK
-rm -rf tools/flutter
-
-# Remove Gradle build cache (~5GB+)
-rm -rf ~/.gradle/caches/
-
-# Optional: remove Dart pub cache (~600MB, shared by all Dart projects)
-rm -rf ~/.pub-cache/
-```
-
-### Windows (PowerShell)
-
-```powershell
-# Remove Flutter SDK
-Remove-Item -Recurse -Force tools\flutter
-
-# Remove Android SDK
-Remove-Item -Recurse -Force tools\android-sdk
-Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Android\Sdk"
-
-# Optional: Gradle cache
-Remove-Item -Recurse -Force "$env:USERPROFILE\.gradle\caches"
-
-# Optional: Dart pub cache
-Remove-Item -Recurse -Force "$env:USERPROFILE\.pub-cache"
-```
-
-**What's kept:** All source code (`backend/`, `flutter_app/`, `web/`, `scripts/`, `database/`) stays intact. The setup scripts remain so you can reinstall later with `./scripts/setup.sh`.
 
 ---
 
