@@ -107,8 +107,6 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
             SliverAppBar(
               pinned: true,
               toolbarHeight: 64,
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
               automaticallyImplyLeading: false,
               flexibleSpace: SizedBox(
                 height: 64,

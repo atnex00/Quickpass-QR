@@ -113,8 +113,6 @@ class _ProfileAppBar extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       toolbarHeight: 64,
-      backgroundColor: context.primary,
-      foregroundColor: context.onPrimary,
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: Padding(

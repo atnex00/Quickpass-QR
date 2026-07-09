@@ -33,12 +33,10 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
     final isAdmin = context.select((AuthProvider a) => a.isAdmin);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Pending Requests (${supProv.pendingCount})'),
-        backgroundColor: context.primary,
-        foregroundColor: context.onPrimary,
-        elevation: 0,
-      ),
+        appBar: AppBar(
+          title: Text('Pending Requests (${supProv.pendingCount})'),
+          elevation: 0,
+        ),
       body: RefreshIndicator(
         onRefresh: () async {
           final prov = context.read<SupervisorProvider>();

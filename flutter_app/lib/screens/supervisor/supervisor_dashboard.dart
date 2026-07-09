@@ -203,8 +203,6 @@ class _SupervisorAppBar extends StatelessWidget {
       pinned: true,
       expandedHeight: 0,
       toolbarHeight: 64,
-      backgroundColor: context.primary,
-      foregroundColor: context.onPrimary,
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: Padding(

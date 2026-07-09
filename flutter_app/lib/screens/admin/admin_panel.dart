@@ -25,8 +25,6 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
     key: ValueKey(tabKey),
     pinned: true,
     toolbarHeight: 64,
-    backgroundColor: context.primary,
-    foregroundColor: context.onPrimary,
     automaticallyImplyLeading: false,
     flexibleSpace: SafeArea(
       child: Padding(

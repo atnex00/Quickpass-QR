@@ -35,8 +35,6 @@ class QrDisplayScreen extends StatelessWidget {
                 SliverAppBar(
                   pinned: true,
                   toolbarHeight: 64,
-                  backgroundColor: context.primary,
-                  foregroundColor: context.onPrimary,
                   automaticallyImplyLeading: false,
                   flexibleSpace: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -238,9 +238,8 @@ class _ScannerAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 64,
-      color: context.primary,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
