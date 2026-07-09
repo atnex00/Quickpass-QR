@@ -23,6 +23,7 @@ export default function DepartmentsPage() {
   const [form, setForm] = useState({ department_id: "", department_name: "", department_code: "", head_of_department: "" })
   const [saving, setSaving] = useState(false)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -51,6 +52,7 @@ export default function DepartmentsPage() {
   }
 
   const handleDelete = async (id: string) => {
+    setDeleting(true)
     try {
       await api.delete(`/admin/departments/${id}`)
       toast.success("Department deleted")
@@ -60,6 +62,7 @@ export default function DepartmentsPage() {
       toast.error(err.response?.data?.message || "Failed to delete")
       setConfirmId(null)
     }
+    setDeleting(false)
   }
 
   return (
@@ -185,8 +188,8 @@ export default function DepartmentsPage() {
           </DialogHeader>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setConfirmId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => confirmId && handleDelete(confirmId)}>
-              Delete
+            <Button variant="destructive" onClick={() => confirmId && handleDelete(confirmId)} disabled={deleting}>
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
           </div>
         </DialogContent>

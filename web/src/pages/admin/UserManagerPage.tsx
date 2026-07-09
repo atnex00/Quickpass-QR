@@ -75,6 +75,11 @@ export default function UserManagerPage() {
   const [selected, setSelected] = useState<Employee | null>(null)
   const [form, setForm] = useState({ ...emptyForm })
   const [password, setPassword] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [updating, setUpdating] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadEmployees = async () => {
     try {
@@ -107,6 +112,7 @@ export default function UserManagerPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
     try {
       await api.post("/admin/employees", form)
       toast.success("Employee created")
@@ -116,11 +122,13 @@ export default function UserManagerPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to create")
     }
+    setSaving(false)
   }
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selected) return
+    setUpdating(true)
     try {
       await api.put(`/admin/employees/${selected.employee_id}`, {
         full_name: form.full_name,
@@ -137,11 +145,13 @@ export default function UserManagerPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to update")
     }
+    setUpdating(false)
   }
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selected || !password) return
+    setResetting(true)
     try {
       await api.put(`/admin/employees/${selected.employee_id}`, { password })
       toast.success("Password reset")
@@ -150,9 +160,11 @@ export default function UserManagerPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to reset password")
     }
+    setResetting(false)
   }
 
   const handleToggleSupervisor = async (id: string) => {
+    setTogglingId(id)
     try {
       await api.put(`/admin/employees/${id}/supervisor`)
       toast.success("Supervisor status toggled")
@@ -160,9 +172,11 @@ export default function UserManagerPage() {
     } catch (_) {
       toast.error("Failed to toggle")
     }
+    setTogglingId(null)
   }
 
   const handleToggleAdmin = async (id: string) => {
+    setTogglingId(id)
     try {
       await api.put(`/admin/employees/${id}/admin`)
       toast.success("Admin status toggled")
@@ -170,10 +184,12 @@ export default function UserManagerPage() {
     } catch (_) {
       toast.error("Failed to toggle")
     }
+    setTogglingId(null)
   }
 
   const handleDeleteEmployee = async (id: string) => {
     if (!confirm("Delete this employee and all their data? This cannot be undone.")) return
+    setDeletingId(id)
     try {
       await api.delete(`/admin/employees/${id}`)
       toast.success("Employee deleted")
@@ -181,9 +197,11 @@ export default function UserManagerPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to delete")
     }
+    setDeletingId(null)
   }
 
   const handleToggleActive = async (emp: Employee) => {
+    setTogglingId(emp.employee_id)
     try {
       await api.put(`/admin/employees/${emp.employee_id}/status`)
       toast.success(emp.is_active ? "Employee deactivated" : "Employee activated")
@@ -191,6 +209,7 @@ export default function UserManagerPage() {
     } catch (_) {
       toast.error("Failed to toggle status")
     }
+    setTogglingId(null)
   }
 
   const openEdit = (emp: Employee) => {
@@ -302,7 +321,9 @@ export default function UserManagerPage() {
                 />
                 <Label htmlFor="isSecurity">Security access</Label>
               </div>
-              <Button type="submit" className="w-full">Create Employee</Button>
+              <Button type="submit" className="w-full" disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Employee"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -407,20 +428,20 @@ export default function UserManagerPage() {
                       <Button variant="ghost" size="icon" onClick={() => openEdit(emp)} title="Edit">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleToggleAdmin(emp.employee_id)} title="Toggle admin">
-                        {emp.is_admin ? <ShieldCheck className="h-4 w-4 text-primary" /> : <Shield className="h-4 w-4" />}
+                      <Button variant="ghost" size="icon" onClick={() => handleToggleAdmin(emp.employee_id)} title="Toggle admin" disabled={togglingId === emp.employee_id}>
+                        {togglingId === emp.employee_id ? <Loader2 className="h-4 w-4 animate-spin" /> : emp.is_admin ? <ShieldCheck className="h-4 w-4 text-primary" /> : <Shield className="h-4 w-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleToggleSupervisor(emp.employee_id)} title="Toggle supervisor">
-                        {emp.is_supervisor ? <UserCheck className="h-4 w-4 text-secondary" /> : <UserX className="h-4 w-4" />}
+                      <Button variant="ghost" size="icon" onClick={() => handleToggleSupervisor(emp.employee_id)} title="Toggle supervisor" disabled={togglingId === emp.employee_id}>
+                        {togglingId === emp.employee_id ? <Loader2 className="h-4 w-4 animate-spin" /> : emp.is_supervisor ? <UserCheck className="h-4 w-4 text-secondary" /> : <UserX className="h-4 w-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleToggleActive(emp)} title={emp.is_active ? "Deactivate" : "Activate"}>
-                        {emp.is_active ? <CheckCircle2 className="h-4 w-4 text-success" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
+                      <Button variant="ghost" size="icon" onClick={() => handleToggleActive(emp)} title={emp.is_active ? "Deactivate" : "Activate"} disabled={togglingId === emp.employee_id}>
+                        {togglingId === emp.employee_id ? <Loader2 className="h-4 w-4 animate-spin" /> : emp.is_active ? <CheckCircle2 className="h-4 w-4 text-success" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => openPassword(emp)} title="Reset password">
                         <KeyRound className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteEmployee(emp.employee_id)} title="Delete employee">
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteEmployee(emp.employee_id)} title="Delete employee" disabled={deletingId === emp.employee_id}>
+                        {deletingId === emp.employee_id ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <Trash2 className="h-4 w-4 text-destructive" />}
                       </Button>
                     </div>
                   </TableCell>
@@ -493,7 +514,9 @@ export default function UserManagerPage() {
                 onChange={(e) => setForm({ ...form, is_security: e.target.checked })} className="h-4 w-4" />
               <Label htmlFor="edit-security">Security access</Label>
             </div>
-            <Button type="submit" className="w-full">Save Changes</Button>
+            <Button type="submit" className="w-full" disabled={updating}>
+              {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>
@@ -517,7 +540,9 @@ export default function UserManagerPage() {
                 minLength={4}
               />
             </div>
-            <Button type="submit" className="w-full">Reset Password</Button>
+            <Button type="submit" className="w-full" disabled={resetting}>
+              {resetting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset Password"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

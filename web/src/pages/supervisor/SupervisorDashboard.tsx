@@ -4,15 +4,18 @@ import { useAuthStore } from "@/stores/authStore"
 import { useLeaveStore } from "@/stores/leaveStore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import LoadingScreen from "@/components/shared/LoadingScreen"
 import { UserCheck, ShieldCheck, CalendarDays, ArrowRight } from "lucide-react"
 
 export default function SupervisorDashboard() {
   const { user } = useAuthStore()
-  const { pendingRequests, loadPendingRequests } = useLeaveStore()
+  const { pendingRequests, isLoading, loadPendingRequests } = useLeaveStore()
 
   useEffect(() => {
     loadPendingRequests()
   }, [])
+
+  if (isLoading) return <LoadingScreen message="Loading pending requests" />
 
   return (
     <div className="page-enter space-y-3">

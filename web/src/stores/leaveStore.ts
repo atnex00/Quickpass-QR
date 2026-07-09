@@ -45,11 +45,12 @@ export const useLeaveStore = create<LeaveState>((set) => ({
   },
 
   loadActiveLeave: async () => {
+    set({ isLoading: true })
     try {
       const res = await api.get("/leave/active")
-      set({ activeLeave: res.data.data })
+      set({ activeLeave: res.data.data, isLoading: false })
     } catch (_) {
-      set({ activeLeave: null })
+      set({ activeLeave: null, isLoading: false })
     }
   },
 

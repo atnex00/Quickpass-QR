@@ -1,10 +1,11 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { useLeaveStore } from "@/stores/leaveStore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
+import DashboardSkeleton from "@/components/shared/DashboardSkeleton"
 import {
   Clock, History, Plus, CheckCircle, Timer, Hourglass, Inbox, CalendarDays,
 } from "lucide-react"
@@ -13,11 +14,13 @@ import { formatDate, formatTime } from "@/lib/utils"
 export default function EmployeeDashboard() {
   const { user } = useAuthStore()
   const { history, activeLeave, loadHistory, loadActiveLeave } = useLeaveStore()
+  const [initialLoading, setInitialLoading] = useState(true)
 
   useEffect(() => {
-    loadHistory()
-    loadActiveLeave()
+    Promise.all([loadHistory(), loadActiveLeave()]).finally(() => setInitialLoading(false))
   }, [])
+
+  if (initialLoading) return <DashboardSkeleton />
 
   const pendingCount = history.filter((l) => l.status === "pending").length
   const approvedCount = history.filter((l) => l.status === "approved").length

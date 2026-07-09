@@ -19,6 +19,7 @@ import ScanResultPage from "@/pages/security/ScanResultPage"
 import ScanHistoryPage from "@/pages/security/ScanHistoryPage"
 import SecurityShell from "@/components/layout/SecurityShell"
 import GuidesPage from "@/pages/guides/GuidesPage"
+import LoadPreviewPage from "@/pages/LoadPreviewPage"
 
 function AppRoutes() {
   const { loadUser } = useAuthStore()
@@ -70,6 +71,7 @@ function AppRoutes() {
         <Route path="/security/history" element={<ScanHistoryPage />} />
       </Route>
 
+      <Route path="/load-preview" element={<LoadPreviewPage />} />
       <Route path="*" element={<Navigate to="/employee" replace />} />
     </Routes>
   )
