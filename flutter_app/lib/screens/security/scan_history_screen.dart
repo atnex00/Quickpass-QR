@@ -52,8 +52,6 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
             SliverAppBar(
               pinned: true,
               toolbarHeight: 64,
-              backgroundColor: context.primary,
-              foregroundColor: context.onPrimary,
               automaticallyImplyLeading: false,
               flexibleSpace: SafeArea(
                 child: Padding(
