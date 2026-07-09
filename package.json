@@ -10,9 +10,12 @@
     "dev:web": "cd web && npx vite --host 0.0.0.0",
     "build:web": "cd web && npx vite build",
     "migrate": "cd backend && npx knex migrate:latest",
-    "seed": "cd backend && npx knex seed:run"
+    "migrate:rollback": "cd backend && npx knex migrate:rollback",
+    "seed": "cd backend && npx knex seed:run",
+    "test": "cd backend && npm test",
+    "docker:build": "docker compose build"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3"
+    "bcryptjs": "^2.4.3"
   }
 }

@@ -7,11 +7,11 @@
     "ghcr.io/devcontainers/features/docker-from-docker:1": {}
   },
   "runArgs": [
-    "--env-file=.devcontainer/devcontainer.env"
+    "--env-file=.devcontainer/devcontainer.env",
+    "--add-host=host.docker.internal:host-gateway"
   ],
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.android,target=/home/vscode/.android,type=bind,consistency=cached",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/Android/Sdk,target=/opt/android-sdk,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.android,target=/home/vscode/.android,type=bind,consistency=cached"
   ],
   "containerEnv": {
     "ANDROID_HOME": "/opt/android-sdk",

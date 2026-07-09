@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
-const qrService = require('../services/qrService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 

@@ -107,7 +107,7 @@ async function validateScan(req, res, next) {
           : `You have returned to the premises. Leave completed.`,
         data: { leave_id, type: type === 'OUT' ? 'scanned_out' : 'scanned_in' },
       });
-    } catch (_) {}
+    } catch (_) { /* Notification failure is non-blocking */ }
 
     res.json({
       success: true,

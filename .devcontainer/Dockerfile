@@ -28,14 +28,14 @@ RUN apt-get update && apt-get install -y \
 # Install Node.js 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g npm@latest
+    && npm install -g npm@10
 
 # Install Flutter SDK
 ENV FLUTTER_HOME=/opt/flutter
 ENV PATH=$FLUTTER_HOME/bin:$PATH
-RUN wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz \
-    && tar -xf flutter_linux_3.24.3-stable.tar.xz -C /opt/ \
-    && rm flutter_linux_3.24.3-stable.tar.xz \
+RUN wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.5-stable.tar.xz \
+    && tar -xf flutter_linux_3.44.5-stable.tar.xz -C /opt/ \
+    && rm flutter_linux_3.44.5-stable.tar.xz \
     && flutter config --no-analytics \
     && flutter precache \
     && dart --disable-analytics

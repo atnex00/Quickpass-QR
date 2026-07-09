@@ -90,7 +90,7 @@ async function approveLeave(req, res, next) {
         body: `Your leave for ${fmtDate(leave.leave_date)} has been approved`,
         data: { leave_id: leaveId, type: 'approved' },
       });
-    } catch (_) {}
+    } catch (_) { /* Notification failure is non-blocking */ }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
@@ -148,7 +148,7 @@ async function rejectLeave(req, res, next) {
         body: `Your leave for ${fmtDate(leave.leave_date)} was rejected: ${reason}`,
         data: { leave_id: leaveId, type: 'rejected' },
       });
-    } catch (_) {}
+    } catch (_) { /* Notification failure is non-blocking */ }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })

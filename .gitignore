@@ -36,6 +36,13 @@ flutter_app/android/key.properties
 # Docker
 docker-data/
 
+# Tools (local SDK installs)
+tools/
+
+# Devcontainer
+.devcontainer/devcontainer-lock.json
+.devcontainer/*.env
+
 # Logs
 *.log
 npm-debug.log*
