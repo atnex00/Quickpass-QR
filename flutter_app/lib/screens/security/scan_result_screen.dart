@@ -106,6 +106,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 case 'history':
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
                 case 'logout':
+                  final errorColor = context.error;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
@@ -116,7 +117,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                         TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                         FilledButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: FilledButton.styleFrom(backgroundColor: context.error),
+                          style: FilledButton.styleFrom(backgroundColor: errorColor),
                           child: const Text('Logout'),
                         ),
                       ],

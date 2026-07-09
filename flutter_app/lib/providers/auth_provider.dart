@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import '../models/employee.dart';
 import '../services/api_service.dart';
 
@@ -72,12 +72,18 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _isLoading = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+
     try {
       await _api.logout();
     } catch (_) {}
     _isAuthenticated = false;
     _user = null;
     _error = null;
+    _isLoading = false;
     notifyListeners();
   }
 

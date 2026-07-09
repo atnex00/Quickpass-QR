@@ -97,6 +97,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                             borderRadius: BorderRadius.circular(12)),
                         onSelected: (value) async {
                           if (value == 'logout') {
+                            final errorColor = context.error;
                             final confirm = await showDialog<bool>(
                               context: context,
                               builder: (ctx) => AlertDialog(
@@ -113,7 +114,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                   FilledButton(
                                     onPressed: () => Navigator.pop(ctx, true),
                                     style: FilledButton.styleFrom(
-                                        backgroundColor: context.error),
+                                        backgroundColor: errorColor),
                                     child: const Text('Logout'),
                                   ),
                                 ],

@@ -146,6 +146,7 @@ class _ProfileAppBar extends StatelessWidget {
                   IconButton(
                     icon: Icon(Icons.logout, color: context.onPrimary),
                     onPressed: () async {
+                      final errorColor = context.error;
                       final confirmed = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
@@ -155,7 +156,7 @@ class _ProfileAppBar extends StatelessWidget {
                             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                             FilledButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              style: FilledButton.styleFrom(backgroundColor: context.error),
+                              style: FilledButton.styleFrom(backgroundColor: errorColor),
                               child: const Text('Logout'),
                             ),
                           ],
