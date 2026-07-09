@@ -349,7 +349,7 @@ async function importEmployees(req, res, next) {
           continue;
         }
 
-        const password_hash = await bcrypt.hash(emp.password || 'quickpass123', 10);
+        const password_hash = await bcrypt.hash(emp.password || uuidv4().split('-')[0], 10);
 
         await db('employees').insert({
           employee_id: emp.employee_id,

@@ -108,10 +108,20 @@ async function refreshToken(req, res, next) {
       throw createError(401, 'Employee not found or deactivated');
     }
 
+    const newSessionId = uuidv4();
+    await db('sessions').insert({
+      session_id: newSessionId,
+      employee_id: employee.employee_id,
+      created_at: db.fn.now(),
+      expires_at: db.raw(`NOW() + INTERVAL '${process.env.SESSION_EXPIRES_IN || '7 days'}'`),
+      is_active: true,
+    });
+    await db('sessions').where({ session_id: decoded.session_id }).update({ is_active: false });
+
     const token = jwt.sign(
       {
         employee_id: employee.employee_id,
-        session_id: decoded.session_id,
+        session_id: newSessionId,
         role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
@@ -158,7 +168,10 @@ async function updateProfile(req, res, next) {
     if (full_name !== undefined) toUpdate.full_name = full_name;
     if (position !== undefined) toUpdate.position = position;
     if (email !== undefined) toUpdate.email = email;
-    if (password) toUpdate.password_hash = await bcrypt.hash(password, 10);
+    if (password) {
+      toUpdate.password_hash = await bcrypt.hash(password, 10);
+      await db('sessions').where({ employee_id: req.user.employee_id }).update({ is_active: false });
+    }
 
     if (Object.keys(toUpdate).length === 0) {
       throw createError(400, 'No valid fields to update');

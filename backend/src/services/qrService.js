@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 
 function getSecret() {
-  return process.env.QR_SECRET || 'quickpass-default-qr-secret';
+  if (!process.env.QR_SECRET) {
+    throw new Error('QR_SECRET environment variable is required');
+  }
+  return process.env.QR_SECRET;
 }
 
 function localTzOffset() {

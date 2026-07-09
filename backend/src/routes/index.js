@@ -22,7 +22,7 @@ router.post('/auth/login', validate(Joi.object({
     'string.pattern.base': 'Employee ID must be exactly 6 digits',
     'any.required': 'Employee ID is required',
   }),
-  password: Joi.string().min(4).required(),
+  password: Joi.string().min(8).required(),
 })), authController.login);
 
 router.post('/auth/logout', authenticate, authController.logout);
@@ -32,7 +32,7 @@ router.put('/auth/profile', authenticate, validate(Joi.object({
   full_name: Joi.string().min(2).max(100),
   position: Joi.string().min(2).max(50),
   email: Joi.string().email(),
-  password: Joi.string().min(4),
+  password: Joi.string().min(8),
 }).min(1)), authController.updateProfile);
 
 router.put('/auth/fcm-token', authenticate, validate(Joi.object({

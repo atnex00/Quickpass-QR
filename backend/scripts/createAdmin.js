@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const knex = require('../src/config/database');
 
 (async () => {
-  const hash = await bcrypt.hash('admin123', 10);
+  const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
   await knex('employees').insert({
     employee_id: '999999',
     full_name: 'System Admin',
@@ -16,6 +16,6 @@ const knex = require('../src/config/database');
   });
   console.log('Admin account created!');
   console.log('Employee ID: 999999');
-  console.log('Password: admin123');
+  console.log('Password: (set via ADMIN_PASSWORD env var or default)');
   await knex.destroy();
 })().catch(e => { console.error(e); process.exit(1); });

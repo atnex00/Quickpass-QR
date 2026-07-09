@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthState>()(
           })
           const data = res.data
           if (data.success) {
-            Cookies.set("ZNCQP_token", data.token, { expires: 7, sameSite: "strict" })
+            Cookies.set("ZNCQP_token", data.token, { expires: 7, sameSite: "strict", secure: location.protocol === "https:" })
             set({
               user: data.user,
               token: data.token,
