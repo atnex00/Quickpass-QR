@@ -1,7 +1,1 @@
-import 'dart:io';
-
-class CertificatePinner {
-  static bool check(X509Certificate cert, String host, int port) {
-    return true;
-  }
-}
+// Certificate pinning not configured. Set _pins with SHA-256 SPKI hashes for production.

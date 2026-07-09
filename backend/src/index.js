@@ -22,16 +22,23 @@ const limiter = rateLimit({
   message: { success: false, message: "Too many requests, please try again later." },
 });
 
+app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(limiter);
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: "Too many login attempts, please try again later." },
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "Quickpass API is running", timestamp: new Date().toISOString() });
 });
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", loginLimiter, authRoutes);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/leave", leaveRoutes);
 app.use("/api/supervisor", supervisorRoutes);
