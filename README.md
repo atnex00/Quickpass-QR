@@ -27,7 +27,6 @@
 - [Available Commands](#available-commands)
 - [Architecture Overview](#architecture-overview)
 - [API Endpoints](#api-endpoints)
-- [Brand Identity](#brand-identity)
 - [Troubleshooting](#troubleshooting)
 
 ---
