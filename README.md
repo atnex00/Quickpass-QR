@@ -1,10 +1,6 @@
 # Quickpass — Smart Gatepass & Leave Management
 
 <p align="center">
-  <img src="assets/brand/logo.svg" alt="Quickpass Logo" width="400" />
-</p>
-
-<p align="center">
   <strong>A QR code-based employee leave management system</strong><br />
   Flutter (Android) + Node.js/Express + Supabase (PostgreSQL)
 </p>
@@ -502,26 +498,6 @@ QR codes are valid ±15 minutes from the scheduled time and use HMAC-SHA256 sign
 | POST | `/api/admin/import/hr` | Bulk import from CSV/HR system |
 | GET | `/api/admin/departments` | List departments |
 | GET | `/api/admin/reports` | Generate reports |
-
----
-
-## Brand Identity
-
-<p align="center">
-  <img src="assets/brand/icon.svg" alt="Quickpass Icon" width="120" />
-</p>
-
-| Element | Value |
-|---------|-------|
-| **Name** | **Quickpass** — *Pass* + *Lynx* (sharp vision, tracking) |
-| **Tagline** | *Smart Gatepass & Leave Management* |
-| **Primary** | `#1B2A4A` (Deep Navy) — Trust, security |
-| **Secondary** | `#0D9488` (Teal) — Growth, approval |
-| **Accent** | `#F59E0B` (Amber) — Warnings, attention |
-| **Success** | `#10B981` (Emerald) — Approved, completed |
-| **Error** | `#EF4444` (Red) — Rejected, invalid |
-| **Font** | [Poppins](https://fonts.google.com/specimen/Poppins) |
-| **Icon** | Lynx eye integrated with QR code corner pattern |
 
 ---
 
