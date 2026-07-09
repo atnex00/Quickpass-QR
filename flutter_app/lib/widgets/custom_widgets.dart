@@ -48,6 +48,69 @@ class LoadingOverlay extends StatelessWidget {
   }
 }
 
+class InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Widget? trailing;
+
+  const InfoRow({super.key, required this.label, required this.value, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 14,
+                color: context.onSurfaceVariant,
+                height: 1.43)),
+        const SizedBox(width: 8),
+        if (trailing != null) ...[
+          const Spacer(),
+          trailing!,
+        ] else ...[
+          Flexible(
+            child: Text(value,
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: context.onSurface,
+                    height: 1.43)),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class GuidelineItem extends StatelessWidget {
+  final String text;
+
+  const GuidelineItem({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('\u2022',
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: context.primaryBlue)),
+        const SizedBox(width: 8),
+        Expanded(
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: 14, color: context.onSurfaceVariant))),
+      ],
+    );
+  }
+}
+
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;

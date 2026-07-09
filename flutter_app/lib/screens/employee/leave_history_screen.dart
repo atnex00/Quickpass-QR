@@ -5,6 +5,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../widgets/custom_widgets.dart';
 import 'qr_display_screen.dart';
 import 'request_leave_screen.dart';
 
@@ -105,33 +106,12 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                   child: Center(child: CircularProgressIndicator()))
             else if (leaveProv.history.isEmpty)
               SliverFillRemaining(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.inbox_outlined,
-                            size: 64, color: context.outlineVariant),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No leave requests found',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: context.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _statusFilter != null
-                              ? 'No $_statusFilter requests match your filter'
-                              : 'Submit a leave request to get started',
-                          style: TextStyle(
-                              color: context.neutralGray, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: EmptyState(
+                  icon: Icons.inbox_outlined,
+                  title: 'No leave requests found',
+                  subtitle: _statusFilter != null
+                      ? 'No $_statusFilter requests match your filter'
+                      : 'Submit a leave request to get started',
                 ),
               )
             else

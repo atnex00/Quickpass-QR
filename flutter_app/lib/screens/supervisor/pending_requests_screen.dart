@@ -5,6 +5,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../providers/supervisor_provider.dart';
+import '../../widgets/custom_widgets.dart';
 import '../../widgets/status_badge.dart';
 import '../../utils/date_formatter.dart';
 
@@ -49,17 +50,10 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
         child: supProv.isLoading
             ? const Center(child: CircularProgressIndicator())
             : supProv.pendingRequests.isEmpty && supProv.approvedLeaves.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle_outline, size: 64, color: context.outlineVariant),
-                        const SizedBox(height: 12),
-                        Text('No pending requests', style: TextStyle(color: context.onSurfaceVariant, fontSize: 16)),
-                        const SizedBox(height: 4),
-                        Text('All caught up!', style: TextStyle(color: context.neutralGray)),
-                      ],
-                    ),
+                ? const EmptyState(
+                    icon: Icons.check_circle_outline,
+                    title: 'No pending requests',
+                    subtitle: 'All caught up!',
                   )
                 : ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

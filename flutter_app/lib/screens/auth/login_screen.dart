@@ -225,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       constraints: const BoxConstraints(maxWidth: 400),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: context.surface,
+                        color: context.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: context.outlineVariant),
                       ),

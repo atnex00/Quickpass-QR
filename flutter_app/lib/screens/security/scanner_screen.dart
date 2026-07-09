@@ -243,40 +243,43 @@ class _ScannerAppBar extends StatelessWidget {
       color: context.primary,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: context.onPrimary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Quickpass',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: context.onPrimary,
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.keyboard),
-              color: context.onPrimary,
-              onPressed: onToggleManual,
-            ),
-            IconButton(
-              icon: Icon(torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
-              color: context.onPrimary,
-              onPressed: onToggleTorch,
-            ),
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: context.onPrimary),
-              color: context.surface,
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: context.onPrimary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Quickpass',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: context.onPrimary,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.keyboard),
+                  color: context.onPrimary,
+                  onPressed: onToggleManual,
+                ),
+                IconButton(
+                  icon: Icon(torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
+                  color: context.onPrimary,
+                  onPressed: onToggleTorch,
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: context.onPrimary),
+                  color: context.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               onSelected: (value) async {
                 switch (value) {
@@ -343,6 +346,8 @@ class _ScannerAppBar extends StatelessWidget {
             ),
           ],
         ),
+      ],
+      ),
       ),
     );
   }

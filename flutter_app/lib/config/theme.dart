@@ -246,10 +246,10 @@ class QuickpassTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
-        primary: QuickpassColors.darkPrimary,
-        onPrimary: QuickpassColors.darkOnPrimary,
-        primaryContainer: QuickpassColors.darkPrimary,
-        onPrimaryContainer: QuickpassColors.darkOnPrimaryContainer,
+        primary: QuickpassColors.primary,
+        onPrimary: QuickpassColors.onPrimary,
+        primaryContainer: QuickpassColors.surfaceContainerLow,
+        onPrimaryContainer: QuickpassColors.onSurface,
         secondary: QuickpassColors.secondary,
         onSecondary: QuickpassColors.onSecondary,
         secondaryContainer: QuickpassColors.secondary,
@@ -363,7 +363,7 @@ class QuickpassTheme {
 
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: QuickpassColors.surface,
-        indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.12),
+        indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: QuickpassColors.darkPrimary);
@@ -377,7 +377,7 @@ class QuickpassTheme {
           return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant);
         }),
         elevation: 0,
-        height: 65,
+        height: 80,
       ),
 
       bottomNavigationBarTheme: BottomNavigationBarThemeData(

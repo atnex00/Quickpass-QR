@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../utils/date_formatter.dart';
+import '../../widgets/custom_widgets.dart';
 
 class QrDisplayScreen extends StatelessWidget {
   final LeaveRequest leave;
@@ -15,24 +16,6 @@ class QrDisplayScreen extends StatelessWidget {
     return qrData.length > 8
         ? qrData.substring(qrData.length - 8).toUpperCase()
         : qrData.toUpperCase();
-  }
-
-  Widget _guidelineItem(String text, BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('\u2022',
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: context.primaryBlue)),
-        const SizedBox(width: 8),
-        Expanded(
-            child: Text(text,
-                style: TextStyle(
-                    fontSize: 14, color: context.onSurfaceVariant))),
-      ],
-    );
   }
 
   @override
@@ -57,8 +40,11 @@ class QrDisplayScreen extends StatelessWidget {
                   automaticallyImplyLeading: false,
                   flexibleSpace: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Row(
+                          children: [
                         Material(
                           type: MaterialType.transparency,
                           child: IconButton(
@@ -91,8 +77,10 @@ class QrDisplayScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ],
                   ),
                 ),
+              ),
 
                 // ── Body ──
                 SliverPadding(
@@ -332,11 +320,11 @@ class QrDisplayScreen extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            _guidelineItem(
-                                'Ensure screen brightness is set to maximum.', context),
+                            const GuidelineItem(
+                                text: 'Ensure screen brightness is set to maximum.'),
                             const SizedBox(height: 8),
-                            _guidelineItem(
-                                'QR codes refresh every 60 seconds for security.', context),
+                            const GuidelineItem(
+                                text: 'QR codes refresh every 60 seconds for security.'),
                           ],
                         ),
                       ),

@@ -5,6 +5,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../widgets/custom_widgets.dart';
 import 'request_leave_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
@@ -48,8 +49,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (i) => setState(() => _currentIndex = i),
           backgroundColor: context.surface,
-          indicatorColor: context.primary.withValues(alpha: 0.15),
-          height: 80,
+          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: [
             NavigationDestination(
@@ -170,39 +170,44 @@ class _DashboardAppBar extends StatelessWidget {
       flexibleSpace: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.onPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Image.asset('assets/icon/app-icon.png',
-                    width: 22, height: 22),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Quickpass',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: context.onPrimary,
-                ),
-              ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(Icons.notifications_outlined,
-                    color: context.onPrimary),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text('No new notifications'),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: context.onPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                },
+                    child: Image.asset('assets/icon/app-icon.png',
+                        width: 22, height: 22),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Quickpass',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: context.onPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.notifications_outlined,
+                        color: context.onPrimary),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          content: Text('No new notifications'),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -399,12 +404,12 @@ class _ActiveLeaveCard extends StatelessWidget {
                       vertical: 8),
                   child: Column(
                     children: [
-                      _InfoRow(
+                      InfoRow(
                           label: 'Validity',
                           value:
                               '${DateFormatter.formatDateApi(leave.leaveDate)} \u2022 ${leave.startTime} - ${leave.endTime}'),
                       const SizedBox(height: 8),
-                      const _InfoRow(
+                      const InfoRow(
                           label: 'Gate Status',
                           value: 'Authorized Out'),
                     ],
@@ -533,60 +538,12 @@ class _RecentActivitySection extends StatelessWidget {
             child: CircularProgressIndicator(),
           ))
         else if (history.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: context.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: context.outlineVariant),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.inbox_outlined,
-                    size: 40,
-                    color: context.outlineVariant),
-                const SizedBox(height: 12),
-                Text('No recent activity',
-                    style: TextStyle(
-                        color: context.neutralGray)),
-              ],
-            ),
+          const EmptyState(
+            icon: Icons.inbox_outlined,
+            title: 'No recent activity',
           )
         else
           ...history.take(10).map((leave) => _ActivityCard(leave: leave)),
-      ],
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _InfoRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 14,
-                color: context.onSurfaceVariant,
-                height: 1.43)),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(value,
-              textAlign: TextAlign.right,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.onSurface,
-                  height: 1.43)),
-        ),
       ],
     );
   }

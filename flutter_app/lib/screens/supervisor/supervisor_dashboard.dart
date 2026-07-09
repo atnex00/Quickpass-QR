@@ -5,6 +5,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../widgets/custom_widgets.dart';
 import '../../widgets/status_badge.dart';
 import '../employee/dashboard_screen.dart';
 import '../employee/profile_screen.dart';
@@ -45,8 +46,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (i) => setState(() => _currentIndex = i),
           backgroundColor: context.surface,
-          indicatorColor: context.primary.withValues(alpha: 0.15),
-          height: 80,
+          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           destinations: [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined, color: context.onSurfaceVariant),
@@ -495,20 +495,9 @@ class _PendingRequestsSection extends StatelessWidget {
             child: CircularProgressIndicator(),
           ))
         else if (pendingRequests.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: context.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.outlineVariant),
-            ),
-            child: Center(
-              child: Text(
-                'No pending requests',
-                style: TextStyle(color: context.neutralGray),
-              ),
-            ),
+          const EmptyState(
+            icon: Icons.inbox_outlined,
+            title: 'No pending requests',
           )
         else
           ...pendingRequests.take(5).map((leave) => _PendingCard(leave: leave)),

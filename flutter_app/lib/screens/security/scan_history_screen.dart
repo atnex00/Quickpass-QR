@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../models/scan_log.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../utils/date_formatter.dart';
 import 'scanner_screen.dart';
@@ -194,38 +195,18 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
               )
             else if (_logs.isEmpty)
               SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.qr_code_scanner_outlined,
-                          size: 64, color: context.outlineVariant),
-                      const SizedBox(height: 12),
-                      Text('No scan history',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: context.onSurfaceVariant)),
-                      const SizedBox(height: 4),
-                      Text('Scanned QR codes will appear here',
-                          style: TextStyle(
-                              color: context.neutralGray,
-                              fontSize: 13)),
-                      const SizedBox(height: 24),
-                      FilledButton.icon(
-                        onPressed: () => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ScannerScreen()),
-                        ),
-                        icon: const Icon(Icons.qr_code_scanner, size: 18),
-                        label: const Text('Scan QR'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: context.primary,
-                          foregroundColor: context.onPrimary,
-                        ),
-                      ),
-                    ],
+                child: EmptyState(
+                  icon: Icons.qr_code_scanner_outlined,
+                  title: 'No scan history',
+                  subtitle: 'Scanned QR codes will appear here',
+                  action: FilledButton.icon(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const ScannerScreen()),
+                    ),
+                    icon: const Icon(Icons.qr_code_scanner, size: 18),
+                    label: const Text('Scan QR'),
                   ),
                 ),
               )

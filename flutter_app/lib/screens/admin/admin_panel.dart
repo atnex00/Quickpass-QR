@@ -13,6 +13,7 @@ import '../../utils/constants.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/debounce.dart';
 import '../../widgets/adaptive_scaffold.dart';
+import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
 import 'employee_detail_screen.dart';
 import '../employee/dashboard_screen.dart';
@@ -30,38 +31,41 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
     flexibleSpace: SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: context.onPrimary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Quickpass',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: context.onPrimary,
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(behavior: SnackBarBehavior.floating, content: Text('No new notifications')),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.logout, color: context.onPrimary),
-              onPressed: () async {
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.onPrimary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Quickpass',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: context.onPrimary,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(behavior: SnackBarBehavior.floating, content: Text('No new notifications')),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.logout, color: context.onPrimary),
+                  onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
@@ -84,12 +88,13 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
             ),
           ],
         ),
+      ],
       ),
       ),
-    );
+      ));
   }
 
-class AdminPanel extends StatefulWidget {
+  class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
 
   @override
@@ -1019,26 +1024,11 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 child: CircularProgressIndicator(),
               ))
             else if (_employees.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: context.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.outlineVariant),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.people_outline, size: 64, color: context.outlineVariant),
-                    const SizedBox(height: 12),
-                    Text('No employees found',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.onSurfaceVariant)),
-                    const SizedBox(height: 4),
-                    Text('Try adjusting your search or filters',
-                      style: TextStyle(color: context.neutralGray, fontSize: 13)),
-                  ],
-                ),
-              ),
+              const EmptyState(
+                icon: Icons.people_outline,
+                title: 'No employees found',
+                subtitle: 'Try adjusting your search or filters',
+              )
           ]),
         ),
       ),
@@ -1692,21 +1682,9 @@ class _ReportsTabState extends State<_ReportsTab> {
                       Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
                       const SizedBox(height: 8),
                       if (_reportData == null || _reportData!.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: context.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: context.outlineVariant),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(Icons.inbox_outlined, size: 48, color: context.outlineVariant),
-                              const SizedBox(height: 12),
-                              Text('No leave requests found', style: TextStyle(color: context.neutralGray)),
-                            ],
-                          ),
+                        const EmptyState(
+                          icon: Icons.inbox_outlined,
+                          title: 'No leave requests found',
                         ),
                     ],
                   ]),
@@ -1992,21 +1970,9 @@ class _LeaveTabState extends State<_LeaveTab> {
             if (_isLoading)
               const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
             else if (filtered.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: context.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.outlineVariant),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.inbox_outlined, size: 48, color: context.outlineVariant),
-                    const SizedBox(height: 12),
-                    Text('No leave requests', style: TextStyle(color: context.neutralGray)),
-                  ],
-                ),
+              const EmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'No leave requests',
               ),
           ]),
         ),
@@ -2388,23 +2354,10 @@ class _DepartmentTabState extends State<_DepartmentTab> {
                 sliver: _departments.isEmpty
                     ? SliverList(
                         delegate: SliverChildListDelegate([
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: context.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.outlineVariant),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(Icons.business_outlined, size: 64, color: context.outlineVariant),
-                                const SizedBox(height: 12),
-                                Text('No departments yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: context.onSurfaceVariant)),
-                                const SizedBox(height: 4),
-                                Text('Add a department to get started', style: TextStyle(color: context.neutralGray, fontSize: 13)),
-                              ],
-                            ),
+                          const EmptyState(
+                            icon: Icons.business_outlined,
+                            title: 'No departments yet',
+                            subtitle: 'Add a department to get started',
                           ),
                         ]),
                       )
