@@ -35,10 +35,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(
-                Icons.qr_code_rounded,
-                size: 44,
-                color: QuickpassColors.darkPrimary,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/icon/app-icon.png',
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: 16),
