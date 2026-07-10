@@ -37,7 +37,8 @@ class Employee {
   @JsonKey(name: 'profile_photo')
   final String? profilePhoto;
 
-  @JsonKey(name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)
+  @JsonKey(
+      name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)
   final DateTime? hireDate;
 
   Employee({

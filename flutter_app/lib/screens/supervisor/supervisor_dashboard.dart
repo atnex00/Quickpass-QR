@@ -27,17 +27,19 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(top: false, child: IndexedStack(
-        index: _currentIndex,
-        children: [
-          _SupervisorOverview(
-            onViewRequests: () => setState(() => _currentIndex = 1),
-            onViewProfile: () => setState(() => _currentIndex = 2),
-          ),
-          const PendingRequestsScreen(),
-          const ProfileScreen(),
-        ],
-      )),
+      body: SafeArea(
+          top: false,
+          child: IndexedStack(
+            index: _currentIndex,
+            children: [
+              _SupervisorOverview(
+                onViewRequests: () => setState(() => _currentIndex = 1),
+                onViewProfile: () => setState(() => _currentIndex = 2),
+              ),
+              const PendingRequestsScreen(),
+              const ProfileScreen(),
+            ],
+          )),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: context.outlineVariant)),
@@ -49,7 +51,8 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
           indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
           destinations: [
             NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined, color: context.onSurfaceVariant),
+              icon: Icon(Icons.dashboard_outlined,
+                  color: context.onSurfaceVariant),
               selectedIcon: Icon(Icons.dashboard, color: context.primary),
               label: 'Overview',
             ),
@@ -57,7 +60,8 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               icon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(Icons.pending_actions_outlined, color: context.onSurfaceVariant),
+                  Icon(Icons.pending_actions_outlined,
+                      color: context.onSurfaceVariant),
                   Positioned(
                     top: -2,
                     right: -4,
@@ -216,7 +220,8 @@ class _SupervisorAppBar extends StatelessWidget {
                   color: context.onPrimary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
+                child: Image.asset('assets/icon/app-icon.png',
+                    width: 18, height: 18),
               ),
               const SizedBox(width: 12),
               Text(
@@ -230,7 +235,8 @@ class _SupervisorAppBar extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
+                icon: Icon(Icons.notifications_outlined,
+                    color: context.onPrimary),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('No new notifications')),
@@ -305,7 +311,8 @@ class _WelcomeSection extends StatelessWidget {
 class _PendingApprovalsHero extends StatelessWidget {
   final int pendingCount;
   final VoidCallback onReviewNow;
-  const _PendingApprovalsHero({required this.pendingCount, required this.onReviewNow});
+  const _PendingApprovalsHero(
+      {required this.pendingCount, required this.onReviewNow});
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +407,8 @@ class _QuickActionsRow extends StatelessWidget {
                 title: 'Scan QR',
                 subtitle: 'Validate gate passes',
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ScannerScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ScannerScreen()));
                 },
               ),
             ),
@@ -411,7 +419,10 @@ class _QuickActionsRow extends StatelessWidget {
                 title: 'My Dashboard',
                 subtitle: 'Employee overview',
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeeDashboard()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const EmployeeDashboard()));
                 },
               ),
             ),
@@ -422,7 +433,8 @@ class _QuickActionsRow extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: TextButton.icon(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
             },
             icon: const Icon(Icons.history, size: 16),
             label: const Text('Scan History'),
@@ -488,7 +500,8 @@ class _PendingRequestsSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (isLoading)
-          const Center(child: Padding(
+          const Center(
+              child: Padding(
             padding: EdgeInsets.all(24),
             child: CircularProgressIndicator(),
           ))
@@ -610,7 +623,9 @@ class _PendingCard extends StatelessWidget {
                       radius: 20,
                       backgroundColor: context.primary.withValues(alpha: 0.2),
                       child: Text(
-                        leave.employeeName.isNotEmpty ? leave.employeeName[0].toUpperCase() : '?',
+                        leave.employeeName.isNotEmpty
+                            ? leave.employeeName[0].toUpperCase()
+                            : '?',
                         style: TextStyle(
                           color: context.primary,
                           fontWeight: FontWeight.w700,
@@ -646,22 +661,26 @@ class _PendingCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
+                    Icon(Icons.calendar_today,
+                        size: 14, color: context.neutralGray),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         DateFormatter.formatDate(leave.leaveDate),
-                        style: TextStyle(fontSize: 13, color: context.neutralGray),
+                        style:
+                            TextStyle(fontSize: 13, color: context.neutralGray),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.access_time, size: 14, color: context.neutralGray),
+                    Icon(Icons.access_time,
+                        size: 14, color: context.neutralGray),
                     const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         '${leave.startTime} - ${leave.endTime}',
-                        style: TextStyle(fontSize: 13, color: context.neutralGray),
+                        style:
+                            TextStyle(fontSize: 13, color: context.neutralGray),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -755,7 +774,8 @@ class _PendingCard extends StatelessWidget {
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,
-              decoration: const InputDecoration(hintText: 'Enter reason...', labelText: 'Rejection reason'),
+              decoration: const InputDecoration(
+                  hintText: 'Enter reason...', labelText: 'Rejection reason'),
               maxLines: 3,
             ),
           ],

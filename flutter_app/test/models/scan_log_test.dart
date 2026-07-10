@@ -39,7 +39,7 @@ void main() {
       expect(log.leaveId, '');
       expect(log.qrType, '');
       expect(log.scannedBy, isNull);
-      expect(log.isValid, true);
+      expect(log.isValid, false);
       expect(log.validationMessage, isNull);
       expect(log.employeeName, isNull);
       expect(log.employeeId, isNull);

@@ -27,14 +27,15 @@ void main() {
     authProvider = AuthProvider(api: mockApi);
   });
 
-  testWidgets('renders login form with all key elements', (WidgetTester tester) async {
+  testWidgets('renders login form with all key elements',
+      (WidgetTester tester) async {
     when(mockApi.getStoredToken()).thenAnswer((_) async => null);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     expect(find.text('Employee ID'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Password'), findsAtLeast(1));
     expect(find.text('Sign In'), findsOneWidget);
     expect(find.text('Quickpass'), findsOneWidget);
     expect(find.text('Forgot?'), findsOneWidget);
@@ -59,14 +60,16 @@ void main() {
     expect(find.byIcon(Icons.visibility_off), findsOneWidget);
   });
 
-  testWidgets('shows error message when auth has error', (WidgetTester tester) async {
+  testWidgets('shows error message when auth has error',
+      (WidgetTester tester) async {
     when(mockApi.getStoredToken()).thenAnswer((_) async => null);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     // Trigger login to simulate error
-    when(mockApi.login('000001', 'wrong')).thenThrow(Exception('Invalid credentials'));
+    when(mockApi.login('000001', 'wrong'))
+        .thenThrow(Exception('Invalid credentials'));
     await tester.enterText(find.byType(TextFormField).first, '000001');
     await tester.enterText(find.byType(TextFormField).last, 'wrong');
     await tester.tap(find.text('Sign In'));

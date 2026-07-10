@@ -19,7 +19,8 @@ class QuickpassAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
       title: Text(title),
-      leading: leading ?? (showBack ? BackButton(color: colorScheme.onPrimary) : null),
+      leading: leading ??
+          (showBack ? BackButton(color: colorScheme.onPrimary) : null),
       actions: actions,
       backgroundColor: colorScheme.primary,
       foregroundColor: colorScheme.onPrimary,

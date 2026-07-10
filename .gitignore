@@ -39,6 +39,12 @@ flutter_app/android/key.properties
 # Docker
 docker-data/
 
+# Backups
+*.zip
+
+# Local setup
+tools/
+
 # Logs
 *.log
 npm-debug.log*

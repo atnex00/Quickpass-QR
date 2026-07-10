@@ -38,7 +38,7 @@ async function login(req, res, next) {
       session_id: sessionId,
       employee_id: employee.employee_id,
       created_at: db.fn.now(),
-      expires_at: db.raw("NOW() + INTERVAL ?", [process.env.SESSION_EXPIRES_IN || '7 days']),
+      expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
     });
 
@@ -126,7 +126,7 @@ async function refreshToken(req, res, next) {
       session_id: newSessionId,
       employee_id: employee.employee_id,
       created_at: db.fn.now(),
-      expires_at: db.raw("NOW() + INTERVAL ?", [process.env.SESSION_EXPIRES_IN || '7 days']),
+      expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
     });
     await db('sessions').where({ session_id: sessionId }).update({ is_active: false });

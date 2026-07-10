@@ -134,7 +134,8 @@ void main() {
 
   group('loadActiveLeave', () {
     test('loads active leave when present', () async {
-      when(mockApi.getActiveLeave()).thenAnswer((_) async => _createMockLeaveRequest('active-1', 'active'));
+      when(mockApi.getActiveLeave()).thenAnswer(
+          (_) async => _createMockLeaveRequest('active-1', 'active'));
 
       await provider.loadActiveLeave();
 

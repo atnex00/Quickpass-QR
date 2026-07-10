@@ -81,7 +81,8 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: widget.color.withValues(alpha: 0.3), width: 2),
+        border:
+            Border.all(color: widget.color.withValues(alpha: 0.3), width: 2),
         color: widget.color.withValues(alpha: 0.03),
       ),
       padding: const EdgeInsets.all(24),
@@ -92,35 +93,43 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: widget.color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   widget.label,
-                  style: TextStyle(color: widget.color, fontWeight: FontWeight.w700, fontSize: 14, letterSpacing: 1.2),
+                  style: TextStyle(
+                      color: widget.color,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      letterSpacing: 1.2),
                 ),
               ),
               if (_used)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle, size: 14, color: context.neutralGray),
+                    Icon(Icons.check_circle,
+                        size: 14, color: context.neutralGray),
                     const SizedBox(width: 4),
-                    Text('Scanned', style: TextStyle(fontSize: 11, color: context.neutralGray)),
+                    Text('Scanned',
+                        style: TextStyle(
+                            fontSize: 11, color: context.neutralGray)),
                   ],
                 ),
             ],
           ),
           const SizedBox(height: 20),
-
           if (_used)
             Column(
               children: [
                 Icon(Icons.check_circle, size: 48, color: context.neutralGray),
                 const SizedBox(height: 8),
-                Text('Already Scanned', style: TextStyle(color: context.neutralGray, fontSize: 16)),
+                Text('Already Scanned',
+                    style: TextStyle(color: context.neutralGray, fontSize: 16)),
               ],
             )
           else if (_expired)
@@ -128,9 +137,12 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
               children: [
                 Icon(Icons.timer_off, size: 48, color: context.neutralGray),
                 const SizedBox(height: 8),
-                Text('QR Code Expired', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16)),
+                Text('QR Code Expired',
+                    style: TextStyle(
+                        color: colorScheme.onSurfaceVariant, fontSize: 16)),
                 const SizedBox(height: 4),
-                Text('The 15-minute validity window has passed', style: TextStyle(color: context.neutralGray, fontSize: 12)),
+                Text('The 15-minute validity window has passed',
+                    style: TextStyle(color: context.neutralGray, fontSize: 12)),
               ],
             )
           else ...[
@@ -140,35 +152,56 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                 version: QrVersions.auto,
                 size: 450,
                 backgroundColor: Colors.white,
-                eyeStyle: QrEyeStyle(eyeShape: QrEyeShape.circle, color: widget.color),
-                dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle, color: Colors.black),
+                eyeStyle: QrEyeStyle(
+                    eyeShape: QrEyeShape.circle, color: widget.color),
+                dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.circle,
+                    color: Colors.black),
               ),
             ),
             const SizedBox(height: 16),
-            _TimerRow(color: widget.color, date: widget.date, time: widget.time, isOut: widget.isOut),
+            _TimerRow(
+                color: widget.color,
+                date: widget.date,
+                time: widget.time,
+                isOut: widget.isOut),
           ],
-
-          if (widget.employeeName != null || widget.employeePosition != null) ...[
+          if (widget.employeeName != null ||
+              widget.employeePosition != null) ...[
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: widget.color.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(12)),
               child: Row(
                 children: [
-                  CircleAvatar(radius: 16, backgroundColor: widget.color, child: Text(
-                    (widget.employeeName ?? '?')[0].toUpperCase(),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                  )),
+                  CircleAvatar(
+                      radius: 16,
+                      backgroundColor: widget.color,
+                      child: Text(
+                        (widget.employeeName ?? '?')[0].toUpperCase(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14),
+                      )),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (widget.employeeName != null)
-                          Text(widget.employeeName!, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: context.onSurface)),
+                          Text(widget.employeeName!,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                  color: context.onSurface)),
                         if (widget.employeePosition != null)
-                          Text(widget.employeePosition!, style: TextStyle(color: context.neutralGray, fontSize: 12)),
+                          Text(widget.employeePosition!,
+                              style: TextStyle(
+                                  color: context.neutralGray, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -187,7 +220,11 @@ class _TimerRow extends StatefulWidget {
   final String date;
   final String time;
   final bool isOut;
-  const _TimerRow({required this.color, required this.date, required this.time, required this.isOut});
+  const _TimerRow(
+      {required this.color,
+      required this.date,
+      required this.time,
+      required this.isOut});
 
   @override
   State<_TimerRow> createState() => _TimerRowState();
@@ -259,9 +296,17 @@ class _TimerRowState extends State<_TimerRow> {
           widget.isOut
               ? Text(
                   '${_windowState == 'before' ? 'Opens in ' : 'Expires in '}${_fmt(_remainingSeconds)}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'monospace', color: widget.color),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'monospace',
+                      color: widget.color),
                 )
-              : Text('Ready to scan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: widget.color)),
+              : Text('Ready to scan',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: widget.color)),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/settings_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -63,7 +64,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.read<AuthProvider>().error ?? 'Could not update profile'),
+          content: Text(
+              context.read<AuthProvider>().error ?? 'Could not update profile'),
         ),
       );
     }
@@ -95,6 +97,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     saving: _saving,
                     onSave: _save,
                   ),
+                  const SizedBox(height: 12),
+                  const _AppearanceCard(),
                 ]),
               ),
             ),
@@ -129,7 +133,8 @@ class _ProfileAppBar extends StatelessWidget {
                       color: context.onPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
+                    child: Image.asset('assets/icon/app-icon.png',
+                        width: 22, height: 22),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -149,12 +154,16 @@ class _ProfileAppBar extends StatelessWidget {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Logout'),
-                          content: const Text('Are you sure you want to logout?'),
+                          content:
+                              const Text('Are you sure you want to logout?'),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel')),
                             FilledButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              style: FilledButton.styleFrom(backgroundColor: errorColor),
+                              style: FilledButton.styleFrom(
+                                  backgroundColor: errorColor),
                               child: const Text('Logout'),
                             ),
                           ],
@@ -196,7 +205,10 @@ class _UserAvatarCard extends StatelessWidget {
             backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
             child: Text(
               (user?.fullName ?? 'U')[0].toUpperCase(),
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: context.primaryBlue),
+              style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w600,
+                  color: context.primaryBlue),
             ),
           ),
           const SizedBox(width: 16),
@@ -205,9 +217,12 @@ class _UserAvatarCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user?.fullName ?? '',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: context.onSurface)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: context.onSurface)),
                 Text(user?.position ?? '',
-                  style: TextStyle(color: context.neutralGray, fontSize: 13)),
+                    style: TextStyle(color: context.neutralGray, fontSize: 13)),
               ],
             ),
           ),
@@ -235,10 +250,14 @@ class _AccountInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Account Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: context.onSurface)),
           Divider(color: context.outlineVariant),
           _ReadOnlyRow(label: 'Employee ID', value: user?.employeeId ?? ''),
-          _ReadOnlyRow(label: 'Department', value: user?.departmentName ?? 'N/A'),
+          _ReadOnlyRow(
+              label: 'Department', value: user?.departmentName ?? 'N/A'),
         ],
       ),
     );
@@ -276,7 +295,10 @@ class _PersonalInfoForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Personal Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: context.onSurface)),
           Divider(color: context.outlineVariant),
           const SizedBox(height: 4),
           TextField(
@@ -313,9 +335,58 @@ class _PersonalInfoForm extends StatelessWidget {
                 foregroundColor: context.onPrimary,
               ),
               child: saving
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
                   : const Text('Save Changes'),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppearanceCard extends StatelessWidget {
+  const _AppearanceCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Appearance',
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: context.onSurface)),
+          Divider(color: context.outlineVariant),
+          Row(
+            children: [
+              Icon(Icons.dark_mode, color: context.neutralGray),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Dark Mode',
+                    style: TextStyle(
+                        fontSize: 14, color: context.onSurfaceVariant)),
+              ),
+              Switch(
+                value: settings.isDarkMode,
+                onChanged: (v) => settings.setDarkMode(v),
+                activeColor: context.primary,
+              ),
+            ],
           ),
         ],
       ),
@@ -334,8 +405,16 @@ class _ReadOnlyRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.3, child: Text(label, style: TextStyle(color: context.neutralGray, fontSize: 13))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.onSurface))),
+          SizedBox(
+              width: MediaQuery.of(context).size.width * 0.3,
+              child: Text(label,
+                  style: TextStyle(color: context.neutralGray, fontSize: 13))),
+          Expanded(
+              child: Text(value,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      color: context.onSurface))),
         ],
       ),
     );

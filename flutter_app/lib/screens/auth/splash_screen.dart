@@ -49,9 +49,9 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'Quickpass',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: QuickpassColors.darkPrimary,
-              ),
+                    fontWeight: FontWeight.w700,
+                    color: QuickpassColors.darkPrimary,
+                  ),
             ),
             const SizedBox(height: 32),
             const SizedBox(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
+import '../../models/employee.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
@@ -42,8 +43,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          border:
-              Border(top: BorderSide(color: context.outlineVariant)),
+          border: Border(top: BorderSide(color: context.outlineVariant)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
@@ -55,22 +55,19 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined,
                   color: context.onSurfaceVariant),
-              selectedIcon:
-                  Icon(Icons.dashboard, color: context.primary),
+              selectedIcon: Icon(Icons.dashboard, color: context.primary),
               label: 'Dashboard',
             ),
             NavigationDestination(
               icon: Icon(Icons.receipt_long_outlined,
                   color: context.onSurfaceVariant),
-              selectedIcon:
-                  Icon(Icons.receipt_long, color: context.primary),
+              selectedIcon: Icon(Icons.receipt_long, color: context.primary),
               label: 'History',
             ),
             NavigationDestination(
               icon: Icon(Icons.account_circle_outlined,
                   color: context.onSurfaceVariant),
-              selectedIcon:
-                  Icon(Icons.account_circle, color: context.primary),
+              selectedIcon: Icon(Icons.account_circle, color: context.primary),
               label: 'Profile',
             ),
           ],
@@ -101,34 +98,34 @@ class _DashboardTabState extends State<_DashboardTab> {
             RefreshIndicator(
               onRefresh: () => context.read<LeaveProvider>().refresh(),
               child: CustomScrollView(
-              slivers: [
-                const _DashboardAppBar(),
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      _UserProfileCard(user: user),
-                      const SizedBox(height: 16),
-                      if (leaveProv.activeLeave != null) ...[
-                        _ActiveLeaveCard(leave: leaveProv.activeLeave!),
+                slivers: [
+                  const _DashboardAppBar(),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _UserProfileCard(user: user),
                         const SizedBox(height: 16),
-                      ],
-                      _StatGrid(
-                        pendingCount: leaveProv.pendingCount,
-                        approvedCount: leaveProv.approvedCount,
-                        completedCount: leaveProv.completedCount,
-                      ),
-                      const SizedBox(height: 24),
-                      _RecentActivitySection(
-                        isLoading: leaveProv.isLoading,
-                        history: leaveProv.history,
-                        onSeeAll: widget.onViewHistory ?? () {},
-                      ),
-                    ]),
+                        if (leaveProv.activeLeave != null) ...[
+                          _ActiveLeaveCard(leave: leaveProv.activeLeave!),
+                          const SizedBox(height: 16),
+                        ],
+                        _StatGrid(
+                          pendingCount: leaveProv.pendingCount,
+                          approvedCount: leaveProv.approvedCount,
+                          completedCount: leaveProv.completedCount,
+                        ),
+                        const SizedBox(height: 24),
+                        _RecentActivitySection(
+                          isLoading: leaveProv.isLoading,
+                          history: leaveProv.history,
+                          onSeeAll: widget.onViewHistory ?? () {},
+                        ),
+                      ]),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             ),
             Positioned(
               bottom: 24,
@@ -216,7 +213,7 @@ class _DashboardAppBar extends StatelessWidget {
 }
 
 class _UserProfileCard extends StatelessWidget {
-  final dynamic user;
+  final Employee? user;
   const _UserProfileCard({required this.user});
 
   @override
@@ -267,41 +264,38 @@ class _UserProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Row(
-                   children: [
-                     Expanded(
-                       child: Text(
-                         user?.position ?? '',
-                         maxLines: 1,
-                         overflow: TextOverflow.ellipsis,
-                         style: TextStyle(
-                           fontSize: 14,
-                           fontWeight: FontWeight.w600,
-                           letterSpacing: 0.01,
-                           color: context.secondary,
-                         ),
-                       ),
-                     ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 6),
-                       child: Text(
-                         '\u2022',
-                         style: TextStyle(
-                             fontSize: 10,
-                             color: context.outline),
-                       ),
-                     ),
-                     Text(
-                       'ID: ${user?.employeeId ?? ''}',
-                       style: TextStyle(
-                         fontSize: 14,
-                         fontWeight: FontWeight.w700,
-                         letterSpacing: 0.05,
-                         color: context.outline,
-                       ),
-                     ),
-                   ],
-                 ),
+                  children: [
+                    Expanded(
+                      child: Text(
+                        user?.position ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.01,
+                          color: context.secondary,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        '\u2022',
+                        style: TextStyle(fontSize: 10, color: context.outline),
+                      ),
+                    ),
+                    Text(
+                      'ID: ${user?.employeeId ?? ''}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.05,
+                        color: context.outline,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -312,7 +306,7 @@ class _UserProfileCard extends StatelessWidget {
 }
 
 class _ActiveLeaveCard extends StatelessWidget {
-  final dynamic leave;
+  final LeaveRequest leave;
   const _ActiveLeaveCard({required this.leave});
 
   @override
@@ -347,59 +341,48 @@ class _ActiveLeaveCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding:
-                              const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: context.success
-                                .withValues(alpha: 0.1),
-                            borderRadius:
-                                BorderRadius.circular(999),
+                            color: context.success.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             'ACTIVE PASS',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color:
-                                  context.success,
+                              color: context.success,
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                           leave.reason,
-                           maxLines: 2,
-                           overflow: TextOverflow.ellipsis,
-                           style: TextStyle(
+                          leave.reason,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color:
-                                context.onSurface,
+                            color: context.onSurface,
                             letterSpacing: -0.01,
                             height: 1.33,
-                           ),
+                          ),
                         ),
                       ],
                     ),
-                    Icon(Icons.check_circle,
-                        color: context.success,
-                        size: 28),
+                    Icon(Icons.check_circle, color: context.success, size: 28),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Column(
                     children: [
                       InfoRow(
@@ -408,8 +391,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                               '${DateFormatter.formatDateApi(leave.leaveDate)} \u2022 ${leave.startTime} - ${leave.endTime}'),
                       const SizedBox(height: 8),
                       const InfoRow(
-                          label: 'Gate Status',
-                          value: 'Authorized Out'),
+                          label: 'Gate Status', value: 'Authorized Out'),
                     ],
                   ),
                 ),
@@ -423,8 +405,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => QrDisplayScreen(
-                                leave: leave),
+                            builder: (_) => QrDisplayScreen(leave: leave),
                           ),
                         );
                       }
@@ -433,9 +414,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.qr_code_2,
-                            size: 20,
-                            color: context
-                                .onPrimary),
+                            size: 20, color: context.onPrimary),
                         const SizedBox(width: 8),
                         const Text(
                           'View QR Pass',
@@ -484,7 +463,7 @@ class _StatGrid extends StatelessWidget {
 
 class _RecentActivitySection extends StatelessWidget {
   final bool isLoading;
-  final List<dynamic> history;
+  final List<LeaveRequest> history;
   final VoidCallback onSeeAll;
 
   const _RecentActivitySection({
@@ -613,88 +592,89 @@ class _ActivityCard extends StatelessWidget {
     return Hero(
       tag: ValueKey('qr-leave-${leave.leaveId}'),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.outlineVariant),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          if (leave.hasQrCodes) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => QrDisplayScreen(leave: leave)));
-          }
-        },
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: context.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Icon(
-                _iconForReason(leave.reason),
-                size: 22,
-                color: colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    leave.reason,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: context.onSurface,
-                      height: 1.43,
-                    ),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.outlineVariant),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              if (leave.hasQrCodes) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => QrDisplayScreen(leave: leave)));
+              }
+            },
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: context.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  Text(
-                    DateFormatter.formatDateApi(leave.leaveDate),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.outline,
-                      height: 1.43,
-                    ),
+                  child: Icon(
+                    _iconForReason(leave.reason),
+                    size: 22,
+                    color: colorScheme.primary,
                   ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: leave.status.color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                leave.status.label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: leave.status.color,
                 ),
-              ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        leave.reason,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: context.onSurface,
+                          height: 1.43,
+                        ),
+                      ),
+                      Text(
+                        DateFormatter.formatDateApi(leave.leaveDate),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.outline,
+                          height: 1.43,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: leave.status.color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    leave.status.label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: leave.status.color,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
         ),
       ),
-    ),
     );
   }
 }

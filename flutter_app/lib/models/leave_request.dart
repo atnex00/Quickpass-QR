@@ -173,8 +173,7 @@ class LeaveRequest {
     return result;
   }
 
-  static String _dateToJson(DateTime v) =>
-      v.toIso8601String().split('T').first;
+  static String _dateToJson(DateTime v) => v.toIso8601String().split('T').first;
 
   static DateTime? _dateTimeOrNullFromJson(dynamic v) =>
       v != null ? DateTime.tryParse(v.toString()) : null;
@@ -184,7 +183,8 @@ class LeaveRequest {
   static DateTime _dateTimeFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint('Warning: Failed to parse datetime from "$v", using current time');
+      debugPrint(
+          'Warning: Failed to parse datetime from "$v", using current time');
       return DateTime.now();
     }
     return result;

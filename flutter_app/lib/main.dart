@@ -7,6 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/leave_provider.dart';
 import 'providers/supervisor_provider.dart';
 import 'providers/scan_provider.dart';
+import 'providers/settings_provider.dart';
 import 'services/api_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/splash_screen.dart';
@@ -22,25 +23,38 @@ void main() async {
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
+    DeviceOrientation.portraitDown,
   ]);
 
-  runApp(QuickpassApp(apiService: apiService));
+  final settings = SettingsProvider();
+  await settings.load();
+
+  runApp(QuickpassApp(apiService: apiService, settings: settings));
 }
 
 class QuickpassApp extends StatefulWidget {
   final ApiService apiService;
-  const QuickpassApp({super.key, required this.apiService});
+  final SettingsProvider settings;
+  const QuickpassApp({super.key, required this.apiService, required this.settings});
 
   @override
   State<QuickpassApp> createState() => _QuickpassAppState();
 }
 
 class _QuickpassAppState extends State<QuickpassApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
+    widget.apiService.onForceLogout = _handleForceLogout;
+  }
+
+  void _handleForceLogout() {
+    _navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -50,22 +64,25 @@ class _QuickpassAppState extends State<QuickpassApp> {
       value: api,
       child: MultiProvider(
         providers: [
+          ChangeNotifierProvider.value(value: widget.settings),
           ChangeNotifierProvider(create: (_) => AuthProvider(api: api)),
           ChangeNotifierProvider(create: (_) => LeaveProvider(api: api)),
           ChangeNotifierProvider(create: (_) => SupervisorProvider(api: api)),
           ChangeNotifierProvider(create: (_) => ScanProvider(api: api)),
         ],
-        child: Consumer<AuthProvider>(
-        builder: (context, auth, _) {
-          return MaterialApp(
-            title: AppConfig.appName,
-            debugShowCheckedModeBanner: false,
-            theme: QuickpassTheme.light,
-            darkTheme: QuickpassTheme.dark,
-            home: _buildHome(auth),
-          );
-        },
-      ),
+        child: Consumer2<AuthProvider, SettingsProvider>(
+          builder: (context, auth, settings, _) {
+            return MaterialApp(
+              navigatorKey: _navigatorKey,
+              title: AppConfig.appName,
+              debugShowCheckedModeBanner: false,
+              theme: QuickpassTheme.light,
+              darkTheme: QuickpassTheme.dark,
+              themeMode: settings.themeMode,
+              home: _buildHome(auth),
+            );
+          },
+        ),
       ),
     );
   }

@@ -5,7 +5,8 @@ class SlidePageRoute<T> extends PageRouteBuilder<T> {
       : super(
           pageBuilder: (context, animation, secondaryAnimation) => page,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final begin = slideUp ? const Offset(0, 0.15) : const Offset(0.05, 0);
+            final begin =
+                slideUp ? const Offset(0, 0.15) : const Offset(0.05, 0);
             return SlideTransition(
               position: Tween<Offset>(
                 begin: begin,

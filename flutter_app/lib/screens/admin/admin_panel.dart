@@ -22,78 +22,86 @@ import '../security/scanner_screen.dart';
 
 Widget _buildAdminAppBar(BuildContext context, String tabKey) {
   return SliverAppBar(
-    key: ValueKey(tabKey),
-    pinned: true,
-    toolbarHeight: 64,
-    automaticallyImplyLeading: false,
-    flexibleSpace: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: context.onPrimary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+      key: ValueKey(tabKey),
+      pinned: true,
+      toolbarHeight: 64,
+      automaticallyImplyLeading: false,
+      flexibleSpace: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: context.onPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Image.asset('assets/icon/app-icon.png',
+                        width: 22, height: 22),
                   ),
-                  child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Quickpass',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: context.onPrimary,
+                  const SizedBox(width: 8),
+                  Text(
+                    'Quickpass',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: context.onPrimary,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(Icons.notifications_outlined, color: context.onPrimary),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(behavior: SnackBarBehavior.floating, content: Text('No new notifications')),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.logout, color: context.onPrimary),
-                  onPressed: () async {
-                final errorColor = context.error;
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Logout'),
-                    content: const Text('Are you sure you want to logout?'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                      FilledButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        style: FilledButton.styleFrom(backgroundColor: errorColor),
-                        child: const Text('Logout'),
-                      ),
-                    ],
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.notifications_outlined,
+                        color: context.onPrimary),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content: Text('No new notifications')),
+                      );
+                    },
                   ),
-                );
-                if (confirmed == true && context.mounted) {
-                  context.read<AuthProvider>().logout();
-                }
-              },
-            ),
-          ],
+                  IconButton(
+                    icon: Icon(Icons.logout, color: context.onPrimary),
+                    onPressed: () async {
+                      final errorColor = context.error;
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Logout'),
+                          content:
+                              const Text('Are you sure you want to logout?'),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel')),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: FilledButton.styleFrom(
+                                  backgroundColor: errorColor),
+                              child: const Text('Logout'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed == true && context.mounted) {
+                        context.read<AuthProvider>().logout();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ],
-      ),
-      ),
       ));
-  }
+}
 
-  class AdminPanel extends StatefulWidget {
+class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
 
   @override
@@ -177,7 +185,8 @@ class _OverviewTabState extends State<_OverviewTab> {
       _loadReports();
     });
     _autoRefreshTimer = Timer.periodic(
-      const Duration(seconds: 60), (_) => _loadReports(),
+      const Duration(seconds: 60),
+      (_) => _loadReports(),
     );
   }
 
@@ -201,7 +210,9 @@ class _OverviewTabState extends State<_OverviewTab> {
 
       final depts = await _api.getDepartments();
       _departmentCount = depts.length;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to load overview reports: $e');
+    }
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -238,7 +249,8 @@ class _OverviewTabState extends State<_OverviewTab> {
             Icon(Icons.info_outline, color: context.neutralGray),
             const SizedBox(width: 12),
             Expanded(
-              child: Text('No department data available.', style: TextStyle(color: context.neutralGray)),
+              child: Text('No department data available.',
+                  style: TextStyle(color: context.neutralGray)),
             ),
           ],
         ),
@@ -257,10 +269,36 @@ class _OverviewTabState extends State<_OverviewTab> {
         children: [
           Row(
             children: [
-              SizedBox(width: 24, child: Text('ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
-              Expanded(flex: 3, child: Text('Department', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
-              Expanded(flex: 1, child: Text('Total', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
-              Expanded(flex: 1, child: Text('Pending', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.outline))),
+              SizedBox(
+                  width: 24,
+                  child: Text('ID',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.outline))),
+              Expanded(
+                  flex: 3,
+                  child: Text('Department',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.outline))),
+              Expanded(
+                  flex: 1,
+                  child: Text('Total',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.outline))),
+              Expanded(
+                  flex: 1,
+                  child: Text('Pending',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: context.outline))),
             ],
           ),
           const SizedBox(height: 8),
@@ -271,11 +309,35 @@ class _OverviewTabState extends State<_OverviewTab> {
                 children: [
                   SizedBox(
                     width: 24,
-                    child: Text('${dept['department_id'] ?? ''}', style: TextStyle(fontSize: 12, color: context.neutralGray)),
+                    child: Text('${dept['department_id'] ?? ''}',
+                        style: TextStyle(
+                            fontSize: 12, color: context.neutralGray)),
                   ),
-                  Expanded(flex: 3, child: Text('${dept['department_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: context.onSurface))),
-                  Expanded(flex: 1, child: Text('${dept['total_requests'] ?? 0}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.onSurface))),
-                  Expanded(flex: 1, child: Text('${dept['pending'] ?? 0}', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.warning))),
+                  Expanded(
+                      flex: 3,
+                      child: Text('${dept['department_name'] ?? ''}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: context.onSurface))),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${dept['total_requests'] ?? 0}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.onSurface))),
+                  Expanded(
+                      flex: 1,
+                      child: Text('${dept['pending'] ?? 0}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.warning))),
                 ],
               ),
             );
@@ -291,7 +353,8 @@ class _OverviewTabState extends State<_OverviewTab> {
 
   @override
   Widget build(BuildContext context) {
-    final userName = context.select((AuthProvider a) => a.user?.fullName ?? 'Admin');
+    final userName =
+        context.select((AuthProvider a) => a.user?.fullName ?? 'Admin');
 
     return Scaffold(
       body: Stack(
@@ -299,56 +362,56 @@ class _OverviewTabState extends State<_OverviewTab> {
           RefreshIndicator(
             onRefresh: _loadReports,
             child: CustomScrollView(
-            slivers: [
-              _buildAdminAppBar(context, 'overview'),
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _AdminProfileCard(userName: userName),
-                    const SizedBox(height: 16),
-                    if (_isLoading)
-                      const Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else ...[
-                      _OverviewStatGrid(
-                        employeeCount: _employeeCount,
-                        pendingCount: _pendingCount,
-                        activeCount: _activeCount,
-                        departmentCount: _departmentCount,
-                      ),
-                      const SizedBox(height: 24),
-                      _QuickActionsSection(onSwitchTab: _switchToTab),
-                      const SizedBox(height: 24),
-                      const _SwitchViewSection(),
-                      const SizedBox(height: 24),
-                      _LeaveBreakdownSection(
-                        pendingCount: _pendingCount,
-                        approvedCount: _approvedCount,
-                        rejectedCount: _rejectedCount,
-                        activeCount: _activeCount,
-                        completedCount: _completedCount,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Department Summary',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: context.onSurface,
-                          height: 1.5,
+              slivers: [
+                _buildAdminAppBar(context, 'overview'),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _AdminProfileCard(userName: userName),
+                      const SizedBox(height: 16),
+                      if (_isLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else ...[
+                        _OverviewStatGrid(
+                          employeeCount: _employeeCount,
+                          pendingCount: _pendingCount,
+                          activeCount: _activeCount,
+                          departmentCount: _departmentCount,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildDepartmentTable(),
-                      const SizedBox(height: 24),
-                    ],
-                  ]),
+                        const SizedBox(height: 24),
+                        _QuickActionsSection(onSwitchTab: _switchToTab),
+                        const SizedBox(height: 24),
+                        const _SwitchViewSection(),
+                        const SizedBox(height: 24),
+                        _LeaveBreakdownSection(
+                          pendingCount: _pendingCount,
+                          approvedCount: _approvedCount,
+                          rejectedCount: _rejectedCount,
+                          activeCount: _activeCount,
+                          completedCount: _completedCount,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Department Summary',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: context.onSurface,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildDepartmentTable(),
+                        const SizedBox(height: 24),
+                      ],
+                    ]),
+                  ),
                 ),
-              ),
-            ],
+              ],
             ),
           ),
         ],
@@ -410,11 +473,13 @@ class _AdminProfileCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: context.error.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: context.error.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: context.error.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     'Admin',
@@ -541,7 +606,9 @@ class _QuickActionsSection extends StatelessWidget {
                 subtitle: 'View analytics',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Scroll down to view leave breakdown')),
+                    const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text('Scroll down to view leave breakdown')),
                   );
                 },
               ),
@@ -554,7 +621,9 @@ class _QuickActionsSection extends StatelessWidget {
                 subtitle: 'Configuration',
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Settings coming soon')),
+                    const SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text('Settings coming soon')),
                   );
                 },
               ),
@@ -672,7 +741,8 @@ class _LeaveBreakdownSection extends StatelessWidget {
           title: '${e.$2}',
           color: e.$3,
           radius: 40,
-          titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+          titleStyle: const TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
         ));
       }
     }
@@ -682,7 +752,10 @@ class _LeaveBreakdownSection extends StatelessWidget {
         title: '0',
         color: context.neutralGray.withValues(alpha: 0.3),
         radius: 40,
-        titleStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.neutralGray),
+        titleStyle: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: context.neutralGray),
       ));
     }
     return Column(
@@ -710,18 +783,32 @@ class _LeaveBreakdownSection extends StatelessWidget {
             children: [
               SizedBox(
                 height: 180,
-                child: PieChart(PieChartData(sections: sections, centerSpaceRadius: 30)),
+                child: PieChart(
+                    PieChartData(sections: sections, centerSpaceRadius: 30)),
               ),
               const SizedBox(height: 16),
-              _StatusLegend(label: 'Pending', count: pendingCount, color: context.warning),
+              _StatusLegend(
+                  label: 'Pending',
+                  count: pendingCount,
+                  color: context.warning),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Approved', count: approvedCount, color: context.primaryBlue),
+              _StatusLegend(
+                  label: 'Approved',
+                  count: approvedCount,
+                  color: context.primaryBlue),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Rejected', count: rejectedCount, color: context.error),
+              _StatusLegend(
+                  label: 'Rejected',
+                  count: rejectedCount,
+                  color: context.error),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Active', count: activeCount, color: context.success),
+              _StatusLegend(
+                  label: 'Active', count: activeCount, color: context.success),
               const SizedBox(height: 4),
-              _StatusLegend(label: 'Completed', count: completedCount, color: context.secondary),
+              _StatusLegend(
+                  label: 'Completed',
+                  count: completedCount,
+                  color: context.secondary),
             ],
           ),
         ),
@@ -739,7 +826,8 @@ class _EmployeeTab extends StatefulWidget {
 
 class _EmployeeTabState extends State<_EmployeeTab> {
   late final ApiService _api;
-  final Debouncer _searchDebouncer = Debouncer(delay: const Duration(milliseconds: 300));
+  final Debouncer _searchDebouncer =
+      Debouncer(delay: const Duration(milliseconds: 300));
   List<Map<String, dynamic>> _employees = [];
   List<Map<String, dynamic>> _departments = [];
   bool _isLoading = true;
@@ -779,7 +867,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
         _employees = List<Map<String, dynamic>>.from(empRes['data'] ?? []);
         final pagination = empRes['pagination'] as Map<String, dynamic>?;
         _totalPages = int.tryParse('${pagination?['pages']}') ?? 1;
-        _totalEmployees = int.tryParse('${pagination?['total']}') ?? _employees.length;
+        _totalEmployees =
+            int.tryParse('${pagination?['total']}') ?? _employees.length;
       }
       final deps = await _api.getDepartments();
       _departments = List<Map<String, dynamic>>.from(deps);
@@ -809,7 +898,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
       if (!mounted) return;
       showDialog<bool>(
         context: context,
-        builder: (_) => _EditEmployeeDialog(emp: emp, departments: _departments),
+        builder: (_) =>
+            _EditEmployeeDialog(emp: emp, departments: _departments),
       ).then((updated) {
         if (updated == true) if (mounted) _loadData();
       });
@@ -839,7 +929,9 @@ class _EmployeeTabState extends State<_EmployeeTab> {
         title: const Text('Delete Employee'),
         content: Text('Remove ${emp['full_name']}? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: ctx.error),
@@ -860,7 +952,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('$e')));
         }
       }
     }
@@ -895,7 +988,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.primary,
                     side: BorderSide(color: context.primary),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
                   ),
                 ),
               ],
@@ -909,18 +1003,21 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   SizedBox(
                     width: 280,
                     child: DropdownButtonFormField<String>(
-                    initialValue: _filterDepartment,
-                    decoration: const InputDecoration(
-                      labelText: 'Dept',
+                      initialValue: _filterDepartment,
+                      decoration: const InputDecoration(
+                        labelText: 'Dept',
                         isDense: false,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
                       items: [
-                        const DropdownMenuItem<String>(value: null, child: Text('All')),
+                        const DropdownMenuItem<String>(
+                            value: null, child: Text('All')),
                         ..._departments.map((d) => DropdownMenuItem<String>(
-                          value: d['department_id'] as String?,
-                          child: Text(d['department_name'] as String? ?? '', overflow: TextOverflow.ellipsis),
-                        )),
+                              value: d['department_id'] as String?,
+                              child: Text(d['department_name'] as String? ?? '',
+                                  overflow: TextOverflow.ellipsis),
+                            )),
                       ],
                       onChanged: (v) {
                         setState(() {
@@ -935,16 +1032,21 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                   SizedBox(
                     width: 280,
                     child: DropdownButtonFormField<String>(
-                      initialValue: _filterStatus.isEmpty ? null : _filterStatus,
+                      initialValue:
+                          _filterStatus.isEmpty ? null : _filterStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         isDense: false,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
                       items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All')),
-                        DropdownMenuItem<String>(value: 'active', child: Text('Active')),
-                        DropdownMenuItem<String>(value: 'inactive', child: Text('Inactive')),
+                        DropdownMenuItem<String>(
+                            value: null, child: Text('All')),
+                        DropdownMenuItem<String>(
+                            value: 'active', child: Text('Active')),
+                        DropdownMenuItem<String>(
+                            value: 'inactive', child: Text('Inactive')),
                       ],
                       onChanged: (v) {
                         setState(() {
@@ -963,13 +1065,18 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       decoration: const InputDecoration(
                         labelText: 'Role',
                         isDense: false,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
                       items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All')),
-                        DropdownMenuItem<String>(value: 'admin', child: Text('Admin')),
-                        DropdownMenuItem<String>(value: 'supervisor', child: Text('Supervisor')),
-                        DropdownMenuItem<String>(value: 'security', child: Text('Security')),
+                        DropdownMenuItem<String>(
+                            value: null, child: Text('All')),
+                        DropdownMenuItem<String>(
+                            value: 'admin', child: Text('Admin')),
+                        DropdownMenuItem<String>(
+                            value: 'supervisor', child: Text('Supervisor')),
+                        DropdownMenuItem<String>(
+                            value: 'security', child: Text('Security')),
                       ],
                       onChanged: (v) {
                         setState(() {
@@ -1008,7 +1115,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                     Icon(Icons.error_outline, size: 48, color: context.error),
                     const SizedBox(height: 12),
                     const Text('Failed to load employees',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: _loadData,
@@ -1018,7 +1126,8 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                 ),
               )
             else if (_isLoading)
-              const Center(child: Padding(
+              const Center(
+                  child: Padding(
                 padding: EdgeInsets.all(24),
                 child: CircularProgressIndicator(),
               ))
@@ -1103,10 +1212,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isActive ? context.surfaceContainerLowest : context.surfaceVariant,
+        color:
+            isActive ? context.surfaceContainerLowest : context.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? context.outlineVariant : context.error.withValues(alpha: 0.3),
+          color: isActive
+              ? context.outlineVariant
+              : context.error.withValues(alpha: 0.3),
         ),
       ),
       child: InkWell(
@@ -1114,150 +1226,182 @@ class _EmployeeTabState extends State<_EmployeeTab> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => EmployeeDetailScreen(employee: emp)),
+            MaterialPageRoute(
+                builder: (_) => EmployeeDetailScreen(employee: emp)),
           );
         },
         child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? context.primary.withValues(alpha: 0.2)
-                        : context.outlineVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Center(
-                    child: Text(
-                      (emp['full_name'] as String?)?[0] ?? '?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: isActive ? context.primary : context.neutralGray,
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? context.primary.withValues(alpha: 0.2)
+                          : context.outlineVariant.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Center(
+                      child: Text(
+                        (emp['full_name'] as String?)?[0] ?? '?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              isActive ? context.primary : context.neutralGray,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              emp['full_name'] ?? '',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: isActive ? context.onSurface : context.neutralGray,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                emp['full_name'] ?? '',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: isActive
+                                      ? context.onSurface
+                                      : context.neutralGray,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          InkWell(
-                            onTap: () => _showEditDialog(emp),
-                            child: Icon(Icons.edit, size: 16, color: context.neutralGray),
-                          ),
-                          if (!isActive) ...[
-                            const SizedBox(width: 6),
-                            Text('inactive',
-                              style: TextStyle(fontSize: 11, color: context.error, fontWeight: FontWeight.w500)),
+                            const SizedBox(width: 4),
+                            InkWell(
+                              onTap: () => _showEditDialog(emp),
+                              child: Icon(Icons.edit,
+                                  size: 16, color: context.neutralGray),
+                            ),
+                            if (!isActive) ...[
+                              const SizedBox(width: 6),
+                              Text('inactive',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: context.error,
+                                      fontWeight: FontWeight.w500)),
+                            ],
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${emp['employee_id']} | ${emp['position'] ?? ''}',
-                        style: TextStyle(fontSize: 12, color: context.outline),
-                      ),
-                      if (badges.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Row(children: badges),
                         ),
-                    ],
+                        const SizedBox(height: 2),
+                        Text(
+                          '${emp['employee_id']} | ${emp['position'] ?? ''}',
+                          style:
+                              TextStyle(fontSize: 12, color: context.outline),
+                        ),
+                        if (badges.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Row(children: badges),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  color: context.error,
-                  onPressed: () => _confirmDelete(emp),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                ),
-              ],
-            ),
-            const Divider(height: 12),
-            Row(
-              children: [
-                _ActionButton(
-                  icon: Icons.admin_panel_settings,
-                  label: 'Admin',
-                  active: emp['is_admin'] == true,
-                  color: context.error,
-                  onTap: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    try {
-                      await _api.toggleAdmin(emp['employee_id']);
-                      if (!mounted) return;
-                      _loadData();
-                      messenger.showSnackBar(
-                        SnackBar(content: Text('Admin ${emp['is_admin'] == true ? 'removed' : 'granted'}')),
-                      );
-                    } catch (_) {}
-                  },
-                ),
-                const SizedBox(width: 4),
-                _ActionButton(
-                  icon: Icons.supervisor_account,
-                  label: 'Supervisor',
-                  active: emp['is_supervisor'] == true,
-                  color: context.tertiary,
-                  onTap: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    try {
-                      await _api.toggleSupervisor(emp['employee_id']);
-                      if (!mounted) return;
-                      _loadData();
-                      messenger.showSnackBar(
-                        SnackBar(content: Text('Supervisor ${emp['is_supervisor'] == true ? 'removed' : 'granted'}')),
-                      );
-                    } catch (_) {}
-                  },
-                ),
-                const SizedBox(width: 4),
-                _ActionButton(
-                  icon: Icons.check_circle_outline,
-                  label: emp['is_active'] != false ? 'Active' : 'Inactive',
-                  active: emp['is_active'] != false,
-                  color: emp['is_active'] != false ? context.success : context.error,
-                  onTap: () async {
-                    try {
-                      await _api.toggleActive(emp['employee_id']);
-                      _loadData();
-                    } catch (_) {}
-                  },
-                ),
-                const SizedBox(width: 4),
-                _ActionButton(
-                  icon: Icons.key,
-                  label: 'Password',
-                  active: false,
-                  color: context.warning,
-                  onTap: () => _showPasswordResetDialog(emp),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    color: context.error,
+                    onPressed: () => _confirmDelete(emp),
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
+                ],
+              ),
+              const Divider(height: 12),
+              Row(
+                children: [
+                  _ActionButton(
+                    icon: Icons.admin_panel_settings,
+                    label: 'Admin',
+                    active: emp['is_admin'] == true,
+                    color: context.error,
+                    onTap: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await _api.toggleAdmin(emp['employee_id']);
+                        if (!mounted) return;
+                        _loadData();
+                        messenger.showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Admin ${emp['is_admin'] == true ? 'removed' : 'granted'}')),
+                        );
+                      } catch (e) {
+                        messenger.showSnackBar(
+                          SnackBar(content: Text('Failed to toggle admin: $e')),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  _ActionButton(
+                    icon: Icons.supervisor_account,
+                    label: 'Supervisor',
+                    active: emp['is_supervisor'] == true,
+                    color: context.tertiary,
+                    onTap: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await _api.toggleSupervisor(emp['employee_id']);
+                        if (!mounted) return;
+                        _loadData();
+                        messenger.showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Supervisor ${emp['is_supervisor'] == true ? 'removed' : 'granted'}')),
+                        );
+                      } catch (e) {
+                        messenger.showSnackBar(
+                          SnackBar(
+                              content: Text('Failed to toggle supervisor: $e')),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  _ActionButton(
+                    icon: Icons.check_circle_outline,
+                    label: emp['is_active'] != false ? 'Active' : 'Inactive',
+                    active: emp['is_active'] != false,
+                    color: emp['is_active'] != false
+                        ? context.success
+                        : context.error,
+                    onTap: () async {
+                      try {
+                        await _api.toggleActive(emp['employee_id']);
+                        _loadData();
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Failed to toggle status: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  _ActionButton(
+                    icon: Icons.key,
+                    label: 'Password',
+                    active: false,
+                    color: context.warning,
+                    onTap: () => _showPasswordResetDialog(emp),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1318,16 +1462,25 @@ class _StatusLegend extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
-  const _StatusLegend({required this.label, required this.count, required this.color});
+  const _StatusLegend(
+      {required this.label, required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
+        Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+                color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 8),
-        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray))),
-        Text('$count', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: color)),
+        Expanded(
+            child: Text(label,
+                style: TextStyle(fontSize: 13, color: context.neutralGray))),
+        Text('$count',
+            style: TextStyle(
+                fontWeight: FontWeight.w600, fontSize: 13, color: color)),
       ],
     );
   }
@@ -1339,7 +1492,12 @@ class _ActionButton extends StatelessWidget {
   final bool active;
   final Color color;
   final VoidCallback onTap;
-  const _ActionButton({required this.icon, required this.label, required this.active, required this.color, required this.onTap});
+  const _ActionButton(
+      {required this.icon,
+      required this.label,
+      required this.active,
+      required this.color,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1352,12 +1510,19 @@ class _ActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: active ? color.withValues(alpha: 0.1) : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withValues(alpha: active ? 0.4 : 0.15)),
+            border:
+                Border.all(color: color.withValues(alpha: active ? 0.4 : 0.15)),
           ),
           child: Column(
             children: [
               Icon(icon, size: 16, color: active ? color : context.neutralGray),
-              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active ? color : context.neutralGray), overflow: TextOverflow.ellipsis, maxLines: 1),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: active ? color : context.neutralGray),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
             ],
           ),
         ),
@@ -1394,7 +1559,8 @@ class _ReportsTabState extends State<_ReportsTab> {
       _loadReports();
     });
     _autoRefreshTimer = Timer.periodic(
-      const Duration(seconds: 60), (_) => _loadReports(),
+      const Duration(seconds: 60),
+      (_) => _loadReports(),
     );
   }
 
@@ -1411,13 +1577,20 @@ class _ReportsTabState extends State<_ReportsTab> {
     try {
       final params = <String, dynamic>{};
       if (_reportType.isNotEmpty) params['type'] = _reportType;
-      if (_startDate != null) params['start_date'] = DateFormatter.formatDateApi(_startDate!);
-      if (_endDate != null) params['end_date'] = DateFormatter.formatDateApi(_endDate!);
-      _reportData = (await _api.getReports(type: params['type'], startDate: params['start_date'], endDate: params['end_date']))['data'] as List?;
+      if (_startDate != null)
+        params['start_date'] = DateFormatter.formatDateApi(_startDate!);
+      if (_endDate != null)
+        params['end_date'] = DateFormatter.formatDateApi(_endDate!);
+      _reportData = (await _api.getReports(
+          type: params['type'],
+          startDate: params['start_date'],
+          endDate: params['end_date']))['data'] as List?;
       final deptRes = await _api.getReports(type: 'department');
       _departmentReport = deptRes['data'] as List<dynamic>?;
       _computeCounts();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to load report data: $e');
+    }
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -1514,7 +1687,12 @@ class _ReportsTabState extends State<_ReportsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Department Overview', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+          Text('Department Overview',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: context.onSurface,
+                  height: 1.5)),
           const SizedBox(height: 12),
           SizedBox(
             height: 280,
@@ -1539,16 +1717,20 @@ class _ReportsTabState extends State<_ReportsTab> {
                       reservedSize: 28,
                       getTitlesWidget: (value, meta) {
                         final idx = value.toInt();
-                        if (idx < 0 || idx >= (_departmentReport?.length ?? 0)) {
+                        if (idx < 0 ||
+                            idx >= (_departmentReport?.length ?? 0)) {
                           return const SizedBox.shrink();
                         }
                         final dept = _departmentReport![idx];
-                        final code = dept['department_code'] as String? ?? dept['department_name'] as String? ?? '';
+                        final code = dept['department_code'] as String? ??
+                            dept['department_name'] as String? ??
+                            '';
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             code,
-                            style: TextStyle(fontSize: 10, color: context.outline),
+                            style:
+                                TextStyle(fontSize: 10, color: context.outline),
                             overflow: TextOverflow.ellipsis,
                           ),
                         );
@@ -1563,13 +1745,16 @@ class _ReportsTabState extends State<_ReportsTab> {
                         if (value == meta.max) return const SizedBox.shrink();
                         return Text(
                           '${value.toInt()}',
-                          style: TextStyle(fontSize: 10, color: context.outline),
+                          style:
+                              TextStyle(fontSize: 10, color: context.outline),
                         );
                       },
                     ),
                   ),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barTouchData: BarTouchData(
@@ -1577,7 +1762,12 @@ class _ReportsTabState extends State<_ReportsTab> {
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final dept = _departmentReport![group.x.toInt()];
                       final deptName = dept['department_name'] as String? ?? '';
-                      final statusLabels = ['Pending', 'Approved', 'Rejected', 'Completed'];
+                      final statusLabels = [
+                        'Pending',
+                        'Approved',
+                        'Rejected',
+                        'Completed'
+                      ];
                       final statusColors = [
                         context.warning,
                         context.primaryBlue,
@@ -1586,15 +1776,22 @@ class _ReportsTabState extends State<_ReportsTab> {
                       ];
                       return BarTooltipItem(
                         '$deptName\n',
-                        TextStyle(color: context.onSurface, fontWeight: FontWeight.w600, fontSize: 12),
+                        TextStyle(
+                            color: context.onSurface,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12),
                         children: [
                           TextSpan(
                             text: '${statusLabels[rodIndex]}: ',
-                            style: TextStyle(color: statusColors[rodIndex], fontWeight: FontWeight.w600, fontSize: 12),
+                            style: TextStyle(
+                                color: statusColors[rodIndex],
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12),
                           ),
                           TextSpan(
                             text: '${rod.toY.toInt()}',
-                            style: TextStyle(color: context.onSurface, fontSize: 12),
+                            style: TextStyle(
+                                color: context.onSurface, fontSize: 12),
                           ),
                         ],
                       );
@@ -1649,109 +1846,132 @@ class _ReportsTabState extends State<_ReportsTab> {
           RefreshIndicator(
             onRefresh: _loadReports,
             child: CustomScrollView(
-            slivers: [
-              _buildAdminAppBar(context, 'reports'),
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _ReportsFilterBar(
-                      startCtl: _startCtl,
-                      endCtl: _endCtl,
-                      reportType: _reportType,
-                      onPickDate: _pickDate,
-                      onFilterChanged: (type) {
-                        setState(() => _reportType = type);
-                        _loadReports();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    if (_isLoading)
-                      const Center(child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
-                      ))
-                    else ...[
-                      _ReportsStatSummary(
-                        statusCounts: _statusCounts,
-                        departmentCount: _departmentReport?.length ?? 0,
+              slivers: [
+                _buildAdminAppBar(context, 'reports'),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _ReportsFilterBar(
+                        startCtl: _startCtl,
+                        endCtl: _endCtl,
+                        reportType: _reportType,
+                        onPickDate: _pickDate,
+                        onFilterChanged: (type) {
+                          setState(() => _reportType = type);
+                          _loadReports();
+                        },
                       ),
                       const SizedBox(height: 16),
-                      _buildDepartmentBarChart(),
-                      Text('Leave Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
-                      const SizedBox(height: 8),
-                      if (_reportData == null || _reportData!.isEmpty)
-                        const EmptyState(
-                          icon: Icons.inbox_outlined,
-                          title: 'No leave requests found',
+                      if (_isLoading)
+                        const Center(
+                            child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: CircularProgressIndicator(),
+                        ))
+                      else ...[
+                        _ReportsStatSummary(
+                          statusCounts: _statusCounts,
+                          departmentCount: _departmentReport?.length ?? 0,
                         ),
-                    ],
-                  ]),
-                ),
-              ),
-              if (_reportData != null && _reportData!.isNotEmpty)
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final entry = _reportData![index];
-                        final status = entry['status'] as String? ?? 'pending';
-                        final statusColor = AppConstants.statusColors[status] ?? context.neutralGray;
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: context.surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: context.outlineVariant),
+                        const SizedBox(height: 16),
+                        _buildDepartmentBarChart(),
+                        Text('Leave Requests',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: context.onSurface,
+                                height: 1.5)),
+                        const SizedBox(height: 8),
+                        if (_reportData == null || _reportData!.isEmpty)
+                          const EmptyState(
+                            icon: Icons.inbox_outlined,
+                            title: 'No leave requests found',
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${entry['employee_name'] ?? 'Unknown'}',
-                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
-                        style: TextStyle(fontSize: 12, color: context.outline),
-                                    ),
-                                    Text(
-                                      entry['reason'] ?? '',
-                  style: TextStyle(fontSize: 12, color: context.neutralGray),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
-                                ),
-                                child: Text(
-                                  AppConstants.statusLabels[status] ?? status,
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      childCount: _reportData!.length.clamp(0, 50),
-                    ),
+                      ],
+                    ]),
                   ),
                 ),
-            ],
-          ),
+                if (_reportData != null && _reportData!.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final entry = _reportData![index];
+                          final status =
+                              entry['status'] as String? ?? 'pending';
+                          final statusColor =
+                              AppConstants.statusColors[status] ??
+                                  context.neutralGray;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: context.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: context.outlineVariant),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${entry['employee_name'] ?? 'Unknown'}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: context.onSurface),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: context.outline),
+                                      ),
+                                      Text(
+                                        entry['reason'] ?? '',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: context.neutralGray),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(
+                                        color:
+                                            statusColor.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Text(
+                                    AppConstants.statusLabels[status] ?? status,
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: statusColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        childCount: _reportData!.length.clamp(0, 50),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1815,11 +2035,20 @@ class _ReportsFilterBar extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _FilterChip(label: 'All', selected: reportType.isEmpty, onTap: () => onFilterChanged('')),
+              _FilterChip(
+                  label: 'All',
+                  selected: reportType.isEmpty,
+                  onTap: () => onFilterChanged('')),
               const SizedBox(width: 8),
-              _FilterChip(label: 'Department', selected: reportType == 'department', onTap: () => onFilterChanged('department')),
+              _FilterChip(
+                  label: 'Department',
+                  selected: reportType == 'department',
+                  onTap: () => onFilterChanged('department')),
               const SizedBox(width: 8),
-              _FilterChip(label: 'Employee', selected: reportType == 'employee', onTap: () => onFilterChanged('employee')),
+              _FilterChip(
+                  label: 'Employee',
+                  selected: reportType == 'employee',
+                  onTap: () => onFilterChanged('employee')),
             ],
           ),
         ),
@@ -1843,21 +2072,45 @@ class _ReportsStatSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            _StatCard(icon: Icons.pending_actions, label: 'Pending', value: '${statusCounts['pending'] ?? 0}', color: context.warning),
+            _StatCard(
+                icon: Icons.pending_actions,
+                label: 'Pending',
+                value: '${statusCounts['pending'] ?? 0}',
+                color: context.warning),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.check_circle, label: 'Approved', value: '${statusCounts['approved'] ?? 0}', color: context.success),
+            _StatCard(
+                icon: Icons.check_circle,
+                label: 'Approved',
+                value: '${statusCounts['approved'] ?? 0}',
+                color: context.success),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.cancel, label: 'Rejected', value: '${statusCounts['rejected'] ?? 0}', color: context.error),
+            _StatCard(
+                icon: Icons.cancel,
+                label: 'Rejected',
+                value: '${statusCounts['rejected'] ?? 0}',
+                color: context.error),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            _StatCard(icon: Icons.timer, label: 'Active', value: '${statusCounts['active'] ?? 0}', color: context.primaryBlue),
+            _StatCard(
+                icon: Icons.timer,
+                label: 'Active',
+                value: '${statusCounts['active'] ?? 0}',
+                color: context.primaryBlue),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.check_circle_outline, label: 'Completed', value: '${statusCounts['completed'] ?? 0}', color: context.secondary),
+            _StatCard(
+                icon: Icons.check_circle_outline,
+                label: 'Completed',
+                value: '${statusCounts['completed'] ?? 0}',
+                color: context.secondary),
             const SizedBox(width: 8),
-            _StatCard(icon: Icons.business, label: 'Departments', value: '$departmentCount', color: context.tertiary),
+            _StatCard(
+                icon: Icons.business,
+                label: 'Departments',
+                value: '$departmentCount',
+                color: context.tertiary),
           ],
         ),
       ],
@@ -1892,7 +2145,9 @@ class _LeaveTabState extends State<_LeaveTab> {
     try {
       final res = await _api.getReports();
       _leaves = res['data'] as List<dynamic>?;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to load leaves: $e');
+    }
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -1907,9 +2162,12 @@ class _LeaveTabState extends State<_LeaveTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Leave'),
-        content: Text('Remove leave request by ${leave['employee_name'] ?? 'Unknown'} on ${leave['leave_date'] ?? ''}?'),
+        content: Text(
+            'Remove leave request by ${leave['employee_name'] ?? 'Unknown'} on ${leave['leave_date'] ?? ''}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: ctx.error),
@@ -1922,11 +2180,13 @@ class _LeaveTabState extends State<_LeaveTab> {
         _api.deleteLeave(leave['leave_id'] as String).then((_) {
           _loadLeaves();
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Leave deleted')));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('Leave deleted')));
           }
         }).catchError((e) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('$e')));
           }
         });
       }
@@ -1948,26 +2208,58 @@ class _LeaveTabState extends State<_LeaveTab> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _FilterChip(label: 'All', selected: _statusFilter.isEmpty, onTap: () { setState(() => _statusFilter = ''); }),
+                  _FilterChip(
+                      label: 'All',
+                      selected: _statusFilter.isEmpty,
+                      onTap: () {
+                        setState(() => _statusFilter = '');
+                      }),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Pending', selected: _statusFilter == 'pending', onTap: () { setState(() => _statusFilter = 'pending'); }),
+                  _FilterChip(
+                      label: 'Pending',
+                      selected: _statusFilter == 'pending',
+                      onTap: () {
+                        setState(() => _statusFilter = 'pending');
+                      }),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Approved', selected: _statusFilter == 'approved', onTap: () { setState(() => _statusFilter = 'approved'); }),
+                  _FilterChip(
+                      label: 'Approved',
+                      selected: _statusFilter == 'approved',
+                      onTap: () {
+                        setState(() => _statusFilter = 'approved');
+                      }),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Active', selected: _statusFilter == 'active', onTap: () { setState(() => _statusFilter = 'active'); }),
+                  _FilterChip(
+                      label: 'Active',
+                      selected: _statusFilter == 'active',
+                      onTap: () {
+                        setState(() => _statusFilter = 'active');
+                      }),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Completed', selected: _statusFilter == 'completed', onTap: () { setState(() => _statusFilter = 'completed'); }),
+                  _FilterChip(
+                      label: 'Completed',
+                      selected: _statusFilter == 'completed',
+                      onTap: () {
+                        setState(() => _statusFilter = 'completed');
+                      }),
                   const SizedBox(width: 8),
-                  _FilterChip(label: 'Rejected', selected: _statusFilter == 'rejected', onTap: () { setState(() => _statusFilter = 'rejected'); }),
+                  _FilterChip(
+                      label: 'Rejected',
+                      selected: _statusFilter == 'rejected',
+                      onTap: () {
+                        setState(() => _statusFilter = 'rejected');
+                      }),
                 ],
               ),
             ),
             const SizedBox(height: 12),
             Text('${filtered.length} leave${filtered.length == 1 ? '' : 's'}',
-              style: TextStyle(fontSize: 12, color: context.neutralGray)),
+                style: TextStyle(fontSize: 12, color: context.neutralGray)),
             const SizedBox(height: 8),
             if (_isLoading)
-              const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+              const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()))
             else if (filtered.isEmpty)
               const EmptyState(
                 icon: Icons.inbox_outlined,
@@ -2012,9 +2304,12 @@ class _LeaveTabState extends State<_LeaveTab> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
-        content: Text('$name \u2014 ${leave['leave_date'] ?? ''} (${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''})'),
+        content: Text(
+            '$name \u2014 ${leave['leave_date'] ?? ''} (${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''})'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Approve'),
@@ -2025,7 +2320,9 @@ class _LeaveTabState extends State<_LeaveTab> {
     if (confirmed == true && leaveId.isNotEmpty && mounted) {
       await context.read<SupervisorProvider>().approveLeave(leaveId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Approved leave for $name')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Approved leave for $name')));
         _loadLeaves();
       }
     }
@@ -2047,13 +2344,15 @@ class _LeaveTabState extends State<_LeaveTab> {
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,
-              decoration: const InputDecoration(hintText: 'Enter reason...', labelText: 'Rejection reason'),
+              decoration: const InputDecoration(
+                  hintText: 'Enter reason...', labelText: 'Rejection reason'),
               maxLines: 3,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
             onPressed: () {
               if (ctrl.text.trim().isEmpty) return;
@@ -2069,7 +2368,9 @@ class _LeaveTabState extends State<_LeaveTab> {
     if (reason != null && leaveId.isNotEmpty && mounted) {
       await context.read<SupervisorProvider>().rejectLeave(leaveId, reason);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Rejected leave for $name')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Rejected leave for $name')));
         _loadLeaves();
       }
     }
@@ -2085,7 +2386,9 @@ class _LeaveTabState extends State<_LeaveTab> {
         title: const Text('Revoke Approval?'),
         content: Text("Move $name's leave back to pending?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Revoke'),
@@ -2096,7 +2399,9 @@ class _LeaveTabState extends State<_LeaveTab> {
     if (confirmed == true && leaveId.isNotEmpty && mounted) {
       await context.read<SupervisorProvider>().revokeApproval(leaveId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Revoked approval for $name')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text('Revoked approval for $name')));
         _loadLeaves();
       }
     }
@@ -2104,7 +2409,8 @@ class _LeaveTabState extends State<_LeaveTab> {
 
   Widget _buildLeaveItem(BuildContext context, Map<String, dynamic> leave) {
     final status = leave['status'] as String? ?? 'pending';
-    final statusColor = AppConstants.statusColors[status] ?? context.neutralGray;
+    final statusColor =
+        AppConstants.statusColors[status] ?? context.neutralGray;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -2124,12 +2430,17 @@ class _LeaveTabState extends State<_LeaveTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(leave['employee_name'] ?? 'Unknown',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
-                    if ((leave['department_name'] as String?)?.isNotEmpty == true)
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: context.onSurface)),
+                    if ((leave['department_name'] as String?)?.isNotEmpty ==
+                        true)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text('${leave['department_name'] ?? ''}',
-                          style: TextStyle(fontSize: 12, color: context.neutralGray)),
+                            style: TextStyle(
+                                fontSize: 12, color: context.neutralGray)),
                       ),
                   ],
                 ),
@@ -2143,7 +2454,10 @@ class _LeaveTabState extends State<_LeaveTab> {
                 ),
                 child: Text(
                   AppConstants.statusLabels[status] ?? status,
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor),
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor),
                 ),
               ),
             ],
@@ -2154,31 +2468,37 @@ class _LeaveTabState extends State<_LeaveTab> {
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
+                Icon(Icons.calendar_today,
+                    size: 14, color: context.neutralGray),
                 const SizedBox(width: 4),
                 Text('${leave['leave_date'] ?? ''}',
-                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
+                    style: TextStyle(fontSize: 12, color: context.neutralGray)),
                 const SizedBox(width: 12),
                 Icon(Icons.access_time, size: 14, color: context.neutralGray),
                 const SizedBox(width: 4),
-                Text('${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
-                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
+                Text(
+                    '${leave['start_time'] ?? ''} - ${leave['end_time'] ?? ''}',
+                    style: TextStyle(fontSize: 12, color: context.neutralGray)),
               ],
             ),
           ),
           if ((leave['reason'] as String?)?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
             Text(leave['reason'] as String? ?? '',
-              style: TextStyle(fontSize: 12, color: context.neutralGray),
-              maxLines: 2, overflow: TextOverflow.ellipsis),
+                style: TextStyle(fontSize: 12, color: context.neutralGray),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis),
           ],
-          if (status == 'pending' || status == 'approved' || status == 'active') ...[
+          if (status == 'pending' ||
+              status == 'approved' ||
+              status == 'active') ...[
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.delete_outline, color: context.error, size: 20),
+                  icon: Icon(Icons.delete_outline,
+                      color: context.error, size: 20),
                   tooltip: 'Delete',
                   onPressed: () => _confirmDeleteLeave(leave),
                 ),
@@ -2227,7 +2547,8 @@ class _FilterChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -2236,7 +2557,9 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? context.primary.withValues(alpha: 0.15) : context.surfaceContainerLow,
+          color: selected
+              ? context.primary.withValues(alpha: 0.15)
+              : context.surfaceContainerLow,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: selected ? context.primary : context.outlineVariant,
@@ -2279,8 +2602,12 @@ class _DepartmentTabState extends State<_DepartmentTab> {
     setState(() => _isLoading = true);
     try {
       final deps = await _api.getDepartments();
-      _departments = deps.map((j) => Department.fromJson(j as Map<String, dynamic>)).toList();
-    } catch (_) {}
+      _departments = deps
+          .map((j) => Department.fromJson(j as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('Failed to load departments: $e');
+    }
     setState(() => _isLoading = false);
   }
 
@@ -2307,9 +2634,12 @@ class _DepartmentTabState extends State<_DepartmentTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Department'),
-        content: Text('Remove ${dept.departmentName}? Employees in this department may be affected.'),
+        content: Text(
+            'Remove ${dept.departmentName}? Employees in this department may be affected.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: ctx.error),
@@ -2330,7 +2660,8 @@ class _DepartmentTabState extends State<_DepartmentTab> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('$e')));
         }
       }
     }
@@ -2346,78 +2677,140 @@ class _DepartmentTabState extends State<_DepartmentTab> {
           RefreshIndicator(
             onRefresh: _loadDepartments,
             child: CustomScrollView(
-            slivers: [
-              _buildAdminAppBar(context, 'departments'),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                sliver: _departments.isEmpty
-                    ? SliverList(
-                        delegate: SliverChildListDelegate([
-                          const EmptyState(
-                            icon: Icons.business_outlined,
-                            title: 'No departments yet',
-                            subtitle: 'Add a department to get started',
-                          ),
-                        ]),
-                      )
-                    : SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final dept = _departments[index];
-                            final statusColor = dept.isActive ? context.success : context.error;
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: context.surfaceContainerLowest,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: context.outlineVariant),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Positioned(left: 0, top: 0, bottom: 0, child: Container(
-                                    width: 4,
-                                    decoration: BoxDecoration(color: statusColor, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12))),
-                                  )),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(radius: 24, backgroundColor: context.secondary.withValues(alpha: 0.12), child: Icon(Icons.business, color: context.secondary)),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(dept.departmentName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface)),
-                                              const SizedBox(height: 2),
-                                              Text('${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 14, color: context.outline)),
-                                            ],
+              slivers: [
+                _buildAdminAppBar(context, 'departments'),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                  sliver: _departments.isEmpty
+                      ? SliverList(
+                          delegate: SliverChildListDelegate([
+                            const EmptyState(
+                              icon: Icons.business_outlined,
+                              title: 'No departments yet',
+                              subtitle: 'Add a department to get started',
+                            ),
+                          ]),
+                        )
+                      : SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final dept = _departments[index];
+                              final statusColor = dept.isActive
+                                  ? context.success
+                                  : context.error;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: context.surfaceContainerLowest,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border:
+                                      Border.all(color: context.outlineVariant),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        bottom: 0,
+                                        child: Container(
+                                          width: 4,
+                                          decoration: BoxDecoration(
+                                              color: statusColor,
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                      topLeft:
+                                                          Radius.circular(12),
+                                                      bottomLeft:
+                                                          Radius.circular(12))),
+                                        )),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          16, 14, 14, 14),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                              radius: 24,
+                                              backgroundColor: context.secondary
+                                                  .withValues(alpha: 0.12),
+                                              child: Icon(Icons.business,
+                                                  color: context.secondary)),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(dept.departmentName,
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            context.onSurface)),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                    '${dept.departmentCode ?? 'No code'}${dept.headOfDepartment != null ? ' \u2022 ${dept.headOfDepartment}' : ''}',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        color:
+                                                            context.outline)),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999), border: Border.all(color: statusColor.withValues(alpha: 0.3))),
-                                          child: Text(dept.isActive ? 'Active' : 'Inactive', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        IconButton(icon: const Icon(Icons.edit_outlined, size: 20), color: context.neutralGray, onPressed: () => _showEditDialog(dept)),
-                                        const SizedBox(width: 4),
-                                        IconButton(icon: const Icon(Icons.delete_outline, size: 20), color: context.error, onPressed: () => _confirmDelete(dept)),
-                                      ],
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                                color: statusColor.withValues(
+                                                    alpha: 0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                                border: Border.all(
+                                                    color:
+                                                        statusColor.withValues(
+                                                            alpha: 0.3))),
+                                            child: Text(
+                                                dept.isActive
+                                                    ? 'Active'
+                                                    : 'Inactive',
+                                                style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: statusColor)),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          IconButton(
+                                              icon: const Icon(
+                                                  Icons.edit_outlined,
+                                                  size: 20),
+                                              color: context.neutralGray,
+                                              onPressed: () =>
+                                                  _showEditDialog(dept)),
+                                          const SizedBox(width: 4),
+                                          IconButton(
+                                              icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  size: 20),
+                                              color: context.error,
+                                              onPressed: () =>
+                                                  _confirmDelete(dept)),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          childCount: _departments.length,
+                                  ],
+                                ),
+                              );
+                            },
+                            childCount: _departments.length,
+                          ),
                         ),
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-          ),
-
           Positioned(
             bottom: 24,
             right: 16,
@@ -2452,7 +2845,9 @@ class _RoleBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 11, color: color, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -2493,18 +2888,26 @@ class _AddDepartmentDialogState extends State<_AddDepartmentDialog> {
             TextFormField(
               controller: _idCtl,
               decoration: const InputDecoration(labelText: 'Department ID'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _nameCtl,
               decoration: const InputDecoration(labelText: 'Department Name'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
-            TextFormField(controller: _codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
+            TextFormField(
+                controller: _codeCtl,
+                decoration: const InputDecoration(
+                    labelText: 'Department Code (optional)')),
             const SizedBox(height: 12),
-            TextFormField(controller: _hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
+            TextFormField(
+                controller: _hodCtl,
+                decoration: const InputDecoration(
+                    labelText: 'Head of Department (optional)')),
           ],
         ),
       ),
@@ -2516,7 +2919,11 @@ class _AddDepartmentDialogState extends State<_AddDepartmentDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _create,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Create'),
         ),
       ],
@@ -2541,7 +2948,8 @@ class _AddDepartmentDialogState extends State<_AddDepartmentDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to create department';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to create department';
       } else {
         msg = e.toString();
       }
@@ -2561,8 +2969,10 @@ class _EditDepartmentDialog extends StatefulWidget {
 
 class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
   late final _nameCtl = TextEditingController(text: widget.dept.departmentName);
-  late final _codeCtl = TextEditingController(text: widget.dept.departmentCode ?? '');
-  late final _hodCtl = TextEditingController(text: widget.dept.headOfDepartment ?? '');
+  late final _codeCtl =
+      TextEditingController(text: widget.dept.departmentCode ?? '');
+  late final _hodCtl =
+      TextEditingController(text: widget.dept.headOfDepartment ?? '');
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -2586,12 +2996,19 @@ class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
             TextFormField(
               controller: _nameCtl,
               decoration: const InputDecoration(labelText: 'Department Name'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
-            TextFormField(controller: _codeCtl, decoration: const InputDecoration(labelText: 'Department Code (optional)')),
+            TextFormField(
+                controller: _codeCtl,
+                decoration: const InputDecoration(
+                    labelText: 'Department Code (optional)')),
             const SizedBox(height: 12),
-            TextFormField(controller: _hodCtl, decoration: const InputDecoration(labelText: 'Head of Department (optional)')),
+            TextFormField(
+                controller: _hodCtl,
+                decoration: const InputDecoration(
+                    labelText: 'Head of Department (optional)')),
           ],
         ),
       ),
@@ -2603,7 +3020,11 @@ class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _save,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Save'),
         ),
       ],
@@ -2627,7 +3048,8 @@ class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to update department';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to update department';
       } else {
         msg = e.toString();
       }
@@ -2662,7 +3084,8 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
   void initState() {
     super.initState();
     if (widget.departments.isNotEmpty) {
-      _selectedDept = widget.departments.first['department_id'] as String? ?? '';
+      _selectedDept =
+          widget.departments.first['department_id'] as String? ?? '';
     }
   }
 
@@ -2688,32 +3111,64 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
             children: [
               TextFormField(
                 controller: _idCtl,
-                decoration: const InputDecoration(labelText: 'Employee ID', hintText: '000001', helperText: '6-digit ID'),
+                decoration: const InputDecoration(
+                    labelText: 'Employee ID',
+                    hintText: '000001',
+                    helperText: '6-digit ID'),
                 keyboardType: TextInputType.number,
                 maxLength: 6,
-                buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                buildCounter: (context,
+                        {required currentLength,
+                        required isFocused,
+                        maxLength}) =>
+                    null,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Required';
-                  if (v.trim().length != 6 || int.tryParse(v.trim()) == null) return 'Must be 6 digits';
+                  if (v.trim().length != 6 || int.tryParse(v.trim()) == null)
+                    return 'Must be 6 digits';
                   return null;
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(controller: _nameCtl, decoration: const InputDecoration(labelText: 'Full Name', hintText: 'e.g. Juan Dela Cruz'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _nameCtl,
+                  decoration: const InputDecoration(
+                      labelText: 'Full Name', hintText: 'e.g. Juan Dela Cruz'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
-              TextFormField(controller: _posCtl, decoration: const InputDecoration(labelText: 'Position', hintText: 'e.g. Software Engineer'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _posCtl,
+                  decoration: const InputDecoration(
+                      labelText: 'Position',
+                      hintText: 'e.g. Software Engineer'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
-              TextFormField(controller: _emailCtl, decoration: const InputDecoration(labelText: 'Email', hintText: 'e.g. juan@company.com'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _emailCtl,
+                  decoration: const InputDecoration(
+                      labelText: 'Email', hintText: 'e.g. juan@company.com'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
-              TextFormField(controller: _passCtl, decoration: const InputDecoration(labelText: 'Password'), obscureText: true, validator: (v) => v == null || v.length < 4 ? 'Min 4 characters' : null),
+              TextFormField(
+                  controller: _passCtl,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  validator: (v) =>
+                      v == null || v.length < 4 ? 'Min 4 characters' : null),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
                 decoration: const InputDecoration(labelText: 'Department'),
-                items: widget.departments.map<DropdownMenuItem<String>>((d) => DropdownMenuItem<String>(
-                  value: d['department_id'] as String?,
-                  child: Text(d['department_name'] as String? ?? ''),
-                )).toList(),
+                items: widget.departments
+                    .map<DropdownMenuItem<String>>((d) =>
+                        DropdownMenuItem<String>(
+                          value: d['department_id'] as String?,
+                          child: Text(d['department_name'] as String? ?? ''),
+                        ))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedDept = v ?? ''),
               ),
               const SizedBox(height: 8),
@@ -2750,7 +3205,11 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _create,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Create'),
         ),
       ],
@@ -2780,7 +3239,8 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to create employee';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to create employee';
       } else {
         msg = e.toString();
       }
@@ -2844,21 +3304,34 @@ class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(controller: _nameCtl, decoration: const InputDecoration(labelText: 'Full Name'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _nameCtl,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
-              TextFormField(controller: _posCtl, decoration: const InputDecoration(labelText: 'Position'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _posCtl,
+                  decoration: const InputDecoration(labelText: 'Position'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
-              TextFormField(controller: _emailCtl, decoration: const InputDecoration(labelText: 'Email'), validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null),
+              TextFormField(
+                  controller: _emailCtl,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
                 decoration: const InputDecoration(labelText: 'Department'),
                 items: [
-                  const DropdownMenuItem<String>(value: null, child: Text('No department')),
+                  const DropdownMenuItem<String>(
+                      value: null, child: Text('No department')),
                   ...widget.departments.map((d) => DropdownMenuItem<String>(
-                    value: d['department_id'] as String?,
-                    child: Text(d['department_name'] as String? ?? ''),
-                  )),
+                        value: d['department_id'] as String?,
+                        child: Text(d['department_name'] as String? ?? ''),
+                      )),
                 ],
                 onChanged: (v) => setState(() => _selectedDept = v ?? ''),
               ),
@@ -2885,7 +3358,9 @@ class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
                 contentPadding: EdgeInsets.zero,
               ),
               CheckboxListTile(
-                title: Text('Active', style: TextStyle(color: _isActive ? context.success : context.error)),
+                title: Text('Active',
+                    style: TextStyle(
+                        color: _isActive ? context.success : context.error)),
                 value: _isActive,
                 onChanged: (v) => setState(() => _isActive = v ?? true),
                 controlAffinity: ListTileControlAffinity.leading,
@@ -2903,7 +3378,11 @@ class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _save,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Save'),
         ),
       ],
@@ -2942,7 +3421,8 @@ class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to update employee';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to update employee';
       } else {
         msg = e.toString();
       }
@@ -2978,20 +3458,25 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Paste employee JSON array:', style: TextStyle(fontSize: 13, color: context.onSurfaceVariant)),
+            Text('Paste employee JSON array:',
+                style:
+                    TextStyle(fontSize: 13, color: context.onSurfaceVariant)),
             const SizedBox(height: 8),
             TextField(
               controller: _ctl,
               maxLines: 10,
               decoration: const InputDecoration(
-                hintText: '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
+                hintText:
+                    '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.all(12),
               ),
               style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
             ),
             const SizedBox(height: 8),
-            Text('Required: employee_id, full_name, position, department_id, email, password', style: TextStyle(fontSize: 11, color: context.neutralGray)),
+            Text(
+                'Required: employee_id, full_name, position, department_id, email, password',
+                style: TextStyle(fontSize: 11, color: context.neutralGray)),
           ],
         ),
       ),
@@ -3003,7 +3488,11 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _import,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Import'),
         ),
       ],
@@ -3019,7 +3508,8 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
       if (list.isEmpty) {
         if (!mounted) return;
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No employees found in data')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No employees found in data')));
         return;
       }
       final api = context.read<ApiService>();
@@ -3028,7 +3518,9 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
       Navigator.pop(context, true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Imported ${result['imported'] ?? list.length} employees')),
+          SnackBar(
+              content: Text(
+                  'Imported ${result['imported'] ?? list.length} employees')),
         );
       }
     } catch (e) {
@@ -3036,7 +3528,8 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to import employees';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to import employees';
       } else {
         msg = e.toString();
       }
@@ -3075,7 +3568,8 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
           const SizedBox(height: 12),
           TextField(
             controller: _passCtl,
-            decoration: const InputDecoration(labelText: 'New Password', hintText: 'Min 4 characters'),
+            decoration: const InputDecoration(
+                labelText: 'New Password', hintText: 'Min 4 characters'),
             obscureText: true,
           ),
         ],
@@ -3088,7 +3582,11 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
         FilledButton(
           onPressed: _isLoading ? null : _reset,
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
               : const Text('Reset'),
         ),
       ],
@@ -3100,7 +3598,8 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
     setState(() => _isLoading = true);
     try {
       final api = context.read<ApiService>();
-      await api.resetPassword(widget.emp['employee_id'] as String, _passCtl.text);
+      await api.resetPassword(
+          widget.emp['employee_id'] as String, _passCtl.text);
       if (!mounted) return;
       Navigator.pop(context, true);
       if (mounted) {
@@ -3113,7 +3612,8 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
       setState(() => _isLoading = false);
       String msg;
       if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ?? 'Failed to reset password';
+        msg = (e.response!.data as Map)['message']?.toString() ??
+            'Failed to reset password';
       } else {
         msg = e.toString();
       }
@@ -3128,7 +3628,11 @@ class _StatCard extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _StatCard({required this.icon, required this.label, required this.value, required this.color});
+  const _StatCard(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -3145,8 +3649,13 @@ class _StatCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 8),
-            Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: context.onSurface)),
-            Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: context.onSurface)),
+            Text(label,
+                style: TextStyle(fontSize: 13, color: context.neutralGray)),
           ],
         ),
       ),
@@ -3217,5 +3726,3 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
-
-

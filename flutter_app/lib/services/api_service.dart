@@ -15,6 +15,7 @@ class ApiService {
   bool _isRefreshing = false;
   final _pendingRequests = <_PendingRequest>[];
   int _refreshRetryCount = 0;
+  VoidCallback? onForceLogout;
 
   void init() {
     _dio = Dio(BaseOptions(
@@ -36,13 +37,16 @@ class ApiService {
     if (!kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) {
-          if (AppConfig.apiBaseUrl.startsWith('https://')) {
-            CertificatePinner.apply(client);
-            return false;
-          }
-          return true;
-        };
+        if (AppConfig.apiBaseUrl.startsWith('https://')) {
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) {
+            final pinned = CertificatePinner.isPinned(cert);
+            if (pinned == null) {
+              return true;
+            }
+            return pinned;
+          };
+        }
         return client;
       };
     }
@@ -116,6 +120,7 @@ class ApiService {
             _pendingRequests.clear();
             await _storage.delete(key: 'auth_token');
             _refreshRetryCount = 0;
+            onForceLogout?.call();
             handler.resolve(Response(
               requestOptions: error.requestOptions,
               data: {'force_logout': true},
@@ -134,6 +139,7 @@ class ApiService {
       onResponse: (response, handler) async {
         if (response.data is Map && response.data['force_logout'] == true) {
           await _storage.delete(key: 'auth_token');
+          onForceLogout?.call();
         }
         return handler.next(response);
       },
@@ -206,7 +212,8 @@ class ApiService {
     return LeaveRequest.fromJson(d);
   }
 
-  Future<Map<String, dynamic>> getLeaveHistory({String? status, int page = 1, int limit = 20}) async {
+  Future<Map<String, dynamic>> getLeaveHistory(
+      {String? status, int page = 1, int limit = 20}) async {
     final params = <String, dynamic>{'page': page, 'limit': limit};
     if (status != null) params['status'] = status;
     final res = await _dio.get('/leave/history', queryParameters: params);
@@ -245,7 +252,8 @@ class ApiService {
   }
 
   Future<LeaveRequest> rejectLeave(String leaveId, String reason) async {
-    final res = await _dio.post('/supervisor/reject/$leaveId', data: {'reason': reason});
+    final res = await _dio
+        .post('/supervisor/reject/$leaveId', data: {'reason': reason});
     final d = res.data['data'];
     if (d == null) throw Exception('Failed to reject leave');
     return LeaveRequest.fromJson(d);
@@ -268,7 +276,8 @@ class ApiService {
   Future<List<LeaveRequest>> getTeamLeaves({String? date}) async {
     final params = <String, dynamic>{};
     if (date != null) params['date'] = date;
-    final res = await _dio.get('/supervisor/team-leaves', queryParameters: params);
+    final res =
+        await _dio.get('/supervisor/team-leaves', queryParameters: params);
     final list = res.data['data'];
     if (list == null) return [];
     return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
@@ -280,8 +289,10 @@ class ApiService {
     return res.data;
   }
 
-  Future<Map<String, dynamic>> getScanHistory({int page = 1, int limit = 50}) async {
-    final res = await _dio.get('/scan/history', queryParameters: {'page': page, 'limit': limit});
+  Future<Map<String, dynamic>> getScanHistory(
+      {int page = 1, int limit = 50}) async {
+    final res = await _dio
+        .get('/scan/history', queryParameters: {'page': page, 'limit': limit});
     return res.data;
   }
 
@@ -291,7 +302,13 @@ class ApiService {
     return res.data;
   }
 
-  Future<Map<String, dynamic>> listEmployees({String? search, String? departmentId, String? status, String? role, int page = 1, int limit = 20}) async {
+  Future<Map<String, dynamic>> listEmployees(
+      {String? search,
+      String? departmentId,
+      String? status,
+      String? role,
+      int page = 1,
+      int limit = 20}) async {
     final params = <String, dynamic>{'page': page, 'limit': limit};
     if (search != null) params['search'] = search;
     if (departmentId != null) params['department_id'] = departmentId;
@@ -301,7 +318,8 @@ class ApiService {
     return res.data;
   }
 
-  Future<Map<String, dynamic>> updateEmployee(String id, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateEmployee(
+      String id, Map<String, dynamic> data) async {
     final res = await _dio.put('/admin/employees/$id', data: data);
     return res.data;
   }
@@ -325,15 +343,18 @@ class ApiService {
   }
 
   Future<void> resetPassword(String id, String password) async {
-    await _dio.put('/admin/employees/$id/reset-password', data: {'password': password});
+    await _dio.put('/admin/employees/$id/reset-password',
+        data: {'password': password});
   }
 
   Future<void> deleteLeave(String leaveId) async {
     await _dio.delete('/leave/$leaveId');
   }
 
-  Future<Map<String, dynamic>> importEmployees(List<Map<String, dynamic>> employees) async {
-    final res = await _dio.post('/admin/import/hr', data: {'employees': employees});
+  Future<Map<String, dynamic>> importEmployees(
+      List<Map<String, dynamic>> employees) async {
+    final res =
+        await _dio.post('/admin/import/hr', data: {'employees': employees});
     return res.data;
   }
 
@@ -354,7 +375,8 @@ class ApiService {
     await _dio.delete('/admin/departments/$id');
   }
 
-  Future<Map<String, dynamic>> getReports({String? type, String? startDate, String? endDate}) async {
+  Future<Map<String, dynamic>> getReports(
+      {String? type, String? startDate, String? endDate}) async {
     final params = <String, dynamic>{};
     if (type != null) params['type'] = type;
     if (startDate != null) params['start_date'] = startDate;

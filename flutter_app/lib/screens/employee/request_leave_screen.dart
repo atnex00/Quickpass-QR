@@ -148,8 +148,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           decoration: BoxDecoration(
                             color: context.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: context.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,8 +158,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                       color: context.onSurface)),
-                              Divider(
-                                  color: context.outlineVariant),
+                              Divider(color: context.outlineVariant),
                               _ReadOnlyField(
                                   label: 'Employee ID',
                                   value: user?.employeeId ?? ''),
@@ -186,8 +184,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                             decoration: BoxDecoration(
                               color: context.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: context.outlineVariant),
+                              border: Border.all(color: context.outlineVariant),
                             ),
                             child: Row(
                               children: [
@@ -200,8 +197,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                                     Text('Date',
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color:
-                                                context.neutralGray)),
+                                            color: context.neutralGray)),
                                     Text(DateFormatter.formatDate(_leaveDate),
                                         style: TextStyle(
                                             fontWeight: FontWeight.w600,
@@ -244,13 +240,11 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           decoration: BoxDecoration(
                             color: context.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: context.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time,
-                                  color: context.secondary),
+                              Icon(Icons.access_time, color: context.secondary),
                               const SizedBox(width: 12),
                               Text('Duration: ',
                                   style: TextStyle(
@@ -347,8 +341,7 @@ class _ReadOnlyField extends StatelessWidget {
           SizedBox(
               width: 110,
               child: Text(label,
-                  style: TextStyle(
-                      color: context.neutralGray, fontSize: 13))),
+                  style: TextStyle(color: context.neutralGray, fontSize: 13))),
           Expanded(
               child: Text(value,
                   style: TextStyle(
@@ -386,13 +379,11 @@ class _TimePickerCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(
-                      fontSize: 12, color: context.neutralGray)),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.access_time,
-                      size: 18, color: context.primaryBlue),
+                  Icon(Icons.access_time, size: 18, color: context.primaryBlue),
                   const SizedBox(width: 6),
                   Text(time,
                       style: TextStyle(

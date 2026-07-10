@@ -36,7 +36,8 @@ class LoadingOverlay extends StatelessWidget {
                     CircularProgressIndicator(color: context.primaryBlue),
                     if (message != null) ...[
                       const SizedBox(height: 16),
-                      Text(message!, style: TextStyle(color: context.onSurfaceVariant)),
+                      Text(message!,
+                          style: TextStyle(color: context.onSurfaceVariant)),
                     ],
                   ],
                 ),
@@ -53,7 +54,8 @@ class InfoRow extends StatelessWidget {
   final String value;
   final Widget? trailing;
 
-  const InfoRow({super.key, required this.label, required this.value, this.trailing});
+  const InfoRow(
+      {super.key, required this.label, required this.value, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,7 @@ class InfoRow extends StatelessWidget {
       children: [
         Text(label,
             style: TextStyle(
-                fontSize: 14,
-                color: context.onSurfaceVariant,
-                height: 1.43)),
+                fontSize: 14, color: context.onSurfaceVariant, height: 1.43)),
         const SizedBox(width: 8),
         if (trailing != null) ...[
           const Spacer(),
@@ -104,8 +104,8 @@ class GuidelineItem extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
             child: Text(text,
-                style: TextStyle(
-                    fontSize: 14, color: context.onSurfaceVariant))),
+                style:
+                    TextStyle(fontSize: 14, color: context.onSurfaceVariant))),
       ],
     );
   }

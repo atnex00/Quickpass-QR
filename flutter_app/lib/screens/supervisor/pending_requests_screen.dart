@@ -33,10 +33,10 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
     final isAdmin = context.select((AuthProvider a) => a.isAdmin);
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Pending Requests (${supProv.pendingCount})'),
-          elevation: 0,
-        ),
+      appBar: AppBar(
+        title: Text('Pending Requests (${supProv.pendingCount})'),
+        elevation: 0,
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           final prov = context.read<SupervisorProvider>();
@@ -54,24 +54,33 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                     subtitle: 'All caught up!',
                   )
                 : ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     children: [
                       if (supProv.pendingRequests.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
                           child: Text('Pending Requests',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.onSurface)),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.onSurface)),
                         ),
-                        ...supProv.pendingRequests.map((leave) => _PendingCard(leave: leave, isAdmin: isAdmin)),
+                        ...supProv.pendingRequests.map((leave) =>
+                            _PendingCard(leave: leave, isAdmin: isAdmin)),
                         const SizedBox(height: 16),
                       ],
                       if (supProv.approvedLeaves.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
                           child: Text('Approved Leaves',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.onSurface)),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.onSurface)),
                         ),
-                        ...supProv.approvedLeaves.map((leave) => _ApprovedCard(leave: leave, isAdmin: isAdmin)),
+                        ...supProv.approvedLeaves.map((leave) =>
+                            _ApprovedCard(leave: leave, isAdmin: isAdmin)),
                       ],
                     ],
                   ),
@@ -106,8 +115,11 @@ class _PendingCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: context.primary.withValues(alpha: 0.2),
                   child: Text(
-                    leave.employeeName.isNotEmpty ? leave.employeeName.substring(0, 1).toUpperCase() : '?',
-                    style: TextStyle(color: context.primary, fontWeight: FontWeight.w700),
+                    leave.employeeName.isNotEmpty
+                        ? leave.employeeName.substring(0, 1).toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                        color: context.primary, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -115,9 +127,14 @@ class _PendingCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(leave.employeeName, style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface)),
+                      Text(leave.employeeName,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: context.onSurface)),
                       if (leave.employeePosition != null)
-                        Text(leave.employeePosition!, style: TextStyle(color: context.neutralGray, fontSize: 12)),
+                        Text(leave.employeePosition!,
+                            style: TextStyle(
+                                color: context.neutralGray, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -130,25 +147,34 @@ class _PendingCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
+                  Icon(Icons.calendar_today,
+                      size: 14, color: context.neutralGray),
                   const SizedBox(width: 4),
-                  Text(DateFormatter.formatDate(leave.leaveDate), style: TextStyle(fontSize: 13, color: context.neutralGray)),
+                  Text(DateFormatter.formatDate(leave.leaveDate),
+                      style:
+                          TextStyle(fontSize: 13, color: context.neutralGray)),
                   const SizedBox(width: 16),
                   Icon(Icons.access_time, size: 14, color: context.neutralGray),
                   const SizedBox(width: 4),
-                  Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(fontSize: 13, color: context.neutralGray)),
+                  Text('${leave.startTime} - ${leave.endTime}',
+                      style:
+                          TextStyle(fontSize: 13, color: context.neutralGray)),
                 ],
               ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(color: context.neutralGray, fontSize: 13)),
+            Text(leave.reason,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: context.neutralGray, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (isAdmin)
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: context.error, size: 20),
+                    icon: Icon(Icons.delete_outline,
+                        color: context.error, size: 20),
                     tooltip: 'Delete',
                     onPressed: () => _confirmDelete(context),
                   ),
@@ -185,9 +211,12 @@ class _PendingCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
-        content: Text('${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})'),
+        content: Text(
+            '${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Approve'),
@@ -224,13 +253,15 @@ class _PendingCard extends StatelessWidget {
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,
-              decoration: const InputDecoration(hintText: 'Enter reason...', labelText: 'Rejection reason'),
+              decoration: const InputDecoration(
+                  hintText: 'Enter reason...', labelText: 'Rejection reason'),
               maxLines: 3,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           FilledButton(
             onPressed: () {
               if (ctrl.text.trim().isEmpty) return;
@@ -265,9 +296,12 @@ class _PendingCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Delete Leave'),
-        content: Text('Delete leave for ${leave.employeeName}? This cannot be undone.'),
+        content: Text(
+            'Delete leave for ${leave.employeeName}? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: context.error),
@@ -282,7 +316,9 @@ class _PendingCard extends StatelessWidget {
         await context.read<LeaveProvider>().deleteLeave(leave.leaveId);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Leave deleted')),
+            const SnackBar(
+                behavior: SnackBarBehavior.floating,
+                content: Text('Leave deleted')),
           );
         }
       } catch (e) {
@@ -322,8 +358,11 @@ class _ApprovedCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: context.success.withValues(alpha: 0.15),
                   child: Text(
-                    leave.employeeName.isNotEmpty ? leave.employeeName.substring(0, 1).toUpperCase() : '?',
-                    style: TextStyle(color: context.success, fontWeight: FontWeight.w700),
+                    leave.employeeName.isNotEmpty
+                        ? leave.employeeName.substring(0, 1).toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                        color: context.success, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -331,9 +370,14 @@ class _ApprovedCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(leave.employeeName, style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface)),
+                      Text(leave.employeeName,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: context.onSurface)),
                       if (leave.employeePosition != null)
-                        Text(leave.employeePosition!, style: TextStyle(color: context.neutralGray, fontSize: 12)),
+                        Text(leave.employeePosition!,
+                            style: TextStyle(
+                                color: context.neutralGray, fontSize: 12)),
                     ],
                   ),
                 ),
@@ -346,25 +390,34 @@ class _ApprovedCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 14, color: context.neutralGray),
+                  Icon(Icons.calendar_today,
+                      size: 14, color: context.neutralGray),
                   const SizedBox(width: 4),
-                  Text(DateFormatter.formatDate(leave.leaveDate), style: TextStyle(fontSize: 13, color: context.neutralGray)),
+                  Text(DateFormatter.formatDate(leave.leaveDate),
+                      style:
+                          TextStyle(fontSize: 13, color: context.neutralGray)),
                   const SizedBox(width: 16),
                   Icon(Icons.access_time, size: 14, color: context.neutralGray),
                   const SizedBox(width: 4),
-                  Text('${leave.startTime} - ${leave.endTime}', style: TextStyle(fontSize: 13, color: context.neutralGray)),
+                  Text('${leave.startTime} - ${leave.endTime}',
+                      style:
+                          TextStyle(fontSize: 13, color: context.neutralGray)),
                 ],
               ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason, maxLines: 3, overflow: TextOverflow.ellipsis, style: TextStyle(color: context.neutralGray, fontSize: 13)),
+            Text(leave.reason,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: context.neutralGray, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (isAdmin)
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: context.error, size: 20),
+                    icon: Icon(Icons.delete_outline,
+                        color: context.error, size: 20),
                     tooltip: 'Delete',
                     onPressed: () => _confirmDelete(context),
                   ),
@@ -393,7 +446,9 @@ class _ApprovedCard extends StatelessWidget {
         title: const Text('Revoke Approval?'),
         content: Text('Move ${leave.employeeName}\'s leave back to pending?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Revoke'),
@@ -422,9 +477,12 @@ class _ApprovedCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Delete Leave'),
-        content: Text('Delete leave for ${leave.employeeName}? This cannot be undone.'),
+        content: Text(
+            'Delete leave for ${leave.employeeName}? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: context.error),
@@ -439,7 +497,9 @@ class _ApprovedCard extends StatelessWidget {
         await context.read<LeaveProvider>().deleteLeave(leave.leaveId);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Leave deleted')),
+            const SnackBar(
+                behavior: SnackBarBehavior.floating,
+                content: Text('Leave deleted')),
           );
         }
       } catch (e) {

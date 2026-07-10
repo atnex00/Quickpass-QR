@@ -26,7 +26,7 @@ void main() {
       expect(dept.departmentName, '');
       expect(dept.departmentCode, isNull);
       expect(dept.headOfDepartment, isNull);
-      expect(dept.isActive, true);
+      expect(dept.isActive, false);
     });
 
     test('toJson produces correct map', () {

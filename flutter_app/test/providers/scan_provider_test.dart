@@ -16,10 +16,10 @@ void main() {
   group('validateScan', () {
     test('returns true on successful validation', () async {
       when(mockApi.validateScan('qr-data-123')).thenAnswer((_) async => {
-        'success': true,
-        'message': 'Valid QR code',
-        'data': {'leave_id': 'l1'},
-      });
+            'success': true,
+            'message': 'Valid QR code',
+            'data': {'leave_id': 'l1'},
+          });
 
       final result = await provider.validateScan('qr-data-123');
 
@@ -31,9 +31,9 @@ void main() {
 
     test('returns false when validation fails', () async {
       when(mockApi.validateScan('bad-qr')).thenAnswer((_) async => {
-        'success': false,
-        'message': 'Invalid QR code',
-      });
+            'success': false,
+            'message': 'Invalid QR code',
+          });
 
       final result = await provider.validateScan('bad-qr');
 
@@ -42,7 +42,8 @@ void main() {
     });
 
     test('returns false on exception', () async {
-      when(mockApi.validateScan('error-qr')).thenThrow(Exception('Network error'));
+      when(mockApi.validateScan('error-qr'))
+          .thenThrow(Exception('Network error'));
 
       final result = await provider.validateScan('error-qr');
 
@@ -66,7 +67,8 @@ void main() {
 
   group('clearResult', () {
     test('clears last result and error', () {
-      when(mockApi.validateScan('qr')).thenAnswer((_) async => {'success': true});
+      when(mockApi.validateScan('qr'))
+          .thenAnswer((_) async => {'success': true});
       provider.validateScan('qr');
       provider.clearResult();
 

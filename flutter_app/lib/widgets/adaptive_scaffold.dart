@@ -39,15 +39,18 @@ class AdaptiveScaffold extends StatelessWidget {
                     color: context.onPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
+                  child: Image.asset('assets/icon/app-icon.png',
+                      width: 22, height: 22),
                 ),
               ),
             ),
             destinations: destinations
                 .map((d) => NavigationRailDestination(
                       icon: Icon(d.icon, color: context.onSurfaceVariant),
-                      selectedIcon: Icon(d.selectedIcon, color: context.primary),
-                      label: Text(d.label, style: const TextStyle(fontSize: 12)),
+                      selectedIcon:
+                          Icon(d.selectedIcon, color: context.primary),
+                      label:
+                          Text(d.label, style: const TextStyle(fontSize: 12)),
                     ))
                 .toList(),
           ),

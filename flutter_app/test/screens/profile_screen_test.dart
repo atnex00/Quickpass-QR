@@ -5,16 +5,21 @@ import 'package:provider/provider.dart';
 import 'package:quickpass/config/theme.dart';
 import 'package:quickpass/models/employee.dart';
 import 'package:quickpass/providers/auth_provider.dart';
+import 'package:quickpass/providers/settings_provider.dart';
 import 'package:quickpass/screens/employee/profile_screen.dart';
 
 import '../helpers/mocks.mocks.dart';
 
-Widget _buildTestApp(AuthProvider authProvider) {
+Widget _buildTestApp(AuthProvider authProvider, {SettingsProvider? settings}) {
+  final settingsProvider = settings ?? SettingsProvider();
   return MaterialApp(
     theme: QuickpassTheme.light,
-    home: ChangeNotifierProvider<AuthProvider>.value(
-      value: authProvider,
-      child: const ProfileScreen(),
+    home: ChangeNotifierProvider<SettingsProvider>.value(
+      value: settingsProvider,
+      child: ChangeNotifierProvider<AuthProvider>.value(
+        value: authProvider,
+        child: const ProfileScreen(),
+      ),
     ),
   );
 }
@@ -42,7 +47,8 @@ void main() {
     when(mockApi.getStoredToken()).thenAnswer((_) async => 'test-token');
   });
 
-  testWidgets('renders profile with user information', (WidgetTester tester) async {
+  testWidgets('renders profile with user information',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
@@ -58,7 +64,8 @@ void main() {
     expect(find.text('Save Changes'), findsOneWidget);
   });
 
-  testWidgets('shows logout confirmation dialog on logout tap', (WidgetTester tester) async {
+  testWidgets('shows logout confirmation dialog on logout tap',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
@@ -72,7 +79,8 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
   });
 
-  testWidgets('cancel dismisses logout dialog without logging out', (WidgetTester tester) async {
+  testWidgets('cancel dismisses logout dialog without logging out',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));

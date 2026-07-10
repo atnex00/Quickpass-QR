@@ -42,85 +42,84 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
         child: RefreshIndicator(
           onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
           child: CustomScrollView(
-          slivers: [
-            // ── Electric Yellow App Bar ──
-            SliverAppBar(
-              pinned: true,
-              toolbarHeight: 64,
-              automaticallyImplyLeading: false,
-              flexibleSpace: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: context.onPrimary
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
+            slivers: [
+              // ── Electric Yellow App Bar ──
+              SliverAppBar(
+                pinned: true,
+                toolbarHeight: 64,
+                automaticallyImplyLeading: false,
+                flexibleSpace: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: context.onPrimary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Image.asset('assets/icon/app-icon.png',
+                                  width: 22, height: 22),
                             ),
-                            child: Image.asset('assets/icon/app-icon.png',
-                                width: 22, height: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Gate History',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: context.onPrimary,
+                            const SizedBox(width: 12),
+                            Text(
+                              'Gate History',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: context.onPrimary,
+                              ),
                             ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: Icon(Icons.notifications_outlined,
-                                color: context.onPrimary),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  behavior: SnackBarBehavior.floating,
-                                  content: Text('No new notifications'),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                            const Spacer(),
+                            IconButton(
+                              icon: Icon(Icons.notifications_outlined,
+                                  color: context.onPrimary),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text('No new notifications'),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // ── Sticky Filter Bar ──
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _FilterBarDelegate(_statusFilter, _setFilter),
-            ),
+              // ── Sticky Filter Bar ──
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _FilterBarDelegate(_statusFilter, _setFilter),
+              ),
 
-            // ── Content ──
-            if (leaveProv.isLoading)
-              const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()))
-            else if (leaveProv.history.isEmpty)
-              SliverFillRemaining(
-                child: EmptyState(
-                  icon: Icons.inbox_outlined,
-                  title: 'No leave requests found',
-                  subtitle: _statusFilter != null
-                      ? 'No $_statusFilter requests match your filter'
-                      : 'Submit a leave request to get started',
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                sliver: SliverList(
+              // ── Content ──
+              if (leaveProv.isLoading)
+                const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()))
+              else if (leaveProv.history.isEmpty)
+                SliverFillRemaining(
+                  child: EmptyState(
+                    icon: Icons.inbox_outlined,
+                    title: 'No leave requests found',
+                    subtitle: _statusFilter != null
+                        ? 'No $_statusFilter requests match your filter'
+                        : 'Submit a leave request to get started',
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                  sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         if (index < leaveProv.history.length) {
@@ -153,8 +152,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                     FilledButton(
                                       onPressed: () => Navigator.pop(ctx, true),
                                       style: FilledButton.styleFrom(
-                                          backgroundColor:
-                                              context.error),
+                                          backgroundColor: context.error),
                                       child: const Text('Delete'),
                                     ),
                                   ],
@@ -205,16 +203,14 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color:
-                                            context.onPrimaryContainer,
+                                        color: context.onPrimaryContainer,
                                         height: 1.5)),
                                 const SizedBox(height: 8),
                                 Text(
                                     'Secure your holiday pass now to ensure quick approval from the command center.',
                                     style: TextStyle(
                                         fontSize: 14,
-                                        color:
-                                            context.onPrimaryContainer,
+                                        color: context.onPrimaryContainer,
                                         height: 1.43)),
                                 const SizedBox(height: 16),
                                 FilledButton(
@@ -236,10 +232,10 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                       childCount: leaveProv.history.length + 2,
                     ),
                   ),
-              ),
-          ],
+                ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -433,8 +429,7 @@ class _HistoryCard extends StatelessWidget {
                             Row(
                               children: [
                                 Icon(Icons.calendar_month,
-                                    size: 16,
-                                    color: context.onSurfaceVariant),
+                                    size: 16, color: context.onSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   DateFormatter.formatDate(leave.leaveDate),
@@ -473,8 +468,7 @@ class _HistoryCard extends StatelessWidget {
                                         leave.rejectionReason!,
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color: context
-                                                .onErrorContainer),
+                                            color: context.onErrorContainer),
                                       ),
                                     ),
                                   ],
@@ -491,8 +485,7 @@ class _HistoryCard extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color:
-                                  context.error.withValues(alpha: 0.12),
+                              color: context.error.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Icon(Icons.delete_outline,

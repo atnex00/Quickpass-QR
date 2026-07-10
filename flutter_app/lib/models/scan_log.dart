@@ -53,11 +53,13 @@ class ScanLog {
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint('Warning: Failed to parse scan_time from "$v", using current time');
+      debugPrint(
+          'Warning: Failed to parse scan_time from "$v", using current time');
       return DateTime.now();
     }
     return result;
   }
+
   static String _dateToJson(DateTime v) => v.toIso8601String();
 
   factory ScanLog.fromJson(Map<String, dynamic> json) =>

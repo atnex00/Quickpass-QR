@@ -15,7 +15,8 @@ ScreenType getScreenType(BuildContext context) {
 }
 
 /// Returns a value based on the current screen type.
-T adaptiveValue<T>(BuildContext context, {required T phone, T? tablet, T? desktop}) {
+T adaptiveValue<T>(BuildContext context,
+    {required T phone, T? tablet, T? desktop}) {
   switch (getScreenType(context)) {
     case ScreenType.desktop:
       return desktop ?? tablet ?? phone;
@@ -45,13 +46,17 @@ bool isTablet(BuildContext context) {
 }
 
 double responsiveFontSize(BuildContext context, double base) {
-  final scaled = base * (MediaQuery.of(context).size.width / _designWidth).clamp(0.85, 1.2);
-  return MediaQuery.textScalerOf(context).scale(scaled).clamp(scaled * 0.85, scaled * 1.3);
+  final scaled = base *
+      (MediaQuery.of(context).size.width / _designWidth).clamp(0.85, 1.2);
+  return MediaQuery.textScalerOf(context)
+      .scale(scaled)
+      .clamp(scaled * 0.85, scaled * 1.3);
 }
 
 EdgeInsets responsivePadding(BuildContext context,
     {double horizontal = 16, double vertical = 16}) {
-  final scale = (MediaQuery.of(context).size.width / _designWidth).clamp(0.8, 1.2);
+  final scale =
+      (MediaQuery.of(context).size.width / _designWidth).clamp(0.8, 1.2);
   return EdgeInsets.symmetric(
     horizontal: horizontal * scale,
     vertical: vertical * scale,
@@ -59,5 +64,6 @@ EdgeInsets responsivePadding(BuildContext context,
 }
 
 double responsiveSize(BuildContext context, double base) {
-  return base * (MediaQuery.of(context).size.width / _designWidth).clamp(0.8, 1.2);
+  return base *
+      (MediaQuery.of(context).size.width / _designWidth).clamp(0.8, 1.2);
 }
