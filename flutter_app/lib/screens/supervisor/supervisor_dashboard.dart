@@ -10,8 +10,6 @@ import '../../widgets/status_badge.dart';
 import '../employee/dashboard_screen.dart';
 import '../employee/profile_screen.dart';
 import '../employee/request_leave_screen.dart';
-import '../security/scanner_screen.dart';
-import '../security/scan_history_screen.dart';
 import 'pending_requests_screen.dart';
 
 class SupervisorDashboard extends StatefulWidget {
@@ -403,18 +401,6 @@ class _QuickActionsRow extends StatelessWidget {
           children: [
             Expanded(
               child: _QuickActionCard(
-                icon: Icons.qr_code_scanner,
-                title: 'Scan QR',
-                subtitle: 'Validate gate passes',
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const ScannerScreen()));
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _QuickActionCard(
                 icon: Icons.dashboard,
                 title: 'My Dashboard',
                 subtitle: 'Employee overview',
@@ -427,22 +413,6 @@ class _QuickActionsRow extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
-            },
-            icon: const Icon(Icons.history, size: 16),
-            label: const Text('Scan History'),
-            style: TextButton.styleFrom(
-              foregroundColor: context.outline,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-          ),
         ),
       ],
     );
