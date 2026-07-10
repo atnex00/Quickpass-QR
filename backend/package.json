@@ -16,7 +16,6 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@eslint/js": "^9.39.4",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -33,11 +32,15 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "eslint": "^9.0.0",
     "globals": "^17.7.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.4",
     "supertest": "^7.0.0"
+  },
+  "overrides": {
+    "uuid": "$uuid"
   },
   "allowScripts": {
     "protobufjs@7.6.4": true
