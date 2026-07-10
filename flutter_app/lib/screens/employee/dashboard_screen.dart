@@ -7,10 +7,10 @@ import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
-import 'request_leave_screen.dart';
+import '../shared/settings_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
-import 'profile_screen.dart';
+import 'request_leave_screen.dart';
 
 class EmployeeDashboard extends StatefulWidget {
   const EmployeeDashboard({super.key});
@@ -38,7 +38,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         children: [
           _DashboardTab(onViewHistory: () => setState(() => _currentIndex = 1)),
           const LeaveHistoryScreen(),
-          const ProfileScreen(),
+          const SettingsScreen(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -65,10 +65,10 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               label: 'History',
             ),
             NavigationDestination(
-              icon: Icon(Icons.account_circle_outlined,
+              icon: Icon(Icons.settings_outlined,
                   color: context.onSurfaceVariant),
-              selectedIcon: Icon(Icons.account_circle, color: context.primary),
-              label: 'Profile',
+              selectedIcon: Icon(Icons.settings, color: context.primary),
+              label: 'Settings',
             ),
           ],
         ),

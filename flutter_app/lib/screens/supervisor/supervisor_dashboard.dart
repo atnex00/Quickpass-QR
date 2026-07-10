@@ -8,8 +8,8 @@ import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/status_badge.dart';
 import '../employee/dashboard_screen.dart';
-import '../employee/profile_screen.dart';
 import '../employee/request_leave_screen.dart';
+import '../shared/settings_screen.dart';
 import 'pending_requests_screen.dart';
 
 class SupervisorDashboard extends StatefulWidget {
@@ -35,7 +35,7 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
                 onViewProfile: () => setState(() => _currentIndex = 2),
               ),
               const PendingRequestsScreen(),
-              const ProfileScreen(),
+              const SettingsScreen(),
             ],
           )),
       bottomNavigationBar: Container(
@@ -97,9 +97,9 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
               label: 'Requests',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline, color: context.onSurfaceVariant),
-              selectedIcon: Icon(Icons.person, color: context.primary),
-              label: 'Profile',
+              icon: Icon(Icons.settings_outlined, color: context.onSurfaceVariant),
+              selectedIcon: Icon(Icons.settings, color: context.primary),
+              label: 'Settings',
             ),
           ],
         ),

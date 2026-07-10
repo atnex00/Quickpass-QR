@@ -4,9 +4,10 @@ import '../../config/theme.dart';
 import '../../models/scan_log.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
-import '../../utils/date_formatter.dart';
+import '../shared/settings_screen.dart';
 import 'scanner_screen.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
@@ -92,6 +93,12 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           onSelected: (value) async {
+                            if (value == 'settings') {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const SettingsScreen()));
+                            }
                             if (value == 'logout') {
                               final errorColor = context.error;
                               final confirm = await showDialog<bool>(
@@ -134,6 +141,16 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                               ),
                             ),
                             const PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'settings',
+                              child: ListTile(
+                                leading: Icon(Icons.settings,
+                                    color: context.onSurface),
+                                title: const Text('Settings'),
+                                contentPadding: EdgeInsets.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
                             PopupMenuItem(
                               value: 'logout',
                               child: ListTile(

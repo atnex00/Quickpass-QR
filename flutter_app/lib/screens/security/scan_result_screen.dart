@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/scan_provider.dart';
 import '../../widgets/loading_indicator.dart';
+import '../shared/settings_screen.dart';
 import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 
@@ -109,6 +110,11 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) async {
               switch (value) {
+                case 'settings':
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SettingsScreen()));
                 case 'history':
                   Navigator.push(
                       context,
@@ -153,6 +159,15 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 ),
               ),
               const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'settings',
+                child: ListTile(
+                  leading: Icon(Icons.settings, color: context.onSurface),
+                  title: const Text('Settings'),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
               PopupMenuItem(
                 value: 'history',
                 child: ListTile(

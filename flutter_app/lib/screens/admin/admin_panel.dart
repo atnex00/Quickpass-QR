@@ -19,6 +19,7 @@ import 'employee_detail_screen.dart';
 import '../employee/dashboard_screen.dart';
 import '../supervisor/supervisor_dashboard.dart';
 import '../security/scanner_screen.dart';
+import '../shared/settings_screen.dart';
 
 Widget _buildAdminAppBar(BuildContext context, String tabKey) {
   return SliverAppBar(
@@ -66,31 +67,13 @@ Widget _buildAdminAppBar(BuildContext context, String tabKey) {
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.logout, color: context.onPrimary),
-                    onPressed: () async {
-                      final errorColor = context.error;
-                      final confirmed = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Logout'),
-                          content:
-                              const Text('Are you sure you want to logout?'),
-                          actions: [
-                            TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Cancel')),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              style: FilledButton.styleFrom(
-                                  backgroundColor: errorColor),
-                              child: const Text('Logout'),
-                            ),
-                          ],
-                        ),
+                    icon: Icon(Icons.settings, color: context.onPrimary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const SettingsScreen()),
                       );
-                      if (confirmed == true && context.mounted) {
-                        context.read<AuthProvider>().logout();
-                      }
                     },
                   ),
                 ],
