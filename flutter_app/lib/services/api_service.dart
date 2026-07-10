@@ -10,6 +10,7 @@ import '../models/leave_request.dart';
 import 'certificate_pinner.dart';
 
 class ApiService {
+  VoidCallback? onForceLogout;
   late Dio _dio;
   final _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
@@ -56,6 +57,7 @@ class ApiService {
 
         if (error.requestOptions.extra['_retry'] == true) {
           await _storage.delete(key: 'auth_token');
+          onForceLogout?.call();
           return handler.next(error);
         }
 

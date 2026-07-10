@@ -22,7 +22,7 @@ router.post('/auth/login', validate(Joi.object({
     'string.pattern.base': 'Employee ID must be exactly 6 digits',
     'any.required': 'Employee ID is required',
   }),
-  password: Joi.string().min(4).required(),
+  password: Joi.string().min(8).required(),
 })), authController.login);
 
 router.post('/auth/logout', authenticate, authController.logout);
@@ -32,7 +32,7 @@ router.put('/auth/profile', authenticate, validate(Joi.object({
   full_name: Joi.string().min(2).max(100),
   position: Joi.string().min(2).max(50),
   email: Joi.string().email(),
-  password: Joi.string().min(4),
+  password: Joi.string().min(8),
 }).min(1)), authController.updateProfile);
 
 router.put('/auth/fcm-token', authenticate, validate(Joi.object({
@@ -69,17 +69,57 @@ router.post('/scan/validate', authenticate, requireSecurity, validate(Joi.object
 router.get('/scan/history', authenticate, requireSecurity, scanController.getScanHistory);
 
 // ── Admin Routes ──
-router.post('/admin/employees', authenticate, requireAdmin, adminController.createEmployee);
+router.post('/admin/employees', authenticate, requireAdmin, validate(Joi.object({
+  employee_id: Joi.string().pattern(/^\d{6}$/).required(),
+  full_name: Joi.string().min(2).max(100).required(),
+  position: Joi.string().min(2).max(50).required(),
+  department_id: Joi.string().optional(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  is_supervisor: Joi.boolean().optional(),
+  is_admin: Joi.boolean().optional(),
+  is_security: Joi.boolean().optional(),
+})), adminController.createEmployee);
 router.get('/admin/employees', authenticate, requireAdmin, adminController.listEmployees);
-router.put('/admin/employees/:id', authenticate, requireAdmin, adminController.updateEmployee);
+router.put('/admin/employees/:id', authenticate, requireAdmin, validate(Joi.object({
+  full_name: Joi.string().min(2).max(100),
+  position: Joi.string().min(2).max(50),
+  department_id: Joi.string().allow(null, ''),
+  email: Joi.string().email(),
+  password: Joi.string().min(8),
+  is_supervisor: Joi.boolean(),
+  is_admin: Joi.boolean(),
+  is_security: Joi.boolean(),
+  is_active: Joi.boolean(),
+}).min(1)), adminController.updateEmployee);
 router.put('/admin/employees/:id/supervisor', authenticate, requireAdmin, adminController.toggleSupervisor);
 router.put('/admin/employees/:id/admin', authenticate, requireAdmin, adminController.toggleAdmin);
 router.put('/admin/employees/:id/status', authenticate, requireAdmin, adminController.toggleActive);
 router.delete('/admin/employees/:id', authenticate, requireAdmin, adminController.deleteEmployee);
-router.post('/admin/import/hr', authenticate, requireAdmin, adminController.importEmployees);
+router.post('/admin/import/hr', authenticate, requireAdmin, validate(Joi.object({
+  employees: Joi.array().items(Joi.object({
+    employee_id: Joi.string().pattern(/^\d{6}$/).required(),
+    full_name: Joi.string().min(2).max(100).required(),
+    position: Joi.string().min(2).max(50).required(),
+    department_id: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).optional(),
+    is_supervisor: Joi.boolean().optional(),
+  })).min(1).required(),
+})), adminController.importEmployees);
 router.get('/admin/departments', authenticate, requireAdmin, adminController.getDepartments);
-router.post('/admin/departments', authenticate, requireAdmin, adminController.createDepartment);
-router.put('/admin/departments/:id', authenticate, requireAdmin, adminController.updateDepartment);
+router.post('/admin/departments', authenticate, requireAdmin, validate(Joi.object({
+  department_id: Joi.string().max(20).required(),
+  department_name: Joi.string().min(2).max(100).required(),
+  department_code: Joi.string().max(20).optional(),
+  head_of_department: Joi.string().optional(),
+})), adminController.createDepartment);
+router.put('/admin/departments/:id', authenticate, requireAdmin, validate(Joi.object({
+  department_name: Joi.string().min(2).max(100),
+  department_code: Joi.string().max(20).allow(null, ''),
+  head_of_department: Joi.string().allow(null, ''),
+  is_active: Joi.boolean(),
+}).min(1)), adminController.updateDepartment);
 router.delete('/admin/departments/:id', authenticate, requireAdmin, adminController.deleteDepartment);
 router.get('/admin/reports', authenticate, requireAdmin, adminController.getReports);
 

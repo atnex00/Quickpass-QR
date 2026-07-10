@@ -13,6 +13,7 @@ async function authenticate(req, res, next) {
 
     const session = await db('sessions')
       .where({ session_id: decoded.session_id, is_active: true })
+      .where('expires_at', '>', db.fn.now())
       .first();
 
     if (!session) {
