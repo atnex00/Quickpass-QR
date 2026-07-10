@@ -48,7 +48,8 @@ async function submitLeave(req, res, next) {
       }
     }
 
-    const leaveId = `LV-${leave_date.replace(/-/g, '')}-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const leaveDateStr = typeof leave_date === 'string' ? leave_date : leave_date.toISOString().split('T')[0];
+    const leaveId = `LV-${leaveDateStr.replace(/-/g, '')}-${uuidv4().slice(0, 8).toUpperCase()}`;
 
     await db('leave_requests').insert({
       leave_id: leaveId,
