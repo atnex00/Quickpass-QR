@@ -29,13 +29,25 @@ void main() async {
   final settings = SettingsProvider();
   await settings.load();
 
-  runApp(QuickpassApp(apiService: apiService, settings: settings));
+  final auth = AuthProvider(api: apiService);
+
+  runApp(QuickpassApp(
+    apiService: apiService,
+    settings: settings,
+    auth: auth,
+  ));
 }
 
 class QuickpassApp extends StatefulWidget {
   final ApiService apiService;
   final SettingsProvider settings;
-  const QuickpassApp({super.key, required this.apiService, required this.settings});
+  final AuthProvider auth;
+  const QuickpassApp({
+    super.key,
+    required this.apiService,
+    required this.settings,
+    required this.auth,
+  });
 
   @override
   State<QuickpassApp> createState() => _QuickpassAppState();
@@ -48,11 +60,27 @@ class _QuickpassAppState extends State<QuickpassApp> {
   void initState() {
     super.initState();
     widget.apiService.onForceLogout = _handleForceLogout;
+    widget.auth.onLoggedOut = _handleForceLogout;
+    widget.auth.onLoggedIn = _handleLoginSuccess;
   }
 
   void _handleForceLogout() {
     _navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  void _handleLoginSuccess() {
+    final home = widget.auth.isAdmin
+        ? const AdminPanel()
+        : widget.auth.isSupervisor
+            ? const SupervisorDashboard()
+            : widget.auth.isScanner
+                ? const ScannerScreen()
+                : const EmployeeDashboard();
+    _navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => home),
       (route) => false,
     );
   }
@@ -65,7 +93,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: widget.settings),
-          ChangeNotifierProvider(create: (_) => AuthProvider(api: api)),
+          ChangeNotifierProvider.value(value: widget.auth),
           ChangeNotifierProvider(create: (_) => LeaveProvider(api: api)),
           ChangeNotifierProvider(create: (_) => SupervisorProvider(api: api)),
           ChangeNotifierProvider(create: (_) => ScanProvider(api: api)),

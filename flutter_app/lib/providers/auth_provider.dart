@@ -4,6 +4,8 @@ import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _api;
+  VoidCallback? onLoggedOut;
+  VoidCallback? onLoggedIn;
 
   AuthProvider({required ApiService api}) : _api = api;
 
@@ -61,6 +63,7 @@ class AuthProvider extends ChangeNotifier {
       _isAuthenticated = true;
       _loginLoading = false;
       notifyListeners();
+      onLoggedIn?.call();
       return true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -85,6 +88,7 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     notifyListeners();
+    onLoggedOut?.call();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
