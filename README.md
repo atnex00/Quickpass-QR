@@ -543,14 +543,14 @@ Same variables as dev, plus:
 
 ### Prerequisites
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Flutter SDK | 3.27+ | App framework ([install guide](https://docs.flutter.dev/get-started/install)) |
-| Android Studio | Latest | Android SDK & emulator ([download](https://developer.android.com/studio)) |
-| .NET SDK | 8.0 | Build tooling (`winget install Microsoft.DotNet.SDK.8`) |
-| Physical device or emulator | — | To run the app |
+| Tool | Version |
+|------|---------|
+| Flutter SDK | 3.27+ ([install guide](https://docs.flutter.dev/get-started/install)) |
+| Android Studio | Latest ([download](https://developer.android.com/studio)) |
+| .NET SDK | 8.0 (`winget install Microsoft.DotNet.SDK.8`) |
+| Physical device or emulator | — |
 
-> **Tip**: Use `scripts/setup.ps1` (Windows) or `scripts/setup.sh` (macOS/Linux) to install Flutter + Android SDK into `tools/` — no system-wide installs required.
+> **Tip**: Use `scripts/setup.ps1` (Windows) or `scripts/setup.sh` (macOS/Linux) to install Flutter + Android SDK into `tools/`.
 
 ### Verify Environment
 
@@ -572,14 +572,13 @@ Ensure all checkmarks are green. Common fixes:
 1. Open **Android Studio** → **More Actions** → **Virtual Device Manager**
 2. Create a new device (e.g., Pixel 7 — API 35)
 3. Start the emulator
-4. Verify with `flutter devices` — the emulator should appear
+4. Verify with `flutter devices`
 
 ```bash
 cd flutter_app
+# 10.0.2.2 is the emulator alias for your host machine's localhost
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
-
-> `10.0.2.2` is the Android emulator alias for your host machine's `localhost`.
 
 ### Running on a Physical Device
 
@@ -588,14 +587,12 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 3. Verify with `flutter devices`
 
 ```bash
-# Windows — use ADB reverse tunnel so the phone can reach the backend
+# ADB reverse tunnel so the phone can reach the backend
 scripts\run_phone.ps1
 
 cd flutter_app
 flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
 ```
-
-> The `run_phone.ps1` script runs `adb reverse tcp:3000 tcp:3000` to tunnel the API port.
 
 ### Building for Production
 
@@ -615,7 +612,7 @@ flutter build ios
 
 #### Android Keystore (Release Builds)
 
-For Play Store distribution, create a keystore:
+Create a keystore:
 
 ```bash
 # Generate a keystore (replace placeholders)
@@ -643,7 +640,7 @@ flutter analyze
 # Unit & widget tests
 flutter test
 
-# With coverage
+# Coverage
 flutter test --coverage
 ```
 
