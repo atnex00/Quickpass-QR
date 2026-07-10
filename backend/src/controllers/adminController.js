@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
 

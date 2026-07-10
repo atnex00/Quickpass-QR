@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
+import 'certificate_pinner.dart';
 
 class ApiService {
   late Dio _dio;
@@ -34,7 +35,15 @@ class ApiService {
 
     if (!kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-        return HttpClient();
+        final client = HttpClient();
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+          if (AppConfig.apiBaseUrl.startsWith('https://')) {
+            CertificatePinner.apply(client);
+            return false;
+          }
+          return true;
+        };
+        return client;
       };
     }
 

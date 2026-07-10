@@ -1,5 +1,6 @@
 function errorHandler(err, req, res, _next) {
-  console.error('Unhandled error:', err);
+  const isDev = process.env.NODE_ENV === 'development';
+  console.error(`[ERROR] ${err.statusCode || 500} ${isDev ? err.stack : err.message}`);
 
   const statusCode = err.statusCode || 500;
   const message = err.expose ? err.message : 'Internal server error';
@@ -7,7 +8,7 @@ function errorHandler(err, req, res, _next) {
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(isDev && { stack: err.stack }),
   });
 }
 

@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
@@ -36,25 +38,33 @@ async function login(req, res, next) {
       session_id: sessionId,
       employee_id: employee.employee_id,
       created_at: db.fn.now(),
-      expires_at: db.raw(`NOW() + INTERVAL '${process.env.SESSION_EXPIRES_IN || '7 days'}'`),
+      expires_at: db.raw("NOW() + INTERVAL ?", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
     });
 
-    const token = jwt.sign(
+    await db('employees').where({ employee_id }).update({ last_login: db.fn.now() });
+
+    const accessToken = jwt.sign(
       {
         employee_id: employee.employee_id,
         session_id: sessionId,
         role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { expiresIn: '15m' }
     );
 
-    await db('employees').where({ employee_id }).update({ last_login: db.fn.now() });
+    res.cookie('refresh_sid', sessionId, {
+      signed: true,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.json({
       success: true,
-      token,
+      token: accessToken,
       user: {
         employee_id: employee.employee_id,
         full_name: employee.full_name,
@@ -76,9 +86,11 @@ async function login(req, res, next) {
 
 async function logout(req, res, next) {
   try {
-    if (req.session_id) {
-      await db('sessions').where({ session_id: req.session_id }).update({ is_active: false });
+    const sessionId = req.signedCookies.refresh_sid || req.session_id;
+    if (sessionId) {
+      await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
     }
+    res.clearCookie('refresh_sid');
     res.json({ success: true, message: 'Logged out' });
   } catch (err) {
     next(err);
@@ -87,24 +99,25 @@ async function logout(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw createError(401, 'No token provided');
+    const sessionId = req.signedCookies.refresh_sid;
+    if (!sessionId) {
+      throw createError(401, 'No refresh token');
     }
 
-    const oldToken = authHeader.split(' ')[1];
-    const decoded = jwt.verify(oldToken, process.env.JWT_SECRET);
-
     const session = await db('sessions')
-      .where({ session_id: decoded.session_id, is_active: true })
+      .where({ session_id: sessionId, is_active: true })
+      .where('expires_at', '>', db.fn.now())
       .first();
 
     if (!session) {
+      res.clearCookie('refresh_sid');
       throw createError(401, 'Session expired');
     }
 
-    const employee = await db('employees').where({ employee_id: decoded.employee_id }).first();
+    const employee = await db('employees').where({ employee_id: session.employee_id }).first();
     if (!employee || !employee.is_active) {
+      res.clearCookie('refresh_sid');
+      await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
       throw createError(401, 'Employee not found or deactivated');
     }
 
@@ -113,10 +126,18 @@ async function refreshToken(req, res, next) {
       session_id: newSessionId,
       employee_id: employee.employee_id,
       created_at: db.fn.now(),
-      expires_at: db.raw(`NOW() + INTERVAL '${process.env.SESSION_EXPIRES_IN || '7 days'}'`),
+      expires_at: db.raw("NOW() + INTERVAL ?", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
     });
-    await db('sessions').where({ session_id: decoded.session_id }).update({ is_active: false });
+    await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
+
+    res.cookie('refresh_sid', newSessionId, {
+      signed: true,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     const token = jwt.sign(
       {
@@ -125,14 +146,11 @@ async function refreshToken(req, res, next) {
         role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { expiresIn: '15m' }
     );
 
     res.json({ success: true, token });
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ success: false, message: 'Token expired' });
-    }
     next(err);
   }
 }
@@ -203,4 +221,38 @@ async function fcmToken(req, res, next) {
   }
 }
 
-module.exports = { login, logout, refreshToken, getProfile, updateProfile, fcmToken };
+async function uploadProfilePhoto(req, res, next) {
+  try {
+    if (!req.file) {
+      throw createError(400, 'No photo file provided');
+    }
+
+    const uploadDir = path.join(__dirname, '../../uploads/photos');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const ext = path.extname(req.file.originalname) || '.jpg';
+    const filename = `${req.user.employee_id}${ext}`;
+    const filePath = path.join(uploadDir, filename);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    const photoUrl = `/uploads/photos/${filename}`;
+    await db('employees').where({ employee_id: req.user.employee_id }).update({
+      profile_photo: photoUrl,
+      updated_at: db.fn.now(),
+    });
+
+    const updated = await db('employees')
+      .join('departments', 'employees.department_id', 'departments.department_id')
+      .where('employees.employee_id', req.user.employee_id)
+      .select('employees.*', 'departments.department_name')
+      .first();
+
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { login, logout, refreshToken, getProfile, updateProfile, fcmToken, uploadProfilePhoto };

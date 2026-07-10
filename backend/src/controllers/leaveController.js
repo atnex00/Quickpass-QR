@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
-const qrService = require('../services/qrService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 
@@ -71,8 +70,8 @@ async function submitLeave(req, res, next) {
         body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
         data: { leave_id: leaveId, type: 'new_request' },
       });
-    } catch (_) {
-      // Notification failure is non-blocking
+    } catch (notifErr) {
+      console.error('Notification error (submit):', notifErr.message);
     }
 
     const leave = await db('leave_requests')
@@ -182,6 +181,10 @@ async function getLeaveById(req, res, next) {
 
     if (!leave) {
       throw createError(404, 'Leave request not found');
+    }
+
+    if (!req.user.is_admin && leave.employee_id !== req.user.employee_id && !req.user.is_supervisor) {
+      throw createError(403, 'You can only view your own leave requests');
     }
 
     res.json({ success: true, data: leave });

@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const { initFirebase } = require('./config/firebase');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -18,9 +19,29 @@ const PORT = process.env.PORT || 3000;
 // Initialize Firebase
 initFirebase();
 
+const corsOrigin = process.env.CORS_ORIGIN;
+if (!corsOrigin && process.env.NODE_ENV === 'production') {
+  console.warn('WARNING: CORS_ORIGIN not set in production. Set it to your frontend URL.');
+}
+
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+if (corsOrigin) {
+  app.use(helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", corsOrigin],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  }));
+}
+app.use(cors({ origin: corsOrigin || false, credentials: true }));
+app.use(cookieParser(process.env.COOKIE_SECRET || 'quickpass-cookie-secret-dev'));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,6 +70,10 @@ const loginLimiter = rateLimit({
 // Serve built frontend in production
 const webDist = path.join(__dirname, '../../web/dist');
 app.use(express.static(webDist));
+
+// Serve uploaded files
+const uploadsDir = path.join(__dirname, '../uploads');
+app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/auth/login', loginLimiter);
@@ -88,7 +113,7 @@ try {
       console.log(`Quickpass HTTPS running on port ${httpsPort}`);
     });
   }
-} catch (_) {
+} catch {
   // HTTPS setup is optional
 }
 

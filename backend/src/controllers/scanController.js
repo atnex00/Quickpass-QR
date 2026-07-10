@@ -23,11 +23,9 @@ async function validateScan(req, res, next) {
       throw createError(400, 'QR code signature is invalid');
     }
 
-    if (type === 'OUT') {
-      const timeValid = qrService.isWithinTimeWindow(timestamp, process.env.QR_VALIDITY_WINDOW_MINUTES || 15);
-      if (!timeValid) {
-        throw createError(400, 'QR code has expired');
-      }
+    const timeValid = qrService.isWithinTimeWindow(timestamp, process.env.QR_VALIDITY_WINDOW_MINUTES || 15);
+    if (!timeValid) {
+      throw createError(400, 'QR code has expired');
     }
 
     const leave = await db('leave_requests')
@@ -107,7 +105,9 @@ async function validateScan(req, res, next) {
           : `You have returned to the premises. Leave completed.`,
         data: { leave_id, type: type === 'OUT' ? 'scanned_out' : 'scanned_in' },
       });
-    } catch (_) {}
+    } catch (notifErr) {
+      console.error('Notification error (scan):', notifErr.message);
+    }
 
     res.json({
       success: true,
