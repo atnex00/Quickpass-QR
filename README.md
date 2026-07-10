@@ -539,6 +539,128 @@ Same variables as dev, plus:
 
 ---
 
+## Mobile Development
+
+### Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Flutter SDK | 3.27+ | App framework ([install guide](https://docs.flutter.dev/get-started/install)) |
+| Android Studio | Latest | Android SDK & emulator ([download](https://developer.android.com/studio)) |
+| .NET SDK | 8.0 | Build tooling (`winget install Microsoft.DotNet.SDK.8`) |
+| Physical device or emulator | — | To run the app |
+
+> **Tip**: Use `scripts/setup.ps1` (Windows) or `scripts/setup.sh` (macOS/Linux) to install Flutter + Android SDK into `tools/` — no system-wide installs required.
+
+### Verify Environment
+
+```bash
+cd flutter_app
+flutter doctor
+```
+
+Ensure all checkmarks are green. Common fixes:
+
+| Issue | Fix |
+|-------|-----|
+| `✗ Android SDK not found` | Set `ANDROID_HOME` to your SDK path (see OS-specific setup below) |
+| `✗ No connected device` | Start an emulator or connect a physical device via USB |
+| `✗ cmdline-tools missing` | Open Android Studio → SDK Manager → install `Android SDK Command-line Tools` |
+
+### Running on an Emulator
+
+1. Open **Android Studio** → **More Actions** → **Virtual Device Manager**
+2. Create a new device (e.g., Pixel 7 — API 35)
+3. Start the emulator
+4. Verify with `flutter devices` — the emulator should appear
+
+```bash
+cd flutter_app
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
+```
+
+> `10.0.2.2` is the Android emulator alias for your host machine's `localhost`.
+
+### Running on a Physical Device
+
+1. Enable **Developer options** and **USB debugging** on your phone
+2. Connect via USB — accept the debugging prompt on your phone
+3. Verify with `flutter devices`
+
+```bash
+# Windows — use ADB reverse tunnel so the phone can reach the backend
+scripts\run_phone.ps1
+
+cd flutter_app
+flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
+```
+
+> The `run_phone.ps1` script runs `adb reverse tcp:3000 tcp:3000` to tunnel the API port.
+
+### Building for Production
+
+```bash
+# Debug APK (fast, for testing)
+flutter build apk --debug
+
+# Release APK (split by ABI for smaller size)
+flutter build apk --split-per-abi
+
+# Android App Bundle (recommended for Play Store)
+flutter build appbundle
+
+# iOS (macOS only)
+flutter build ios
+```
+
+#### Android Keystore (Release Builds)
+
+For Play Store distribution, create a keystore:
+
+```bash
+# Generate a keystore (replace placeholders)
+keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA \
+  -keysize 2048 -validity 10000 -alias upload
+
+# Move it to flutter_app/android/app/
+```
+
+Then create `flutter_app/android/key.properties`:
+
+```properties
+storePassword=your-store-password
+keyPassword=your-key-password
+keyAlias=upload
+storeFile=../app/upload-keystore.jks
+```
+
+### Running Tests
+
+```bash
+# Static analysis
+flutter analyze
+
+# Unit & widget tests
+flutter test
+
+# With coverage
+flutter test --coverage
+```
+
+### Common Issues
+
+| Problem | Solution |
+|---------|----------|
+| `flutter pub get` fails | Check internet connection and `pubspec.yaml` syntax |
+| Gradle build fails | Open `flutter_app/android/` in Android Studio to sync Gradle |
+| App crashes on launch | Run `adb logcat \| grep flutter` to see crash logs |
+| Camera permission denied | Go to **Settings → Apps → Quickpass → Permissions → Camera** |
+| `API_BASE_URL` not working | Ensure the backend is running and the port matches (default `:3000`) |
+| Emulator is slow | Enable **Hardware acceleration** in AVD settings (HAXM on Windows, Hypervisor.framework on macOS) |
+| `flutter build apk` fails | Run `flutter clean && flutter pub get` and retry |
+
+---
+
 ## Architecture Overview
 
 ```
