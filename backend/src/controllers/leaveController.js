@@ -16,8 +16,8 @@ async function submitLeave(req, res, next) {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    if (leave_date !== today) {
-      throw createError(400, 'Leave date must be today');
+    if (leave_date < today) {
+      throw createError(400, 'Leave date cannot be in the past');
     }
 
     const conflict = await db('leave_requests')
