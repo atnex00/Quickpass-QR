@@ -94,7 +94,7 @@ exports.seed = async function (knex) {
     {
       employee_id: '000019', full_name: 'Mason Thompson', position: 'Tech Lead',
       department_id: 'DEP-002', email: 'mason.thompson@zaneco.com',
-      is_supervisor: true, is_active: true, hire_date: '2021-07-15', password_hash: hash,
+      is_active: true, hire_date: '2021-07-15', password_hash: hash,
     },
 
     // ── FSD — Finance Services Department ──
@@ -152,12 +152,12 @@ exports.seed = async function (knex) {
     {
       employee_id: '000012', full_name: 'Ava Johnson', position: 'CPD Supervisor',
       department_id: 'DEP-006', email: 'ava.johnson@zaneco.com',
-      is_supervisor: true, is_active: true, hire_date: '2019-06-15', password_hash: hash,
+      is_active: true, hire_date: '2019-06-15', password_hash: hash,
     },
     {
       employee_id: '000016', full_name: 'Mia Jackson', position: 'CPD Supervisor',
       department_id: 'DEP-006', email: 'mia.jackson@zaneco.com',
-      is_supervisor: true, is_active: true, hire_date: '2021-03-12', password_hash: hash,
+      is_active: true, hire_date: '2021-03-12', password_hash: hash,
     },
     {
       employee_id: '000017', full_name: 'Lucas Harris', position: 'CPD Manager',
@@ -167,7 +167,7 @@ exports.seed = async function (knex) {
     {
       employee_id: '000020', full_name: 'Amelia Robinson', position: 'CPD Supervisor',
       department_id: 'DEP-006', email: 'amelia.robinson@zaneco.com',
-      is_supervisor: true, is_active: true, hire_date: '2021-09-01', password_hash: hash,
+      is_active: true, hire_date: '2021-09-01', password_hash: hash,
     },
 
     // ── Admin ──
