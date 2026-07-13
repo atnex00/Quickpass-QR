@@ -2817,6 +2817,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
             bottom: 24,
             right: 16,
             child: FloatingActionButton(
+              heroTag: 'admin_add_department',
               onPressed: _showAddDialog,
               backgroundColor: context.primary,
               foregroundColor: context.onPrimary,

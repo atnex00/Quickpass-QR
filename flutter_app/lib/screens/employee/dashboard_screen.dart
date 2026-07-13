@@ -132,6 +132,7 @@ class _DashboardTabState extends State<_DashboardTab> {
               bottom: 24,
               right: 16,
               child: FloatingActionButton(
+                heroTag: 'employee_add',
                 onPressed: () {
                   Navigator.push(
                       context,

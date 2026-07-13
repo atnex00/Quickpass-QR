@@ -76,8 +76,14 @@ async function approveLeave(req, res, next) {
     const outQrCode = qrService.encodeQrData(outQrData);
     const inQrCode = qrService.encodeQrData(inQrData);
 
-    const outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
-    const inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
+    let outQrImage = null;
+    let inQrImage = null;
+    try {
+      outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
+      inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
+    } catch (qrErr) {
+      console.error('QR image generation failed (approval continues):', qrErr.message);
+    }
 
     await db('leave_requests')
       .where({ leave_id: leaveId })

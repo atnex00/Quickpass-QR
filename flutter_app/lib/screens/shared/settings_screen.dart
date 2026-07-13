@@ -120,7 +120,10 @@ class _SettingsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: context.outlineVariant),
       ),
-      child: Column(children: children),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(children: children),
+      ),
     );
   }
 }

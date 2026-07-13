@@ -175,6 +175,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
             bottom: 24,
             right: 16,
             child: FloatingActionButton(
+              heroTag: 'supervisor_add',
               onPressed: () {
                 Navigator.push(
                   context,

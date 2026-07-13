@@ -5,6 +5,9 @@ const sharp = require('sharp');
 
 const LOGO_PATH = path.join(__dirname, '../../uploads/logo.png');
 const OUTPUT_DIR = path.join(__dirname, '../../uploads/qr_codes');
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
 const CELL_SIZE = 10;
 const MARGIN_MODULES = 8;
 const LOGO_SIZE_FRACTION = 0.28;
