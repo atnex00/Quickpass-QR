@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
@@ -93,6 +94,8 @@ class _PendingCard extends StatelessWidget {
   final LeaveRequest leave;
   final bool isAdmin;
 
+  static String? _photo(LeaveRequest l) => AppConfig.photoUrl(l.employeePhoto);
+
   const _PendingCard({required this.leave, required this.isAdmin});
 
   @override
@@ -114,13 +117,19 @@ class _PendingCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: context.primary.withValues(alpha: 0.2),
-                  child: Text(
-                    leave.employeeName.isNotEmpty
-                        ? leave.employeeName.substring(0, 1).toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                        color: context.primary, fontWeight: FontWeight.w700),
-                  ),
+                  backgroundImage: _photo(leave) != null
+                      ? NetworkImage(_photo(leave)!)
+                      : null,
+                  child: _photo(leave) == null
+                      ? Text(
+                          leave.employeeName.isNotEmpty
+                              ? leave.employeeName.substring(0, 1).toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                              color: context.primary,
+                              fontWeight: FontWeight.w700),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -336,6 +345,8 @@ class _ApprovedCard extends StatelessWidget {
   final LeaveRequest leave;
   final bool isAdmin;
 
+  static String? _photo(LeaveRequest l) => AppConfig.photoUrl(l.employeePhoto);
+
   const _ApprovedCard({required this.leave, required this.isAdmin});
 
   @override
@@ -357,13 +368,19 @@ class _ApprovedCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: context.success.withValues(alpha: 0.15),
-                  child: Text(
-                    leave.employeeName.isNotEmpty
-                        ? leave.employeeName.substring(0, 1).toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                        color: context.success, fontWeight: FontWeight.w700),
-                  ),
+                  backgroundImage: _photo(leave) != null
+                      ? NetworkImage(_photo(leave)!)
+                      : null,
+                  child: _photo(leave) == null
+                      ? Text(
+                          leave.employeeName.isNotEmpty
+                              ? leave.employeeName.substring(0, 1).toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                              color: context.success,
+                              fontWeight: FontWeight.w700),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

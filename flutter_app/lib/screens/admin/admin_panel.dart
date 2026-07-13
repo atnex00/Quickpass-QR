@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/department.dart';
 import '../../providers/auth_provider.dart';
@@ -332,6 +333,8 @@ class _OverviewTabState extends State<_OverviewTab> {
   Widget build(BuildContext context) {
     final userName =
         context.select((AuthProvider a) => a.user?.fullName ?? 'Admin');
+    final userPhoto =
+        context.select((AuthProvider a) => a.user?.profilePhoto);
 
     return Scaffold(
       body: Stack(
@@ -345,7 +348,9 @@ class _OverviewTabState extends State<_OverviewTab> {
                   padding: const EdgeInsets.all(16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      _AdminProfileCard(userName: userName),
+                      _AdminProfileCard(
+                          userName: userName,
+                          photoUrl: AppConfig.photoUrl(userPhoto)),
                       const SizedBox(height: 16),
                       if (_isLoading)
                         const Padding(
@@ -399,7 +404,8 @@ class _OverviewTabState extends State<_OverviewTab> {
 
 class _AdminProfileCard extends StatelessWidget {
   final String userName;
-  const _AdminProfileCard({required this.userName});
+  final String? photoUrl;
+  const _AdminProfileCard({required this.userName, required this.photoUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -415,15 +421,20 @@ class _AdminProfileCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundColor: context.primary.withValues(alpha: 0.2),
-            child: Text(
-              (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: context.primary,
-              ),
-            ),
+            backgroundColor:
+                photoUrl != null ? null : context.primary.withValues(alpha: 0.2),
+            backgroundImage:
+                photoUrl != null ? NetworkImage(photoUrl!) : null,
+            child: photoUrl == null
+                ? Text(
+                    (userName.isNotEmpty ? userName[0] : 'A').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: context.primary,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/employee.dart';
 import '../../models/leave_request.dart';
@@ -216,6 +217,8 @@ class _UserProfileCard extends StatelessWidget {
   final Employee? user;
   const _UserProfileCard({required this.user});
 
+  static String? _photo(Employee? u) => AppConfig.photoUrl(u?.profilePhoto);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -231,14 +234,19 @@ class _UserProfileCard extends StatelessWidget {
           CircleAvatar(
             radius: 32,
             backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
-            child: Text(
-              (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: context.primaryBlue,
-              ),
-            ),
+            backgroundImage: _photo(user) != null
+                ? NetworkImage(_photo(user)!)
+                : null,
+            child: _photo(user) == null
+                ? Text(
+                    (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryBlue,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(

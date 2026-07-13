@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
@@ -144,6 +145,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
             slivers: [
               _SupervisorAppBar(
                 userName: userName,
+                photoUrl: AppConfig.photoUrl(user?.profilePhoto),
                 onProfileTap: widget.onViewProfile,
               ),
               SliverPadding(
@@ -195,8 +197,13 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
 
 class _SupervisorAppBar extends StatelessWidget {
   final String userName;
+  final String? photoUrl;
   final VoidCallback onProfileTap;
-  const _SupervisorAppBar({required this.userName, required this.onProfileTap});
+  const _SupervisorAppBar({
+    required this.userName,
+    required this.photoUrl,
+    required this.onProfileTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -245,15 +252,22 @@ class _SupervisorAppBar extends StatelessWidget {
                 onTap: onProfileTap,
                 child: CircleAvatar(
                   radius: 16,
-                  backgroundColor: context.onPrimary.withValues(alpha: 0.2),
-                  child: Text(
-                    (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: context.onPrimary,
-                    ),
-                  ),
+                  backgroundColor: photoUrl != null
+                      ? null
+                      : context.onPrimary.withValues(alpha: 0.2),
+                  backgroundImage: photoUrl != null
+                      ? NetworkImage(photoUrl!)
+                      : null,
+                  child: photoUrl == null
+                      ? Text(
+                          (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.onPrimary,
+                          ),
+                        )
+                      : null,
                 ),
               ),
             ],
@@ -554,6 +568,9 @@ class _QuickActionCard extends StatelessWidget {
 class _PendingCard extends StatelessWidget {
   final LeaveRequest leave;
 
+  static String? _empPhoto(LeaveRequest l) =>
+      AppConfig.photoUrl(l.employeePhoto);
+
   const _PendingCard({required this.leave});
 
   @override
@@ -592,15 +609,20 @@ class _PendingCard extends StatelessWidget {
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: context.primary.withValues(alpha: 0.2),
-                      child: Text(
-                        leave.employeeName.isNotEmpty
-                            ? leave.employeeName[0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          color: context.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      backgroundImage: _empPhoto(leave) != null
+                          ? NetworkImage(_empPhoto(leave)!)
+                          : null,
+                      child: _empPhoto(leave) == null
+                          ? Text(
+                              leave.employeeName.isNotEmpty
+                                  ? leave.employeeName[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                color: context.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(

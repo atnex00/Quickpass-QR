@@ -264,12 +264,6 @@ class _ProfileAppBar extends StatelessWidget {
   }
 }
 
-String _getPhotoUrl(String? photo) {
-  if (photo == null || photo.isEmpty) return '';
-  final base = AppConfig.apiBaseUrl.replaceFirst('/api', '');
-  return '$base$photo';
-}
-
 class _UserAvatarCard extends StatelessWidget {
   final dynamic user;
   final bool uploading;
@@ -284,8 +278,8 @@ class _UserAvatarCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photo = user?.profilePhoto as String?;
-    final photoUrl = _getPhotoUrl(photo);
-    final hasPhoto = photoUrl.isNotEmpty;
+    final photoUrl = AppConfig.photoUrl(photo);
+    final hasPhoto = photoUrl != null;
 
     return Container(
       width: double.infinity,

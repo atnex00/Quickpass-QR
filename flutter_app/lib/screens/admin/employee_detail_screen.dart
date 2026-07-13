@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../services/api_service.dart';
 
@@ -38,6 +39,9 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
     }
     if (mounted) setState(() => _isLoading = false);
   }
+
+  static String? _empPhoto(Map<String, dynamic>? emp) =>
+      AppConfig.photoUrl(emp?['profile_photo'] as String?);
 
   void _showEditDialog() {
     final emp = _employee!;
@@ -233,16 +237,20 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                       children: [
                         CircleAvatar(
                           radius: 44,
-                          backgroundColor:
-                              context.primary.withValues(alpha: 0.2),
-                          child: Text(
-                            ((emp['full_name'] as String?) ?? '?')[0]
-                                .toUpperCase(),
-                            style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w700,
-                                color: context.primary),
-                          ),
+                          backgroundColor: context.primary.withValues(alpha: 0.2),
+                          backgroundImage: _empPhoto(emp) != null
+                              ? NetworkImage(_empPhoto(emp)!)
+                              : null,
+                          child: _empPhoto(emp) == null
+                              ? Text(
+                                  ((emp['full_name'] as String?) ?? '?')[0]
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.primary),
+                                )
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         Text(emp['full_name'] ?? '',

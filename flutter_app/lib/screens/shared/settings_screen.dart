@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -25,15 +26,7 @@ class SettingsScreen extends StatelessWidget {
                   _SettingsCard(
                     children: [
                       ListTile(
-                        leading: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: context.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.person, color: context.primary),
-                        ),
+                        leading: _ProfileAvatar(user: user),
                         title: Text('Profile',
                             style: TextStyle(
                                 fontWeight: FontWeight.w600,
@@ -225,6 +218,32 @@ class _LogoutCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  final dynamic user;
+  const _ProfileAvatar({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = AppConfig.photoUrl(user?.profilePhoto as String?);
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: photoUrl == null
+            ? context.primary.withValues(alpha: 0.1)
+            : null,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: photoUrl != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(photoUrl, fit: BoxFit.cover),
+            )
+          : Icon(Icons.person, color: context.primary),
     );
   }
 }

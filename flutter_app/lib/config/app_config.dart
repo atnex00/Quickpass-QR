@@ -8,4 +8,10 @@ class AppConfig {
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
   static const int qrValidityMinutes = 15;
+
+  static String? photoUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    final base = apiBaseUrl.replaceFirst('/api', '');
+    return '$base$path';
+  }
 }
