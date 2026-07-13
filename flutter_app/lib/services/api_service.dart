@@ -82,8 +82,10 @@ class ApiService {
           }
 
           final refreshDio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+          final refreshSid = await _storage.read(key: 'refresh_sid');
           final res = await refreshDio.post(
             '/auth/refresh',
+            data: refreshSid != null ? {'refresh_sid': refreshSid} : null,
             options: Options(headers: {'Authorization': 'Bearer $oldToken'}),
           );
           final rawToken = res.data?['token'];
@@ -160,6 +162,9 @@ class ApiService {
     await _storage.write(key: 'auth_token', value: data['token']);
     await _storage.write(key: 'employee_id', value: employeeId);
     await _storage.write(key: 'user_data', value: jsonEncode(data['user']));
+    if (data['refresh_sid'] != null) {
+      await _storage.write(key: 'refresh_sid', value: data['refresh_sid']);
+    }
     return data;
   }
 

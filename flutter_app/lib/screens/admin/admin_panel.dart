@@ -957,7 +957,6 @@ class _EmployeeTabState extends State<_EmployeeTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading && _employees.isEmpty) return const LoadingIndicator();
 
     final slivers = <Widget>[
       _buildAdminAppBar(context, 'employees'),

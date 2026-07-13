@@ -65,6 +65,7 @@ async function login(req, res, next) {
     res.json({
       success: true,
       token: accessToken,
+      refresh_sid: sessionId,
       user: {
         employee_id: employee.employee_id,
         full_name: employee.full_name,
@@ -99,7 +100,7 @@ async function logout(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const sessionId = req.signedCookies.refresh_sid;
+    const sessionId = req.signedCookies.refresh_sid || req.body?.refresh_sid;
     if (!sessionId) {
       throw createError(401, 'No refresh token');
     }
