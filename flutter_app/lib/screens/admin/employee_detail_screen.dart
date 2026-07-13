@@ -133,46 +133,11 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
   }
 
   void _showPasswordResetDialog() {
-    final passCtl = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reset Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('New password for ${_employee!['full_name']}'),
-            const SizedBox(height: 12),
-            TextField(
-                controller: passCtl,
-                decoration: const InputDecoration(labelText: 'New Password'),
-                obscureText: true),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (passCtl.text.length < 4) return;
-              try {
-                await _api.resetPassword(
-                    _employee!['employee_id'], passCtl.text);
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password reset')));
-                }
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Reset'),
-          ),
-        ],
+      builder: (ctx) => _PasswordResetDialog(
+        employee: _employee!,
+        api: _api,
       ),
     );
   }
@@ -461,7 +426,79 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                 ],
               ),
-            ),
+      ),
+    );
+  }
+}
+
+class _PasswordResetDialog extends StatefulWidget {
+  final Map<String, dynamic> employee;
+  final ApiService api;
+
+  const _PasswordResetDialog({
+    required this.employee,
+    required this.api,
+  });
+
+  @override
+  State<_PasswordResetDialog> createState() => _PasswordResetDialogState();
+}
+
+class _PasswordResetDialogState extends State<_PasswordResetDialog> {
+  late final TextEditingController _passCtl;
+
+  @override
+  void initState() {
+    super.initState();
+    _passCtl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _passCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('New password for ${widget.employee['full_name']}'),
+          const SizedBox(height: 12),
+          TextField(
+              controller: _passCtl,
+              decoration: const InputDecoration(labelText: 'New Password'),
+              obscureText: true),
+        ],
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        FilledButton(
+          onPressed: () async {
+            if (_passCtl.text.length < 4) return;
+            try {
+              await widget.api.resetPassword(
+                  widget.employee['employee_id'], _passCtl.text);
+              if (!context.mounted) return;
+              Navigator.pop(context);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password reset')));
+              }
+            } catch (e) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('$e')));
+            }
+          },
+          child: const Text('Reset'),
+        ),
+      ],
     );
   }
 }

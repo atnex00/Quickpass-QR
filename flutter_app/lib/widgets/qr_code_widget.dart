@@ -34,6 +34,7 @@ class QrCodeWidget extends StatefulWidget {
 
 class _QrCodeWidgetState extends State<QrCodeWidget> {
   String _windowState = 'during';
+  int _remainingSeconds = 0;
   Timer? _timer;
 
   @override
@@ -56,7 +57,8 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
   void _tick() {
     final result = QrService.windowSeconds(widget.date, widget.time);
     setState(() {
-      _windowState = result['state'] as String;
+      _windowState = (result['state'] as String?) ?? 'after';
+      _remainingSeconds = (result['seconds'] as int?) ?? 0;
     });
     if (_windowState == 'after') {
       _timer?.cancel();
@@ -162,9 +164,9 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
             const SizedBox(height: 16),
             _TimerRow(
                 color: widget.color,
-                date: widget.date,
-                time: widget.time,
-                isOut: widget.isOut),
+                isOut: widget.isOut,
+                windowState: _windowState,
+                remainingSeconds: _remainingSeconds),
           ],
           if (widget.employeeName != null ||
               widget.employeePosition != null) ...[
@@ -215,61 +217,18 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
   }
 }
 
-class _TimerRow extends StatefulWidget {
+class _TimerRow extends StatelessWidget {
   final Color color;
-  final String date;
-  final String time;
   final bool isOut;
-  const _TimerRow(
-      {required this.color,
-      required this.date,
-      required this.time,
-      required this.isOut});
+  final String windowState;
+  final int remainingSeconds;
 
-  @override
-  State<_TimerRow> createState() => _TimerRowState();
-}
-
-class _TimerRowState extends State<_TimerRow> {
-  String _windowState = 'during';
-  int _remainingSeconds = 900;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _tick();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-  }
-
-  @override
-  void didUpdateWidget(covariant _TimerRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.date != oldWidget.date || widget.time != oldWidget.time) {
-      _timer?.cancel();
-      _tick();
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-    }
-  }
-
-  void _tick() {
-    final result = QrService.windowSeconds(widget.date, widget.time);
-    if (!mounted) return;
-    setState(() {
-      _windowState = result['state'] as String;
-      _remainingSeconds = result['seconds'] as int;
-    });
-    if (_windowState == 'after') {
-      _timer?.cancel();
-      _timer = null;
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
+  const _TimerRow({
+    required this.color,
+    required this.isOut,
+    required this.windowState,
+    required this.remainingSeconds,
+  });
 
   String _fmt(int secs) {
     final m = (secs ~/ 60).toString().padLeft(2, '0');
@@ -279,34 +238,34 @@ class _TimerRowState extends State<_TimerRow> {
 
   @override
   Widget build(BuildContext context) {
-    final expired = widget.isOut && _windowState == 'after';
+    final expired = isOut && windowState == 'after';
     if (expired) return const SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: widget.color.withValues(alpha: 0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer, size: 18, color: widget.color),
+          Icon(Icons.timer, size: 18, color: color),
           const SizedBox(width: 6),
-          widget.isOut
+          isOut
               ? Text(
-                  '${_windowState == 'before' ? 'Opens in ' : 'Expires in '}${_fmt(_remainingSeconds)}',
+                  '${windowState == 'before' ? 'Opens in ' : 'Expires in '}${_fmt(remainingSeconds)}',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'monospace',
-                      color: widget.color),
+                      color: color),
                 )
               : Text('Ready to scan',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: widget.color)),
+                      color: color)),
         ],
       ),
     );
