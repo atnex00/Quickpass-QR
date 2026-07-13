@@ -236,14 +236,23 @@ class _PendingCard extends StatelessWidget {
 
     if (result == true && context.mounted) {
       final supProv = context.read<SupervisorProvider>();
-      await supProv.approveLeave(leave.leaveId);
+      final approved = await supProv.approveLeave(leave.leaveId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text('Approved leave for ${leave.employeeName}'),
-          ),
-        );
+        if (approved != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('Approved leave for ${leave.employeeName}'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text(supProv.error ?? 'Failed to approve leave'),
+            ),
+          );
+        }
       }
     }
   }
@@ -285,14 +294,23 @@ class _PendingCard extends StatelessWidget {
 
     if (reason != null && context.mounted) {
       final supProv = context.read<SupervisorProvider>();
-      await supProv.rejectLeave(leave.leaveId, reason);
+      final rejected = await supProv.rejectLeave(leave.leaveId, reason);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text('Rejected leave for ${leave.employeeName}'),
-          ),
-        );
+        if (rejected != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text('Rejected leave for ${leave.employeeName}'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              content: Text(supProv.error ?? 'Failed to reject leave'),
+            ),
+          );
+        }
       }
     }
 
