@@ -37,14 +37,11 @@ class ApiService {
     if (!kIsWeb) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
-        if (AppConfig.apiBaseUrl.startsWith('https://')) {
+        if (AppConfig.apiBaseUrl.startsWith('https://') &&
+            CertificatePinner.hasPins) {
           client.badCertificateCallback =
               (X509Certificate cert, String host, int port) {
-            final pinned = CertificatePinner.isPinned(cert);
-            if (pinned == null) {
-              return true;
-            }
-            return pinned;
+            return CertificatePinner.isPinned(cert) ?? false;
           };
         }
         return client;

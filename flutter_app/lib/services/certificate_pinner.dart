@@ -5,6 +5,8 @@ import 'package:crypto/crypto.dart';
 class CertificatePinner {
   static const List<String> _pins = [];
 
+  static bool get hasPins => _pins.isNotEmpty;
+
   static bool? isPinned(X509Certificate cert) {
     if (_pins.isEmpty) return null;
 
