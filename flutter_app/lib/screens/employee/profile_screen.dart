@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 
@@ -16,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _emailCtl;
   late TextEditingController _passCtl;
   bool _saving = false;
+  bool _uploading = false;
 
   @override
   void initState() {
@@ -70,6 +73,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _showPhotoSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Change Profile Photo',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: context.onSurface,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAndUploadPhoto(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAndUploadPhoto(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadPhoto(ImageSource source) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (picked == null) return;
+
+    setState(() => _uploading = true);
+    final ok = await context.read<AuthProvider>().uploadProfilePhoto(picked.path);
+    setState(() => _uploading = false);
+
+    if (ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile photo updated')),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.read<AuthProvider>().error ?? 'Could not upload photo',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -84,7 +163,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _UserAvatarCard(user: user),
+                  _UserAvatarCard(
+                    user: user,
+                    uploading: _uploading,
+                    onTap: _showPhotoSourceSheet,
+                  ),
                   const SizedBox(height: 12),
                   _AccountInfoCard(user: user),
                   const SizedBox(height: 12),
@@ -181,12 +264,29 @@ class _ProfileAppBar extends StatelessWidget {
   }
 }
 
+String _getPhotoUrl(String? photo) {
+  if (photo == null || photo.isEmpty) return '';
+  final base = AppConfig.apiBaseUrl.replaceFirst('/api', '');
+  return '$base$photo';
+}
+
 class _UserAvatarCard extends StatelessWidget {
   final dynamic user;
-  const _UserAvatarCard({required this.user});
+  final bool uploading;
+  final VoidCallback onTap;
+
+  const _UserAvatarCard({
+    required this.user,
+    required this.uploading,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final photo = user?.profilePhoto as String?;
+    final photoUrl = _getPhotoUrl(photo);
+    final hasPhoto = photoUrl.isNotEmpty;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -197,15 +297,63 @@ class _UserAvatarCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
-            child: Text(
-              (user?.fullName ?? 'U')[0].toUpperCase(),
-              style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
-                  color: context.primaryBlue),
+          GestureDetector(
+            onTap: uploading ? null : onTap,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
+                  backgroundImage:
+                      hasPhoto ? NetworkImage(photoUrl) : null,
+                  child: hasPhoto
+                      ? null
+                      : Text(
+                          (user?.fullName ?? 'U')[0].toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            color: context.primaryBlue,
+                          ),
+                        ),
+                ),
+                if (uploading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black38,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (!uploading)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: context.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: context.surfaceContainerLowest, width: 2),
+                      ),
+                      child: Icon(Icons.camera_alt,
+                          size: 12, color: context.onPrimary),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 16),

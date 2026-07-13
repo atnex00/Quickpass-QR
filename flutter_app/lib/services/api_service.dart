@@ -194,6 +194,16 @@ class ApiService {
     return Employee.fromJson(d);
   }
 
+  Future<Employee> uploadProfilePhoto(String filePath) async {
+    final formData = FormData.fromMap({
+      'photo': await MultipartFile.fromFile(filePath, filename: 'profile.jpg'),
+    });
+    final res = await _dio.post('/auth/profile/photo', data: formData);
+    final d = res.data['data'];
+    if (d == null) throw Exception('Invalid photo upload response');
+    return Employee.fromJson(d);
+  }
+
   // ── Leave Requests ──
   Future<LeaveRequest> submitLeave({
     required String leaveDate,

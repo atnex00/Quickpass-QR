@@ -104,6 +104,19 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> uploadProfilePhoto(String filePath) async {
+    try {
+      final user = await _api.uploadProfilePhoto(filePath);
+      _user = user;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();
