@@ -818,6 +818,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
       Debouncer(delay: const Duration(milliseconds: 300));
   List<Map<String, dynamic>> _employees = [];
   List<Map<String, dynamic>> _departments = [];
+  late final TextEditingController _searchCtl;
   bool _isLoading = true;
   bool _loadingError = false;
 
@@ -833,9 +834,16 @@ class _EmployeeTabState extends State<_EmployeeTab> {
   void initState() {
     super.initState();
     _api = context.read<ApiService>();
+    _searchCtl = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchCtl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -959,6 +967,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
           delegate: SliverChildListDelegate([
             // ── Search Bar ──
             TextField(
+              controller: _searchCtl,
               decoration: const InputDecoration(
                 hintText: 'Search by name, ID or position...',
                 prefixIcon: Icon(Icons.search),
