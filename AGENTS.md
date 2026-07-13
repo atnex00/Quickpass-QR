@@ -22,7 +22,7 @@ cd backend && npm run dev
 cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
-Env: `NODE_ENV` selects `backend/.env.<NODE_ENV>` (defaults to `dev`). Knexfile loads the same way via dotenv.
+Env: `backend/.env` loads first if it exists, then `backend/.env.<NODE_ENV>` loads to override. `NODE_ENV` defaults to `dev`. This keeps old single-file `.env` setups working while also supporting `.env.dev`/`.env.prod`.
 
 Setup scripts (`scripts/setup.ps1` / `setup.sh`) install Flutter + Android SDK into `tools/` — no system-wide installs. `scripts/run_phone.ps1` uses ADB reverse tunnel (`localhost:3000`) for physical device testing.
 

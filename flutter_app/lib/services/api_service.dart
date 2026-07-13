@@ -94,6 +94,10 @@ class ApiService {
           }
           final newToken = rawToken;
           await _storage.write(key: 'auth_token', value: newToken);
+          final rawRefreshSid = res.data?['refresh_sid'];
+          if (rawRefreshSid is String && rawRefreshSid.isNotEmpty) {
+            await _storage.write(key: 'refresh_sid', value: rawRefreshSid);
+          }
           _refreshRetryCount = 0;
 
           error.requestOptions.extra['_retry'] = true;
@@ -121,7 +125,7 @@ class ApiService {
           _refreshRetryCount++;
           if (_refreshRetryCount >= 3) {
             _refreshRetryCount = 0;
-            await _storage.delete(key: 'auth_token');
+            await clearLocalAuth();
             for (final p in _pendingRequests) {
               p.handler.next(error);
             }
@@ -141,7 +145,7 @@ class ApiService {
       },
       onResponse: (response, handler) async {
         if (response.data is Map && response.data['force_logout'] == true) {
-          await _storage.delete(key: 'auth_token');
+          await clearLocalAuth();
           onForceLogout?.call();
         }
         return handler.next(response);
@@ -168,11 +172,18 @@ class ApiService {
     return data;
   }
 
+  Future<void> clearLocalAuth() async {
+    await _storage.delete(key: 'auth_token');
+    await _storage.delete(key: 'refresh_sid');
+    await _storage.delete(key: 'user_data');
+    await _storage.delete(key: 'employee_id');
+  }
+
   Future<void> logout() async {
     try {
       await _dio.post('/auth/logout');
     } catch (_) {}
-    await _storage.deleteAll();
+    await clearLocalAuth();
   }
 
   Future<Map<String, dynamic>?> getStoredUser() async {

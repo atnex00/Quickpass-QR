@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import type { Employee } from "@/types"
-import api, { setAccessToken, getAccessToken } from "@/lib/api"
+import api, { setAccessToken, getAccessToken, setOnAuthFailure } from "@/lib/api"
 
 interface AuthState {
   user: Employee | null
@@ -106,3 +106,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 }))
+
+setOnAuthFailure(() => {
+  useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: false })
+})

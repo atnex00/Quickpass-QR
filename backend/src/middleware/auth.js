@@ -24,9 +24,18 @@ async function authenticate(req, res, next) {
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', decoded.employee_id)
       .select(
-        'employees.*',
+        'employees.employee_id',
+        'employees.full_name',
+        'employees.position',
+        'employees.department_id',
         'departments.department_name',
-        'departments.department_code'
+        'employees.email',
+        'employees.is_supervisor',
+        'employees.is_admin',
+        'employees.is_security',
+        'employees.is_active',
+        'employees.profile_photo',
+        'employees.hire_date'
       )
       .first();
 

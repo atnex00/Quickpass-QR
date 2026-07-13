@@ -1,10 +1,52 @@
-const envFile = `.env.${process.env.NODE_ENV || 'dev'}`;
-require('dotenv').config({ path: require('path').join(__dirname, '..', envFile) });
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+function loadEnv() {
+  const baseEnv = path.join(__dirname, '..', '.env');
+  const envFile = path.join(__dirname, '..', `.env.${process.env.NODE_ENV || 'dev'}`);
+  if (fs.existsSync(baseEnv)) {
+    dotenv.config({ path: baseEnv });
+  }
+  if (fs.existsSync(envFile) && envFile !== baseEnv) {
+    dotenv.config({ path: envFile });
+  }
+}
+
+loadEnv();
+
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`ERROR: ${name} is required. Set it in your backend/.env file.`);
+    process.exit(1);
+  }
+  return value;
+}
+
+function envOrDevFallback(name, fallback) {
+  const value = process.env[name];
+  if (value) return value;
+  if (process.env.NODE_ENV === 'production') {
+    console.error(`ERROR: ${name} is required in production. Set it in your backend/.env file.`);
+    process.exit(1);
+  }
+  console.warn(`WARNING: ${name} is not set. Using a development fallback. Set it in your backend/.env file.`);
+  return fallback;
+}
+
+requireEnv('DB_CONNECTION');
+process.env.JWT_SECRET = envOrDevFallback('JWT_SECRET', 'quickpass-jwt-secret-dev-change-me');
+process.env.COOKIE_SECRET = envOrDevFallback('COOKIE_SECRET', 'quickpass-cookie-secret-dev-change-me');
+process.env.QR_SECRET = envOrDevFallback('QR_SECRET', 'quickpass-qr-secret-dev-change-me');
+
+if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
+  console.error('ERROR: CORS_ORIGIN is required in production. Set it in your backend/.env file.');
+  process.exit(1);
+}
 
 const express = require('express');
 const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -20,9 +62,6 @@ const PORT = process.env.PORT || 3000;
 initFirebase();
 
 const corsOrigin = process.env.CORS_ORIGIN;
-if (!corsOrigin && process.env.NODE_ENV === 'production') {
-  console.warn('WARNING: CORS_ORIGIN not set in production. Set it to your frontend URL.');
-}
 
 // Middleware
 app.use(helmet());
@@ -41,7 +80,7 @@ if (corsOrigin) {
   }));
 }
 app.use(cors({ origin: corsOrigin || false, credentials: true }));
-app.use(cookieParser(process.env.COOKIE_SECRET || 'quickpass-cookie-secret-dev'));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 

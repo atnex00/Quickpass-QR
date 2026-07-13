@@ -1,6 +1,8 @@
 import axios from "axios"
 
 let _accessToken: string | null = null
+let _refreshPromise: Promise<string | null> | null = null
+let _onAuthFailure: (() => void) | null = null
 
 export function setAccessToken(token: string | null) {
   _accessToken = token
@@ -8,6 +10,24 @@ export function setAccessToken(token: string | null) {
 
 export function getAccessToken(): string | null {
   return _accessToken
+}
+
+export function setOnAuthFailure(callback: (() => void) | null) {
+  _onAuthFailure = callback
+}
+
+async function refreshAccessToken(): Promise<string | null> {
+  if (_refreshPromise) return _refreshPromise
+
+  _refreshPromise = axios
+    .post("/api/auth/refresh", {}, { withCredentials: true })
+    .then((res) => res.data?.token || null)
+    .catch(() => null)
+    .finally(() => {
+      _refreshPromise = null
+    })
+
+  return _refreshPromise
 }
 
 const api = axios.create({
@@ -29,17 +49,14 @@ api.interceptors.response.use(
     const originalRequest = err.config
     if (err.response?.status === 401 && !originalRequest._retry && originalRequest.url !== "/auth/refresh") {
       originalRequest._retry = true
-      try {
-        const res = await axios.post("/api/auth/refresh", {}, { withCredentials: true })
-        const newToken = res.data.token
-        if (newToken) {
-          setAccessToken(newToken)
-          originalRequest.headers.Authorization = `Bearer ${newToken}`
-          return api(originalRequest)
-        }
-      } catch {
-        setAccessToken(null)
+      const newToken = await refreshAccessToken()
+      if (newToken) {
+        setAccessToken(newToken)
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return api(originalRequest)
       }
+      setAccessToken(null)
+      _onAuthFailure?.()
     }
     return Promise.reject(err)
   }

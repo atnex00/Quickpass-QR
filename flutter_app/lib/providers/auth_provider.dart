@@ -41,6 +41,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Auth initialization failed: $e');
+      await _api.clearLocalAuth();
     }
 
     _isLoading = false;
@@ -88,6 +89,14 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
     onLoggedOut?.call();
+  }
+
+  Future<void> clearAuth() async {
+    _isAuthenticated = false;
+    _user = null;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {

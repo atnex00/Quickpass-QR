@@ -52,6 +52,7 @@ void main() {
     test('handles error during initialization', () async {
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token-123');
       when(mockApi.getProfile()).thenThrow(Exception('Network error'));
+      when(mockApi.clearLocalAuth()).thenAnswer((_) async {});
 
       await provider.initialize();
 

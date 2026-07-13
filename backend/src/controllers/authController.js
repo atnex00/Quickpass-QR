@@ -62,10 +62,9 @@ async function login(req, res, next) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({
+    const responsePayload = {
       success: true,
       token: accessToken,
-      refresh_sid: sessionId,
       user: {
         employee_id: employee.employee_id,
         full_name: employee.full_name,
@@ -79,7 +78,11 @@ async function login(req, res, next) {
         profile_photo: employee.profile_photo,
         hire_date: employee.hire_date,
       },
-    });
+    };
+    if (isMobileClient(req)) {
+      responsePayload.refresh_sid = sessionId;
+    }
+    res.json(responsePayload);
   } catch (err) {
     next(err);
   }
@@ -100,7 +103,8 @@ async function logout(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const sessionId = req.signedCookies.refresh_sid || req.body?.refresh_sid;
+    const isMobile = isMobileClient(req);
+    const sessionId = req.signedCookies.refresh_sid || (isMobile && req.body?.refresh_sid);
     if (!sessionId) {
       throw createError(401, 'No refresh token');
     }
@@ -150,7 +154,11 @@ async function refreshToken(req, res, next) {
       { expiresIn: '15m' }
     );
 
-    res.json({ success: true, token });
+    const responsePayload = { success: true, token };
+    if (isMobile) {
+      responsePayload.refresh_sid = newSessionId;
+    }
+    res.json(responsePayload);
   } catch (err) {
     next(err);
   }
@@ -203,7 +211,20 @@ async function updateProfile(req, res, next) {
     const updated = await db('employees')
       .join('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', req.user.employee_id)
-      .select('employees.*', 'departments.department_name')
+      .select(
+        'employees.employee_id',
+        'employees.full_name',
+        'employees.position',
+        'employees.department_id',
+        'departments.department_name',
+        'employees.email',
+        'employees.is_supervisor',
+        'employees.is_admin',
+        'employees.is_security',
+        'employees.is_active',
+        'employees.profile_photo',
+        'employees.hire_date'
+      )
       .first();
 
     res.json({ success: true, data: updated });
@@ -247,13 +268,31 @@ async function uploadProfilePhoto(req, res, next) {
     const updated = await db('employees')
       .join('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', req.user.employee_id)
-      .select('employees.*', 'departments.department_name')
+      .select(
+        'employees.employee_id',
+        'employees.full_name',
+        'employees.position',
+        'employees.department_id',
+        'departments.department_name',
+        'employees.email',
+        'employees.is_supervisor',
+        'employees.is_admin',
+        'employees.is_security',
+        'employees.is_active',
+        'employees.profile_photo',
+        'employees.hire_date'
+      )
       .first();
 
     res.json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }
+}
+
+function isMobileClient(req) {
+  const ua = req.headers['user-agent'] || '';
+  return ua.includes('Dart');
 }
 
 module.exports = { login, logout, refreshToken, getProfile, updateProfile, fcmToken, uploadProfilePhoto };

@@ -65,6 +65,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
   }
 
   void _handleForceLogout() {
+    widget.auth.clearAuth();
     _navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,

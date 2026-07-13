@@ -292,12 +292,14 @@ cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/ap
 
 ## Environment Switching
 
-The project supports **dev** (local PostgreSQL) and **production** (Supabase cloud) environments via `NODE_ENV`. The backend loads the corresponding `.env.<env>` file.
+The project supports **dev** (local PostgreSQL) and **production** (Supabase cloud) environments via `NODE_ENV`.
 
-| Env | File | DB Target | Command |
-|-----|------|-----------|---------|
-| dev | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
-| prod | `backend/.env.prod` | Supabase cloud | `npm run prod` |
+The backend loads `backend/.env` first if it exists, then loads `backend/.env.<NODE_ENV>` to override. This keeps simple single-file `.env` setups working while also supporting `.env.dev` / `.env.prod`.
+
+| Env | Base file | Override file | DB Target | Command |
+|-----|-----------|---------------|-----------|---------|
+| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
+| prod | `backend/.env` | `backend/.env.prod` | Supabase cloud | `npm run prod` |
 
 ### Quick Switch
 
@@ -315,7 +317,7 @@ npm run prod        # runs backend serving web/dist
 ```bash
 docker-compose up --build
 ```
-This uses `NODE_ENV=production` and reads `backend/.env` (copy from `.env.prod`).
+This uses `NODE_ENV=production`. Copy `backend/.env.prod` to `backend/.env`, or keep `backend/.env` as base and `backend/.env.prod` as override.
 
 ---
 
@@ -345,14 +347,19 @@ Quickpass uses **Supabase** for its PostgreSQL database. No local PostgreSQL is 
 
 ### Step 3: Configure Environment
 
-Edit `backend/.env.prod`:
+Create `backend/.env` (base) or `backend/.env.prod` (production override) with at least these values:
 
 ```env
+NODE_ENV=production
 DB_CONNECTION=postgresql://postgres:YOUR_PASSWORD@db.YOUR_REF.supabase.co:5432/postgres
 DB_SSL=true
 JWT_SECRET=your-strong-random-secret
+COOKIE_SECRET=your-strong-random-cookie-secret
 QR_SECRET=your-strong-random-qr-secret
+CORS_ORIGIN=https://your-frontend-domain.com
 ```
+
+Production startup will fail if `DB_CONNECTION`, `JWT_SECRET`, `COOKIE_SECRET`, `QR_SECRET`, or `CORS_ORIGIN` are missing.
 
 ### Step 4: Run Migrations
 
@@ -459,28 +466,39 @@ Quickpass-QR/
 
 ## Environment Variables
 
-### `backend/.env.dev` — Development
+### `backend/.env` / `backend/.env.dev` — Development
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable | Description | Default / Fallback |
+|----------|-------------|--------------------|
 | `PORT` | API server port | `3000` |
 | `NODE_ENV` | Environment | `development` |
-| `DB_CONNECTION` | PostgreSQL connection string | `postgresql://postgres:admin@localhost:5432/passlynx` |
+| `DB_CONNECTION` | PostgreSQL connection string | — (required) |
 | `DB_SSL` | Enable SSL for DB connection | `false` |
-| `JWT_SECRET` | JWT signing secret | `passlynx-dev-secret...` |
+| `JWT_SECRET` | JWT signing secret | loud dev fallback if unset |
+| `COOKIE_SECRET` | Signed cookie secret | loud dev fallback if unset |
+| `QR_SECRET` | QR code HMAC signing secret | loud dev fallback if unset |
 | `JWT_EXPIRES_IN` | Token expiration | `24h` |
 | `SESSION_EXPIRES_IN` | Session duration | `7d` |
-| `QR_SECRET` | QR code HMAC signing secret | `passlynx-qr-dev-secret...` |
 | `QR_VALIDITY_WINDOW_MINUTES` | QR code validity window | `15` |
 
 ### `backend/.env.prod` — Production
 
-Same variables as dev, plus:
+Required in production:
 
 | Variable | Description |
 |----------|-------------|
-| `FCM_*` | Firebase Cloud Messaging credentials (optional) |
-| `HTTPS_KEY` / `HTTPS_CERT` | Optional HTTPS server paths (port 3443 for camera access) |
+| `DB_CONNECTION` | PostgreSQL connection string |
+| `JWT_SECRET` | JWT signing secret |
+| `COOKIE_SECRET` | Signed cookie secret |
+| `QR_SECRET` | QR code HMAC signing secret |
+| `CORS_ORIGIN` | Allowed frontend origin |
+
+Optional:
+
+| Variable | Description |
+|----------|-------------|
+| `FCM_*` | Firebase Cloud Messaging credentials |
+| `HTTPS_KEY` / `HTTPS_CERT` | HTTPS server paths (port 3443 for camera access) |
 
 ---
 
@@ -697,6 +715,8 @@ flutter test --coverage
 3. **Security** scans OUT QR at exit → status: `active`
 4. **Security** scans IN QR at entry → status: `completed`
 
+Each OUT/IN QR can only be scanned once. The database enforces this with a unique constraint and the scan is wrapped in a transaction.
+
 ### Roles
 
 | Role | Access |
@@ -828,7 +848,7 @@ All passwords are `pass1234`.
 | `npm run migrate` fails | Check `DB_CONNECTION` in `.env.<env>` and that Supabase allows your IP |
 | `flutter pub get` fails | Ensure you're in the `flutter_app` directory |
 | QR scanner not working | Grant camera permission in Android Settings → Apps → Quickpass |
-| Backend won't start | Check that port 3000 is free: `lsof -i :3000` (macOS/Linux) or `netstat -ano \| findstr :3000` (Windows) |
+| Backend won't start | Check missing required env vars (`DB_CONNECTION`, `JWT_SECRET`, `COOKIE_SECRET`, `QR_SECRET`, `CORS_ORIGIN` in production) and that port 3000 is free |
 | Web app shows blank page | Run `npm run build:web` first if using production mode, or check Vite dev server is running on port 8080 |
 
 ### Supabase Connection Issues
