@@ -49,7 +49,7 @@ class ScanLog {
   });
 
   static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
-  static bool _boolFromJson(dynamic v) => v as bool? ?? false;
+  static bool _boolFromJson(dynamic v) => v == true || v == 1;
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {

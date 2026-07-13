@@ -28,7 +28,7 @@ class Department {
   });
 
   static String _stringFromJson(dynamic v) => v?.toString() ?? '';
-  static bool _boolFromJson(dynamic v) => v as bool? ?? false;
+  static bool _boolFromJson(dynamic v) => v == true || v == 1;
 
   factory Department.fromJson(Map<String, dynamic> json) =>
       _$DepartmentFromJson(json);

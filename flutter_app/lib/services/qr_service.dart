@@ -1,3 +1,5 @@
+import '../config/app_config.dart';
+
 class QrService {
   static DateTime? _tryParse(String s) => DateTime.tryParse(s);
 
@@ -16,7 +18,7 @@ class QrService {
     if (start == null) return false;
     final now = DateTime.now();
     final diff = now.difference(start).inMinutes.abs();
-    return diff <= 15;
+    return diff <= AppConfig.qrValidityMinutes;
   }
 
   static bool isInQrValid(String date, String endTime, DateTime? inScanTime,
@@ -27,7 +29,7 @@ class QrService {
     if (end == null) return false;
     final now = DateTime.now();
     final diff = now.difference(end).inMinutes.abs();
-    return diff <= 15;
+    return diff <= AppConfig.qrValidityMinutes;
   }
 
   static Map<String, dynamic> windowSeconds(String date, String time,
@@ -37,8 +39,8 @@ class QrService {
     if (target == null) {
       return {'state': 'after', 'seconds': 0};
     }
-    final windowStart = target.subtract(const Duration(minutes: 15));
-    final windowEnd = target.add(const Duration(minutes: 15));
+    final windowStart = target.subtract(const Duration(minutes: AppConfig.qrValidityMinutes));
+    final windowEnd = target.add(const Duration(minutes: AppConfig.qrValidityMinutes));
     now ??= DateTime.now();
 
     if (now.isBefore(windowStart)) {

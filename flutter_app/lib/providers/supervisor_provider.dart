@@ -66,6 +66,7 @@ class SupervisorProvider extends ChangeNotifier {
     try {
       final leave = await _api.revokeApproval(leaveId);
       _approvedLeaves.removeWhere((l) => l.leaveId == leaveId);
+      _pendingRequests.insert(0, leave);
       notifyListeners();
       return leave;
     } catch (e) {

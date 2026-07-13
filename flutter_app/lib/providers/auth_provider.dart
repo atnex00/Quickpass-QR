@@ -41,7 +41,6 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Auth initialization failed: $e');
-      await _api.logout();
     }
 
     _isLoading = false;

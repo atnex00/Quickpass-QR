@@ -48,7 +48,6 @@ class LeaveProvider extends ChangeNotifier {
       final list = data['data'] as List? ?? [];
       _history = list.map((j) => LeaveRequest.fromJson(j)).toList();
       _recomputeCounts();
-      _error = null;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     }
@@ -65,7 +64,6 @@ class LeaveProvider extends ChangeNotifier {
       _activeLeave = await _api.getActiveLeave();
       _error = null;
     } catch (e) {
-      _activeLeave = null;
       _error = e.toString().replaceFirst('Exception: ', '');
     }
 
