@@ -208,8 +208,12 @@ class LeaveRequest {
     final startParts = startTime.split(':');
     final endParts = endTime.split(':');
     if (startParts.length < 2 || endParts.length < 2) return 0;
-    var startMin = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
-    var endMin = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+    final startH = int.tryParse(startParts[0]) ?? 0;
+    final startM = int.tryParse(startParts[1]) ?? 0;
+    final endH = int.tryParse(endParts[0]) ?? 0;
+    final endM = int.tryParse(endParts[1]) ?? 0;
+    final startMin = startH * 60 + startM;
+    var endMin = endH * 60 + endM;
     if (endMin < startMin) endMin += 1440;
     return endMin - startMin;
   }
