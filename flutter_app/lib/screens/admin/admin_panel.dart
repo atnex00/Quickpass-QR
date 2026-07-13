@@ -846,6 +846,9 @@ class _EmployeeTabState extends State<_EmployeeTab> {
     super.dispose();
   }
 
+  static String? _empPhoto(Map<String, dynamic> emp) =>
+      AppConfig.photoUrl(emp['profile_photo'] as String?);
+
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -1236,22 +1239,31 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? context.primary.withValues(alpha: 0.2)
-                          : context.outlineVariant.withValues(alpha: 0.3),
+                      color: _empPhoto(emp) == null
+                          ? (isActive
+                              ? context.primary.withValues(alpha: 0.2)
+                              : context.outlineVariant.withValues(alpha: 0.3))
+                          : null,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Center(
-                      child: Text(
-                        (emp['full_name'] as String?)?[0] ?? '?',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              isActive ? context.primary : context.neutralGray,
-                        ),
-                      ),
-                    ),
+                    child: _empPhoto(emp) != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: Image.network(_empPhoto(emp)!,
+                                fit: BoxFit.cover),
+                          )
+                        : Center(
+                            child: Text(
+                              (emp['full_name'] as String?)?[0] ?? '?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isActive
+                                    ? context.primary
+                                    : context.neutralGray,
+                              ),
+                            ),
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
