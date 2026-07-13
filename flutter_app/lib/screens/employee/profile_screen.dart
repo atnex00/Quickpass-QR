@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _saving = true);
     final ok = await context.read<AuthProvider>().updateProfile(data);
-    setState(() => _saving = false);
+    if (mounted) setState(() => _saving = false);
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _uploading = true);
     final ok = await context.read<AuthProvider>().uploadProfilePhoto(picked.path);
-    setState(() => _uploading = false);
+    if (mounted) setState(() => _uploading = false);
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

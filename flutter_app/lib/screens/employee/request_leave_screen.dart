@@ -82,7 +82,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
       reason: _reason,
     );
 
-    setState(() => _isSubmitting = false);
+    if (mounted) setState(() => _isSubmitting = false);
 
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
