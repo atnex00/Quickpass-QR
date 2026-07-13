@@ -117,14 +117,14 @@ class ApiService {
         } catch (_) {
           _refreshRetryCount++;
           if (_refreshRetryCount >= 3) {
-            _pendingRequests.clear();
-            await _storage.delete(key: 'auth_token');
             _refreshRetryCount = 0;
+            await _storage.delete(key: 'auth_token');
+            for (final p in _pendingRequests) {
+              p.handler.next(error);
+            }
+            _pendingRequests.clear();
             onForceLogout?.call();
-            handler.resolve(Response(
-              requestOptions: error.requestOptions,
-              data: {'force_logout': true},
-            ));
+            handler.next(error);
             return;
           }
           for (final p in _pendingRequests) {
