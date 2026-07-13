@@ -89,7 +89,11 @@ class ApiService {
             '/auth/refresh',
             options: Options(headers: {'Authorization': 'Bearer $oldToken'}),
           );
-          final newToken = res.data['token'] as String;
+          final rawToken = res.data?['token'];
+          if (rawToken is! String || rawToken.isEmpty) {
+            throw Exception('Invalid token response from refresh endpoint');
+          }
+          final newToken = rawToken;
           await _storage.write(key: 'auth_token', value: newToken);
           _refreshRetryCount = 0;
 
