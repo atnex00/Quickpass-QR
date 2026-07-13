@@ -112,6 +112,12 @@ class LeaveRequest {
   @JsonKey(name: 'in_qr_code')
   final String? inQrCode;
 
+  @JsonKey(name: 'out_qr_image')
+  final String? outQrImage;
+
+  @JsonKey(name: 'in_qr_image')
+  final String? inQrImage;
+
   @JsonKey(
       name: 'out_scan_time',
       fromJson: _dateTimeOrNullFromJson,
@@ -155,6 +161,8 @@ class LeaveRequest {
     required this.status,
     this.outQrCode,
     this.inQrCode,
+    this.outQrImage,
+    this.inQrImage,
     this.outScanTime,
     this.inScanTime,
     this.rejectionReason,

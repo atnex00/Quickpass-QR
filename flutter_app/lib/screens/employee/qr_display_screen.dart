@@ -11,13 +11,6 @@ class QrDisplayScreen extends StatelessWidget {
 
   const QrDisplayScreen({super.key, required this.leave});
 
-  String _qrToken(String? qrData) {
-    if (qrData == null) return '---';
-    return qrData.length > 8
-        ? qrData.substring(qrData.length - 8).toUpperCase()
-        : qrData.toUpperCase();
-  }
-
   @override
   Widget build(BuildContext context) {
     final dateStr = DateFormatter.formatDateApi(leave.leaveDate);
@@ -256,12 +249,10 @@ class QrDisplayScreen extends StatelessWidget {
                                   headerColor: context.primary,
                                   headerTextColor: context.onPrimary,
                                   qrData: leave.outQrCode!,
+                                  qrImageUrl: leave.outQrImage,
                                   qrColor: context.primaryBlue,
-                                  scanLineColor:
-                                      context.secondary.withValues(alpha: 0.4),
                                   title: 'Exit Authorized',
                                   subtitle: 'Scan at Main Gate (Exit)',
-                                  token: _qrToken(leave.outQrCode),
                                   pulseColor: context.primaryBlue,
                                 ),
                               const SizedBox(height: 16),
@@ -274,12 +265,10 @@ class QrDisplayScreen extends StatelessWidget {
                                       context.success.withValues(alpha: 0.1),
                                   headerTextColor: context.success,
                                   qrData: leave.inQrCode!,
+                                  qrImageUrl: leave.inQrImage,
                                   qrColor: context.success,
-                                  scanLineColor:
-                                      context.success.withValues(alpha: 0.4),
                                   title: 'Entry Authorized',
                                   subtitle: 'Scan at Main Gate (Entry)',
-                                  token: _qrToken(leave.inQrCode),
                                   pulseColor: context.success,
                                 ),
                             ],
@@ -357,11 +346,10 @@ class _QrPassCard extends StatelessWidget {
   final Color headerColor;
   final Color headerTextColor;
   final String qrData;
+  final String? qrImageUrl;
   final Color qrColor;
-  final Color scanLineColor;
   final String title;
   final String subtitle;
-  final String token;
   final Color pulseColor;
 
   const _QrPassCard({
@@ -370,11 +358,10 @@ class _QrPassCard extends StatelessWidget {
     required this.headerColor,
     required this.headerTextColor,
     required this.qrData,
+    this.qrImageUrl,
     required this.qrColor,
-    required this.scanLineColor,
     required this.title,
     required this.subtitle,
-    required this.token,
     required this.pulseColor,
   });
 
@@ -425,6 +412,28 @@ class _QrPassCard extends StatelessWidget {
                 () {
                   final qrSize = (MediaQuery.of(context).size.width - 80)
                       .clamp(180.0, 240.0);
+                  final displaySize = qrSize - 32;
+                  if (qrImageUrl != null) {
+                    return Container(
+                      width: qrSize,
+                      height: qrSize,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: qrColor.withValues(alpha: 0.2)),
+                        borderRadius: BorderRadius.circular(12),
+                        color: context.surfaceContainerLow,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          qrImageUrl!,
+                          width: displaySize,
+                          height: displaySize,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    );
+                  }
                   return Container(
                     width: qrSize,
                     height: qrSize,
@@ -434,27 +443,18 @@ class _QrPassCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       color: context.surfaceContainerLow,
                     ),
-                    child: Stack(
-                      children: [
-                        RepaintBoundary(
-                          child: QrImageView(
-                            data: qrData,
-                            version: QrVersions.auto,
-                            size: qrSize - 32,
-                            backgroundColor: Colors.transparent,
-                            eyeStyle: QrEyeStyle(
-                                eyeShape: QrEyeShape.circle, color: qrColor),
-                            dataModuleStyle: QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.circle,
-                                color: qrColor),
-                          ),
-                        ),
-                        // Scanning line animation
-                        IgnorePointer(
-                          child: _ScanLine(
-                              containerSize: qrSize, color: scanLineColor),
-                        ),
-                      ],
+                    child: RepaintBoundary(
+                      child: QrImageView(
+                        data: qrData,
+                        version: QrVersions.auto,
+                        size: displaySize,
+                        backgroundColor: Colors.transparent,
+                        eyeStyle: QrEyeStyle(
+                            eyeShape: QrEyeShape.circle, color: qrColor),
+                        dataModuleStyle: QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.circle,
+                            color: qrColor),
+                      ),
                     ),
                   );
                 }(),
@@ -480,37 +480,7 @@ class _QrPassCard extends StatelessWidget {
             ),
           ),
 
-          // Token bar
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: context.surfaceContainerLow,
-              border: Border(top: BorderSide(color: context.outlineVariant)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: pulseColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'TOKEN: $token',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.05,
-                    color: context.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
+
         ],
       ),
     );
@@ -648,66 +618,4 @@ class _BottomTimerState extends State<_BottomTimer>
   }
 }
 
-class _ScanLine extends StatefulWidget {
-  final double containerSize;
-  final Color color;
-  const _ScanLine({required this.containerSize, required this.color});
 
-  @override
-  State<_ScanLine> createState() => _ScanLineState();
-}
-
-class _ScanLineState extends State<_ScanLine>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat();
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.linear),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (context, child) {
-              return Positioned(
-                top: _animation.value * (widget.containerSize - 2),
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 2,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      widget.color.withValues(alpha: 0),
-                      widget.color,
-                      widget.color.withValues(alpha: 0),
-                    ]),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}

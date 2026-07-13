@@ -6,6 +6,7 @@ import '../services/qr_service.dart';
 
 class QrCodeWidget extends StatefulWidget {
   final String qrData;
+  final String? qrImageUrl;
   final String label;
   final Color color;
   final String date;
@@ -18,6 +19,7 @@ class QrCodeWidget extends StatefulWidget {
   const QrCodeWidget({
     super.key,
     required this.qrData,
+    this.qrImageUrl,
     required this.label,
     required this.color,
     required this.date,
@@ -148,19 +150,27 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
               ],
             )
           else ...[
-            RepaintBoundary(
-              child: QrImageView(
-                data: widget.qrData,
-                version: QrVersions.auto,
-                size: 450,
-                backgroundColor: context.surface,
-                eyeStyle: QrEyeStyle(
-                    eyeShape: QrEyeShape.circle, color: widget.color),
-                dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.circle,
-                    color: Colors.black),
+            if (widget.qrImageUrl != null)
+              Image.network(
+                widget.qrImageUrl!,
+                width: 450,
+                height: 450,
+                fit: BoxFit.contain,
+              )
+            else
+              RepaintBoundary(
+                child: QrImageView(
+                  data: widget.qrData,
+                  version: QrVersions.auto,
+                  size: 450,
+                  backgroundColor: context.surface,
+                  eyeStyle: QrEyeStyle(
+                      eyeShape: QrEyeShape.circle, color: widget.color),
+                  dataModuleStyle: const QrDataModuleStyle(
+                      dataModuleShape: QrDataModuleShape.circle,
+                      color: Colors.black),
+                ),
               ),
-            ),
             const SizedBox(height: 16),
             _TimerRow(
                 color: widget.color,

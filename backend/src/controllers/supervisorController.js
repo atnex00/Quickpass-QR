@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const qrService = require('../services/qrService');
+const qrImageService = require('../services/qrImageService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 
@@ -75,12 +76,17 @@ async function approveLeave(req, res, next) {
     const outQrCode = qrService.encodeQrData(outQrData);
     const inQrCode = qrService.encodeQrData(inQrData);
 
+    const outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
+    const inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
+
     await db('leave_requests')
       .where({ leave_id: leaveId })
       .update({
         status: 'approved',
         out_qr_code: outQrCode,
         in_qr_code: inQrCode,
+        out_qr_image: outQrImage,
+        in_qr_image: inQrImage,
         updated_at: db.fn.now(),
       });
 
@@ -223,12 +229,16 @@ async function revokeApproval(req, res, next) {
       }
     }
 
+    qrImageService.deleteQrImages(leaveId);
+
     await db('leave_requests')
       .where({ leave_id: leaveId })
       .update({
         status: 'pending',
         out_qr_code: null,
         in_qr_code: null,
+        out_qr_image: null,
+        in_qr_image: null,
         out_scan_time: null,
         in_scan_time: null,
         updated_at: db.fn.now(),

@@ -37,6 +37,8 @@ export interface LeaveRequest {
   status: LeaveStatus
   out_qr_code: string | null
   in_qr_code: string | null
+  out_qr_image: string | null
+  in_qr_image: string | null
   out_scan_time: string | null
   in_scan_time: string | null
   rejection_reason: string | null

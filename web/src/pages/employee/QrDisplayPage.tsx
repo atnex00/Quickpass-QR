@@ -119,6 +119,7 @@ export default function QrDisplayPage() {
       {leave.out_qr_code && (
         <QrDisplay
           qrData={leave.out_qr_code}
+          qrImageUrl={leave.out_qr_image}
           label="EXIT PASS"
           color="blue"
           date={dateStr}
@@ -133,6 +134,7 @@ export default function QrDisplayPage() {
       {leave.in_qr_code && (
         <QrDisplay
           qrData={leave.in_qr_code}
+          qrImageUrl={leave.in_qr_image}
           label="ENTRY PASS"
           color="green"
           date={dateStr}
