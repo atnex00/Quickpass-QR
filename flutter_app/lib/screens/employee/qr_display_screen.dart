@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
+import '../../services/qr_service.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 
@@ -81,7 +82,6 @@ class QrDisplayScreen extends StatelessWidget {
                         // ── Leave Details ──
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: context.surfaceContainerLowest,
                             borderRadius: BorderRadius.circular(12),
@@ -94,6 +94,7 @@ class QrDisplayScreen extends StatelessWidget {
                               ),
                             ],
                           ),
+                          clipBehavior: Clip.antiAlias,
                           child: Stack(
                             children: [
                               Positioned(
@@ -112,7 +113,8 @@ class QrDisplayScreen extends StatelessWidget {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(left: 4),
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 16, 16, 16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -254,6 +256,8 @@ class QrDisplayScreen extends StatelessWidget {
                                   title: 'Exit Authorized',
                                   subtitle: 'Scan at Main Gate (Exit)',
                                   pulseColor: context.primaryBlue,
+                                  date: dateStr,
+                                  time: leave.startTime,
                                 ),
                               const SizedBox(height: 16),
                               // ── IN PASS ──
@@ -270,6 +274,8 @@ class QrDisplayScreen extends StatelessWidget {
                                   title: 'Entry Authorized',
                                   subtitle: 'Scan at Main Gate (Entry)',
                                   pulseColor: context.success,
+                                  date: dateStr,
+                                  time: leave.endTime,
                                 ),
                             ],
                           ),
@@ -314,7 +320,7 @@ class QrDisplayScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 100),
+                        const SizedBox(height: 24),
                       ]),
                     ),
                   ),
@@ -322,17 +328,6 @@ class QrDisplayScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Bottom Timer Footer ──
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _BottomTimer(
-                  leaveDate: leave.leaveDate,
-                  startTime: leave.startTime,
-                  endTime: leave.endTime,
-                  isOut: true),
-            ),
           ],
         ),
       ),
@@ -340,7 +335,7 @@ class QrDisplayScreen extends StatelessWidget {
   }
 }
 
-class _QrPassCard extends StatelessWidget {
+class _QrPassCard extends StatefulWidget {
   final String label;
   final IconData icon;
   final Color headerColor;
@@ -351,6 +346,8 @@ class _QrPassCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color pulseColor;
+  final String date;
+  final String time;
 
   const _QrPassCard({
     required this.label,
@@ -363,10 +360,54 @@ class _QrPassCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.pulseColor,
+    required this.date,
+    required this.time,
   });
 
   @override
+  State<_QrPassCard> createState() => _QrPassCardState();
+}
+
+class _QrPassCardState extends State<_QrPassCard> {
+  Timer? _timer;
+  int _remainingSeconds = 0;
+  String _windowState = 'during';
+
+  @override
+  void initState() {
+    super.initState();
+    _tick();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  void _tick() {
+    final result = QrService.windowSeconds(widget.date, widget.time);
+    if (!mounted) return;
+    setState(() {
+      _windowState = (result['state'] as String?) ?? 'after';
+      _remainingSeconds = (result['seconds'] as int?) ?? 0;
+    });
+    if (_windowState == 'after') {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String _fmt(int secs) {
+    final m = (secs ~/ 60).toString().padLeft(2, '0');
+    final s = (secs % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final expired = _windowState == 'after';
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -381,7 +422,7 @@ class _QrPassCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: headerColor,
+              color: widget.headerColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(11),
                 topRight: Radius.circular(11),
@@ -391,15 +432,15 @@ class _QrPassCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  label.toUpperCase(),
+                  widget.label.toUpperCase(),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
-                    color: headerTextColor,
+                    color: widget.headerTextColor,
                   ),
                 ),
-                Icon(icon, color: headerTextColor),
+                Icon(widget.icon, color: widget.headerTextColor),
               ],
             ),
           ),
@@ -413,20 +454,21 @@ class _QrPassCard extends StatelessWidget {
                   final qrSize = (MediaQuery.of(context).size.width - 80)
                       .clamp(180.0, 240.0);
                   final displaySize = qrSize - 32;
-                  if (qrImageUrl != null) {
+                  if (widget.qrImageUrl != null) {
                     return Container(
                       width: qrSize,
                       height: qrSize,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        border: Border.all(color: qrColor.withValues(alpha: 0.2)),
+                        border: Border.all(
+                            color: widget.qrColor.withValues(alpha: 0.2)),
                         borderRadius: BorderRadius.circular(12),
                         color: context.surfaceContainerLow,
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
-                          qrImageUrl!,
+                          widget.qrImageUrl!,
                           width: displaySize,
                           height: displaySize,
                           fit: BoxFit.contain,
@@ -439,175 +481,96 @@ class _QrPassCard extends StatelessWidget {
                     height: qrSize,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      border: Border.all(color: qrColor.withValues(alpha: 0.2)),
+                      border: Border.all(
+                          color: widget.qrColor.withValues(alpha: 0.2)),
                       borderRadius: BorderRadius.circular(12),
                       color: context.surfaceContainerLow,
                     ),
                     child: RepaintBoundary(
                       child: QrImageView(
-                        data: qrData,
+                        data: widget.qrData,
                         version: QrVersions.auto,
                         size: displaySize,
                         backgroundColor: Colors.transparent,
                         eyeStyle: QrEyeStyle(
-                            eyeShape: QrEyeShape.circle, color: qrColor),
+                            eyeShape: QrEyeShape.circle,
+                            color: widget.qrColor),
                         dataModuleStyle: QrDataModuleStyle(
                             dataModuleShape: QrDataModuleShape.circle,
-                            color: qrColor),
+                            color: widget.qrColor),
                       ),
                     ),
                   );
                 }(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                // ── Live Countdown ──
+                if (!expired)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: widget.qrColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.timer_outlined,
+                            size: 16, color: widget.qrColor),
+                        const SizedBox(width: 6),
+                        Text(
+                          _windowState == 'before'
+                              ? 'Opens in ${_fmt(_remainingSeconds)}'
+                              : 'Expires in ${_fmt(_remainingSeconds)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'monospace',
+                            color: widget.qrColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (expired)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: context.error.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.timer_off_outlined,
+                            size: 16, color: context.error),
+                        const SizedBox(width: 6),
+                        Text('Expired',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: context.error)),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 12),
                 Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: qrColor,
+                    color: widget.qrColor,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  widget.subtitle,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: context.outline,
                   ),
-                ),
-              ],
-            ),
-          ),
-
-
-        ],
-      ),
-    );
-  }
-}
-
-class _BottomTimer extends StatefulWidget {
-  final DateTime leaveDate;
-  final String startTime;
-  final String endTime;
-  final bool isOut;
-  const _BottomTimer(
-      {required this.leaveDate,
-      required this.startTime,
-      required this.endTime,
-      this.isOut = true});
-
-  @override
-  State<_BottomTimer> createState() => _BottomTimerState();
-}
-
-class _BottomTimerState extends State<_BottomTimer>
-    with WidgetsBindingObserver {
-  late Timer _timer;
-  late DateTime _windowEnd;
-  int _remainingSeconds = 0;
-  int _totalSeconds = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _windowEnd = _computeWindowEnd();
-    _tick();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-  }
-
-  DateTime _computeWindowEnd() {
-    final dateStr = DateFormatter.formatDateApi(widget.leaveDate);
-    final timeStr =
-        (widget.isOut ? widget.startTime : widget.endTime).padLeft(5, '0');
-    final hhmm = timeStr.split(':').take(2).join(':');
-    final start = DateTime.parse('${dateStr}T$hhmm:00');
-    return start.add(const Duration(minutes: 15));
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _timer.cancel();
-    } else if (state == AppLifecycleState.resumed) {
-      _timer.cancel();
-      _tick();
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-    }
-  }
-
-  void _tick() {
-    final now = DateTime.now();
-    final remaining = _windowEnd.difference(now).inSeconds;
-    final total = const Duration(minutes: 15).inSeconds;
-    if (!mounted) return;
-    setState(() {
-      _remainingSeconds = remaining.clamp(0, total);
-      _totalSeconds = total;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  String _fmt(int secs) {
-    final h = secs ~/ 3600;
-    final m = (secs % 3600) ~/ 60;
-    final s = secs % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final progress =
-        _totalSeconds > 0 ? _remainingSeconds / _totalSeconds : 0.0;
-    return Container(
-      height: 88,
-      decoration: BoxDecoration(
-        color: context.surface,
-        border: Border(top: BorderSide(color: context.outlineVariant)),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: context.surfaceContainer,
-                color: context.error,
-                minHeight: 4,
-              )),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('VALID FOR',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1,
-                        color: context.outline)),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.timer, size: 18, color: context.error),
-                    const SizedBox(width: 6),
-                    Text(_fmt(_remainingSeconds),
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'monospace',
-                            color: context.error)),
-                  ],
                 ),
               ],
             ),
