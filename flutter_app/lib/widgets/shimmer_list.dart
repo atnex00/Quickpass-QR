@@ -31,7 +31,7 @@ class AnimatedShimmerList extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.outline.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -44,7 +44,7 @@ class AnimatedShimmerList extends StatelessWidget {
                         height: 14,
                         width: 150,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.outline.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -53,7 +53,7 @@ class AnimatedShimmerList extends StatelessWidget {
                         height: 12,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.outline.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),

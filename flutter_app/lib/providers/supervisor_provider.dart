@@ -9,17 +9,17 @@ class SupervisorProvider extends ChangeNotifier {
 
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];
-  bool _isLoading = false;
+  int _loadingCount = 0;
   String? _error;
 
   List<LeaveRequest> get pendingRequests => _pendingRequests;
   List<LeaveRequest> get approvedLeaves => _approvedLeaves;
-  bool get isLoading => _isLoading;
+  bool get isLoading => _loadingCount > 0;
   String? get error => _error;
   int get pendingCount => _pendingRequests.length;
 
   Future<void> loadPendingRequests() async {
-    _isLoading = true;
+    _loadingCount++;
     notifyListeners();
 
     try {
@@ -27,10 +27,10 @@ class SupervisorProvider extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _loadingCount--;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<LeaveRequest?> approveLeave(String leaveId) async {
@@ -48,7 +48,7 @@ class SupervisorProvider extends ChangeNotifier {
   }
 
   Future<void> loadApprovedLeaves() async {
-    _isLoading = true;
+    _loadingCount++;
     notifyListeners();
 
     try {
@@ -56,10 +56,10 @@ class SupervisorProvider extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _loadingCount--;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<LeaveRequest?> revokeApproval(String leaveId) async {

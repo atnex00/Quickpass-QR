@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
     final auth = context.read<AuthProvider>();
     auth.clearError();
     await auth.login(

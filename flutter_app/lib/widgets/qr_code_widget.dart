@@ -151,7 +151,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
                 data: widget.qrData,
                 version: QrVersions.auto,
                 size: 450,
-                backgroundColor: Colors.white,
+                backgroundColor: context.surface,
                 eyeStyle: QrEyeStyle(
                     eyeShape: QrEyeShape.circle, color: widget.color),
                 dataModuleStyle: const QrDataModuleStyle(

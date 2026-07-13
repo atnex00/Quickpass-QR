@@ -8,7 +8,6 @@ import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
 import '../shared/settings_screen.dart';
-import 'scanner_screen.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
   const ScanHistoryScreen({super.key});
@@ -62,11 +61,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                         IconButton(
                           icon:
                               Icon(Icons.arrow_back, color: context.onPrimary),
-                          onPressed: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ScannerScreen()),
-                          ),
+                          onPressed: () => Navigator.pop(context),
                         ),
                         Container(
                           width: 28,
@@ -212,11 +207,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     title: 'No scan history',
                     subtitle: 'Scanned QR codes will appear here',
                     action: FilledButton.icon(
-                      onPressed: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ScannerScreen()),
-                      ),
+                      onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.qr_code_scanner, size: 18),
                       label: const Text('Scan QR'),
                     ),
