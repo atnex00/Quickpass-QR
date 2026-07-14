@@ -1,16 +1,8 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:mockito/mockito.dart';
 
-import 'package:quickpass/models/employee.dart';
 import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/services/api_service.dart';
-
-import '../helpers/mocks.mocks.dart';
 
 Map<String, dynamic> _mockResponse({Map<String, dynamic>? data, bool success = true, String? message}) {
   return {'success': success, 'data': data, 'message': message};
@@ -199,23 +191,26 @@ void main() {
           handler.resolve(Response(
             requestOptions: options,
             statusCode: 200,
-            data: _mockResponse(data: [
-              {
-                'leave_id': 'l1',
-                'employee_id': '000001',
-                'employee_name': 'Alice Chen',
-                'department_id': '1',
-                'supervisor_id': 'sup1',
-                'supervisor_name': 'David Kim',
-                'leave_date': '2025-07-15',
-                'start_time': '09:00',
-                'end_time': '12:00',
-                'reason': 'Sick leave',
-                'status': 'pending',
-                'created_at': '2025-07-14T10:00:00Z',
-                'updated_at': '2025-07-14T10:00:00Z',
-              },
-            ]),
+            data: {
+              'success': true,
+              'data': [
+                {
+                  'leave_id': 'l1',
+                  'employee_id': '000001',
+                  'employee_name': 'Alice Chen',
+                  'department_id': '1',
+                  'supervisor_id': 'sup1',
+                  'supervisor_name': 'David Kim',
+                  'leave_date': '2025-07-15',
+                  'start_time': '09:00',
+                  'end_time': '12:00',
+                  'reason': 'Sick leave',
+                  'status': 'pending',
+                  'created_at': '2025-07-14T10:00:00Z',
+                  'updated_at': '2025-07-14T10:00:00Z',
+                },
+              ],
+            },
           ));
         },
       ));
@@ -276,20 +271,23 @@ void main() {
           handler.resolve(Response(
             requestOptions: options,
             statusCode: 200,
-            data: _mockResponse(data: [
-              {
-                'employee_id': '000001',
-                'full_name': 'Alice Chen',
-                'position': 'Engineer',
-                'department_id': '1',
-                'department_name': 'Engineering',
-                'email': 'alice@test.com',
-                'is_supervisor': false,
-                'is_admin': false,
-                'is_security': false,
-                'is_active': true,
-              },
-            ]),
+            data: {
+              'success': true,
+              'data': [
+                {
+                  'employee_id': '000001',
+                  'full_name': 'Alice Chen',
+                  'position': 'Engineer',
+                  'department_id': '1',
+                  'department_name': 'Engineering',
+                  'email': 'alice@test.com',
+                  'is_supervisor': false,
+                  'is_admin': false,
+                  'is_security': false,
+                  'is_active': true,
+                },
+              ],
+            },
           ));
         },
       ));
