@@ -73,6 +73,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.logout));
     await tester.pump();
+    await tester.pump();
 
     expect(find.text('Logout'), findsAtLeast(2));
     expect(find.text('Are you sure you want to logout?'), findsOneWidget);
@@ -87,6 +88,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.logout));
+    await tester.pump();
     await tester.pump();
 
     await tester.tap(find.text('Cancel'));

@@ -74,6 +74,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).last, 'wrong');
     await tester.tap(find.text('Sign In'));
     await tester.pump();
+    await tester.pump();
 
     expect(find.textContaining('Invalid credentials'), findsOneWidget);
   });
