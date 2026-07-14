@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const dotenv = require('dotenv');
 
 function loadEnv() {
@@ -24,21 +25,22 @@ function requireEnv(name) {
   return value;
 }
 
-function envOrDevFallback(name, fallback) {
+function secret(name) {
   const value = process.env[name];
   if (value) return value;
   if (process.env.NODE_ENV === 'production') {
     console.error(`ERROR: ${name} is required in production. Set it in your backend/.env file.`);
     process.exit(1);
   }
-  console.warn(`WARNING: ${name} is not set. Using a development fallback. Set it in your backend/.env file.`);
-  return fallback;
+  const generated = crypto.randomBytes(64).toString('hex');
+  console.warn(`WARNING: ${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
+  return generated;
 }
 
 requireEnv('DB_CONNECTION');
-process.env.JWT_SECRET = envOrDevFallback('JWT_SECRET', 'quickpass-jwt-secret-dev-change-me');
-process.env.COOKIE_SECRET = envOrDevFallback('COOKIE_SECRET', 'quickpass-cookie-secret-dev-change-me');
-process.env.QR_SECRET = envOrDevFallback('QR_SECRET', 'quickpass-qr-secret-dev-change-me');
+process.env.JWT_SECRET = secret('JWT_SECRET');
+process.env.COOKIE_SECRET = secret('COOKIE_SECRET');
+process.env.QR_SECRET = secret('QR_SECRET');
 
 if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
   console.error('ERROR: CORS_ORIGIN is required in production. Set it in your backend/.env file.');
