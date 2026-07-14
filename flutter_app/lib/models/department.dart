@@ -4,6 +4,17 @@ part 'department.g.dart';
 
 @JsonSerializable()
 class Department {
+
+  Department({
+    required this.departmentId,
+    required this.departmentName,
+    this.departmentCode,
+    this.headOfDepartment,
+    required this.isActive,
+  });
+
+  factory Department.fromJson(Map<String, dynamic> json) =>
+      _$DepartmentFromJson(json);
   @JsonKey(name: 'department_id', fromJson: _stringFromJson)
   final String departmentId;
 
@@ -19,19 +30,8 @@ class Department {
   @JsonKey(name: 'is_active', fromJson: _boolFromJson)
   final bool isActive;
 
-  Department({
-    required this.departmentId,
-    required this.departmentName,
-    this.departmentCode,
-    this.headOfDepartment,
-    required this.isActive,
-  });
-
   static String _stringFromJson(dynamic v) => v?.toString() ?? '';
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
-
-  factory Department.fromJson(Map<String, dynamic> json) =>
-      _$DepartmentFromJson(json);
 
   Map<String, dynamic> toJson() => _$DepartmentToJson(this);
 }

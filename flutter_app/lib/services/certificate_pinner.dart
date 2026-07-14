@@ -19,7 +19,7 @@ class CertificatePinner {
   static String? _extractSpkiHash(X509Certificate cert) {
     try {
       final lines = cert.pem.split('\n');
-      final b64 = lines.where((l) => !l.startsWith('-----')).join('');
+      final b64 = lines.where((l) => !l.startsWith('-----')).join();
       final derBytes = base64Decode(b64);
 
       var offset = 0;

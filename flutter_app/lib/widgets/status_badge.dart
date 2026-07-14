@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/leave_request.dart';
 
 class StatusBadge extends StatelessWidget {
-  final LeaveStatus status;
-  final double fontSize;
 
   const StatusBadge({super.key, required this.status, this.fontSize = 12});
+  final LeaveStatus status;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class StatusBadge extends StatelessWidget {
         color: status.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
         border:
-            Border.all(color: status.color.withValues(alpha: 0.3), width: 1),
+            Border.all(color: status.color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

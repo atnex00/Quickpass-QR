@@ -121,6 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickAndUploadPhoto(ImageSource source) async {
     final picker = ImagePicker();
+    final auth = context.read<AuthProvider>();
     final picked = await picker.pickImage(
       source: source,
       maxWidth: 1024,
@@ -131,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (picked == null) return;
 
     setState(() => _uploading = true);
-    final ok = await context.read<AuthProvider>().uploadProfilePhoto(picked.path);
+    final ok = await auth.uploadProfilePhoto(picked.path);
     if (mounted) setState(() => _uploading = false);
 
     if (ok && mounted) {
@@ -265,15 +266,15 @@ class _ProfileAppBar extends StatelessWidget {
 }
 
 class _UserAvatarCard extends StatelessWidget {
-  final dynamic user;
-  final bool uploading;
-  final VoidCallback onTap;
 
   const _UserAvatarCard({
     required this.user,
     required this.uploading,
     required this.onTap,
   });
+  final dynamic user;
+  final bool uploading;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -372,8 +373,8 @@ class _UserAvatarCard extends StatelessWidget {
 }
 
 class _AccountInfoCard extends StatelessWidget {
-  final dynamic user;
   const _AccountInfoCard({required this.user});
+  final dynamic user;
 
   @override
   Widget build(BuildContext context) {
@@ -404,12 +405,6 @@ class _AccountInfoCard extends StatelessWidget {
 }
 
 class _PersonalInfoForm extends StatelessWidget {
-  final TextEditingController nameCtl;
-  final TextEditingController posCtl;
-  final TextEditingController emailCtl;
-  final TextEditingController passCtl;
-  final bool saving;
-  final VoidCallback onSave;
 
   const _PersonalInfoForm({
     required this.nameCtl,
@@ -419,6 +414,12 @@ class _PersonalInfoForm extends StatelessWidget {
     required this.saving,
     required this.onSave,
   });
+  final TextEditingController nameCtl;
+  final TextEditingController posCtl;
+  final TextEditingController emailCtl;
+  final TextEditingController passCtl;
+  final bool saving;
+  final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -489,9 +490,9 @@ class _PersonalInfoForm extends StatelessWidget {
 }
 
 class _ReadOnlyRow extends StatelessWidget {
+  const _ReadOnlyRow({required this.label, required this.value});
   final String label;
   final String value;
-  const _ReadOnlyRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

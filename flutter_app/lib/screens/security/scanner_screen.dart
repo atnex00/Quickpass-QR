@@ -58,8 +58,6 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   void _initScanner() {
     _controller = MobileScannerController(
-      torchEnabled: false,
-      facing: CameraFacing.back,
       detectionSpeed: DetectionSpeed.noDuplicates,
     );
     if (mounted) setState(() {});
@@ -287,10 +285,6 @@ class _ScannerScreenState extends State<ScannerScreen>
 }
 
 class _ScannerAppBar extends StatelessWidget {
-  final bool torchEnabled;
-  final bool showManualEntry;
-  final VoidCallback onToggleManual;
-  final VoidCallback onToggleTorch;
 
   const _ScannerAppBar({
     required this.torchEnabled,
@@ -298,6 +292,10 @@ class _ScannerAppBar extends StatelessWidget {
     required this.onToggleManual,
     required this.onToggleTorch,
   });
+  final bool torchEnabled;
+  final bool showManualEntry;
+  final VoidCallback onToggleManual;
+  final VoidCallback onToggleTorch;
 
   @override
   Widget build(BuildContext context) {
@@ -443,8 +441,8 @@ class _ScannerAppBar extends StatelessWidget {
 }
 
 class _QrScanFrame extends StatelessWidget {
-  final String? cameraError;
   const _QrScanFrame({this.cameraError});
+  final String? cameraError;
 
   @override
   Widget build(BuildContext context) {
@@ -490,8 +488,8 @@ class _QrScanFrame extends StatelessWidget {
 }
 
 class _CornerBracket extends StatelessWidget {
-  final Color color;
   const _CornerBracket(this.color);
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -506,8 +504,8 @@ class _CornerBracket extends StatelessWidget {
 }
 
 class _BracketPainter extends CustomPainter {
-  final Color color;
   _BracketPainter(this.color);
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {

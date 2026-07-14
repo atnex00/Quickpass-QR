@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
 
 class ScanProvider extends ChangeNotifier {
-  final ApiService _api;
 
   ScanProvider({required ApiService api}) : _api = api;
+  final ApiService _api;
 
   Map<String, dynamic>? _lastResult;
   bool _isScanning = false;

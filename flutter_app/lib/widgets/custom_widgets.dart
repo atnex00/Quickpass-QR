@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
 class LoadingOverlay extends StatelessWidget {
-  final bool isLoading;
-  final Widget child;
-  final String? message;
 
   const LoadingOverlay({
     super.key,
@@ -12,6 +9,9 @@ class LoadingOverlay extends StatelessWidget {
     required this.child,
     this.message,
   });
+  final bool isLoading;
+  final Widget child;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +50,12 @@ class LoadingOverlay extends StatelessWidget {
 }
 
 class InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Widget? trailing;
 
   const InfoRow(
       {super.key, required this.label, required this.value, this.trailing});
+  final String label;
+  final String value;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +87,9 @@ class InfoRow extends StatelessWidget {
 }
 
 class GuidelineItem extends StatelessWidget {
-  final String text;
 
   const GuidelineItem({super.key, required this.text});
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +112,6 @@ class GuidelineItem extends StatelessWidget {
 }
 
 class EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Widget? action;
 
   const EmptyState({
     super.key,
@@ -124,6 +120,10 @@ class EmptyState extends StatelessWidget {
     this.subtitle,
     this.action,
   });
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {

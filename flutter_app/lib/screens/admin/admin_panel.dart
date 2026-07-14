@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 import 'package:dio/dio.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/department.dart';
@@ -16,11 +18,11 @@ import '../../utils/debounce.dart';
 import '../../widgets/adaptive_scaffold.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
-import 'employee_detail_screen.dart';
 import '../employee/dashboard_screen.dart';
-import '../supervisor/supervisor_dashboard.dart';
 import '../security/scanner_screen.dart';
 import '../shared/settings_screen.dart';
+import '../supervisor/supervisor_dashboard.dart';
+import 'employee_detail_screen.dart';
 
 Widget _buildAdminAppBar(BuildContext context, String tabKey) {
   return SliverAppBar(
@@ -145,8 +147,8 @@ class _AdminPanelState extends State<AdminPanel> {
 }
 
 class _OverviewTab extends StatefulWidget {
-  final ValueChanged<int>? onSwitchTab;
   const _OverviewTab({this.onSwitchTab});
+  final ValueChanged<int>? onSwitchTab;
 
   @override
   State<_OverviewTab> createState() => _OverviewTabState();
@@ -262,7 +264,6 @@ class _OverviewTabState extends State<_OverviewTab> {
                           fontWeight: FontWeight.w600,
                           color: context.outline))),
               Expanded(
-                  flex: 1,
                   child: Text('Total',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -270,7 +271,6 @@ class _OverviewTabState extends State<_OverviewTab> {
                           fontWeight: FontWeight.w600,
                           color: context.outline))),
               Expanded(
-                  flex: 1,
                   child: Text('Pending',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -301,7 +301,6 @@ class _OverviewTabState extends State<_OverviewTab> {
                               fontWeight: FontWeight.w500,
                               color: context.onSurface))),
                   Expanded(
-                      flex: 1,
                       child: Text('${dept['total_requests'] ?? 0}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -309,7 +308,6 @@ class _OverviewTabState extends State<_OverviewTab> {
                               fontWeight: FontWeight.w600,
                               color: context.onSurface))),
                   Expanded(
-                      flex: 1,
                       child: Text('${dept['pending'] ?? 0}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -403,9 +401,9 @@ class _OverviewTabState extends State<_OverviewTab> {
 }
 
 class _AdminProfileCard extends StatelessWidget {
+  const _AdminProfileCard({required this.userName, required this.photoUrl});
   final String userName;
   final String? photoUrl;
-  const _AdminProfileCard({required this.userName, required this.photoUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -488,10 +486,6 @@ class _AdminProfileCard extends StatelessWidget {
 }
 
 class _OverviewStatGrid extends StatelessWidget {
-  final int employeeCount;
-  final int pendingCount;
-  final int activeCount;
-  final int departmentCount;
 
   const _OverviewStatGrid({
     required this.employeeCount,
@@ -499,6 +493,10 @@ class _OverviewStatGrid extends StatelessWidget {
     required this.activeCount,
     required this.departmentCount,
   });
+  final int employeeCount;
+  final int pendingCount;
+  final int activeCount;
+  final int departmentCount;
 
   @override
   Widget build(BuildContext context) {
@@ -545,8 +543,8 @@ class _OverviewStatGrid extends StatelessWidget {
 }
 
 class _QuickActionsSection extends StatelessWidget {
-  final void Function(int) onSwitchTab;
   const _QuickActionsSection({required this.onSwitchTab});
+  final void Function(int) onSwitchTab;
 
   @override
   Widget build(BuildContext context) {
@@ -698,11 +696,6 @@ class _SwitchViewSection extends StatelessWidget {
 }
 
 class _LeaveBreakdownSection extends StatelessWidget {
-  final int pendingCount;
-  final int approvedCount;
-  final int rejectedCount;
-  final int activeCount;
-  final int completedCount;
 
   const _LeaveBreakdownSection({
     required this.pendingCount,
@@ -711,6 +704,11 @@ class _LeaveBreakdownSection extends StatelessWidget {
     required this.activeCount,
     required this.completedCount,
   });
+  final int pendingCount;
+  final int approvedCount;
+  final int rejectedCount;
+  final int activeCount;
+  final int completedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -815,7 +813,7 @@ class _EmployeeTab extends StatefulWidget {
 class _EmployeeTabState extends State<_EmployeeTab> {
   late final ApiService _api;
   final Debouncer _searchDebouncer =
-      Debouncer(delay: const Duration(milliseconds: 300));
+      Debouncer();
   List<Map<String, dynamic>> _employees = [];
   List<Map<String, dynamic>> _departments = [];
   late final TextEditingController _searchCtl;
@@ -1011,7 +1009,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       ),
                       items: [
                         const DropdownMenuItem<String>(
-                            value: null, child: Text('All')),
+                            child: Text('All')),
                         ..._departments.map((d) => DropdownMenuItem<String>(
                               value: d['department_id'] as String?,
                               child: Text(d['department_name'] as String? ?? '',
@@ -1041,7 +1039,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       ),
                       items: const [
                         DropdownMenuItem<String>(
-                            value: null, child: Text('All')),
+                            child: Text('All')),
                         DropdownMenuItem<String>(
                             value: 'active', child: Text('Active')),
                         DropdownMenuItem<String>(
@@ -1069,7 +1067,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                       ),
                       items: const [
                         DropdownMenuItem<String>(
-                            value: null, child: Text('All')),
+                            child: Text('All')),
                         DropdownMenuItem<String>(
                             value: 'admin', child: Text('Admin')),
                         DropdownMenuItem<String>(
@@ -1385,12 +1383,13 @@ class _EmployeeTabState extends State<_EmployeeTab> {
                         ? context.success
                         : context.error,
                     onTap: () async {
+                      final messenger = ScaffoldMessenger.of(context);
                       try {
                         await _api.toggleActive(emp['employee_id']);
                         _loadData();
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             SnackBar(
                                 content: Text('Failed to toggle status: $e')),
                           );
@@ -1467,11 +1466,11 @@ class _EmployeeTabState extends State<_EmployeeTab> {
 }
 
 class _StatusLegend extends StatelessWidget {
+  const _StatusLegend(
+      {required this.label, required this.count, required this.color});
   final String label;
   final int count;
   final Color color;
-  const _StatusLegend(
-      {required this.label, required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -1495,17 +1494,17 @@ class _StatusLegend extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final Color color;
-  final VoidCallback onTap;
   const _ActionButton(
       {required this.icon,
       required this.label,
       required this.active,
       required this.color,
       required this.onTap});
+  final IconData icon;
+  final String label;
+  final bool active;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1579,10 +1578,12 @@ class _ReportsTabState extends State<_ReportsTab> {
     try {
       final params = <String, dynamic>{};
       if (_reportType.isNotEmpty) params['type'] = _reportType;
-      if (_startDate != null)
+      if (_startDate != null) {
         params['start_date'] = DateFormatter.formatDateApi(_startDate!);
-      if (_endDate != null)
+      }
+      if (_endDate != null) {
         params['end_date'] = DateFormatter.formatDateApi(_endDate!);
+      }
       _reportData = (await _api.getReports(
           type: params['type'],
           startDate: params['start_date'],
@@ -1705,7 +1706,6 @@ class _ReportsTabState extends State<_ReportsTab> {
                 groupsSpace: 16,
                 barGroups: _buildBarGroups(),
                 gridData: FlGridData(
-                  show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
                     color: context.outlineVariant.withValues(alpha: 0.5),
@@ -1754,9 +1754,9 @@ class _ReportsTabState extends State<_ReportsTab> {
                     ),
                   ),
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                      ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                      ),
                 ),
                 borderData: FlBorderData(show: false),
                 barTouchData: BarTouchData(
@@ -1982,11 +1982,6 @@ class _ReportsTabState extends State<_ReportsTab> {
 }
 
 class _ReportsFilterBar extends StatelessWidget {
-  final TextEditingController startCtl;
-  final TextEditingController endCtl;
-  final String reportType;
-  final void Function(bool isStart) onPickDate;
-  final void Function(String type) onFilterChanged;
 
   const _ReportsFilterBar({
     required this.startCtl,
@@ -1995,6 +1990,11 @@ class _ReportsFilterBar extends StatelessWidget {
     required this.onPickDate,
     required this.onFilterChanged,
   });
+  final TextEditingController startCtl;
+  final TextEditingController endCtl;
+  final String reportType;
+  final void Function(bool isStart) onPickDate;
+  final void Function(String type) onFilterChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -2060,13 +2060,13 @@ class _ReportsFilterBar extends StatelessWidget {
 }
 
 class _ReportsStatSummary extends StatelessWidget {
-  final Map<String, int> statusCounts;
-  final int departmentCount;
 
   const _ReportsStatSummary({
     required this.statusCounts,
     required this.departmentCount,
   });
+  final Map<String, int> statusCounts;
+  final int departmentCount;
 
   @override
   Widget build(BuildContext context) {
@@ -2545,12 +2545,12 @@ class _LeaveTabState extends State<_LeaveTab> {
 }
 
 class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
 
   const _FilterChip(
       {required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -2834,9 +2834,9 @@ class _DepartmentTabState extends State<_DepartmentTab> {
 }
 
 class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({required this.label, required this.color});
   final String label;
   final Color color;
-  const _RoleBadge({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -2962,9 +2962,9 @@ class _AddDepartmentDialogState extends State<_AddDepartmentDialog> {
 }
 
 class _EditDepartmentDialog extends StatefulWidget {
-  final Department dept;
 
   const _EditDepartmentDialog({required this.dept});
+  final Department dept;
 
   @override
   State<_EditDepartmentDialog> createState() => _EditDepartmentDialogState();
@@ -3062,9 +3062,9 @@ class _EditDepartmentDialogState extends State<_EditDepartmentDialog> {
 }
 
 class _AddEmployeeDialog extends StatefulWidget {
-  final List<Map<String, dynamic>> departments;
 
   const _AddEmployeeDialog({required this.departments});
+  final List<Map<String, dynamic>> departments;
 
   @override
   State<_AddEmployeeDialog> createState() => _AddEmployeeDialogState();
@@ -3127,8 +3127,9 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
                     null,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Required';
-                  if (v.trim().length != 6 || int.tryParse(v.trim()) == null)
+                  if (v.trim().length != 6 || int.tryParse(v.trim()) == null) {
                     return 'Must be 6 digits';
+                  }
                   return null;
                 },
               ),
@@ -3253,10 +3254,10 @@ class _AddEmployeeDialogState extends State<_AddEmployeeDialog> {
 }
 
 class _EditEmployeeDialog extends StatefulWidget {
-  final Map<String, dynamic> emp;
-  final List<Map<String, dynamic>> departments;
 
   const _EditEmployeeDialog({required this.emp, required this.departments});
+  final Map<String, dynamic> emp;
+  final List<Map<String, dynamic>> departments;
 
   @override
   State<_EditEmployeeDialog> createState() => _EditEmployeeDialogState();
@@ -3330,7 +3331,7 @@ class _EditEmployeeDialogState extends State<_EditEmployeeDialog> {
                 decoration: const InputDecoration(labelText: 'Department'),
                 items: [
                   const DropdownMenuItem<String>(
-                      value: null, child: Text('No department')),
+                      child: Text('No department')),
                   ...widget.departments.map((d) => DropdownMenuItem<String>(
                         value: d['department_id'] as String?,
                         child: Text(d['department_name'] as String? ?? ''),
@@ -3542,9 +3543,9 @@ class _ImportEmployeesDialogState extends State<_ImportEmployeesDialog> {
 }
 
 class _ResetPasswordDialog extends StatefulWidget {
-  final Map<String, dynamic> emp;
 
   const _ResetPasswordDialog({required this.emp});
+  final Map<String, dynamic> emp;
 
   @override
   State<_ResetPasswordDialog> createState() => _ResetPasswordDialogState();
@@ -3626,16 +3627,16 @@ class _ResetPasswordDialogState extends State<_ResetPasswordDialog> {
 }
 
 class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
 
   const _StatCard(
       {required this.icon,
       required this.label,
       required this.value,
       required this.color});
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -3667,10 +3668,6 @@ class _StatCard extends StatelessWidget {
 }
 
 class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
 
   const _QuickActionCard({
     required this.icon,
@@ -3678,6 +3675,10 @@ class _QuickActionCard extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

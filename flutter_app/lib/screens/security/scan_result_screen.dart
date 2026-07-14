@@ -9,9 +9,9 @@ import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 
 class ScanResultScreen extends StatefulWidget {
-  final String qrData;
 
   const ScanResultScreen({super.key, required this.qrData});
+  final String qrData;
 
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
@@ -347,9 +347,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 }
 
 class _ResultRow extends StatelessWidget {
+  const _ResultRow({required this.label, required this.value});
   final String label;
   final String value;
-  const _ResultRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

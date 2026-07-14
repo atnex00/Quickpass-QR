@@ -5,9 +5,9 @@ import '../../config/theme.dart';
 import '../../services/api_service.dart';
 
 class EmployeeDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> employee;
 
   const EmployeeDetailScreen({super.key, required this.employee});
+  final Map<String, dynamic> employee;
 
   @override
   State<EmployeeDetailScreen> createState() => _EmployeeDetailScreenState();
@@ -111,10 +111,12 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     'position': posCtl.text,
                     'email': emailCtl.text,
                   });
-                  if (emp['is_supervisor'] != isSupervisor)
+                  if (emp['is_supervisor'] != isSupervisor) {
                     await _api.toggleSupervisor(emp['employee_id']);
-                  if (emp['is_admin'] != isAdmin)
+                  }
+                  if (emp['is_admin'] != isAdmin) {
                     await _api.toggleAdmin(emp['employee_id']);
+                  }
                   if (!ctx.mounted) return;
                   Navigator.pop(ctx);
                   _refresh();
@@ -440,13 +442,13 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
 }
 
 class _PasswordResetDialog extends StatefulWidget {
-  final Map<String, dynamic> employee;
-  final ApiService api;
 
   const _PasswordResetDialog({
     required this.employee,
     required this.api,
   });
+  final Map<String, dynamic> employee;
+  final ApiService api;
 
   @override
   State<_PasswordResetDialog> createState() => _PasswordResetDialogState();
@@ -512,10 +514,10 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
 }
 
 class _InfoItem extends StatelessWidget {
-  final String label;
-  final String value;
 
   const _InfoItem({required this.label, required this.value});
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {

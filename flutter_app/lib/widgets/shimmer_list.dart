@@ -3,9 +3,9 @@ import 'package:shimmer/shimmer.dart';
 import '../config/theme.dart';
 
 class AnimatedShimmerList extends StatelessWidget {
-  final int itemCount;
 
   const AnimatedShimmerList({super.key, this.itemCount = 5});
+  final int itemCount;
 
   @override
   Widget build(BuildContext context) {

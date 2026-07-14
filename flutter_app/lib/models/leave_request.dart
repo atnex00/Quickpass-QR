@@ -73,6 +73,34 @@ enum LeaveStatus {
 
 @JsonSerializable()
 class LeaveRequest {
+
+  LeaveRequest({
+    required this.leaveId,
+    required this.employeeId,
+    required this.employeeName,
+    required this.departmentId,
+    required this.supervisorId,
+    required this.supervisorName,
+    required this.leaveDate,
+    required this.startTime,
+    required this.endTime,
+    required this.reason,
+    required this.status,
+    this.outQrCode,
+    this.inQrCode,
+    this.outQrImage,
+    this.inQrImage,
+    this.outScanTime,
+    this.inScanTime,
+    this.rejectionReason,
+    required this.createdAt,
+    required this.updatedAt,
+    this.employeePosition,
+    this.employeePhoto,
+  });
+
+  factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
+      _$LeaveRequestFromJson(json);
   @JsonKey(name: 'leave_id', defaultValue: '')
   final String leaveId;
 
@@ -147,31 +175,6 @@ class LeaveRequest {
   @JsonKey(name: 'employee_photo')
   final String? employeePhoto;
 
-  LeaveRequest({
-    required this.leaveId,
-    required this.employeeId,
-    required this.employeeName,
-    required this.departmentId,
-    required this.supervisorId,
-    required this.supervisorName,
-    required this.leaveDate,
-    required this.startTime,
-    required this.endTime,
-    required this.reason,
-    required this.status,
-    this.outQrCode,
-    this.inQrCode,
-    this.outQrImage,
-    this.inQrImage,
-    this.outScanTime,
-    this.inScanTime,
-    this.rejectionReason,
-    required this.createdAt,
-    required this.updatedAt,
-    this.employeePosition,
-    this.employeePhoto,
-  });
-
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
@@ -204,9 +207,6 @@ class LeaveRequest {
       LeaveStatus.fromString(v?.toString() ?? 'pending');
 
   static String _statusToJson(LeaveStatus v) => v.name;
-
-  factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
-      _$LeaveRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$LeaveRequestToJson(this);
 

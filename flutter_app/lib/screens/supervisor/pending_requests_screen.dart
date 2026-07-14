@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../providers/supervisor_provider.dart';
+import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/status_badge.dart';
-import '../../utils/date_formatter.dart';
 
 class PendingRequestsScreen extends StatefulWidget {
   const PendingRequestsScreen({super.key});
@@ -91,12 +92,12 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
 }
 
 class _PendingCard extends StatelessWidget {
+
+  const _PendingCard({required this.leave, required this.isAdmin});
   final LeaveRequest leave;
   final bool isAdmin;
 
   static String? _photo(LeaveRequest l) => AppConfig.photoUrl(l.employeePhoto);
-
-  const _PendingCard({required this.leave, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {
@@ -360,12 +361,12 @@ class _PendingCard extends StatelessWidget {
 }
 
 class _ApprovedCard extends StatelessWidget {
+
+  const _ApprovedCard({required this.leave, required this.isAdmin});
   final LeaveRequest leave;
   final bool isAdmin;
 
   static String? _photo(LeaveRequest l) => AppConfig.photoUrl(l.employeePhoto);
-
-  const _ApprovedCard({required this.leave, required this.isAdmin});
 
   @override
   Widget build(BuildContext context) {

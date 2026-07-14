@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import 'config/app_config.dart';
 import 'config/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/leave_provider.dart';
-import 'providers/supervisor_provider.dart';
 import 'providers/scan_provider.dart';
 import 'providers/settings_provider.dart';
-import 'services/api_service.dart';
+import 'providers/supervisor_provider.dart';
+import 'screens/admin/admin_panel.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/employee/dashboard_screen.dart';
-import 'screens/supervisor/supervisor_dashboard.dart';
-import 'screens/admin/admin_panel.dart';
 import 'screens/security/scanner_screen.dart';
+import 'screens/supervisor/supervisor_dashboard.dart';
+import 'services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,15 +40,15 @@ void main() async {
 }
 
 class QuickpassApp extends StatefulWidget {
-  final ApiService apiService;
-  final SettingsProvider settings;
-  final AuthProvider auth;
   const QuickpassApp({
     super.key,
     required this.apiService,
     required this.settings,
     required this.auth,
   });
+  final ApiService apiService;
+  final SettingsProvider settings;
+  final AuthProvider auth;
 
   @override
   State<QuickpassApp> createState() => _QuickpassAppState();

@@ -3,11 +3,11 @@ import '../models/employee.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
+
+  AuthProvider({required ApiService api}) : _api = api;
   final ApiService _api;
   VoidCallback? onLoggedOut;
   VoidCallback? onLoggedIn;
-
-  AuthProvider({required ApiService api}) : _api = api;
 
   Employee? _user;
   bool _isLoading = true;

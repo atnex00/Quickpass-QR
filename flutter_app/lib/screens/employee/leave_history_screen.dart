@@ -244,10 +244,10 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
 // ── Sticky Filter Bar ──
 
 class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
-  final String? currentFilter;
-  final void Function(String?) onFilterChanged;
 
   _FilterBarDelegate(this.currentFilter, this.onFilterChanged);
+  final String? currentFilter;
+  final void Function(String?) onFilterChanged;
 
   @override
   Widget build(
@@ -306,12 +306,12 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
 
   const _FilterChip(
       {required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -343,16 +343,16 @@ class _FilterChip extends StatelessWidget {
 // ── History Card ──
 
 class _HistoryCard extends StatelessWidget {
-  final LeaveRequest leave;
-  final VoidCallback onTap;
-  final bool isAdmin;
-  final VoidCallback? onDelete;
 
   const _HistoryCard(
       {required this.leave,
       required this.onTap,
       this.isAdmin = false,
       this.onDelete});
+  final LeaveRequest leave;
+  final VoidCallback onTap;
+  final bool isAdmin;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {

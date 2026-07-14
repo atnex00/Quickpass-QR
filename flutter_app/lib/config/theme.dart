@@ -67,12 +67,6 @@ class QuickpassColors {
 }
 
 class StatusColors extends ThemeExtension<StatusColors> {
-  final Color success;
-  final Color onSuccess;
-  final Color successContainer;
-  final Color onSuccessContainer;
-  final Color warning;
-  final Color onWarning;
 
   const StatusColors({
     required this.success,
@@ -82,6 +76,12 @@ class StatusColors extends ThemeExtension<StatusColors> {
     required this.warning,
     required this.onWarning,
   });
+  final Color success;
+  final Color onSuccess;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color onWarning;
 
   @override
   StatusColors copyWith({
@@ -137,11 +137,6 @@ class StatusColors extends ThemeExtension<StatusColors> {
 }
 
 class AppColors extends ThemeExtension<AppColors> {
-  final Color primaryBlue;
-  final Color neutralGray;
-  final Color qrOut;
-  final Color qrIn;
-  final Color surfaceNavy;
 
   const AppColors({
     required this.primaryBlue,
@@ -150,6 +145,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.qrIn,
     required this.surfaceNavy,
   });
+  final Color primaryBlue;
+  final Color neutralGray;
+  final Color qrOut;
+  final Color qrIn;
+  final Color surfaceNavy;
 
   @override
   AppColors copyWith({
@@ -260,10 +260,8 @@ class QuickpassTheme {
         onSecondaryContainer: QuickpassColors.onSecondaryContainer,
         tertiary: QuickpassColors.tertiary,
         error: QuickpassColors.error,
-        onError: QuickpassColors.onError,
         errorContainer: QuickpassColors.errorContainer,
         onErrorContainer: QuickpassColors.onErrorContainer,
-        surface: QuickpassColors.surface,
         onSurface: QuickpassColors.onSurface,
         surfaceContainerLowest: QuickpassColors.surfaceContainerLowest,
         surfaceContainerLow: QuickpassColors.surfaceContainerLow,

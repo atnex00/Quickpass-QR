@@ -79,8 +79,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
 }
 
 class _DashboardTab extends StatefulWidget {
-  final VoidCallback? onViewHistory;
   const _DashboardTab({this.onViewHistory});
+  final VoidCallback? onViewHistory;
 
   @override
   State<_DashboardTab> createState() => _DashboardTabState();
@@ -215,8 +215,8 @@ class _DashboardAppBar extends StatelessWidget {
 }
 
 class _UserProfileCard extends StatelessWidget {
-  final Employee? user;
   const _UserProfileCard({required this.user});
+  final Employee? user;
 
   static String? _photo(Employee? u) => AppConfig.photoUrl(u?.profilePhoto);
 
@@ -315,8 +315,8 @@ class _UserProfileCard extends StatelessWidget {
 }
 
 class _ActiveLeaveCard extends StatelessWidget {
-  final LeaveRequest leave;
   const _ActiveLeaveCard({required this.leave});
+  final LeaveRequest leave;
 
   @override
   Widget build(BuildContext context) {
@@ -446,15 +446,15 @@ class _ActiveLeaveCard extends StatelessWidget {
 }
 
 class _StatGrid extends StatelessWidget {
-  final int pendingCount;
-  final int approvedCount;
-  final int completedCount;
 
   const _StatGrid({
     required this.pendingCount,
     required this.approvedCount,
     required this.completedCount,
   });
+  final int pendingCount;
+  final int approvedCount;
+  final int completedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -471,15 +471,15 @@ class _StatGrid extends StatelessWidget {
 }
 
 class _RecentActivitySection extends StatelessWidget {
-  final bool isLoading;
-  final List<LeaveRequest> history;
-  final VoidCallback onSeeAll;
 
   const _RecentActivitySection({
     required this.isLoading,
     required this.history,
     required this.onSeeAll,
   });
+  final bool isLoading;
+  final List<LeaveRequest> history;
+  final VoidCallback onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -536,11 +536,11 @@ class _RecentActivitySection extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
+
+  const _StatCard(this.title, this.value, this.color);
   final String title;
   final String value;
   final Color color;
-
-  const _StatCard(this.title, this.value, this.color);
 
   @override
   Widget build(BuildContext context) {
@@ -580,9 +580,9 @@ class _StatCard extends StatelessWidget {
 }
 
 class _ActivityCard extends StatelessWidget {
-  final LeaveRequest leave;
 
   const _ActivityCard({required this.leave});
+  final LeaveRequest leave;
 
   IconData _iconForReason(String reason) {
     final r = reason.toLowerCase();

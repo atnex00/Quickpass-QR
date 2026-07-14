@@ -526,10 +526,10 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _FooterBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const _FooterBadge({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

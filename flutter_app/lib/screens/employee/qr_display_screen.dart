@@ -8,9 +8,9 @@ import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 
 class QrDisplayScreen extends StatelessWidget {
-  final LeaveRequest leave;
 
   const QrDisplayScreen({super.key, required this.leave});
+  final LeaveRequest leave;
 
   @override
   Widget build(BuildContext context) {
@@ -336,18 +336,6 @@ class QrDisplayScreen extends StatelessWidget {
 }
 
 class _QrPassCard extends StatefulWidget {
-  final String label;
-  final IconData icon;
-  final Color headerColor;
-  final Color headerTextColor;
-  final String qrData;
-  final String? qrImageUrl;
-  final Color qrColor;
-  final String title;
-  final String subtitle;
-  final Color pulseColor;
-  final String date;
-  final String time;
 
   const _QrPassCard({
     required this.label,
@@ -363,6 +351,18 @@ class _QrPassCard extends StatefulWidget {
     required this.date,
     required this.time,
   });
+  final String label;
+  final IconData icon;
+  final Color headerColor;
+  final Color headerTextColor;
+  final String qrData;
+  final String? qrImageUrl;
+  final Color qrColor;
+  final String title;
+  final String subtitle;
+  final Color pulseColor;
+  final String date;
+  final String time;
 
   @override
   State<_QrPassCard> createState() => _QrPassCardState();
@@ -489,9 +489,7 @@ class _QrPassCardState extends State<_QrPassCard> {
                     child: RepaintBoundary(
                       child: QrImageView(
                         data: widget.qrData,
-                        version: QrVersions.auto,
                         size: displaySize,
-                        backgroundColor: Colors.transparent,
                         eyeStyle: QrEyeStyle(
                             eyeShape: QrEyeShape.circle,
                             color: widget.qrColor),

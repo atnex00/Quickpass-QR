@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
 class QuickpassAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final List<Widget>? actions;
-  final Widget? leading;
-  final bool showBack;
 
   const QuickpassAppBar({
     super.key,
@@ -13,6 +9,10 @@ class QuickpassAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.showBack = false,
   });
+  final String title;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {

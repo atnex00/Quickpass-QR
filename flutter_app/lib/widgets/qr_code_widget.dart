@@ -5,16 +5,6 @@ import '../config/theme.dart';
 import '../services/qr_service.dart';
 
 class QrCodeWidget extends StatefulWidget {
-  final String qrData;
-  final String? qrImageUrl;
-  final String label;
-  final Color color;
-  final String date;
-  final String time;
-  final DateTime? priorScanTime;
-  final String? employeeName;
-  final String? employeePosition;
-  final bool isOut;
 
   const QrCodeWidget({
     super.key,
@@ -29,6 +19,16 @@ class QrCodeWidget extends StatefulWidget {
     this.employeePosition,
     required this.isOut,
   });
+  final String qrData;
+  final String? qrImageUrl;
+  final String label;
+  final Color color;
+  final String date;
+  final String time;
+  final DateTime? priorScanTime;
+  final String? employeeName;
+  final String? employeePosition;
+  final bool isOut;
 
   @override
   State<QrCodeWidget> createState() => _QrCodeWidgetState();
@@ -161,7 +161,6 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
               RepaintBoundary(
                 child: QrImageView(
                   data: widget.qrData,
-                  version: QrVersions.auto,
                   size: 450,
                   backgroundColor: context.surface,
                   eyeStyle: QrEyeStyle(
@@ -228,10 +227,6 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
 }
 
 class _TimerRow extends StatelessWidget {
-  final Color color;
-  final bool isOut;
-  final String windowState;
-  final int remainingSeconds;
 
   const _TimerRow({
     required this.color,
@@ -239,6 +234,10 @@ class _TimerRow extends StatelessWidget {
     required this.windowState,
     required this.remainingSeconds,
   });
+  final Color color;
+  final bool isOut;
+  final String windowState;
+  final int remainingSeconds;
 
   String _fmt(int secs) {
     final m = (secs ~/ 60).toString().padLeft(2, '0');
@@ -262,16 +261,14 @@ class _TimerRow extends StatelessWidget {
         children: [
           Icon(Icons.timer, size: 18, color: color),
           const SizedBox(width: 6),
-          isOut
-              ? Text(
+          if (isOut) Text(
                   '${windowState == 'before' ? 'Opens in ' : 'Expires in '}${_fmt(remainingSeconds)}',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'monospace',
                       color: color),
-                )
-              : Text('Ready to scan',
+                ) else Text('Ready to scan',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,

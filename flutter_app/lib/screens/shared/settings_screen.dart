@@ -107,8 +107,8 @@ class _SettingsAppBar extends StatelessWidget {
 }
 
 class _SettingsCard extends StatelessWidget {
-  final List<Widget> children;
   const _SettingsCard({required this.children});
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -226,8 +226,8 @@ class _LogoutCard extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  final dynamic user;
   const _ProfileAvatar({required this.user});
+  final dynamic user;
 
   @override
   Widget build(BuildContext context) {

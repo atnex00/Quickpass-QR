@@ -328,9 +328,9 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
 }
 
 class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({required this.label, required this.value});
   final String label;
   final String value;
-  const _ReadOnlyField({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -355,12 +355,12 @@ class _ReadOnlyField extends StatelessWidget {
 }
 
 class _TimePickerCard extends StatelessWidget {
-  final String label;
-  final String time;
-  final VoidCallback onTap;
 
   const _TimePickerCard(
       {required this.label, required this.time, required this.onTap});
+  final String label;
+  final String time;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

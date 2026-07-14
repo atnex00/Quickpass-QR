@@ -3,10 +3,6 @@ import '../config/theme.dart';
 import '../utils/responsive.dart';
 
 class AdaptiveScaffold extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final List<AdaptiveDestination> destinations;
-  final Widget body;
 
   const AdaptiveScaffold({
     super.key,
@@ -15,6 +11,10 @@ class AdaptiveScaffold extends StatelessWidget {
     required this.destinations,
     required this.body,
   });
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+  final List<AdaptiveDestination> destinations;
+  final Widget body;
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +87,13 @@ class AdaptiveScaffold extends StatelessWidget {
 }
 
 class AdaptiveDestination {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
 
   const AdaptiveDestination({
     required this.icon,
     required this.selectedIcon,
     required this.label,
   });
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
 }

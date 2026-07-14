@@ -13,7 +13,7 @@ LeaveRequest _mockLeave(String id, String status) {
     departmentId: '1',
     supervisorId: '000004',
     supervisorName: 'David Kim',
-    leaveDate: DateTime(2025, 7, 1),
+    leaveDate: DateTime(2025, 7),
     startTime: '09:00',
     endTime: '17:00',
     reason: 'Test leave',

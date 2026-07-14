@@ -10,7 +10,12 @@ import '../models/leave_request.dart';
 import 'certificate_pinner.dart';
 
 class ApiService {
-  late Dio _dio;
+  Dio? __dio;
+
+  Dio get _dio => __dio ?? (throw StateError(
+        'ApiService not initialized. Call init() first.',
+      ));
+
   final _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
   final _pendingRequests = <_PendingRequest>[];
@@ -18,7 +23,7 @@ class ApiService {
   VoidCallback? onForceLogout;
 
   void init() {
-    _dio = Dio(BaseOptions(
+    __dio = Dio(BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: AppConfig.connectTimeout,
       receiveTimeout: AppConfig.receiveTimeout,
@@ -35,7 +40,7 @@ class ApiService {
     }
 
     if (!kIsWeb) {
-      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      (__dio!.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
         if (AppConfig.apiBaseUrl.startsWith('https://') &&
             CertificatePinner.hasPins) {
@@ -48,7 +53,7 @@ class ApiService {
       };
     }
 
-    _dio.interceptors.add(InterceptorsWrapper(
+    __dio!.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _storage.read(key: 'auth_token');
         if (token != null) {
@@ -414,8 +419,8 @@ class ApiService {
 }
 
 class _PendingRequest {
-  final RequestOptions options;
-  final ErrorInterceptorHandler handler;
 
   _PendingRequest({required this.options, required this.handler});
+  final RequestOptions options;
+  final ErrorInterceptorHandler handler;
 }

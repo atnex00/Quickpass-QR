@@ -110,12 +110,12 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
 }
 
 class _SupervisorOverview extends StatefulWidget {
-  final VoidCallback onViewRequests;
-  final VoidCallback onViewProfile;
   const _SupervisorOverview({
     required this.onViewRequests,
     required this.onViewProfile,
   });
+  final VoidCallback onViewRequests;
+  final VoidCallback onViewProfile;
 
   @override
   State<_SupervisorOverview> createState() => _SupervisorOverviewState();
@@ -197,14 +197,14 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
 }
 
 class _SupervisorAppBar extends StatelessWidget {
-  final String userName;
-  final String? photoUrl;
-  final VoidCallback onProfileTap;
   const _SupervisorAppBar({
     required this.userName,
     required this.photoUrl,
     required this.onProfileTap,
   });
+  final String userName;
+  final String? photoUrl;
+  final VoidCallback onProfileTap;
 
   @override
   Widget build(BuildContext context) {
@@ -280,8 +280,8 @@ class _SupervisorAppBar extends StatelessWidget {
 }
 
 class _WelcomeSection extends StatelessWidget {
-  final String userName;
   const _WelcomeSection({required this.userName});
+  final String userName;
 
   String _greeting() {
     final hour = DateTime.now().hour;
@@ -322,10 +322,10 @@ class _WelcomeSection extends StatelessWidget {
 }
 
 class _PendingApprovalsHero extends StatelessWidget {
-  final int pendingCount;
-  final VoidCallback onReviewNow;
   const _PendingApprovalsHero(
       {required this.pendingCount, required this.onReviewNow});
+  final int pendingCount;
+  final VoidCallback onReviewNow;
 
   @override
   Widget build(BuildContext context) {
@@ -435,15 +435,15 @@ class _QuickActionsRow extends StatelessWidget {
 }
 
 class _PendingRequestsSection extends StatelessWidget {
-  final bool isLoading;
-  final List<dynamic> pendingRequests;
-  final VoidCallback onViewAll;
 
   const _PendingRequestsSection({
     required this.isLoading,
     required this.pendingRequests,
     required this.onViewAll,
   });
+  final bool isLoading;
+  final List<dynamic> pendingRequests;
+  final VoidCallback onViewAll;
 
   @override
   Widget build(BuildContext context) {
@@ -503,10 +503,6 @@ class _PendingRequestsSection extends StatelessWidget {
 }
 
 class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
 
   const _QuickActionCard({
     required this.icon,
@@ -514,6 +510,10 @@ class _QuickActionCard extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -567,12 +567,12 @@ class _QuickActionCard extends StatelessWidget {
 }
 
 class _PendingCard extends StatelessWidget {
+
+  const _PendingCard({required this.leave});
   final LeaveRequest leave;
 
   static String? _empPhoto(LeaveRequest l) =>
       AppConfig.photoUrl(l.employeePhoto);
-
-  const _PendingCard({required this.leave});
 
   @override
   Widget build(BuildContext context) {
