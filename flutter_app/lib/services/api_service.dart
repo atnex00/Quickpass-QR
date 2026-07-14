@@ -15,6 +15,9 @@ class ApiService {
         'ApiService not initialized. Call init() first.',
       ));
 
+  @visibleForTesting
+  void setDio(Dio dio) => __dio = dio;
+
   final _storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
   final _pendingRequests = <_PendingRequest>[];
