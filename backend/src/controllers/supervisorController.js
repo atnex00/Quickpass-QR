@@ -237,18 +237,24 @@ async function revokeApproval(req, res, next) {
 
     qrImageService.deleteQrImages(leaveId);
 
+    const updateData = {
+      status: 'pending',
+      out_qr_code: null,
+      in_qr_code: null,
+      out_qr_image: null,
+      in_qr_image: null,
+      updated_at: db.fn.now(),
+    };
+    if (!leave.out_scan_time) {
+      updateData.out_scan_time = null;
+    }
+    if (!leave.in_scan_time) {
+      updateData.in_scan_time = null;
+    }
+
     await db('leave_requests')
       .where({ leave_id: leaveId })
-      .update({
-        status: 'pending',
-        out_qr_code: null,
-        in_qr_code: null,
-        out_qr_image: null,
-        in_qr_image: null,
-        out_scan_time: null,
-        in_scan_time: null,
-        updated_at: db.fn.now(),
-      });
+      .update(updateData);
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })

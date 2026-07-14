@@ -183,8 +183,15 @@ async function getLeaveById(req, res, next) {
       throw createError(404, 'Leave request not found');
     }
 
-    if (!req.user.is_admin && leave.employee_id !== req.user.employee_id && !req.user.is_supervisor) {
-      throw createError(403, 'You can only view your own leave requests');
+    if (!req.user.is_admin) {
+      if (leave.employee_id !== req.user.employee_id) {
+        if (!req.user.is_supervisor) {
+          throw createError(403, 'You can only view your own leave requests');
+        }
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This leave request is not in your department');
+        }
+      }
     }
 
     res.json({ success: true, data: leave });

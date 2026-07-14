@@ -71,7 +71,7 @@ function AppRoutes() {
         <Route path="/security/history" element={<ScanHistoryPage />} />
       </Route>
 
-      <Route path="/load-preview" element={<LoadPreviewPage />} />
+      {import.meta.env.DEV && <Route path="/load-preview" element={<LoadPreviewPage />} />}
       <Route path="*" element={<Navigate to="/employee" replace />} />
     </Routes>
   )

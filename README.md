@@ -743,9 +743,9 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | `/admin/employees` | is_admin | UserManagerPage | AppLayout |
 | `/admin/departments` | is_admin | DepartmentsPage | AppLayout |
 | `/admin/reports` | is_admin | ReportsPage | AppLayout |
-| `/security/scan` | Authenticated | ScannerPage | SecurityShell (no sidebar) |
-| `/security/result` | Authenticated | ScanResultPage | SecurityShell |
-| `/security/history` | Authenticated | ScanHistoryPage | SecurityShell |
+| `/security/scan` | is_security/is_admin | ScannerPage | SecurityShell (no sidebar) |
+| `/security/result` | is_security/is_admin | ScanResultPage | SecurityShell |
+| `/security/history` | is_security/is_admin | ScanHistoryPage | SecurityShell |
 | `/guides` | Any | GuidesPage | AppLayout |
 | `*` | — | Redirect → `/employee` | — |
 
@@ -885,6 +885,60 @@ netstat -ano | findstr :3000
 $env:PORT=3001; npm run dev  # Windows PowerShell
 export PORT=3001 && npm run dev  # macOS/Linux
 ```
+
+---
+
+## Security
+
+This project follows defense-in-depth security practices across all layers.
+
+### Backend
+
+| Measure | Description |
+|---------|-------------|
+| **JWT algorithm pinning** | Tokens are signed and verified with `HS256` only — `"alg": "none"` attacks are rejected |
+| **Account enumeration prevention** | Login and token verification return identical messages for invalid credentials, inactive accounts, and deactivated employees |
+| **Rate limiting** | Global: 100 req/15min, login: 20 req/15min, auth refresh: 30 req/15min, bulk import: 5 req/hour |
+| **Magic byte validation** | Uploaded files are validated by content (JPEG, PNG, GIF, WebP magic bytes), not just MIME type |
+| **Password complexity** | Admin-created passwords require uppercase, lowercase, and digit (min 8 chars) |
+| **QR signature verification** | HMAC-SHA256 with constant-time comparison (`crypto.timingSafeEqual`) |
+| **Session rotation** | Refresh tokens are rotated on each use; old sessions are invalidated |
+| **HTTP-only cookies** | `refresh_sid` cookie uses `httpOnly`, `signed`, `sameSite: strict`, and `secure` (in production) |
+| **Helmet/CSP** | Security headers applied via Helmet; CSP restricts scripts, styles, and frame ancestors |
+| **CORS** | Configurable origin via `CORS_ORIGIN` env var; credentials support |
+| **Input validation** | Joi schemas on all routes; body size limited to 1 MB |
+| **Scan integrity** | Revoking an approved leave preserves scan timestamps if the employee has already exited |
+
+### Authorization
+
+| Check | Enforcement |
+|-------|-------------|
+| **Supervisor IDOR** | Supervisors can only view leave requests within their own department |
+| **Security routes** | Web `SecurityShell` requires `is_security` or `is_admin` role (frontend guard) |
+| **Backend role middleware** | `requireAdmin`, `requireSupervisor`, `requireSecurity` enforce roles server-side |
+| **Deactivated accounts** | Middleware invalidates sessions and returns generic `401` for deactivated users |
+
+### Web Frontend
+
+| Measure | Description |
+|---------|-------------|
+| **Role-gated routes** | Scanner/security pages require `is_security` or `is_admin` in addition to authentication |
+| **No console data leaks** | QR validation responses are not logged to the browser console |
+| **Dev-only routes** | `/load-preview` page stripped from production builds |
+| **In-memory token** | JWT stored in JavaScript closure (not localStorage/sessionStorage) |
+| **Cookie-based refresh** | Session refresh via httpOnly signed cookie |
+
+### Flutter App
+
+| Measure | Description |
+|---------|-------------|
+| **FlutterSecureStorage** | JWT tokens encrypted at rest (not SharedPreferences) |
+| **Certificate pinning** | OS-level TLS validation; pinning framework available (`CertificatePinner`) |
+| **Provider state cleanup** | `LeaveProvider`, `SupervisorProvider`, `ScanProvider` reset on logout |
+| **No raw exceptions** | SnackBars show generic messages instead of raw error details |
+| **Password validation** | Client-side enforces minimum 8 characters |
+| **`FLAG_SECURE`** | Screenshots and screen recording blocked on Android |
+| **`allowBackup: false`** | App data excluded from Android cloud backup |
 
 ---
 

@@ -351,7 +351,7 @@ class _PendingCard extends StatelessWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(behavior: SnackBarBehavior.floating, content: Text('$e')),
+            const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Failed to delete leave')),
           );
         }
       }
@@ -540,7 +540,7 @@ class _ApprovedCard extends StatelessWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(behavior: SnackBarBehavior.floating, content: Text('$e')),
+            const SnackBar(behavior: SnackBarBehavior.floating, content: Text('Failed to delete leave')),
           );
         }
       }

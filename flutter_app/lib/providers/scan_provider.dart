@@ -46,4 +46,12 @@ class ScanProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  void reset() {
+    _lastResult = null;
+    _isScanning = false;
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
+  }
 }

@@ -19,12 +19,8 @@ async function login(req, res, next) {
       )
       .first();
 
-    if (!employee) {
+    if (!employee || !employee.is_active) {
       throw createError(401, 'Invalid employee ID or password');
-    }
-
-    if (!employee.is_active) {
-      throw createError(403, 'Account is deactivated');
     }
 
     const valid = await bcrypt.compare(password, employee.password_hash);
@@ -51,7 +47,7 @@ async function login(req, res, next) {
         role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
-      { expiresIn: '15m' }
+      { algorithm: 'HS256', expiresIn: '15m' }
     );
 
     res.cookie('refresh_sid', sessionId, {
@@ -151,7 +147,7 @@ async function refreshToken(req, res, next) {
         role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
-      { expiresIn: '15m' }
+      { algorithm: 'HS256', expiresIn: '15m' }
     );
 
     const responsePayload = { success: true, token };
@@ -247,6 +243,18 @@ async function uploadProfilePhoto(req, res, next) {
   try {
     if (!req.file) {
       throw createError(400, 'No photo file provided');
+    }
+
+    const buf = req.file.buffer;
+    if (!buf || buf.length < 4) {
+      throw createError(400, 'Invalid file');
+    }
+    const valid = (buf[0] === 0xFF && buf[1] === 0xD8) ||
+                  (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) ||
+                  (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x38) ||
+                  (buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46);
+    if (!valid) {
+      throw createError(400, 'Only JPEG, PNG, GIF, and WebP images are accepted');
     }
 
     const uploadDir = path.join(__dirname, '../../uploads/photos');

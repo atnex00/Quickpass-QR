@@ -65,6 +65,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
   }
 
   void _handleForceLogout() {
+    _resetProviders();
     widget.auth.clearAuth();
     _navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -72,7 +73,22 @@ class _QuickpassAppState extends State<QuickpassApp> {
     );
   }
 
+  void _resetProviders() {
+    final context = _navigatorKey.currentState?.context;
+    if (context == null) return;
+    try {
+      context.read<LeaveProvider>().reset();
+    } catch (_) {}
+    try {
+      context.read<SupervisorProvider>().reset();
+    } catch (_) {}
+    try {
+      context.read<ScanProvider>().reset();
+    } catch (_) {}
+  }
+
   void _handleLoginSuccess() {
+    _resetProviders();
     final home = widget.auth.isAdmin
         ? const AdminPanel()
         : widget.auth.isSupervisor

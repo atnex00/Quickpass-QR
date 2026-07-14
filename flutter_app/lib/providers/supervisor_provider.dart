@@ -93,4 +93,12 @@ class SupervisorProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  void reset() {
+    _pendingRequests = [];
+    _approvedLeaves = [];
+    _loadingCount = 0;
+    _error = null;
+    notifyListeners();
+  }
 }

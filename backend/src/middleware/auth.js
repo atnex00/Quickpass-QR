@@ -9,7 +9,7 @@ async function authenticate(req, res, next) {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
 
     const session = await db('sessions')
       .where({ session_id: decoded.session_id, is_active: true })
@@ -39,12 +39,9 @@ async function authenticate(req, res, next) {
       )
       .first();
 
-    if (!employee) {
-      return res.status(401).json({ success: false, message: 'Employee not found' });
-    }
-
-    if (!employee.is_active) {
-      return res.status(403).json({ success: false, message: 'Account deactivated' });
+    if (!employee || !employee.is_active) {
+      if (session) await db('sessions').where({ session_id: decoded.session_id }).update({ is_active: false });
+      return res.status(401).json({ success: false, message: 'Invalid token' });
     }
 
     req.user = employee;

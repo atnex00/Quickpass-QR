@@ -3,7 +3,7 @@ import { useAuthStore } from "@/stores/authStore"
 import { Outlet } from "react-router"
 
 export default function SecurityShell() {
-  const { isAuthenticated, isLoading } = useAuthStore()
+  const { user, isAuthenticated, isLoading } = useAuthStore()
   const location = useLocation()
 
   if (isLoading) {
@@ -16,6 +16,10 @@ export default function SecurityShell() {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+
+  if (user && !user.is_security && !user.is_admin) {
+    return <Navigate to="/employee" replace />
   }
 
   return (

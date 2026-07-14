@@ -106,6 +106,24 @@ const loginLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts, please try again later' },
 });
 
+// Rate limit for auth endpoints (refresh, etc.)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later' },
+});
+
+// Stricter rate limit for bulk import
+const importLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many import requests, please try again later' },
+});
+
 // Serve built frontend in production
 const webDist = path.join(__dirname, '../../web/dist');
 app.use(express.static(webDist));
@@ -116,6 +134,8 @@ app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/refresh', authLimiter);
+app.use('/api/admin/import/hr', importLimiter);
 app.use('/api', routes);
 
 // SPA fallback — serve index.html for any non-API, non-static route

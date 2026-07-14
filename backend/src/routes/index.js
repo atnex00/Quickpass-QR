@@ -90,7 +90,9 @@ router.post('/admin/employees', authenticate, requireAdmin, validate(Joi.object(
   position: Joi.string().min(2).max(50).required(),
   department_id: Joi.string().optional(),
   email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
+  password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).messages({
+    'string.pattern.base': 'Password must contain at least one uppercase, one lowercase, and one number',
+  }).required(),
   is_supervisor: Joi.boolean().optional(),
   is_admin: Joi.boolean().optional(),
   is_security: Joi.boolean().optional(),
@@ -101,7 +103,9 @@ router.put('/admin/employees/:id', authenticate, requireAdmin, validate(Joi.obje
   position: Joi.string().min(2).max(50),
   department_id: Joi.string().allow(null, ''),
   email: Joi.string().email(),
-  password: Joi.string().min(8),
+  password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).messages({
+    'string.pattern.base': 'Password must contain at least one uppercase, one lowercase, and one number',
+  }),
   is_supervisor: Joi.boolean(),
   is_admin: Joi.boolean(),
   is_security: Joi.boolean(),

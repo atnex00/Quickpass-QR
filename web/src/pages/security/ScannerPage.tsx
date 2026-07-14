@@ -57,14 +57,11 @@ export default function ScannerPage() {
 
   const doScan = useCallback(async (data: string) => {
     if (!data.trim()) return
-    console.log("[Scan] doScan called with data length:", data.length)
     setScanState("confirmed")
     const ok = await validateScan(data.trim())
-    console.log("[Scan] validateScan returned:", ok)
     if (ok) navigate("/security/result", { replace: true })
     else {
       const err = useScanStore.getState().error
-      console.log("[Scan] error from store:", err)
       if (err) toast.error(err)
       navigate("/security/result", { replace: true })
     }

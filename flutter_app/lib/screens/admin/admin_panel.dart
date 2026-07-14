@@ -952,7 +952,7 @@ class _EmployeeTabState extends State<_EmployeeTab> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('$e')));
+              .showSnackBar(const SnackBar(content: Text('Failed to delete employee')));
         }
       }
     }
@@ -2188,7 +2188,7 @@ class _LeaveTabState extends State<_LeaveTab> {
         }).catchError((e) {
           if (mounted) {
             ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('$e')));
+                .showSnackBar(const SnackBar(content: Text('Failed to delete leave')));
           }
         });
       }
@@ -2663,7 +2663,7 @@ class _DepartmentTabState extends State<_DepartmentTab> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('$e')));
+              .showSnackBar(const SnackBar(content: Text('Failed to delete department')));
         }
       }
     }

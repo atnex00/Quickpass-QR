@@ -125,7 +125,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                 } catch (e) {
                   if (!mounted) return;
                   ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('$e')));
+                      .showSnackBar(const SnackBar(content: Text('Failed to update employee')));
                 }
               },
               child: const Text('Save'),
@@ -176,7 +176,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text('$e')));
+                .showSnackBar(const SnackBar(content: Text('Failed to delete employee')));
           }
         }
       }
@@ -501,7 +501,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
             } catch (e) {
               if (!mounted) return;
               ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text('$e')));
+                  .showSnackBar(const SnackBar(content: Text('Failed to reset password')));
             }
           },
           child: const Text('Reset'),

@@ -120,4 +120,15 @@ class LeaveProvider extends ChangeNotifier {
   Future<void> refresh() async {
     await Future.wait([loadHistory(), loadActiveLeave()]);
   }
+
+  void reset() {
+    _history = [];
+    _activeLeave = null;
+    _isLoading = false;
+    _error = null;
+    _pendingCount = 0;
+    _approvedCount = 0;
+    _completedCount = 0;
+    notifyListeners();
+  }
 }
