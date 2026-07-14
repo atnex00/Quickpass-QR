@@ -9,7 +9,7 @@ import '../../widgets/custom_widgets.dart';
 import 'admin_shared.dart';
 
 class LeaveTab extends StatefulWidget {
-  const LeaveTab();
+  const LeaveTab({super.key});
 
   @override
   State<LeaveTab> createState() => _LeaveTabState();

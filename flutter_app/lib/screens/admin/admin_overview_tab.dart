@@ -12,7 +12,7 @@ import '../supervisor/supervisor_dashboard.dart';
 import 'admin_shared.dart';
 
 class OverviewTab extends StatefulWidget {
-  const OverviewTab({this.onSwitchTab});
+  const OverviewTab({super.key, this.onSwitchTab});
   final ValueChanged<int>? onSwitchTab;
 
   @override
@@ -266,7 +266,7 @@ class _OverviewTabState extends State<OverviewTab> {
 }
 
 class AdminProfileCard extends StatelessWidget {
-  const AdminProfileCard({required this.userName, required this.photoUrl});
+  const AdminProfileCard({super.key, required this.userName, required this.photoUrl});
   final String userName;
   final String? photoUrl;
 
@@ -353,6 +353,7 @@ class AdminProfileCard extends StatelessWidget {
 class OverviewStatGrid extends StatelessWidget {
 
   const OverviewStatGrid({
+    super.key,
     required this.employeeCount,
     required this.pendingCount,
     required this.activeCount,
@@ -408,7 +409,7 @@ class OverviewStatGrid extends StatelessWidget {
 }
 
 class QuickActionsSection extends StatelessWidget {
-  const QuickActionsSection({required this.onSwitchTab});
+  const QuickActionsSection({super.key, required this.onSwitchTab});
   final void Function(int) onSwitchTab;
 
   @override
@@ -487,7 +488,7 @@ class QuickActionsSection extends StatelessWidget {
 }
 
 class SwitchViewSection extends StatelessWidget {
-  const SwitchViewSection();
+  const SwitchViewSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -563,6 +564,7 @@ class SwitchViewSection extends StatelessWidget {
 class LeaveBreakdownSection extends StatelessWidget {
 
   const LeaveBreakdownSection({
+    super.key,
     required this.pendingCount,
     required this.approvedCount,
     required this.rejectedCount,

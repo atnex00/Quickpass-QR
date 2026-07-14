@@ -10,7 +10,7 @@ import '../../widgets/custom_widgets.dart';
 import 'admin_shared.dart';
 
 class ReportsTab extends StatefulWidget {
-  const ReportsTab();
+  const ReportsTab({super.key});
 
   @override
   State<ReportsTab> createState() => _ReportsTabState();
@@ -455,6 +455,7 @@ class _ReportsTabState extends State<ReportsTab> {
 class ReportsFilterBar extends StatelessWidget {
 
   const ReportsFilterBar({
+    super.key,
     required this.startCtl,
     required this.endCtl,
     required this.reportType,
@@ -533,6 +534,7 @@ class ReportsFilterBar extends StatelessWidget {
 class ReportsStatSummary extends StatelessWidget {
 
   const ReportsStatSummary({
+    super.key,
     required this.statusCounts,
     required this.departmentCount,
   });

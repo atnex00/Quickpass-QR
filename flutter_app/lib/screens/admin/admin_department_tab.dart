@@ -10,7 +10,7 @@ import '../../widgets/loading_indicator.dart';
 import 'admin_shared.dart';
 
 class DepartmentTab extends StatefulWidget {
-  const DepartmentTab();
+  const DepartmentTab({super.key});
 
   @override
   State<DepartmentTab> createState() => _DepartmentTabState();
@@ -262,7 +262,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
 }
 
 class AddDepartmentDialog extends StatefulWidget {
-  const AddDepartmentDialog();
+  const AddDepartmentDialog({super.key});
 
   @override
   State<AddDepartmentDialog> createState() => _AddDepartmentDialogState();
@@ -369,7 +369,7 @@ class _AddDepartmentDialogState extends State<AddDepartmentDialog> {
 
 class EditDepartmentDialog extends StatefulWidget {
 
-  const EditDepartmentDialog({required this.dept});
+  const EditDepartmentDialog({super.key, required this.dept});
   final Department dept;
 
   @override

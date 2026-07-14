@@ -13,7 +13,7 @@ import 'admin_shared.dart';
 import 'employee_detail_screen.dart';
 
 class EmployeeTab extends StatefulWidget {
-  const EmployeeTab();
+  const EmployeeTab({super.key});
 
   @override
   State<EmployeeTab> createState() => _EmployeeTabState();
@@ -676,7 +676,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
 
 class AddEmployeeDialog extends StatefulWidget {
 
-  const AddEmployeeDialog({required this.departments});
+  const AddEmployeeDialog({super.key, required this.departments});
   final List<Map<String, dynamic>> departments;
 
   @override
@@ -868,7 +868,7 @@ class _AddEmployeeDialogState extends State<AddEmployeeDialog> {
 
 class EditEmployeeDialog extends StatefulWidget {
 
-  const EditEmployeeDialog({required this.emp, required this.departments});
+  const EditEmployeeDialog({super.key, required this.emp, required this.departments});
   final Map<String, dynamic> emp;
   final List<Map<String, dynamic>> departments;
 
@@ -1049,7 +1049,7 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
 }
 
 class ImportEmployeesDialog extends StatefulWidget {
-  const ImportEmployeesDialog();
+  const ImportEmployeesDialog({super.key});
 
   @override
   State<ImportEmployeesDialog> createState() => _ImportEmployeesDialogState();
@@ -1157,7 +1157,7 @@ class _ImportEmployeesDialogState extends State<ImportEmployeesDialog> {
 
 class ResetPasswordDialog extends StatefulWidget {
 
-  const ResetPasswordDialog({required this.emp});
+  const ResetPasswordDialog({super.key, required this.emp});
   final Map<String, dynamic> emp;
 
   @override

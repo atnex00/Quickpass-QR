@@ -69,7 +69,8 @@ Widget buildAdminAppBar(BuildContext context, String tabKey) {
 class AdminStatCard extends StatelessWidget {
 
   const AdminStatCard(
-      {required this.icon,
+      {super.key,
+      required this.icon,
       required this.label,
       required this.value,
       required this.color});
@@ -110,6 +111,7 @@ class AdminStatCard extends StatelessWidget {
 class AdminQuickActionCard extends StatelessWidget {
 
   const AdminQuickActionCard({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -174,7 +176,7 @@ class AdminQuickActionCard extends StatelessWidget {
 class AdminFilterChip extends StatelessWidget {
 
   const AdminFilterChip(
-      {required this.label, required this.selected, required this.onTap});
+      {super.key, required this.label, required this.selected, required this.onTap});
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -210,7 +212,7 @@ class AdminFilterChip extends StatelessWidget {
 
 class AdminStatusLegend extends StatelessWidget {
   const AdminStatusLegend(
-      {required this.label, required this.count, required this.color});
+      {super.key, required this.label, required this.count, required this.color});
   final String label;
   final int count;
   final Color color;
@@ -237,7 +239,7 @@ class AdminStatusLegend extends StatelessWidget {
 }
 
 class AdminRoleBadge extends StatelessWidget {
-  const AdminRoleBadge({required this.label, required this.color});
+  const AdminRoleBadge({super.key, required this.label, required this.color});
   final String label;
   final Color color;
 
@@ -261,7 +263,8 @@ class AdminRoleBadge extends StatelessWidget {
 class AdminActionButton extends StatelessWidget {
 
   const AdminActionButton(
-      {required this.icon,
+      {super.key,
+      required this.icon,
       required this.label,
       required this.active,
       required this.color,
