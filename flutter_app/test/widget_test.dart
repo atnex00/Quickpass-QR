@@ -4,11 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quickpass/main.dart';
 import 'package:quickpass/providers/auth_provider.dart';
 import 'package:quickpass/providers/settings_provider.dart';
-import 'package:quickpass/services/api_service.dart';
+
+import 'helpers/mocks.mocks.dart';
 
 void main() {
-  testWidgets('App renders', (WidgetTester tester) async {
-    final apiService = ApiService();
+  testWidgets('App renders MaterialApp', (WidgetTester tester) async {
+    final apiService = MockApiService();
     final settings = SettingsProvider();
     final auth = AuthProvider(api: apiService);
     await tester.pumpWidget(QuickpassApp(
