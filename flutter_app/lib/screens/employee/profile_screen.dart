@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
@@ -131,8 +132,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (picked == null) return;
 
+    CroppedFile? cropped;
+    try {
+      cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Photo',
+            toolbarColor: const Color(0xFF1E40AF),
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(title: 'Crop Photo'),
+        ],
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not crop image: $e')),
+        );
+      }
+      return;
+    }
+
+    if (cropped == null) return;
+
     setState(() => _uploading = true);
-    final ok = await auth.uploadProfilePhoto(picked.path);
+    final ok = await auth.uploadProfilePhoto(cropped.path);
     if (mounted) setState(() => _uploading = false);
 
     if (ok && mounted) {
