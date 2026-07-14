@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
-import '../../services/qr_service.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/qr_countdown.dart';
 import '../../widgets/custom_widgets.dart';
 
 class QrDisplayScreen extends StatelessWidget {
@@ -368,46 +367,22 @@ class _QrPassCard extends StatefulWidget {
   State<_QrPassCard> createState() => _QrPassCardState();
 }
 
-class _QrPassCardState extends State<_QrPassCard> {
-  Timer? _timer;
-  int _remainingSeconds = 0;
-  String _windowState = 'during';
-
+class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassCard> {
   @override
   void initState() {
     super.initState();
-    _tick();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-  }
-
-  void _tick() {
-    final result = QrService.windowSeconds(widget.date, widget.time);
-    if (!mounted) return;
-    setState(() {
-      _windowState = (result['state'] as String?) ?? 'after';
-      _remainingSeconds = (result['seconds'] as int?) ?? 0;
-    });
-    if (_windowState == 'after') {
-      _timer?.cancel();
-      _timer = null;
-    }
+    initCountdown(widget.date, widget.time);
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    disposeCountdown();
     super.dispose();
-  }
-
-  String _fmt(int secs) {
-    final m = (secs ~/ 60).toString().padLeft(2, '0');
-    final s = (secs % 60).toString().padLeft(2, '0');
-    return '$m:$s';
   }
 
   @override
   Widget build(BuildContext context) {
-    final expired = _windowState == 'after';
+    final expired = windowState == 'after';
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -517,9 +492,9 @@ class _QrPassCardState extends State<_QrPassCard> {
                             size: 16, color: widget.qrColor),
                         const SizedBox(width: 6),
                         Text(
-                          _windowState == 'before'
-                              ? 'Opens in ${_fmt(_remainingSeconds)}'
-                              : 'Expires in ${_fmt(_remainingSeconds)}',
+                          windowState == 'before'
+                              ? 'Opens in ${formatCountdown(remainingSeconds)}'
+                              : 'Expires in ${formatCountdown(remainingSeconds)}',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

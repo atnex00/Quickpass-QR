@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../config/theme.dart';
-import '../services/qr_service.dart';
+import '../utils/qr_countdown.dart';
 
 class QrCodeWidget extends StatefulWidget {
 
@@ -34,47 +33,27 @@ class QrCodeWidget extends StatefulWidget {
   State<QrCodeWidget> createState() => _QrCodeWidgetState();
 }
 
-class _QrCodeWidgetState extends State<QrCodeWidget> {
-  String _windowState = 'during';
-  int _remainingSeconds = 0;
-  Timer? _timer;
-
+class _QrCodeWidgetState extends State<QrCodeWidget> with QrCountdownMixin<QrCodeWidget> {
   @override
   void initState() {
     super.initState();
-    _tick();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    initCountdown(widget.date, widget.time);
   }
 
   @override
   void didUpdateWidget(covariant QrCodeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.date != oldWidget.date || widget.time != oldWidget.time) {
-      _timer?.cancel();
-      _tick();
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
-    }
-  }
-
-  void _tick() {
-    final result = QrService.windowSeconds(widget.date, widget.time);
-    setState(() {
-      _windowState = (result['state'] as String?) ?? 'after';
-      _remainingSeconds = (result['seconds'] as int?) ?? 0;
-    });
-    if (_windowState == 'after') {
-      _timer?.cancel();
-      _timer = null;
-    }
+    updateCountdown(widget.date, widget.time,
+        oldDate: oldWidget.date, oldTime: oldWidget.time);
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    disposeCountdown();
     super.dispose();
   }
 
-  bool get _expired => widget.isOut && _windowState == 'after';
+  bool get _expired => widget.isOut && windowState == 'after';
   bool get _used => widget.priorScanTime != null;
 
   @override
@@ -174,8 +153,8 @@ class _QrCodeWidgetState extends State<QrCodeWidget> {
             _TimerRow(
                 color: widget.color,
                 isOut: widget.isOut,
-                windowState: _windowState,
-                remainingSeconds: _remainingSeconds),
+                windowState: windowState,
+                remainingSeconds: remainingSeconds),
           ],
           if (widget.employeeName != null ||
               widget.employeePosition != null) ...[
