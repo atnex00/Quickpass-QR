@@ -66,10 +66,10 @@ void main() {
   });
 
   group('clearResult', () {
-    test('clears last result and error', () {
+    test('clears last result and error', () async {
       when(mockApi.validateScan('qr'))
           .thenAnswer((_) async => {'success': true});
-      provider.validateScan('qr');
+      await provider.validateScan('qr');
       provider.clearResult();
 
       expect(provider.lastResult, isNull);
