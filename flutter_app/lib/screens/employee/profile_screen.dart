@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
+import '../../models/employee.dart';
 import '../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -299,13 +300,13 @@ class _UserAvatarCard extends StatelessWidget {
     required this.uploading,
     required this.onTap,
   });
-  final dynamic user;
+  final Employee? user;
   final bool uploading;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final photo = user?.profilePhoto as String?;
+    final photo = user?.profilePhoto;
     final photoUrl = AppConfig.photoUrl(photo);
     final hasPhoto = photoUrl != null;
 
@@ -401,7 +402,7 @@ class _UserAvatarCard extends StatelessWidget {
 
 class _AccountInfoCard extends StatelessWidget {
   const _AccountInfoCard({required this.user});
-  final dynamic user;
+  final Employee? user;
 
   @override
   Widget build(BuildContext context) {

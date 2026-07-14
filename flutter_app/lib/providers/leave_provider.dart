@@ -102,14 +102,10 @@ class LeaveProvider extends ChangeNotifier {
   }
 
   Future<void> deleteLeave(String leaveId) async {
-    try {
-      await _api.deleteLeave(leaveId);
-      _history.removeWhere((l) => l.leaveId == leaveId);
-      _recomputeCounts();
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
+    await _api.deleteLeave(leaveId);
+    _history.removeWhere((l) => l.leaveId == leaveId);
+    _recomputeCounts();
+    notifyListeners();
   }
 
   void clearError() {
