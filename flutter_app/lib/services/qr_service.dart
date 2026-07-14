@@ -11,27 +11,6 @@ class QrService {
     return diff <= windowMinutes * 60 * 1000;
   }
 
-  static bool isOutQrValid(
-      String date, String startTime, DateTime? outScanTime) {
-    if (outScanTime != null) return false;
-    final start = _tryParse('${date}T${startTime.padLeft(5, '0')}:00');
-    if (start == null) return false;
-    final now = DateTime.now();
-    final diff = now.difference(start).inMinutes.abs();
-    return diff <= AppConfig.qrValidityMinutes;
-  }
-
-  static bool isInQrValid(String date, String endTime, DateTime? inScanTime,
-      DateTime? outScanTime) {
-    if (inScanTime != null) return false;
-    if (outScanTime == null) return false;
-    final end = _tryParse('${date}T${endTime.padLeft(5, '0')}:00');
-    if (end == null) return false;
-    final now = DateTime.now();
-    final diff = now.difference(end).inMinutes.abs();
-    return diff <= AppConfig.qrValidityMinutes;
-  }
-
   static Map<String, dynamic> windowSeconds(String date, String time,
       {DateTime? now}) {
     final t = time.split(':').take(2).join(':');

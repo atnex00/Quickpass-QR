@@ -7,7 +7,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
-import 'certificate_pinner.dart';
 
 class ApiService {
   Dio? __dio;
@@ -41,15 +40,7 @@ class ApiService {
 
     if (!kIsWeb) {
       (__dio!.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-        final client = HttpClient();
-        if (AppConfig.apiBaseUrl.startsWith('https://') &&
-            CertificatePinner.hasPins) {
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) {
-            return CertificatePinner.isPinned(cert) ?? false;
-          };
-        }
-        return client;
+        return HttpClient();
       };
     }
 
