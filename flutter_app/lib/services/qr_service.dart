@@ -18,8 +18,15 @@ class QrService {
     if (target == null) {
       return {'state': 'after', 'seconds': 0};
     }
-    final windowStart = target.subtract(const Duration(minutes: AppConfig.qrValidityMinutes));
-    final windowEnd = target.add(const Duration(minutes: AppConfig.qrValidityMinutes));
+    return windowSecondsFromTimestamp(target, now: now);
+  }
+
+  static Map<String, dynamic> windowSecondsFromTimestamp(DateTime target,
+      {DateTime? now}) {
+    final windowStart =
+        target.subtract(const Duration(minutes: AppConfig.qrValidityMinutes));
+    final windowEnd =
+        target.add(const Duration(minutes: AppConfig.qrValidityMinutes));
     now ??= DateTime.now();
 
     if (now.isBefore(windowStart)) {

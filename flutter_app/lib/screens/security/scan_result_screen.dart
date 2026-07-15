@@ -259,7 +259,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                       _ResultRow(label: 'Date', value: data['leave_date']),
                     _ResultRow(
                         label: 'Time',
-                        value: '${data['start_time']} - ${data['end_time']}'),
+                        value: '${data['start_time'] ?? '--'} - ${data['end_time'] ?? '--'}'),
                     _ResultRow(
                         label: 'Status', value: data['new_status'] ?? ''),
                   ],

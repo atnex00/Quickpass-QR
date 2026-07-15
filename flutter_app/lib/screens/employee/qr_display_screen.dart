@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
@@ -371,7 +372,18 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
   @override
   void initState() {
     super.initState();
-    initCountdown(widget.date, widget.time);
+    initCountdown(widget.date, widget.time, target: _resolveTarget());
+  }
+
+  DateTime? _resolveTarget() {
+    try {
+      final decoded = utf8.decode(base64Url.decode(base64Url.normalize(widget.qrData)));
+      final json = jsonDecode(decoded) as Map<String, dynamic>;
+      if (json['timestamp'] != null) {
+        return DateTime.tryParse(json['timestamp']);
+      }
+    } catch (_) {}
+    return null;
   }
 
   @override

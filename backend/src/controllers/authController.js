@@ -44,7 +44,7 @@ async function login(req, res, next) {
       {
         employee_id: employee.employee_id,
         session_id: sessionId,
-        role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
+        role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
       { algorithm: 'HS256', expiresIn: '15m' }
@@ -144,7 +144,7 @@ async function refreshToken(req, res, next) {
       {
         employee_id: employee.employee_id,
         session_id: newSessionId,
-        role: employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
+        role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
       { algorithm: 'HS256', expiresIn: '15m' }

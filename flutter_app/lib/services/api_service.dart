@@ -369,7 +369,7 @@ class ApiService {
   }
 
   Future<void> resetPassword(String id, String password) async {
-    await _dio.put('/admin/employees/$id/reset-password',
+    await _dio.put('/admin/employees/$id',
         data: {'password': password});
   }
 

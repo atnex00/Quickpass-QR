@@ -1,7 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
 const multer = require('multer');
-const { validate } = require('../middleware/validate');
+const { validate, validateQuery } = require('../middleware/validate');
 const { authenticate, requireSupervisor, requireAdmin, requireSecurity } = require('../middleware/auth');
 
 const upload = multer({
@@ -62,7 +62,11 @@ router.post('/leave/request', authenticate, validate(Joi.object({
   reason: Joi.string().min(5).max(500).required(),
 })), leaveController.submitLeave);
 
-router.get('/leave/history', authenticate, leaveController.getHistory);
+router.get('/leave/history', authenticate, validateQuery(Joi.object({
+  status: Joi.string().valid('pending', 'approved', 'active', 'completed', 'rejected', 'cancelled').optional(),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+})), leaveController.getHistory);
 router.get('/leave/active', authenticate, leaveController.getActiveLeave);
 router.get('/leave/:id', authenticate, leaveController.getLeaveById);
 router.delete('/leave/:id', authenticate, requireAdmin, leaveController.deleteLeave);
@@ -75,13 +79,18 @@ router.post('/supervisor/revoke/:leaveId', authenticate, requireSupervisor, supe
 router.post('/supervisor/reject/:leaveId', authenticate, requireSupervisor, validate(Joi.object({
   reason: Joi.string().min(2).max(500).required(),
 })), supervisorController.rejectLeave);
-router.get('/supervisor/team-leaves', authenticate, requireSupervisor, supervisorController.getTeamLeaves);
+router.get('/supervisor/team-leaves', authenticate, requireSupervisor, validateQuery(Joi.object({
+  date: Joi.string().isoDate().optional(),
+})), supervisorController.getTeamLeaves);
 
 // ── Scan Routes ──
 router.post('/scan/validate', authenticate, requireSecurity, validate(Joi.object({
   qr_data: Joi.string().required(),
 })), scanController.validateScan);
-router.get('/scan/history', authenticate, requireSecurity, scanController.getScanHistory);
+router.get('/scan/history', authenticate, requireSecurity, validateQuery(Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+})), scanController.getScanHistory);
 
 // ── Admin Routes ──
 router.post('/admin/employees', authenticate, requireAdmin, validate(Joi.object({
@@ -97,7 +106,14 @@ router.post('/admin/employees', authenticate, requireAdmin, validate(Joi.object(
   is_admin: Joi.boolean().optional(),
   is_security: Joi.boolean().optional(),
 })), adminController.createEmployee);
-router.get('/admin/employees', authenticate, requireAdmin, adminController.listEmployees);
+router.get('/admin/employees', authenticate, requireAdmin, validateQuery(Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  search: Joi.string().max(100).optional().allow(''),
+  department_id: Joi.string().max(20).optional().allow(''),
+  is_active: Joi.string().valid('true', 'false').optional(),
+  role: Joi.string().valid('admin', 'supervisor').optional(),
+})), adminController.listEmployees);
 router.put('/admin/employees/:id', authenticate, requireAdmin, validate(Joi.object({
   full_name: Joi.string().min(2).max(100),
   position: Joi.string().min(2).max(50),
@@ -140,6 +156,10 @@ router.put('/admin/departments/:id', authenticate, requireAdmin, validate(Joi.ob
   is_active: Joi.boolean(),
 }).min(1)), adminController.updateDepartment);
 router.delete('/admin/departments/:id', authenticate, requireAdmin, adminController.deleteDepartment);
-router.get('/admin/reports', authenticate, requireAdmin, adminController.getReports);
+router.get('/admin/reports', authenticate, requireAdmin, validateQuery(Joi.object({
+  type: Joi.string().valid('daily', 'department', 'summary').optional(),
+  start_date: Joi.string().isoDate().optional(),
+  end_date: Joi.string().isoDate().optional(),
+})), adminController.getReports);
 
 module.exports = router;

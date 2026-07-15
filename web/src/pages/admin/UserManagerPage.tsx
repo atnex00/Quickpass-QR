@@ -94,7 +94,9 @@ export default function UserManagerPage() {
       const res = await api.get("/admin/employees", { params })
       setEmployees(res.data.data)
       setTotal(res.data.pagination?.total || 0)
-    } catch (_) {}
+    } catch {
+      console.warn("Failed to load employees")
+    }
     finally { setLoading(false) }
   }
 
@@ -102,7 +104,9 @@ export default function UserManagerPage() {
     try {
       const res = await api.get("/admin/departments")
       setDepartments(res.data.data)
-    } catch (_) {}
+    } catch {
+      console.warn("Failed to load departments")
+    }
   }
 
   useEffect(() => {
@@ -537,7 +541,7 @@ export default function UserManagerPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter new password"
                 required
-                minLength={4}
+                minLength={8}
               />
             </div>
             <Button type="submit" className="w-full" disabled={resetting}>

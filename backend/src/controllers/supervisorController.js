@@ -40,61 +40,67 @@ async function approveLeave(req, res, next) {
   try {
     const { leaveId } = req.params;
 
-    const leave = await db('leave_requests')
-      .where({ leave_id: leaveId, status: 'pending' })
-      .first();
-
-    if (!leave) {
-      throw createError(404, 'Leave request not found or already processed');
-    }
-
-    if (!req.user.is_admin) {
-      if (leave.supervisor_id !== req.user.employee_id) {
-        throw createError(403, 'You are not the assigned supervisor for this request');
-      }
-
-      if (leave.department_id !== req.user.department_id) {
-        throw createError(403, 'This request is not in your department');
-      }
-    }
-
-    const leaveDate = fmtDate(leave.leave_date);
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    // Use current time if scheduled window has already passed
-    const now = new Date();
-    const schedOut = new Date(`${leaveDate}T${leave.start_time}`);
-    const outRef = schedOut > now ? leave.start_time : new Date().toTimeString().slice(0, 8);
-    const outDate = schedOut > now ? leaveDate : todayStr;
-    const schedIn = new Date(`${leaveDate}T${leave.end_time}`);
-    const inRef = schedIn > now ? leave.end_time : new Date().toTimeString().slice(0, 8);
-    const inDate = schedIn > now ? leaveDate : todayStr;
-
-    const outQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'OUT', outDate, outRef);
-    const inQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'IN', inDate, inRef);
-
-    const outQrCode = qrService.encodeQrData(outQrData);
-    const inQrCode = qrService.encodeQrData(inQrData);
-
+    let leave;
+    let outQrCode;
+    let inQrCode;
     let outQrImage = null;
     let inQrImage = null;
-    try {
-      outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
-      inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
-    } catch (qrErr) {
-      console.error('QR image generation failed (approval continues):', qrErr.message);
-    }
 
-    await db('leave_requests')
-      .where({ leave_id: leaveId })
-      .update({
-        status: 'approved',
-        out_qr_code: outQrCode,
-        in_qr_code: inQrCode,
-        out_qr_image: outQrImage,
-        in_qr_image: inQrImage,
-        updated_at: db.fn.now(),
-      });
+    await db.transaction(async (trx) => {
+      leave = await trx('leave_requests')
+        .where({ leave_id: leaveId, status: 'pending' })
+        .forUpdate()
+        .first();
+
+      if (!leave) {
+        throw createError(404, 'Leave request not found or already processed');
+      }
+
+      if (!req.user.is_admin) {
+        if (leave.supervisor_id !== req.user.employee_id) {
+          throw createError(403, 'You are not the assigned supervisor for this request');
+        }
+
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This request is not in your department');
+        }
+      }
+
+      const leaveDate = fmtDate(leave.leave_date);
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      const now = new Date();
+      const schedOut = new Date(`${leaveDate}T${leave.start_time}`);
+      const outRef = schedOut > now ? leave.start_time : new Date().toTimeString().slice(0, 8);
+      const outDate = schedOut > now ? leaveDate : todayStr;
+      const schedIn = new Date(`${leaveDate}T${leave.end_time}`);
+      const inRef = schedIn > now ? leave.end_time : new Date().toTimeString().slice(0, 8);
+      const inDate = schedIn > now ? leaveDate : todayStr;
+
+      const outQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'OUT', outDate, outRef);
+      const inQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'IN', inDate, inRef);
+
+      outQrCode = qrService.encodeQrData(outQrData);
+      inQrCode = qrService.encodeQrData(inQrData);
+
+      try {
+        outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
+        inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
+      } catch (qrErr) {
+        console.error('QR image generation failed (approval continues):', qrErr.message);
+      }
+
+      await trx('leave_requests')
+        .where({ leave_id: leaveId })
+        .update({
+          status: 'approved',
+          out_qr_code: outQrCode,
+          in_qr_code: inQrCode,
+          out_qr_image: outQrImage,
+          in_qr_image: inQrImage,
+          updated_at: trx.fn.now(),
+        });
+    });
 
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
@@ -145,6 +151,9 @@ async function rejectLeave(req, res, next) {
     if (!req.user.is_admin) {
       if (leave.supervisor_id !== req.user.employee_id) {
         throw createError(403, 'You are not the assigned supervisor for this request');
+      }
+      if (leave.department_id !== req.user.department_id) {
+        throw createError(403, 'This request is not in your department');
       }
     }
 

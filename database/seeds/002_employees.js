@@ -1,6 +1,10 @@
 const bcrypt = require('bcryptjs');
 
 exports.seed = async function (knex) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Seeds must not be run in production');
+  }
+
   await knex('employees').del();
 
   const hash = await bcrypt.hash('pass1234', 10);

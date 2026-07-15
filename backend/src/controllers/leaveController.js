@@ -153,7 +153,7 @@ async function getActiveLeave(req, res, next) {
       .first();
 
     if (!leave) {
-      return res.status(404).json({ success: false, message: 'No active leave found' });
+      throw createError(404, 'No active leave found');
     }
 
     res.json({ success: true, data: leave });

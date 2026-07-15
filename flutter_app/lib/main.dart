@@ -79,14 +79,19 @@ class _QuickpassAppState extends State<QuickpassApp> {
     if (context == null) return;
     try {
       context.read<LeaveProvider>().reset();
-    } catch (_) {}
+    } catch (_) {
+      debugPrint('LeaveProvider reset failed (already disposed)');
+    }
     try {
       context.read<SupervisorProvider>().reset();
-    } catch (_) {}
+    } catch (_) {
+      debugPrint('SupervisorProvider reset failed (already disposed)');
+    }
     try {
       context.read<ScanProvider>().reset();
-    } catch (_) {}
-  }
+    } catch (_) {
+      debugPrint('ScanProvider reset failed (already disposed)');
+    }  }
 
   void _handleLoginSuccess() {
     _resetProviders();

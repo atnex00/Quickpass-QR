@@ -307,15 +307,17 @@ async function deleteEmployee(req, res, next) {
   try {
     const { id } = req.params;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
+      }
 
-    await db('qr_scan_logs').where({ scanned_by: id }).del();
-    await db('sessions').where({ employee_id: id }).del();
-    await db('leave_requests').where({ employee_id: id }).del();
-    await db('employees').where({ employee_id: id }).del();
+      await trx('qr_scan_logs').where({ scanned_by: id }).del();
+      await trx('sessions').where({ employee_id: id }).del();
+      await trx('leave_requests').where({ employee_id: id }).del();
+      await trx('employees').where({ employee_id: id }).del();
+    });
 
     res.json({ success: true, message: 'Employee deleted' });
   } catch (err) {

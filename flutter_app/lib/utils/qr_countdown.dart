@@ -12,22 +12,24 @@ mixin QrCountdownMixin<T extends StatefulWidget> on State<T> {
   String get windowState => _windowState;
   int get remainingSeconds => _remainingSeconds;
 
-  void initCountdown(String date, String time) {
-    _tick(date, time);
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick(date, time));
+  void initCountdown(String date, String time, {DateTime? target}) {
+    _tick(date, time, target: target);
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick(date, time, target: target));
   }
 
   void updateCountdown(String date, String time,
-      {required String oldDate, required String oldTime}) {
+      {required String oldDate, required String oldTime, DateTime? target}) {
     if (date != oldDate || time != oldTime) {
       _timer?.cancel();
-      _tick(date, time);
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick(date, time));
+      _tick(date, time, target: target);
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick(date, time, target: target));
     }
   }
 
-  void _tick(String date, String time) {
-    final result = QrService.windowSeconds(date, time);
+  void _tick(String date, String time, {DateTime? target}) {
+    final result = target != null
+        ? QrService.windowSecondsFromTimestamp(target)
+        : QrService.windowSeconds(date, time);
     setState(() {
       _windowState = (result['state'] as String?) ?? 'after';
       _remainingSeconds = (result['seconds'] as int?) ?? 0;
