@@ -24,6 +24,7 @@ import 'screens/security/scanner_screen.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
+import 'widgets/connectivity_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -187,17 +188,19 @@ class _QuickpassAppState extends State<QuickpassApp> {
         child: Consumer2<AuthProvider, SettingsProvider>(
           builder: (context, auth, settings, _) {
             final analytics = FirebaseAnalytics.instance;
-            return MaterialApp(
-              navigatorKey: _navigatorKey,
-              title: AppConfig.appName,
-              debugShowCheckedModeBanner: false,
-              theme: QuickpassTheme.light,
-              darkTheme: QuickpassTheme.dark,
-              themeMode: settings.themeMode,
-              navigatorObservers: [
-                FirebaseAnalyticsObserver(analytics: analytics),
-              ],
-              home: _buildHome(auth),
+            return ConnectivityBanner(
+              child: MaterialApp(
+                navigatorKey: _navigatorKey,
+                title: AppConfig.appName,
+                debugShowCheckedModeBanner: false,
+                theme: QuickpassTheme.light,
+                darkTheme: QuickpassTheme.dark,
+                themeMode: settings.themeMode,
+                navigatorObservers: [
+                  FirebaseAnalyticsObserver(analytics: analytics),
+                ],
+                home: _buildHome(auth),
+              ),
             );
           },
         ),

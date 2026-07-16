@@ -6,6 +6,7 @@ import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../utils/errors.dart';
 import '../employee/dashboard_screen.dart';
 import '../security/scanner_screen.dart';
 import '../supervisor/supervisor_dashboard.dart';
@@ -24,6 +25,7 @@ class _OverviewTabState extends State<OverviewTab> {
   Map<String, dynamic>? _reportData;
   List<dynamic>? _departmentReport;
   bool _isLoading = true;
+  String? _error;
   Map<String, int> _cachedStatusCounts = {};
   int _employeeCount = 0;
 
@@ -42,7 +44,7 @@ class _OverviewTabState extends State<OverviewTab> {
   }
 
   Future<void> _loadReports() async {
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _error = null; });
     try {
       _reportData = await _api.getReports();
       final deptRes = await _api.getReports(type: 'department');
@@ -56,7 +58,7 @@ class _OverviewTabState extends State<OverviewTab> {
       final depts = await _api.getDepartments();
       _departmentCount = depts.length;
     } catch (e) {
-      debugPrint('Failed to load overview reports: $e');
+      _error = friendlyError(e);
     }
     if (mounted) setState(() => _isLoading = false);
   }
@@ -219,6 +221,20 @@ class _OverviewTabState extends State<OverviewTab> {
                         const Padding(
                           padding: EdgeInsets.all(24),
                           child: Center(child: CircularProgressIndicator()),
+                        )
+                      else if (_error != null)
+                        Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: context.error),
+                              const SizedBox(height: 12),
+                              Text(_error!, textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 15)),
+                              const SizedBox(height: 16),
+                              FilledButton(onPressed: _loadReports, child: const Text('Retry')),
+                            ],
+                          ),
                         )
                       else ...[
                         OverviewStatGrid(

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/department.dart';
 import '../../services/api_service.dart';
+import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
 import 'admin_shared.dart';
@@ -20,6 +21,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
   late final ApiService _api;
   List<Department> _departments = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -29,14 +31,14 @@ class _DepartmentTabState extends State<DepartmentTab> {
   }
 
   Future<void> _loadDepartments() async {
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _error = null; });
     try {
       final deps = await _api.getDepartments();
       _departments = deps
           .map((j) => Department.fromJson(j as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('Failed to load departments: $e');
+      _error = friendlyError(e);
     }
     setState(() => _isLoading = false);
   }
@@ -100,6 +102,27 @@ class _DepartmentTabState extends State<DepartmentTab> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const LoadingIndicator();
+
+    if (_error != null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: context.error),
+                const SizedBox(height: 12),
+                Text(_error!, textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 15)),
+                const SizedBox(height: 16),
+                FilledButton(onPressed: _loadDepartments, child: const Text('Retry')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Stack(

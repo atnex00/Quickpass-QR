@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/leave_request.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../utils/errors.dart';
 
 class LeaveProvider extends ChangeNotifier {
 
@@ -51,7 +52,7 @@ class LeaveProvider extends ChangeNotifier {
       _history = list.map((j) => LeaveRequest.fromJson(j)).toList();
       _recomputeCounts();
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     }
 
     _isLoading = false;
@@ -66,7 +67,7 @@ class LeaveProvider extends ChangeNotifier {
       _activeLeave = await _api.getActiveLeave();
       _error = null;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     }
 
     _isLoading = false;
@@ -97,7 +98,7 @@ class LeaveProvider extends ChangeNotifier {
       AnalyticsService().logLeaveSubmitted();
       return leave;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       _isLoading = false;
       notifyListeners();
       return null;

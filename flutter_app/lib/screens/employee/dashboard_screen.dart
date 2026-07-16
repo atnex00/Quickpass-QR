@@ -121,6 +121,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                         _RecentActivitySection(
                           isLoading: leaveProv.isLoading,
                           history: leaveProv.history,
+                          error: leaveProv.error,
                           onSeeAll: widget.onViewHistory ?? () {},
                         ),
                       ]),
@@ -523,10 +524,12 @@ class _RecentActivitySection extends StatelessWidget {
   const _RecentActivitySection({
     required this.isLoading,
     required this.history,
+    this.error,
     required this.onSeeAll,
   });
   final bool isLoading;
   final List<LeaveRequest> history;
+  final String? error;
   final VoidCallback onSeeAll;
 
   @override
@@ -571,6 +574,18 @@ class _RecentActivitySection extends StatelessWidget {
             padding: EdgeInsets.all(24),
             child: CircularProgressIndicator(),
           ))
+        else if (error != null)
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Icon(Icons.error_outline, size: 40, color: context.error),
+                const SizedBox(height: 8),
+                Text(error!, textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: context.error)),
+              ],
+            ),
+          )
         else if (history.isEmpty)
           const EmptyState(
             icon: Icons.inbox_outlined,

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../utils/errors.dart';
 
 class ScanProvider extends ChangeNotifier {
 
@@ -34,7 +35,7 @@ class ScanProvider extends ChangeNotifier {
       return isValid;
     } catch (e) {
       _lastResult = null;
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       _isLoading = false;
       notifyListeners();
       return false;

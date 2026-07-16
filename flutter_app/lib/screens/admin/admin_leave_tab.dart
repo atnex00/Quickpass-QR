@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
 import 'admin_shared.dart';
 
@@ -19,6 +20,7 @@ class _LeaveTabState extends State<LeaveTab> {
   late final ApiService _api;
   List<dynamic>? _leaves;
   bool _isLoading = true;
+  String? _error;
   String _statusFilter = '';
 
   @override
@@ -31,12 +33,12 @@ class _LeaveTabState extends State<LeaveTab> {
   }
 
   Future<void> _loadLeaves() async {
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _error = null; });
     try {
       final res = await _api.getReports();
       _leaves = res['data'] as List<dynamic>?;
     } catch (e) {
-      debugPrint('Failed to load leaves: $e');
+      _error = friendlyError(e);
     }
     if (mounted) setState(() => _isLoading = false);
   }
@@ -150,6 +152,20 @@ class _LeaveTabState extends State<LeaveTab> {
               const Padding(
                   padding: EdgeInsets.all(24),
                   child: Center(child: CircularProgressIndicator()))
+            else if (_error != null)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: context.error),
+                    const SizedBox(height: 12),
+                    Text(_error!, textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 15)),
+                    const SizedBox(height: 16),
+                    FilledButton(onPressed: _loadLeaves, child: const Text('Retry')),
+                  ],
+                ),
+              )
             else if (filtered.isEmpty)
               const EmptyState(
                 icon: Icons.inbox_outlined,

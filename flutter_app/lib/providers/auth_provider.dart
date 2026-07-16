@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../models/employee.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../utils/errors.dart';
 
 class AuthProvider extends ChangeNotifier {
 
@@ -70,7 +71,7 @@ class AuthProvider extends ChangeNotifier {
       AnalyticsService().logLogin(role: role);
       return true;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       _isAuthenticated = false;
       _loginLoading = false;
       notifyListeners();
@@ -79,11 +80,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _isLoading = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-
     try {
       await _api.logout();
     } catch (_) {}
@@ -111,7 +107,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       notifyListeners();
       return false;
     }
@@ -124,7 +120,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       notifyListeners();
       return false;
     }

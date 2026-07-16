@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/leave_request.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../utils/errors.dart';
 
 class SupervisorProvider extends ChangeNotifier {
 
@@ -28,7 +29,7 @@ class SupervisorProvider extends ChangeNotifier {
       _pendingRequests = await _api.getPendingRequests();
       _error = null;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     } finally {
       _loadingCount--;
       notifyListeners();
@@ -44,7 +45,7 @@ class SupervisorProvider extends ChangeNotifier {
       AnalyticsService().logLeaveApproved();
       return leave;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       notifyListeners();
       return null;
     }
@@ -58,7 +59,7 @@ class SupervisorProvider extends ChangeNotifier {
       _approvedLeaves = await _api.getApprovedLeaves();
       _error = null;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     } finally {
       _loadingCount--;
       notifyListeners();
@@ -74,7 +75,7 @@ class SupervisorProvider extends ChangeNotifier {
       AnalyticsService().logLeaveRevoked();
       return leave;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       notifyListeners();
       return null;
     }
@@ -88,7 +89,7 @@ class SupervisorProvider extends ChangeNotifier {
       AnalyticsService().logLeaveRejected();
       return leave;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       notifyListeners();
       return null;
     }

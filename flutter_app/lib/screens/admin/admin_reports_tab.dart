@@ -6,6 +6,7 @@ import '../../config/theme.dart';
 import '../../services/api_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
 import 'admin_shared.dart';
 
@@ -21,6 +22,7 @@ class _ReportsTabState extends State<ReportsTab> {
   List<dynamic>? _reportData;
   List<dynamic>? _departmentReport;
   bool _isLoading = true;
+  String? _error;
   String _reportType = '';
   DateTime? _startDate;
   DateTime? _endDate;
@@ -45,7 +47,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   Future<void> _loadReports() async {
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _error = null; });
     try {
       final params = <String, dynamic>{};
       if (_reportType.isNotEmpty) params['type'] = _reportType;
@@ -63,7 +65,7 @@ class _ReportsTabState extends State<ReportsTab> {
       _departmentReport = deptRes['data'] as List<dynamic>?;
       _computeCounts();
     } catch (e) {
-      debugPrint('Failed to load report data: $e');
+      _error = friendlyError(e);
     }
     if (mounted) setState(() => _isLoading = false);
   }
@@ -342,6 +344,19 @@ class _ReportsTabState extends State<ReportsTab> {
                           padding: EdgeInsets.all(24),
                           child: CircularProgressIndicator(),
                         ))
+                      else if (_error != null)
+                        Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.error_outline, size: 48, color: context.error),
+                              const SizedBox(height: 12),
+                              Text(_error!, textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 15)),
+                              const SizedBox(height: 16),
+                              FilledButton(onPressed: _loadReports, child: const Text('Retry')),
+                            ],
+                          ),
+                        )
                       else ...[
                         ReportsStatSummary(
                           statusCounts: _statusCounts,
