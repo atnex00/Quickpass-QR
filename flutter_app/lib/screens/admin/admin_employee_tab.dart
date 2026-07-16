@@ -64,7 +64,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
     try {
       final empRes = await _api.listEmployees(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        departmentId: _filterDepartment,
+        departmentId: _filterDepartment?.isNotEmpty == true ? _filterDepartment : null,
         status: _filterStatus.isNotEmpty ? _filterStatus : null,
         role: _filterRole.isNotEmpty ? _filterRole : null,
         page: _currentPage,
@@ -100,15 +100,12 @@ class _EmployeeTabState extends State<EmployeeTab> {
   }
 
   void _showEditDialog(Map<String, dynamic> emp) {
-    _loadData().then((_) {
-      if (!mounted) return;
-      showDialog<bool>(
-        context: context,
-        builder: (_) =>
-            EditEmployeeDialog(emp: emp, departments: _departments),
-      ).then((updated) {
-        if (updated == true) if (mounted) _loadData();
-      });
+    showDialog<bool>(
+      context: context,
+      builder: (_) =>
+          EditEmployeeDialog(emp: emp, departments: _departments),
+    ).then((updated) {
+      if (updated == true && mounted) _loadData();
     });
   }
 
@@ -209,6 +206,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                   SizedBox(
                     width: 280,
                     child: DropdownButtonFormField<String>(
+                      key: ValueKey('dept_$_filterDepartment'),
                       initialValue: _filterDepartment,
                       decoration: const InputDecoration(
                         labelText: 'Dept',
@@ -218,7 +216,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                       ),
                       items: [
                         const DropdownMenuItem<String>(
-                            child: Text('All')),
+                            value: '', child: Text('All')),
                         ..._departments.map((d) => DropdownMenuItem<String>(
                               value: d['department_id'] as String?,
                               child: Text(d['department_name'] as String? ?? '',
@@ -238,8 +236,8 @@ class _EmployeeTabState extends State<EmployeeTab> {
                   SizedBox(
                     width: 280,
                     child: DropdownButtonFormField<String>(
-                      initialValue:
-                          _filterStatus.isEmpty ? null : _filterStatus,
+                      key: ValueKey('status_$_filterStatus'),
+                      initialValue: _filterStatus.isEmpty ? null : _filterStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         isDense: false,
@@ -248,7 +246,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                       ),
                       items: const [
                         DropdownMenuItem<String>(
-                            child: Text('All')),
+                            value: '', child: Text('All')),
                         DropdownMenuItem<String>(
                             value: 'active', child: Text('Active')),
                         DropdownMenuItem<String>(
@@ -267,6 +265,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                   SizedBox(
                     width: 280,
                     child: DropdownButtonFormField<String>(
+                      key: ValueKey('role_$_filterRole'),
                       initialValue: _filterRole.isEmpty ? null : _filterRole,
                       decoration: const InputDecoration(
                         labelText: 'Role',
@@ -276,7 +275,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                       ),
                       items: const [
                         DropdownMenuItem<String>(
-                            child: Text('All')),
+                            value: '', child: Text('All')),
                         DropdownMenuItem<String>(
                             value: 'admin', child: Text('Admin')),
                         DropdownMenuItem<String>(
@@ -608,10 +607,38 @@ class _EmployeeTabState extends State<EmployeeTab> {
                   ),
                   const SizedBox(width: 4),
                   AdminActionButton(
+                    icon: Icons.shield_outlined,
+                    label: 'Security',
+                    active: emp['is_security'] == true,
+                    color: context.warning,
+                    onTap: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await _api.updateEmployee(emp['employee_id'] as String, {
+                          'is_security': emp['is_security'] != true,
+                        });
+                        if (!mounted) return;
+                        _loadData();
+                        final was = emp['is_security'] == true;
+                        messenger.showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Security ${was ? 'removed' : 'granted'}')),
+                        );
+                      } catch (e) {
+                        messenger.showSnackBar(
+                          SnackBar(
+                              content: Text('Failed to toggle security: $e')),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  AdminActionButton(
                     icon: Icons.key,
                     label: 'Password',
                     active: false,
-                    color: context.warning,
+                    color: context.tertiary,
                     onTap: () => _showPasswordResetDialog(emp),
                   ),
                 ],
@@ -766,15 +793,25 @@ class _AddEmployeeDialogState extends State<AddEmployeeDialog> {
                   controller: _emailCtl,
                   decoration: const InputDecoration(
                       labelText: 'Email', hintText: 'e.g. juan@company.com'),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Required' : null),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Required';
+                    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(v.trim())) {
+                      return 'Invalid email format';
+                    }
+                    return null;
+                  }),
               const SizedBox(height: 12),
               TextFormField(
                   controller: _passCtl,
                   decoration: const InputDecoration(labelText: 'Password'),
                   obscureText: true,
-                  validator: (v) =>
-                      v == null || v.length < 4 ? 'Min 4 characters' : null),
+                  validator: (v) {
+                    if (v == null || v.length < 8) return 'Min 8 characters';
+                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(v)) {
+                      return 'Must contain uppercase, lowercase, and number';
+                    }
+                    return null;
+                  }),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
@@ -1016,16 +1053,10 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
         'position': _posCtl.text.trim(),
         'email': _emailCtl.text.trim(),
         'department_id': _selectedDept,
+        'is_supervisor': _isSupervisor,
+        'is_admin': _isAdmin,
+        'is_active': _isActive,
       });
-      if (widget.emp['is_supervisor'] != _isSupervisor) {
-        await api.toggleSupervisor(_empId);
-      }
-      if (widget.emp['is_admin'] != _isAdmin) {
-        await api.toggleAdmin(_empId);
-      }
-      if ((widget.emp['is_active'] ?? true) != _isActive) {
-        await api.toggleActive(_empId);
-      }
       if (!mounted) return;
       Navigator.pop(context, true);
       if (mounted) {
@@ -1083,8 +1114,8 @@ class _ImportEmployeesDialogState extends State<ImportEmployeesDialog> {
               controller: _ctl,
               maxLines: 10,
               decoration: const InputDecoration(
-                hintText:
-                    '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEPT01","email":"john@company.com","password":"pass1234"}]',
+                  hintText:
+                      '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEP-001","email":"john@company.com","password":"pass1234"}]',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.all(12),
               ),
@@ -1166,6 +1197,7 @@ class ResetPasswordDialog extends StatefulWidget {
 
 class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   final _passCtl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
@@ -1178,18 +1210,28 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Reset Password'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('New password for ${widget.emp['full_name']}'),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _passCtl,
-            decoration: const InputDecoration(
-                labelText: 'New Password', hintText: 'Min 4 characters'),
-            obscureText: true,
-          ),
-        ],
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('New password for ${widget.emp['full_name']}'),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passCtl,
+              decoration: const InputDecoration(
+                  labelText: 'New Password', hintText: 'Min 8 characters'),
+              obscureText: true,
+              validator: (v) {
+                if (v == null || v.length < 8) return 'Min 8 characters';
+                if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(v)) {
+                  return 'Must contain uppercase, lowercase, and number';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -1211,7 +1253,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   }
 
   Future<void> _reset() async {
-    if (_passCtl.text.length < 4) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _isLoading = true);
     try {
       final api = context.read<ApiService>();

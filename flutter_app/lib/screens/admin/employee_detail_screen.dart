@@ -45,92 +45,116 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
 
   void _showEditDialog() {
     final emp = _employee!;
+    final formKey = GlobalKey<FormState>();
     final nameCtl = TextEditingController(text: emp['full_name'] ?? '');
     final posCtl = TextEditingController(text: emp['position'] ?? '');
     final emailCtl = TextEditingController(text: emp['email'] ?? '');
     bool isSupervisor = emp['is_supervisor'] == true;
     bool isAdmin = emp['is_admin'] == true;
     bool isSecurity = emp['is_security'] == true;
+    bool saving = false;
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Edit Employee'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                    controller: nameCtl,
-                    decoration: const InputDecoration(labelText: 'Full Name')),
-                const SizedBox(height: 12),
-                TextField(
-                    controller: posCtl,
-                    decoration: const InputDecoration(labelText: 'Position')),
-                const SizedBox(height: 12),
-                TextField(
-                    controller: emailCtl,
-                    decoration: const InputDecoration(labelText: 'Email')),
-                const SizedBox(height: 8),
-                CheckboxListTile(
-                  title: const Text('Supervisor access'),
-                  value: isSupervisor,
-                  onChanged: (v) =>
-                      setDialogState(() => isSupervisor = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Admin access'),
-                  value: isAdmin,
-                  onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Security access'),
-                  value: isSecurity,
-                  onChanged: (v) =>
-                      setDialogState(() => isSecurity = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                      controller: nameCtl,
+                      decoration: const InputDecoration(labelText: 'Full Name'),
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                      controller: posCtl,
+                      decoration: const InputDecoration(labelText: 'Position'),
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                      controller: emailCtl,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'Required';
+                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(v.trim())) {
+                          return 'Invalid email format';
+                        }
+                        return null;
+                      }),
+                  const SizedBox(height: 8),
+                  CheckboxListTile(
+                    title: const Text('Supervisor access'),
+                    value: isSupervisor,
+                    onChanged: (v) =>
+                        setDialogState(() => isSupervisor = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Admin access'),
+                    value: isAdmin,
+                    onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Security access'),
+                    value: isSecurity,
+                    onChanged: (v) =>
+                        setDialogState(() => isSecurity = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx),
+                onPressed: saving ? null : () => Navigator.pop(ctx),
                 child: const Text('Cancel')),
             FilledButton(
-              onPressed: () async {
-                try {
-                  await _api.updateEmployee(emp['employee_id'], {
-                    'full_name': nameCtl.text,
-                    'position': posCtl.text,
-                    'email': emailCtl.text,
-                  });
-                  if (emp['is_supervisor'] != isSupervisor) {
-                    await _api.toggleSupervisor(emp['employee_id']);
-                  }
-                  if (emp['is_admin'] != isAdmin) {
-                    await _api.toggleAdmin(emp['employee_id']);
-                  }
-                  if (!ctx.mounted) return;
-                  Navigator.pop(ctx);
-                  _refresh();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Employee updated')));
-                  }
-                } catch (e) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(const SnackBar(content: Text('Failed to update employee')));
-                }
-              },
-              child: const Text('Save'),
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (!(formKey.currentState?.validate() ?? false)) return;
+                      setDialogState(() => saving = true);
+                      try {
+                        await _api.updateEmployee(emp['employee_id'], {
+                          'full_name': nameCtl.text.trim(),
+                          'position': posCtl.text.trim(),
+                          'email': emailCtl.text.trim(),
+                          'is_supervisor': isSupervisor,
+                          'is_admin': isAdmin,
+                          'is_security': isSecurity,
+                        });
+                        if (!ctx.mounted) return;
+                        Navigator.pop(ctx);
+                        _refresh();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Employee updated')));
+                        }
+                      } catch (e) {
+                        if (!mounted) return;
+                        setDialogState(() => saving = false);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(content: Text('Failed to update employee')));
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Text('Save'),
             ),
           ],
         ),
@@ -455,13 +479,9 @@ class _PasswordResetDialog extends StatefulWidget {
 }
 
 class _PasswordResetDialogState extends State<_PasswordResetDialog> {
-  late final TextEditingController _passCtl;
-
-  @override
-  void initState() {
-    super.initState();
-    _passCtl = TextEditingController();
-  }
+  final _passCtl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool saving = false;
 
   @override
   void dispose() {
@@ -473,40 +493,61 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Reset Password'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('New password for ${widget.employee['full_name']}'),
-          const SizedBox(height: 12),
-          TextField(
-              controller: _passCtl,
-              decoration: const InputDecoration(labelText: 'New Password'),
-              obscureText: true),
-        ],
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('New password for ${widget.employee['full_name']}'),
+            const SizedBox(height: 12),
+            TextFormField(
+                controller: _passCtl,
+                decoration: const InputDecoration(
+                    labelText: 'New Password', hintText: 'Min 8 characters'),
+                obscureText: true,
+                validator: (v) {
+                  if (v == null || v.length < 8) return 'Min 8 characters';
+                  if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(v)) {
+                    return 'Must contain uppercase, lowercase, and number';
+                  }
+                  return null;
+                }),
+          ],
+        ),
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: saving ? null : () => Navigator.pop(context),
             child: const Text('Cancel')),
         FilledButton(
-          onPressed: () async {
-            if (_passCtl.text.length < 4) return;
-            try {
-              await widget.api.resetPassword(
-                  widget.employee['employee_id'], _passCtl.text);
-              if (!context.mounted) return;
-              Navigator.pop(context);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Password reset')));
-              }
-            } catch (e) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text('Failed to reset password')));
-            }
-          },
-          child: const Text('Reset'),
+          onPressed: saving
+              ? null
+              : () async {
+                  if (!(_formKey.currentState?.validate() ?? false)) return;
+                  setState(() => saving = true);
+                  try {
+                    await widget.api.resetPassword(
+                        widget.employee['employee_id'], _passCtl.text);
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Password reset')));
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    setState(() => saving = false);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Failed to reset password')));
+                  }
+                },
+          child: saving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
+              : const Text('Reset'),
         ),
       ],
     );

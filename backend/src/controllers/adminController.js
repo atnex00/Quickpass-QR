@@ -68,6 +68,8 @@ async function listEmployees(req, res, next) {
       query = query.andWhere('employees.is_admin', true);
     } else if (role === 'supervisor') {
       query = query.andWhere('employees.is_supervisor', true);
+    } else if (role === 'security') {
+      query = query.andWhere('employees.is_security', true);
     }
 
     if (search) {

@@ -112,7 +112,7 @@ router.get('/admin/employees', authenticate, requireAdmin, validateQuery(Joi.obj
   search: Joi.string().max(100).optional().allow(''),
   department_id: Joi.string().max(20).optional().allow(''),
   is_active: Joi.string().valid('true', 'false').optional(),
-  role: Joi.string().valid('admin', 'supervisor').optional(),
+  role: Joi.string().valid('admin', 'supervisor', 'security').optional(),
 })), adminController.listEmployees);
 router.put('/admin/employees/:id', authenticate, requireAdmin, validate(Joi.object({
   full_name: Joi.string().min(2).max(100),
