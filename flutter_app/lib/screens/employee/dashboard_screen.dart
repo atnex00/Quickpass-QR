@@ -436,6 +436,64 @@ class _ActiveLeaveCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (leave.status == LeaveStatus.approved) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 36,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Cancel Leave'),
+                            content: Text(
+                                'Cancel your leave for ${DateFormatter.formatDate(leave.leaveDate)}?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('No')),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(
+                                    backgroundColor: context.warning),
+                                child: const Text('Yes, Cancel'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && context.mounted) {
+                          try {
+                            await context
+                                .read<LeaveProvider>()
+                                .cancelLeave(leave.leaveId);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text('Leave cancelled')),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text('$e')),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      icon: const Icon(Icons.close, size: 16),
+                      label: const Text('Cancel Leave'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.warning,
+                        side: BorderSide(color: context.warning),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

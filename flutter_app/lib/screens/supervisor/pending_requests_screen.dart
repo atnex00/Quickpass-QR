@@ -69,7 +69,37 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                                   color: context.onSurface)),
                         ),
                         ...supProv.pendingRequests.map((leave) =>
-                            _PendingCard(leave: leave, isAdmin: isAdmin)),
+                            Dismissible(
+                              key: ValueKey('pending_${leave.leaveId}'),
+                              confirmDismiss: (direction) async {
+                                if (direction == DismissDirection.endToStart) {
+                                  await _PendingCard.showRejectDialog(context, leave);
+                                  return false;
+                                } else {
+                                  await _PendingCard.approveLeave(context, leave);
+                                  return false;
+                                }
+                              },
+                              background: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.only(left: 24),
+                                decoration: BoxDecoration(
+                                  color: context.success,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.check, color: Colors.white, size: 32),
+                              ),
+                              secondaryBackground: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 24),
+                                decoration: BoxDecoration(
+                                  color: context.error,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.close, color: Colors.white, size: 32),
+                              ),
+                              child: _PendingCard(leave: leave, isAdmin: isAdmin),
+                            )),
                         const SizedBox(height: 16),
                       ],
                       if (supProv.approvedLeaves.isNotEmpty) ...[
@@ -189,7 +219,7 @@ class _PendingCard extends StatelessWidget {
                     onPressed: () => _confirmDelete(context),
                   ),
                 OutlinedButton.icon(
-                  onPressed: () => _showRejectDialog(context),
+                  onPressed: () => _PendingCard.showRejectDialog(context, leave),
                   icon: const Icon(Icons.close, size: 18),
                   label: const Text('Reject'),
                   style: OutlinedButton.styleFrom(
@@ -199,7 +229,7 @@ class _PendingCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 FilledButton.icon(
-                  onPressed: () => _approve(context),
+                  onPressed: () => _PendingCard.approveLeave(context, leave),
                   icon: const Icon(Icons.check, size: 18),
                   label: const Text('Approve'),
                   style: FilledButton.styleFrom(
@@ -215,7 +245,7 @@ class _PendingCard extends StatelessWidget {
     );
   }
 
-  void _approve(BuildContext context) async {
+  static Future<void> approveLeave(BuildContext context, LeaveRequest leave) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -258,7 +288,7 @@ class _PendingCard extends StatelessWidget {
     }
   }
 
-  void _showRejectDialog(BuildContext context) async {
+  static Future<void> showRejectDialog(BuildContext context, LeaveRequest leave) async {
     final ctrl = TextEditingController();
     final reason = await showDialog<String>(
       context: context,

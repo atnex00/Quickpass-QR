@@ -378,6 +378,10 @@ class ApiService {
         data: {'password': password});
   }
 
+  Future<void> cancelLeave(String leaveId) async {
+    await _dio.post('/leave/$leaveId/cancel');
+  }
+
   Future<void> deleteLeave(String leaveId) async {
     await _dio.delete('/leave/$leaveId');
   }

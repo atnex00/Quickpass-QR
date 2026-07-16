@@ -1,7 +1,13 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
+const qrImageService = require('../services/qrImageService');
 const { createError } = require('../middleware/errorHandler');
+
+function fmtDate(d) {
+  if (d instanceof Date) return d.toISOString().split('T')[0];
+  return String(d).split('T')[0];
+}
 
 async function submitLeave(req, res, next) {
   try {
@@ -199,6 +205,72 @@ async function getLeaveById(req, res, next) {
   }
 }
 
+async function cancelLeave(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const leave = await db('leave_requests')
+      .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
+      .where('leave_requests.leave_id', id)
+      .select('leave_requests.*', 'emp.full_name as employee_name')
+      .first();
+
+    if (!leave) {
+      throw createError(404, 'Leave request not found');
+    }
+
+    if (leave.employee_id !== req.user.employee_id && !req.user.is_admin) {
+      throw createError(403, 'You can only cancel your own leave requests');
+    }
+
+    if (!['pending', 'approved'].includes(leave.status)) {
+      throw createError(400, 'Only pending or approved leaves can be cancelled');
+    }
+
+    const updateData = {
+      status: 'cancelled',
+      updated_at: db.fn.now(),
+    };
+
+    if (leave.status === 'approved') {
+      qrImageService.deleteQrImages(id);
+      updateData.out_qr_code = null;
+      updateData.in_qr_code = null;
+      updateData.out_qr_image = null;
+      updateData.in_qr_image = null;
+    }
+
+    await db('leave_requests').where({ leave_id: id }).update(updateData);
+
+    try {
+      await notificationService.sendToEmployee(leave.supervisor_id, {
+        title: 'Leave Cancelled',
+        body: `${leave.employee_name} cancelled their leave for ${fmtDate(leave.leave_date)}`,
+        data: { leave_id: id, type: 'cancelled' },
+      });
+    } catch (notifErr) {
+      console.error('Notification error (cancel):', notifErr.message);
+    }
+
+    const updated = await db('leave_requests')
+      .where({ leave_id: id })
+      .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
+      .leftJoin('employees as sup', 'leave_requests.supervisor_id', 'sup.employee_id')
+      .select(
+        'leave_requests.*',
+        'emp.full_name as employee_name',
+        'emp.position as employee_position',
+        'emp.profile_photo as employee_photo',
+        'sup.full_name as supervisor_name'
+      )
+      .first();
+
+    res.json({ success: true, data: updated, message: 'Leave cancelled' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function deleteLeave(req, res, next) {
   try {
     const { id } = req.params;
@@ -221,4 +293,4 @@ async function deleteLeave(req, res, next) {
   }
 }
 
-module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, deleteLeave };
+module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, cancelLeave, deleteLeave };

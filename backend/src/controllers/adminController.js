@@ -76,7 +76,8 @@ async function listEmployees(req, res, next) {
       query = query.andWhere(function () {
         this.where('employees.full_name', 'ilike', `%${search}%`)
           .orWhere('employees.employee_id', 'ilike', `%${search}%`)
-          .orWhere('employees.email', 'ilike', `%${search}%`);
+          .orWhere('employees.email', 'ilike', `%${search}%`)
+          .orWhere('departments.department_name', 'ilike', `%${search}%`);
       });
     }
 

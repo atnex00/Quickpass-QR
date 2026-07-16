@@ -137,6 +137,51 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                                     ));
                               }
                             },
+                            onCancel: () async {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Cancel Leave'),
+                                  content: Text(
+                                      'Cancel leave request #${leave.leaveId}?'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: const Text('No')),
+                                    FilledButton(
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, true),
+                                      style: FilledButton.styleFrom(
+                                          backgroundColor: context.warning),
+                                      child: const Text('Yes, Cancel'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true && context.mounted) {
+                                try {
+                                  await context
+                                      .read<LeaveProvider>()
+                                      .cancelLeave(leave.leaveId);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text('Leave cancelled')),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text('$e')),
+                                    );
+                                  }
+                                }
+                              }
+                            },
                             onDelete: () async {
                               final confirmed = await showDialog<bool>(
                                 context: context,
@@ -348,11 +393,13 @@ class _HistoryCard extends StatelessWidget {
       {required this.leave,
       required this.onTap,
       this.isAdmin = false,
-      this.onDelete});
+      this.onDelete,
+      this.onCancel});
   final LeaveRequest leave;
   final VoidCallback onTap;
   final bool isAdmin;
   final VoidCallback? onDelete;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -479,6 +526,21 @@ class _HistoryCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
+                      if (leave.status == LeaveStatus.pending ||
+                          leave.status == LeaveStatus.approved)
+                        GestureDetector(
+                          onTap: onCancel,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: context.warning.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Icon(Icons.close,
+                                size: 20, color: context.warning),
+                          ),
+                        ),
+                      const SizedBox(width: 4),
                       if (isAdmin)
                         GestureDetector(
                           onTap: onDelete,
