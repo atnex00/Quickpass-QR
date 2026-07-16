@@ -7,6 +7,7 @@ import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
+import '../../widgets/offline_indicator.dart';
 import 'qr_display_screen.dart';
 import 'request_leave_screen.dart';
 
@@ -93,6 +94,13 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
               ),
 
               // ── Content ──
+              if (leaveProv.fromCache)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: OfflineIndicator(),
+                  ),
+                ),
               if (leaveProv.isLoading)
                 const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()))

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../models/employee.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../utils/errors.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -41,10 +42,17 @@ class AuthProvider extends ChangeNotifier {
         final user = await _api.getProfile();
         _user = user;
         _isAuthenticated = true;
+        CacheService().saveProfile(user.toJson());
       }
     } catch (e) {
       debugPrint('Auth initialization failed: $e');
-      await _api.clearLocalAuth();
+      final cached = await CacheService().loadProfile();
+      if (cached != null) {
+        _user = Employee.fromJson(cached);
+        _isAuthenticated = true;
+      } else {
+        await _api.clearLocalAuth();
+      }
     }
 
     _isLoading = false;

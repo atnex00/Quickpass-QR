@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/leave_request.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../utils/errors.dart';
 
 class LeaveProvider extends ChangeNotifier {
@@ -13,6 +14,7 @@ class LeaveProvider extends ChangeNotifier {
   List<LeaveRequest> _history = [];
   LeaveRequest? _activeLeave;
   bool _isLoading = false;
+  bool _fromCache = false;
   String? _error;
   int _pendingCount = 0;
   int _approvedCount = 0;
@@ -21,6 +23,7 @@ class LeaveProvider extends ChangeNotifier {
   List<LeaveRequest> get history => _history;
   LeaveRequest? get activeLeave => _activeLeave;
   bool get isLoading => _isLoading;
+  bool get fromCache => _fromCache;
   String? get error => _error;
   int get pendingCount => _pendingCount;
   int get approvedCount => _approvedCount;
@@ -51,8 +54,17 @@ class LeaveProvider extends ChangeNotifier {
       final list = data['data'] as List? ?? [];
       _history = list.map((j) => LeaveRequest.fromJson(j)).toList();
       _recomputeCounts();
+      _fromCache = false;
+      CacheService().saveLeaves(_history);
     } catch (e) {
       _error = friendlyError(e);
+      final cached = await CacheService().loadLeaves();
+      if (cached != null && cached.isNotEmpty) {
+        _history = cached;
+        _recomputeCounts();
+        _fromCache = true;
+        _error = null;
+      }
     }
 
     _isLoading = false;
@@ -66,8 +78,16 @@ class LeaveProvider extends ChangeNotifier {
     try {
       _activeLeave = await _api.getActiveLeave();
       _error = null;
+      _fromCache = false;
+      CacheService().saveActiveLeave(_activeLeave);
     } catch (e) {
       _error = friendlyError(e);
+      final cached = await CacheService().loadActiveLeave();
+      if (cached != null) {
+        _activeLeave = cached;
+        _fromCache = true;
+        _error = null;
+      }
     }
 
     _isLoading = false;
@@ -94,6 +114,8 @@ class LeaveProvider extends ChangeNotifier {
       _history = [leave, ..._history];
       _recomputeCounts();
       _isLoading = false;
+      _fromCache = false;
+      CacheService().saveLeaves(_history);
       notifyListeners();
       AnalyticsService().logLeaveSubmitted();
       return leave;
@@ -110,6 +132,8 @@ class LeaveProvider extends ChangeNotifier {
     _history.removeWhere((l) => l.leaveId == leaveId);
     if (_activeLeave?.leaveId == leaveId) _activeLeave = null;
     _recomputeCounts();
+    CacheService().saveLeaves(_history);
+    CacheService().saveActiveLeave(_activeLeave);
     notifyListeners();
   }
 
@@ -117,6 +141,7 @@ class LeaveProvider extends ChangeNotifier {
     await _api.deleteLeave(leaveId);
     _history.removeWhere((l) => l.leaveId == leaveId);
     _recomputeCounts();
+    CacheService().saveLeaves(_history);
     notifyListeners();
   }
 

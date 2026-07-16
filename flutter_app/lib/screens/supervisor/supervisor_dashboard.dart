@@ -8,6 +8,7 @@ import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
+import '../../widgets/offline_indicator.dart';
 import '../../widgets/status_badge.dart';
 import '../employee/dashboard_screen.dart';
 import '../employee/request_leave_screen.dart';
@@ -154,6 +155,10 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _WelcomeSection(userName: userName),
+                    if (supProv.fromCache)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: OfflineIndicator()),
                     const SizedBox(height: 16),
                     _PendingApprovalsHero(
                       pendingCount: supProv.pendingCount,

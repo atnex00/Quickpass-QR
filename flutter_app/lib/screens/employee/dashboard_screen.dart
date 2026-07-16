@@ -9,6 +9,7 @@ import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
+import '../../widgets/offline_indicator.dart';
 import '../shared/settings_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
@@ -118,6 +119,10 @@ class _DashboardTabState extends State<_DashboardTab> {
                           completedCount: leaveProv.completedCount,
                         ),
                         const SizedBox(height: 24),
+                        if (leaveProv.fromCache)
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: OfflineIndicator()),
                         _RecentActivitySection(
                           isLoading: leaveProv.isLoading,
                           history: leaveProv.history,

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/leave_request.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
 import '../utils/errors.dart';
 
 class SupervisorProvider extends ChangeNotifier {
@@ -13,11 +14,13 @@ class SupervisorProvider extends ChangeNotifier {
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];
   int _loadingCount = 0;
+  bool _fromCache = false;
   String? _error;
 
   List<LeaveRequest> get pendingRequests => _pendingRequests;
   List<LeaveRequest> get approvedLeaves => _approvedLeaves;
   bool get isLoading => _loadingCount > 0;
+  bool get fromCache => _fromCache;
   String? get error => _error;
   int get pendingCount => _pendingRequests.length;
 
@@ -28,8 +31,16 @@ class SupervisorProvider extends ChangeNotifier {
     try {
       _pendingRequests = await _api.getPendingRequests();
       _error = null;
+      _fromCache = false;
+      CacheService().savePendingRequests(_pendingRequests);
     } catch (e) {
       _error = friendlyError(e);
+      final cached = await CacheService().loadPendingRequests();
+      if (cached != null && cached.isNotEmpty) {
+        _pendingRequests = cached;
+        _fromCache = true;
+        _error = null;
+      }
     } finally {
       _loadingCount--;
       notifyListeners();
@@ -58,8 +69,16 @@ class SupervisorProvider extends ChangeNotifier {
     try {
       _approvedLeaves = await _api.getApprovedLeaves();
       _error = null;
+      _fromCache = false;
+      CacheService().saveApprovedLeaves(_approvedLeaves);
     } catch (e) {
       _error = friendlyError(e);
+      final cached = await CacheService().loadApprovedLeaves();
+      if (cached != null && cached.isNotEmpty) {
+        _approvedLeaves = cached;
+        _fromCache = true;
+        _error = null;
+      }
     } finally {
       _loadingCount--;
       notifyListeners();
