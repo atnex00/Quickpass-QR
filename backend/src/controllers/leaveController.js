@@ -36,13 +36,12 @@ async function submitLeave(req, res, next) {
       throw createError(409, 'You already have a leave request for this time period');
     }
 
-    let supervisor = await db('employees')
-      .where({ department_id: req.user.department_id, is_supervisor: true, is_active: true })
-      .first();
+    const supervisors = await db('employees')
+      .where({ department_id: req.user.department_id, is_supervisor: true, is_active: true });
 
-    if (!supervisor) {
+    if (supervisors.length === 0) {
       if (req.user.is_admin) {
-        supervisor = req.user;
+        supervisors.push(req.user);
       } else {
         throw createError(500, 'No supervisor found for your department');
       }
@@ -54,7 +53,7 @@ async function submitLeave(req, res, next) {
       leave_id: leaveId,
       employee_id: req.user.employee_id,
       department_id: req.user.department_id,
-      supervisor_id: supervisor.employee_id,
+      supervisor_id: supervisors[0].employee_id,
       leave_date,
       start_time,
       end_time,
@@ -64,15 +63,28 @@ async function submitLeave(req, res, next) {
       updated_at: db.fn.now(),
     });
 
-    try {
-      await notificationService.sendToEmployee(supervisor.employee_id, {
-        title: 'New Leave Request',
-        body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
-        data: { leave_id: leaveId, type: 'new_request' },
-      });
-    } catch (notifErr) {
-      console.error('Notification error (submit):', notifErr.message);
-    }
+    await Promise.allSettled(
+      supervisors.map((sup) =>
+        notificationService.sendToEmployee(sup.employee_id, {
+          title: 'New Leave Request',
+          body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
+          data: { leave_id: leaveId, type: 'new_request' },
+        }).catch((err) => console.error('Notification error (submit):', err.message))
+      )
+    );
+
+    const admins = await db('employees')
+      .where({ is_admin: true, is_active: true })
+      .whereNot('employee_id', req.user.employee_id);
+    await Promise.allSettled(
+      admins.map((a) =>
+        notificationService.sendToEmployee(a.employee_id, {
+          title: 'New Leave Request',
+          body: `${req.user.full_name} (${req.user.department_name}) requested leave`,
+          data: { leave_id: leaveId, type: 'new_request' },
+        }).catch(() => {})
+      )
+    );
 
     const leave = await db('leave_requests')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')

@@ -265,6 +265,16 @@ async function revokeApproval(req, res, next) {
       .where({ leave_id: leaveId })
       .update(updateData);
 
+    try {
+      await notificationService.sendToEmployee(leave.employee_id, {
+        title: 'Approval Revoked',
+        body: `Your leave for ${fmtDate(leave.leave_date)} approval has been revoked`,
+        data: { leave_id: leaveId, type: 'revoked' },
+      });
+    } catch (notifErr) {
+      console.error('Notification error (revoke):', notifErr.message);
+    }
+
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
       .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
