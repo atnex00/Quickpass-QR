@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -176,6 +177,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
         ],
         child: Consumer2<AuthProvider, SettingsProvider>(
           builder: (context, auth, settings, _) {
+            final analytics = FirebaseAnalytics.instance;
             return MaterialApp(
               navigatorKey: _navigatorKey,
               title: AppConfig.appName,
@@ -183,6 +185,9 @@ class _QuickpassAppState extends State<QuickpassApp> {
               theme: QuickpassTheme.light,
               darkTheme: QuickpassTheme.dark,
               themeMode: settings.themeMode,
+              navigatorObservers: [
+                FirebaseAnalyticsObserver(analytics: analytics),
+              ],
               home: _buildHome(auth),
             );
           },

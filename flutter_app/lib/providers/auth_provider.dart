@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
+
 import '../models/employee.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -64,6 +66,8 @@ class AuthProvider extends ChangeNotifier {
       _loginLoading = false;
       notifyListeners();
       onLoggedIn?.call();
+      final role = isAdmin ? 'admin' : isSupervisor ? 'supervisor' : isSecurity ? 'security' : 'employee';
+      AnalyticsService().logLogin(role: role);
       return true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -88,6 +92,7 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     notifyListeners();
+    AnalyticsService().logLogout();
     onLoggedOut?.call();
   }
 

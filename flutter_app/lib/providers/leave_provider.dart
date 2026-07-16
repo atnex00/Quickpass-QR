@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/leave_request.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 
 class LeaveProvider extends ChangeNotifier {
@@ -92,6 +94,7 @@ class LeaveProvider extends ChangeNotifier {
       _recomputeCounts();
       _isLoading = false;
       notifyListeners();
+      AnalyticsService().logLeaveSubmitted();
       return leave;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');

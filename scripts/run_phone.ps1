@@ -109,7 +109,7 @@ try {
     Push-Location (Join-Path $ProjectDir "flutter_app")
     Write-Info "Starting Flutter on $Device..."
     Write-Host ""
-    & $Flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
+    & $Flutter run --dart-define-from-file=env.dev.json
 } finally {
     Pop-Location
     Write-Info "Cleaning up ADB reverse tunnel..."
