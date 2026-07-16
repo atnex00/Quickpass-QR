@@ -17,16 +17,20 @@ function initFirebase() {
   }
 
   try {
+    const privateKey = process.env.FCM_PRIVATE_KEY.startsWith('"')
+      ? JSON.parse(process.env.FCM_PRIVATE_KEY)
+      : process.env.FCM_PRIVATE_KEY.replace(/\\n/g, '\n');
+
     firebaseApp = admin.initializeApp({
-      credential: admin.credential.cert({
-        type: process.env.FCM_TYPE,
+      credential: admin.cert({
+        type: process.env.FCM_TYPE || 'service_account',
         project_id: process.env.FCM_PROJECT_ID,
         private_key_id: process.env.FCM_PRIVATE_KEY_ID,
-        private_key: process.env.FCM_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        private_key: privateKey,
         client_email: process.env.FCM_CLIENT_EMAIL,
         client_id: process.env.FCM_CLIENT_ID,
-        auth_uri: process.env.FCM_AUTH_URI,
-        token_uri: process.env.FCM_TOKEN_URI,
+        auth_uri: process.env.FCM_AUTH_URI || 'https://accounts.google.com/o/oauth2/auth',
+        token_uri: process.env.FCM_TOKEN_URI || 'https://oauth2.googleapis.com/token',
       }),
     });
     console.log('Firebase initialized');
