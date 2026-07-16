@@ -481,21 +481,6 @@ class QuickActionsSection extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AdminQuickActionCard(
-                icon: Icons.settings,
-                title: 'Settings',
-                subtitle: 'Configuration',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        content: Text('Settings coming soon')),
-                  );
-                },
-              ),
-            ),
           ],
         ),
       ],
