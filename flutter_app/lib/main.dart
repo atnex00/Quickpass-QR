@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -76,6 +79,15 @@ class _QuickpassAppState extends State<QuickpassApp> {
       navigatorKey: _navigatorKey,
       apiService: widget.apiService,
     );
+
+    FlutterError.onError = (details) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
     widget.auth.addListener(_checkPendingNotification);
     _checkPendingNotification();
   }
