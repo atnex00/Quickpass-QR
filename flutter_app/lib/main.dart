@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,11 +26,19 @@ import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+
+  FlutterError.onError = (details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   final apiService = ApiService();
   apiService.init();
-
-  // Firebase init happens inside NotificationService.init()
-  // called from _QuickpassAppState._initNotifications()
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -80,14 +89,6 @@ class _QuickpassAppState extends State<QuickpassApp> {
       navigatorKey: _navigatorKey,
       apiService: widget.apiService,
     );
-
-    FlutterError.onError = (details) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-    };
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
 
     widget.auth.addListener(_checkPendingNotification);
     _checkPendingNotification();
