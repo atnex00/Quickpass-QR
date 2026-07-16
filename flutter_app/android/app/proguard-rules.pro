@@ -11,7 +11,7 @@
 -keep class com.google.android.gms.** { *; }
 
 # JSON serialization (Dart → Java bridge)
--keep class _InternalLinkedHashMap<*, *> { *; }
+-keep class _InternalLinkedHashMap { *; }
 -keep class com.fasterxml.jackson.** { *; }
 
 # Network
@@ -21,3 +21,7 @@
 
 # Keep enum classes
 -keepclassmembers enum * { *; }
+
+# Play Core (referenced by Flutter but not required for single APK)
+-dontwarn com.google.android.play.core.**
+
