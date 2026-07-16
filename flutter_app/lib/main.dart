@@ -11,6 +11,7 @@ import 'config/app_config.dart';
 import 'config/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/leave_provider.dart';
+import 'providers/notification_provider.dart';
 import 'providers/scan_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/supervisor_provider.dart';
@@ -48,12 +49,16 @@ void main() async {
   final settings = SettingsProvider();
   await settings.load();
 
+  final notifProv = NotificationProvider();
+  await notifProv.load();
+
   final auth = AuthProvider(api: apiService);
 
   runApp(QuickpassApp(
     apiService: apiService,
     settings: settings,
     auth: auth,
+    notifProv: notifProv,
   ));
 }
 
@@ -63,10 +68,12 @@ class QuickpassApp extends StatefulWidget {
     required this.apiService,
     required this.settings,
     required this.auth,
+    required this.notifProv,
   });
   final ApiService apiService;
   final SettingsProvider settings;
   final AuthProvider auth;
+  final NotificationProvider notifProv;
 
   @override
   State<QuickpassApp> createState() => _QuickpassAppState();
@@ -172,6 +179,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
         providers: [
           ChangeNotifierProvider.value(value: widget.settings),
           ChangeNotifierProvider.value(value: widget.auth),
+          ChangeNotifierProvider.value(value: widget.notifProv),
           ChangeNotifierProvider(create: (_) => LeaveProvider(api: api)),
           ChangeNotifierProvider(create: (_) => SupervisorProvider(api: api)),
           ChangeNotifierProvider(create: (_) => ScanProvider(api: api)),

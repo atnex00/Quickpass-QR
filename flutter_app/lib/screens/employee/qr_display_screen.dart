@@ -6,6 +6,7 @@ import '../../models/leave_request.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/qr_countdown.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/notification_bell.dart';
 
 class QrDisplayScreen extends StatelessWidget {
 
@@ -55,18 +56,7 @@ class QrDisplayScreen extends StatelessWidget {
                                 ),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.notifications_outlined,
-                                    color: context.onPrimary),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      behavior: SnackBarBehavior.floating,
-                                      content: Text('No new notifications'),
-                                    ),
-                                  );
-                                },
-                              ),
+                              const NotificationBell(),
                             ],
                           ),
                         ],

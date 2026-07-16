@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../providers/notification_provider.dart';
 import '../screens/employee/dashboard_screen.dart';
 import '../screens/employee/leave_history_screen.dart';
 import '../screens/supervisor/supervisor_dashboard.dart';
@@ -62,6 +63,7 @@ class NotificationService {
   }
 
   void _onForegroundMessage(RemoteMessage message) {
+    NotificationProvider().increment();
     final title = message.notification?.title ?? '';
     final body = message.notification?.body ?? '';
     if (title.isEmpty && body.isEmpty) return;

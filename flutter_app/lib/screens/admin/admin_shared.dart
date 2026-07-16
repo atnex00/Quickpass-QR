@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../config/theme.dart';
+import '../../widgets/notification_bell.dart';
 import '../shared/settings_screen.dart';
 
 Widget buildAdminAppBar(BuildContext context, String tabKey) {
@@ -37,17 +38,7 @@ Widget buildAdminAppBar(BuildContext context, String tabKey) {
                     ),
                   ),
                   const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.notifications_outlined,
-                        color: context.onPrimary),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text('No new notifications')),
-                      );
-                    },
-                  ),
+                  const NotificationBell(),
                   IconButton(
                     icon: Icon(Icons.settings, color: context.onPrimary),
                     onPressed: () {

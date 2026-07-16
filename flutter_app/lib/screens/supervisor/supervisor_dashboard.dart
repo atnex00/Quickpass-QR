@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/notification_bell.dart';
 import '../../widgets/status_badge.dart';
 import '../employee/dashboard_screen.dart';
 import '../employee/request_leave_screen.dart';
@@ -240,15 +241,7 @@ class _SupervisorAppBar extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              IconButton(
-                icon: Icon(Icons.notifications_outlined,
-                    color: context.onPrimary),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No new notifications')),
-                  );
-                },
-              ),
+              const NotificationBell(),
               GestureDetector(
                 onTap: onProfileTap,
                 child: CircleAvatar(

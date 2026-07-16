@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/notification_bell.dart';
 import '../shared/settings_screen.dart';
 import 'leave_history_screen.dart';
 import 'qr_display_screen.dart';
@@ -192,18 +193,7 @@ class _DashboardAppBar extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.notifications_outlined,
-                        color: context.onPrimary),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          content: Text('No new notifications'),
-                        ),
-                      );
-                    },
-                  ),
+                  const NotificationBell(),
                 ],
               ),
             ],
