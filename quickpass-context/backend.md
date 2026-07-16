@@ -62,7 +62,7 @@ Startup sequence:
 | POST | `/supervisor/reject/:leaveId` | Reject with reason |
 | GET | `/supervisor/approved` | Approved leaves |
 | POST | `/supervisor/revoke/:leaveId` | Revoke → back to pending |
-| GET | `/supervisor/team-leaves` | Team leaves with date filter |
+| GET | `/supervisor/team-leaves` | Team leaves with date or range (`start_date`/`end_date`) filter |
 
 ### Security/Scan
 | Method | Path | Description |
@@ -86,6 +86,14 @@ Startup sequence:
 | PUT | `/admin/departments/:id` | Update department |
 | DELETE | `/admin/departments/:id` | Delete (fails if employees exist) |
 | GET | `/admin/reports` | Reports (daily/department/summary) |
+
+### Notes
+- `GET /supervisor/team-leaves` accepts optional `date` (single day) or `start_date` + `end_date` (range) — calendar view uses range
+- Also returns `pending` leaves for calendar visibility (shows upcoming approved + pending together)
+
+## Firebase Admin SDK
+- v14+ — `admin.cert()` is top-level (not `admin.credential.cert()`)
+- Graceful degradation: if FCM env vars missing, push notifications disabled (no crash)
 
 ## QR Code System
 

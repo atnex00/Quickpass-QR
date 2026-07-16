@@ -41,8 +41,8 @@ Force logout/logged in callbacks use `_navigatorKey` (GlobalKey) with `pushAndRe
 - Methods: `loadHistory`, `loadActiveLeave`, `submitLeave`, `deleteLeave`, `refresh`
 
 ### SupervisorProvider
-- State: `pendingRequests`, `approvedLeaves`, `isLoading`, `error`, `pendingCount`
-- Methods: `loadPendingRequests`, `loadApprovedLeaves`, `approveLeave`, `rejectLeave`, `revokeApproval`
+- State: `pendingRequests`, `approvedLeaves`, `teamLeaves`, `isLoading`, `error`, `pendingCount`
+- Methods: `loadPendingRequests`, `loadApprovedLeaves`, `loadTeamLeaves`, `approveLeave`, `rejectLeave`, `revokeApproval`
 
 ### ScanProvider
 - State: `lastResult`, `isScanning`, `isLoading`, `error`
@@ -62,6 +62,7 @@ Force logout/logged in callbacks use `_navigatorKey` (GlobalKey) with `pushAndRe
 ## Navigation
 - **No named routes** — all imperative `Navigator.push` / `pushReplacement` / `pushAndRemoveUntil`
 - **Tab navigation**: `IndexedStack` + `NavigationBar` (employee 3 tabs, supervisor 3 tabs, admin 5 tabs)
+- **Team Calendar**: Push-navigated from supervisor overview quick action card
 - **AdminPanel**: `AdaptiveScaffold` (NavigationRail tablet, NavigationBar phone)
 - **Security**: popup menu, no bottom nav
 
@@ -80,7 +81,7 @@ Force logout/logged in callbacks use `_navigatorKey` (GlobalKey) with `pushAndRe
 |---|---|
 | Auth (2) | SplashScreen, LoginScreen |
 | Employee (5) | DashboardScreen, RequestLeaveScreen, LeaveHistoryScreen, QrDisplayScreen, ProfileScreen |
-| Supervisor (2) | SupervisorDashboard, PendingRequestsScreen |
+| Supervisor (3) | SupervisorDashboard, PendingRequestsScreen, TeamCalendarScreen |
 | Security (3) | ScannerScreen, ScanResultScreen, ScanHistoryScreen |
 | Admin (8) | AdminPanel, OverviewTab, EmployeeTab, DepartmentTab, ReportsTab, LeaveTab, EmployeeDetailScreen, admin_shared helpers |
 | Shared (1) | SettingsScreen |
@@ -111,3 +112,4 @@ Force logout/logged in callbacks use `_navigatorKey` (GlobalKey) with `pushAndRe
 | image_picker ^1.1.2 | Photo selection |
 | image_cropper ^8.0.2 | Photo cropping |
 | permission_handler ^11.3.1 | Camera permissions |
+| table_calendar ^3.1.2 | Month calendar widget (team calendar view) |
