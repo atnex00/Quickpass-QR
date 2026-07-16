@@ -304,9 +304,15 @@ class ApiService {
     return LeaveRequest.fromJson(d);
   }
 
-  Future<List<LeaveRequest>> getTeamLeaves({String? date}) async {
+  Future<List<LeaveRequest>> getTeamLeaves({
+    String? date,
+    String? startDate,
+    String? endDate,
+  }) async {
     final params = <String, dynamic>{};
     if (date != null) params['date'] = date;
+    if (startDate != null) params['start_date'] = startDate;
+    if (endDate != null) params['end_date'] = endDate;
     final res =
         await _dio.get('/supervisor/team-leaves', queryParameters: params);
     final list = res.data['data'];

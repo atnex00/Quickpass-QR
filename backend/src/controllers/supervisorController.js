@@ -296,11 +296,11 @@ async function revokeApproval(req, res, next) {
 
 async function getTeamLeaves(req, res, next) {
   try {
-    const { date } = req.query;
+    const { date, start_date, end_date } = req.query;
 
     let query = db('leave_requests')
       .where('leave_requests.department_id', req.user.department_id)
-      .whereIn('leave_requests.status', ['approved', 'active'])
+      .whereIn('leave_requests.status', ['approved', 'active', 'pending'])
       .join('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
       .select(
         'leave_requests.*',
@@ -310,6 +310,8 @@ async function getTeamLeaves(req, res, next) {
 
     if (date) {
       query = query.andWhere('leave_requests.leave_date', date);
+    } else if (start_date && end_date) {
+      query = query.whereBetween('leave_requests.leave_date', [start_date, end_date]);
     }
 
     const leaves = await query.orderBy('leave_requests.leave_date', 'asc');

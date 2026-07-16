@@ -13,12 +13,14 @@ class SupervisorProvider extends ChangeNotifier {
 
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];
+  List<LeaveRequest> _teamLeaves = [];
   int _loadingCount = 0;
   bool _fromCache = false;
   String? _error;
 
   List<LeaveRequest> get pendingRequests => _pendingRequests;
   List<LeaveRequest> get approvedLeaves => _approvedLeaves;
+  List<LeaveRequest> get teamLeaves => _teamLeaves;
   bool get isLoading => _loadingCount > 0;
   bool get fromCache => _fromCache;
   String? get error => _error;
@@ -111,6 +113,29 @@ class SupervisorProvider extends ChangeNotifier {
       _error = friendlyError(e);
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<void> loadTeamLeaves({
+    String? date,
+    String? startDate,
+    String? endDate,
+  }) async {
+    _loadingCount++;
+    notifyListeners();
+
+    try {
+      _teamLeaves = await _api.getTeamLeaves(
+        date: date,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      _error = null;
+    } catch (e) {
+      _error = friendlyError(e);
+    } finally {
+      _loadingCount--;
+      notifyListeners();
     }
   }
 

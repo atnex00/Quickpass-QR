@@ -81,6 +81,8 @@ router.post('/supervisor/reject/:leaveId', authenticate, requireSupervisor, vali
 })), supervisorController.rejectLeave);
 router.get('/supervisor/team-leaves', authenticate, requireSupervisor, validateQuery(Joi.object({
   date: Joi.string().isoDate().optional(),
+  start_date: Joi.string().isoDate().optional(),
+  end_date: Joi.string().isoDate().optional(),
 })), supervisorController.getTeamLeaves);
 
 // ── Scan Routes ──
