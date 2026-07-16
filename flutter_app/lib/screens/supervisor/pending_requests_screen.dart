@@ -68,6 +68,29 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                                   fontWeight: FontWeight.w600,
                                   color: context.onSurface)),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: context.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: context.primary.withValues(alpha: 0.2)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.swipe, size: 16, color: context.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Swipe right to approve \u2022 Swipe left to reject',
+                                    style: TextStyle(fontSize: 12, color: context.primary),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         ...supProv.pendingRequests.map((leave) =>
                             Dismissible(
                               key: ValueKey('pending_${leave.leaveId}'),
