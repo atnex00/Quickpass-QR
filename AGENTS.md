@@ -45,6 +45,12 @@ No local PostgreSQL needed — `docker-compose.yml` provides only the backend se
 | flutter_app | `flutter run` | Run on connected device |
 | flutter_app | `flutter analyze` | Static analysis |
 | flutter_app | `flutter build apk` / `appbundle` / `ios` | Production builds |
+| admin-desktop | `npm run dev` | Tauri dev (loads web on localhost:8080) |
+| admin-desktop | `npm run build` | Tauri build → `.msi` installer |
+| root | `npm run desktop:dev` | Shortcut for `cd admin-desktop && npm run dev` |
+| root | `npm run desktop:build` | Shortcut for `cd admin-desktop && npm run build` |
+| root | `npm run setup:desktop` | Install Rust + MSVC tools + npm deps for desktop build |
+| root | `npm run remove:desktop` | Uninstall Rust + MSVC tools + clean build artifacts |
 
 Seeds need `bcryptjs`. Run from `backend/` (resolves to `backend/node_modules/bcryptjs`). Root also has `bcryptjs` as fallback.
 

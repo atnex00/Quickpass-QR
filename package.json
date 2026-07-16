@@ -10,7 +10,11 @@
     "dev:web": "cd web && npx vite --host 0.0.0.0",
     "build:web": "cd web && npx vite build",
     "migrate": "cd backend && npx knex migrate:latest",
-    "seed": "cd backend && npx knex seed:run"
+    "seed": "cd backend && npx knex seed:run",
+    "desktop:dev": "cd admin-desktop && npm run dev",
+    "desktop:build": "cd admin-desktop && npm run build",
+    "setup:desktop": "powershell -ExecutionPolicy Bypass -File scripts/setup-desktop.ps1",
+    "remove:desktop": "powershell -ExecutionPolicy Bypass -File scripts/remove-desktop.ps1"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3"

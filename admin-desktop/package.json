@@ -1,0 +1,14 @@
+{
+  "name": "quickpass-admin-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "powershell -NoProfile -Command { $env:VITE_API_URL='http://localhost:3000/api'; Set-Location ../web; npm run build; Set-Location ../admin-desktop; npx tauri build }"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

@@ -16,11 +16,13 @@ export function setOnAuthFailure(callback: (() => void) | null) {
   _onAuthFailure = callback
 }
 
+const _base = import.meta.env.VITE_API_URL || "/api"
+
 async function refreshAccessToken(): Promise<string | null> {
   if (_refreshPromise) return _refreshPromise
 
   _refreshPromise = axios
-    .post("/api/auth/refresh", {}, { withCredentials: true })
+    .post(`${_base}/auth/refresh`, {}, { withCredentials: true })
     .then((res) => res.data?.token || null)
     .catch(() => null)
     .finally(() => {
@@ -31,7 +33,7 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: _base,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 })

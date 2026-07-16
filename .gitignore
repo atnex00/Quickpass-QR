@@ -39,6 +39,12 @@ flutter_app/android/key.properties
 # Docker
 docker-data/
 
+# Tauri desktop admin
+admin-desktop/node_modules/
+admin-desktop/src-tauri/target/
+admin-desktop/src-tauri/icons/android/
+admin-desktop/src-tauri/icons/ios/
+
 # Backups
 *.zip
 
@@ -48,3 +54,5 @@ tools/
 # Logs
 *.log
 npm-debug.log*
+
+sessions.txt
