@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useLeaveStore } from "@/stores/leaveStore"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
 import {
@@ -15,7 +15,7 @@ import { toast } from "sonner"
 import { formatDate, formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
 import api from "@/lib/api"
-import { CheckCircle, XCircle, Loader2, Inbox, User, Undo2, Trash2 } from "lucide-react"
+import { CheckCircle, XCircle, Loader2, Inbox, Undo2, Trash2 } from "lucide-react"
 
 export default function PendingRequestsPage() {
   const {
@@ -81,7 +81,7 @@ export default function PendingRequestsPage() {
   return (
     <div className="page-enter space-y-4">
       <div>
-        <h1 className="text-2xl font-bold font-display">Pending Requests</h1>
+        <h1 className="text-2xl font-bold">Pending Requests</h1>
         <p className="text-sm text-muted-foreground">
           {pendingRequests.length} request{pendingRequests.length !== 1 ? "s" : ""} awaiting review
         </p>
@@ -89,25 +89,25 @@ export default function PendingRequestsPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : pendingRequests.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">
-            <Inbox className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center gap-4 py-16 text-center">
+          <div className="flex items-center justify-center w-12 h-12 rounded-lg border border-border bg-muted">
+            <Inbox className="h-5 w-5 text-muted-foreground" />
           </div>
           <div>
-            <h3>All caught up!</h3>
-            <p>No pending requests awaiting your review</p>
+            <p className="text-base font-semibold text-foreground">All caught up!</p>
+            <p className="text-sm text-muted-foreground">No pending requests awaiting your review</p>
           </div>
         </div>
       ) : (
         <div className="space-y-3">
           {pendingRequests.map((req) => (
-            <div key={req.leave_id} className="panel-card card-hover border-l-4 border-l-primary">
-              <div className="panel-card-body">
+            <Card key={req.leave_id} className="border-l-4 border-l-primary">
+              <CardContent>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
                     {req.employee_name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -123,75 +123,75 @@ export default function PendingRequestsPage() {
 
                     <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
                       <span>{formatDate(req.leave_date)}</span>
-                      <span className="text-border/50">|</span>
+                      <span className="text-border">|</span>
                       <span>{formatTime(req.start_time)} - {formatTime(req.end_time)}</span>
                     </div>
 
-                    <p className="mt-1.5 text-xs text-muted-foreground/70">{req.reason}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{req.reason}</p>
 
                     <div className="mt-3 flex gap-1.5">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1 h-7 text-[10px] border-destructive text-destructive hover:bg-destructive/10"
+                        className="gap-1 border-destructive text-destructive hover:bg-destructive/10"
                         disabled={actionLoading === req.leave_id}
                         onClick={() => setRejectId(req.leave_id)}
                       >
-                        <XCircle className="h-3 w-3" /> Reject
+                        <XCircle className="h-3.5 w-3.5" /> Reject
                       </Button>
                       <Button
                         size="sm"
-                        className="gap-1 h-7 text-[10px] bg-primary text-primary-foreground"
+                        className="gap-1"
                         disabled={actionLoading === req.leave_id}
                         onClick={() => handleApprove(req.leave_id)}
                       >
                         {actionLoading === req.leave_id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <CheckCircle className="h-3 w-3" />
+                          <CheckCircle className="h-3.5 w-3.5" />
                         )}
                         Approve
                       </Button>
                       {user?.is_admin && (
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="gap-1 h-7 text-[10px] border-destructive/40 text-destructive hover:bg-destructive/5"
+                          size="icon"
+                          className="h-8 w-8 border-destructive/40 text-destructive hover:bg-destructive/10"
                           disabled={actionLoading === req.leave_id}
                           onClick={() => handleDelete(req.leave_id)}
                           title="Delete (admin only)"
                         >
                           {actionLoading === req.leave_id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           )}
                         </Button>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
       {/* Approved / Revoke Section */}
       <div className="pt-2">
-        <h2 className="text-lg font-bold font-display">Approved Leaves</h2>
-        <p className="text-xs text-muted-foreground">Revoke approvals to move requests back to pending</p>
+        <h2 className="text-lg font-semibold">Approved Leaves</h2>
+        <p className="text-sm text-muted-foreground">Revoke approvals to move requests back to pending</p>
       </div>
 
       {approvedLeaves.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No approved leaves yet</p>
+        <p className="text-sm text-muted-foreground">No approved leaves yet</p>
       ) : (
         <div className="space-y-3">
           {approvedLeaves.map((req) => (
-            <div key={req.leave_id} className="panel-card border-l-4 border-l-success/60">
-              <div className="panel-card-body">
+            <Card key={req.leave_id} className="border-l-4 border-l-success/60">
+              <CardContent>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/20 text-xs font-bold text-success">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success/15 text-sm font-semibold text-success">
                     {req.employee_name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -207,24 +207,24 @@ export default function PendingRequestsPage() {
 
                     <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
                       <span>{formatDate(req.leave_date)}</span>
-                      <span className="text-border/50">|</span>
+                      <span className="text-border">|</span>
                       <span>{formatTime(req.start_time)} - {formatTime(req.end_time)}</span>
                     </div>
 
-                    <p className="mt-1.5 text-xs text-muted-foreground/70">{req.reason}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{req.reason}</p>
 
                     <div className="mt-3 flex gap-1.5">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1 h-7 text-[10px] border-primary/40 text-primary hover:bg-primary/10"
+                        className="gap-1 border-primary/40 text-primary hover:bg-primary/10"
                         disabled={actionLoading === req.leave_id}
                         onClick={() => handleRevoke(req.leave_id)}
                       >
                         {actionLoading === req.leave_id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <Undo2 className="h-3 w-3" />
+                          <Undo2 className="h-3.5 w-3.5" />
                         )}
                         Revoke Approval
                       </Button>
@@ -232,14 +232,14 @@ export default function PendingRequestsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 h-7 text-[10px] border-destructive/40 text-destructive hover:bg-destructive/10"
+                          className="gap-1 border-destructive/40 text-destructive hover:bg-destructive/10"
                           disabled={actionLoading === req.leave_id}
                           onClick={() => handleDelete(req.leave_id)}
                         >
                           {actionLoading === req.leave_id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           )}
                           Delete
                         </Button>
@@ -247,8 +247,8 @@ export default function PendingRequestsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -257,8 +257,8 @@ export default function PendingRequestsPage() {
       <Dialog open={!!rejectId} onOpenChange={(o) => { if (!o) setRejectId(null) }}>
         <DialogContent>
           <DialogHeader>
-              <DialogTitle>Reject Leave Request</DialogTitle>
-              <DialogDescription>Explain why this request is being declined</DialogDescription>
+            <DialogTitle>Reject Leave Request</DialogTitle>
+            <DialogDescription>Explain why this request is being declined</DialogDescription>
           </DialogHeader>
           <Textarea
             placeholder="Enter rejection reason..."

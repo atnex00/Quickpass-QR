@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/authStore"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { BookOpen, ChevronDown } from "lucide-react"
 import { useState } from "react"
 
@@ -72,8 +73,8 @@ const guides = [
         steps: [
           'Go to "Pending" in the sidebar under Management.',
           "Review the employee's name, date, time, and reason.",
-          'Click the green "Approve" button to generate QR codes and approve the leave.',
-          'Click the red "Reject" button to decline — you must provide a reason.',
+          'Click the "Approve" button to generate QR codes and approve the leave.',
+          'Click the "Reject" button to decline — you must provide a reason.',
           "Approved leaves appear in the Approved section below, where you can revoke if needed.",
           "Once approved, the employee can view their QR pass on their dashboard.",
         ],
@@ -128,16 +129,16 @@ const guides = [
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(true)
   return (
-    <div className="panel-card">
+    <Card>
       <button
         onClick={() => setOpen(!open)}
-        className="panel-card-header flex w-full items-center justify-between text-left cursor-pointer"
+        className="flex w-full items-center justify-between border-b border-border px-4 py-3 text-left"
       >
-        <h3>{title}</h3>
-        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/50 transition-transform ${open ? "" : "-rotate-90"}`} />
+        <h3 className="text-sm font-semibold">{title}</h3>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "" : "-rotate-90"}`} />
       </button>
-      {open && <div className="panel-card-body space-y-4">{children}</div>}
-    </div>
+      {open && <CardContent className="space-y-4 pt-4">{children}</CardContent>}
+    </Card>
   )
 }
 
@@ -147,8 +148,8 @@ function GuideItem({ title, steps }: { title: string; steps: string[] }) {
       <p className="text-sm font-semibold text-foreground mb-2">{title}</p>
       <ol className="space-y-1.5">
         {steps.map((step, i) => (
-          <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary mt-0.5">
+          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary mt-0.5">
               {i + 1}
             </span>
             {step}
@@ -165,12 +166,12 @@ export default function GuidesPage() {
   return (
     <div className="page-enter space-y-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded border border-border bg-muted">
-          <BookOpen className="h-4 w-4 text-muted-foreground" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-muted">
+          <BookOpen className="h-5 w-5 text-muted-foreground" />
         </div>
         <div>
-          <h1 className="text-xl font-bold font-display">User Guide</h1>
-          <p className="text-xs text-muted-foreground">How to use ZANECO QuickPass</p>
+          <h1 className="text-2xl font-bold">User Guide</h1>
+          <p className="text-sm text-muted-foreground">How to use ZANECO QuickPass</p>
         </div>
       </div>
 

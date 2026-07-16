@@ -17,7 +17,7 @@ import {
 } from "recharts"
 import { format } from "date-fns"
 
-const COLORS = ["#f59e0b", "#0d9488", "#dc2626", "#fbbf24", "#a8a29e"]
+const COLORS = ["#b45309", "#0d9488", "#dc2626", "#fbbf24", "#78716c"]
 
 export default function ReportsPage() {
   const [deptData, setDeptData] = useState<any[]>([])
@@ -68,11 +68,11 @@ export default function ReportsPage() {
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#44403c" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="Pending" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Pending" fill="#b45309" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Approved" fill="#0d9488" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Rejected" fill="#dc2626" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Completed" fill="#fbbf24" radius={[4, 4, 0, 0]} />
@@ -131,10 +131,10 @@ export default function ReportsPage() {
                   <tr key={d.department_id} className="border-b last:border-0">
                     <td className="py-3 font-medium">{d.department_name}</td>
                     <td className="py-3">{d.total_requests}</td>
-                    <td className="py-3 text-[#f59e0b]">{d.pending || 0}</td>
-                    <td className="py-3 text-[#0d9488]">{d.approved || 0}</td>
+                    <td className="py-3 text-primary">{d.pending || 0}</td>
+                    <td className="py-3 text-success">{d.approved || 0}</td>
                     <td className="py-3 text-destructive">{d.rejected || 0}</td>
-                    <td className="py-3 text-[#fbbf24]">{d.completed || 0}</td>
+                    <td className="py-3 text-gold">{d.completed || 0}</td>
                   </tr>
                 ))}
               </tbody>

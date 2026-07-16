@@ -90,14 +90,14 @@ export default function DepartmentsPage() {
             <h3>No departments</h3>
             <p>Create your first department to organize your organization</p>
           </div>
-          <Button className="btn-primary" onClick={() => setAddOpen(true)}>
+            <Button className="gap-2" onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" /> Add Department
           </Button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {departments.map((dept) => (
-            <Card key={dept.department_id} className="card-hover relative group">
+            <Card key={dept.department_id} className="relative group transition-colors hover:border-border">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="rounded-lg bg-primary/10 p-3">

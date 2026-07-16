@@ -106,31 +106,31 @@ export default function MyProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-lg border bg-muted/50 p-4 text-sm">
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Employee ID</span>
+              <span className="text-xs font-medium text-muted-foreground">Employee ID</span>
               <p className="mt-0.5 font-medium">{user?.employee_id}</p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Role</span>
+              <span className="text-xs font-medium text-muted-foreground">Role</span>
               <p className="mt-0.5 font-medium">{role}</p>
             </div>
             <div className="col-span-2">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Full Name</span>
+              <span className="text-xs font-medium text-muted-foreground">Full Name</span>
               <p className="mt-0.5 font-medium">{user?.full_name}</p>
             </div>
             <div className="col-span-2">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Email</span>
+              <span className="text-xs font-medium text-muted-foreground">Email</span>
               <p className="mt-0.5 font-medium">{user?.email}</p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Position</span>
+              <span className="text-xs font-medium text-muted-foreground">Position</span>
               <p className="mt-0.5 font-medium">{user?.position}</p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Department</span>
+              <span className="text-xs font-medium text-muted-foreground">Department</span>
               <p className="mt-0.5 font-medium">{user?.department_name || "N/A"}</p>
             </div>
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Hire Date</span>
+              <span className="text-xs font-medium text-muted-foreground">Hire Date</span>
               <p className="mt-0.5 font-medium">{user?.hire_date || "N/A"}</p>
             </div>
           </div>
