@@ -436,7 +436,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
-                    height: 36,
+                    height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () async {
                         final confirmed = await showDialog<bool>(
@@ -481,7 +481,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                           }
                         }
                       },
-                      icon: const Icon(Icons.close, size: 16),
+                      icon: const Icon(Icons.close, size: 18),
                       label: const Text('Cancel Leave'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: context.warning,
