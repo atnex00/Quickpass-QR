@@ -73,19 +73,6 @@ async function submitLeave(req, res, next) {
       )
     );
 
-    const admins = await db('employees')
-      .where({ is_admin: true, is_active: true })
-      .whereNot('employee_id', req.user.employee_id);
-    await Promise.allSettled(
-      admins.map((a) =>
-        notificationService.sendToEmployee(a.employee_id, {
-          title: 'New Leave Request',
-          body: `${req.user.full_name} (${req.user.department_name}) requested leave`,
-          data: { leave_id: leaveId, type: 'new_request' },
-        }).catch(() => {})
-      )
-    );
-
     const leave = await db('leave_requests')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
       .where('leave_requests.leave_id', leaveId)
