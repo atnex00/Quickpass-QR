@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react"
-import { useNavigate } from "react-router"
-import SecurityHeader from "@/components/layout/SecurityHeader"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { useNavigate, Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Scan, QrCode, Camera, CameraOff, Loader2, CheckCircle } from "lucide-react"
+import { Scan, QrCode, Camera, CameraOff, Loader2, History, CheckCircle, LogOut, LayoutDashboard } from "lucide-react"
 import jsQR from "jsqr"
 import { toast } from "sonner"
 import { useScanStore } from "@/stores/scanStore"
+import { useAuthStore } from "@/stores/authStore"
 
 type ScanState = "idle" | "detected" | "confirmed"
 
@@ -26,6 +24,7 @@ if (hasNative) {
 export default function ScannerPage() {
   const navigate = useNavigate()
   const { validateScan, isLoading } = useScanStore()
+  const { user, logout } = useAuthStore()
   const [manualInput, setManualInput] = useState("")
   const [cameraActive, setCameraActive] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -175,37 +174,54 @@ export default function ScannerPage() {
 
   return (
     <div className="page-enter flex min-h-screen flex-col bg-background">
+      {/* Header */}
+      <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="ZANECO QuickPass" className="h-8 w-auto" />
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Security Scanner</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {user && <span className="hidden text-sm text-muted-foreground sm:block">{user.full_name}</span>}
+          <Link to="/employee">
+            <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
+          </Link>
+          <Link to="/security/history">
+            <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
+          </Link>
+          <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
+        </div>
+      </header>
+
       <main className="flex flex-1 items-start justify-center p-6">
         <div className="w-full max-w-sm space-y-4">
 
           {/* Scanner Card */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Camera Scanner</CardTitle>
+          <div className="panel-card">
+            <div className="p-4">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xs font-black uppercase tracking-[0.1em] text-muted-foreground">Camera Scanner</h2>
                 {cameraActive && isIdle && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                  <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
                     <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                     Live
                   </span>
                 )}
                 {isDetected && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
-                    <CheckCircle className="h-3.5 w-3.5" /> Detected
+                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
+                    <CheckCircle className="h-3 w-3" /> Detected
                   </span>
                 )}
                 {isConfirmed && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-gold/10 px-2.5 py-1 text-xs font-medium text-primary">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Processing
+                  <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Processing
                   </span>
                 )}
               </div>
-            </CardHeader>
-            <CardContent>
+
               {cameraError && (
-                <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/5 p-3">
-                  <p className="text-xs font-medium text-destructive">Camera Error</p>
-                  <p className="mt-0.5 text-sm text-destructive/80">{cameraError}</p>
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <p className="text-[10px] font-black uppercase tracking-[0.08em]">Camera Error</p>
+                  <p className="mt-0.5">{cameraError}</p>
                 </div>
               )}
 
@@ -215,12 +231,12 @@ export default function ScannerPage() {
 
                 {!cameraActive && (
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-muted">
-                    <div className="flex items-center justify-center rounded-lg bg-card p-4 border border-border">
+                    <div className="flex items-center justify-center rounded-xl bg-card p-4 border border-border">
                       <QrCode className="h-10 w-10 text-muted-foreground/40" />
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-muted-foreground">Camera is off</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">Position QR code within the frame</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/60">Position QR code within the frame</p>
                     </div>
                   </div>
                 )}
@@ -228,45 +244,45 @@ export default function ScannerPage() {
                 {cameraActive && (
                   <>
                     {(isDetected || isConfirmed) && (
-                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-success/15 animate-[statFadeIn_0.15s_ease]" />
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-emerald-500/15 animate-[statFadeIn_0.15s_ease]" />
                     )}
                     {isDetected && (
                       <div className="absolute inset-0 z-30 flex items-center justify-center">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/20 backdrop-blur-sm">
-                          <CheckCircle className="h-8 w-8 text-success" />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 backdrop-blur-sm">
+                          <CheckCircle className="h-8 w-8 text-emerald-600" />
                         </div>
                       </div>
                     )}
                     {isConfirmed && (
                       <div className="absolute inset-0 z-30 flex items-center justify-center">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gold/20 backdrop-blur-sm">
-                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/20 backdrop-blur-sm">
+                          <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
                         </div>
                       </div>
                     )}
                     <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                       <div className={`relative size-48 ${cameraActive && isIdle ? "amber-border-glow" : ""}`}>
-                        <div className="absolute top-0 left-0 h-7 w-7 border-t-[3px] border-l-[3px] rounded-tl-lg border-gold" />
-                        <div className="absolute top-0 right-0 h-7 w-7 border-t-[3px] border-r-[3px] rounded-tr-lg border-gold" />
-                        <div className="absolute bottom-0 left-0 h-7 w-7 border-b-[3px] border-l-[3px] rounded-bl-lg border-gold" />
-                        <div className="absolute bottom-0 right-0 h-7 w-7 border-b-[3px] border-r-[3px] rounded-br-lg border-gold" />
+                        <div className="absolute top-0 left-0 h-7 w-7 border-t-[3px] border-l-[3px] rounded-tl border-primary" />
+                        <div className="absolute top-0 right-0 h-7 w-7 border-t-[3px] border-r-[3px] rounded-tr border-primary" />
+                        <div className="absolute bottom-0 left-0 h-7 w-7 border-b-[3px] border-l-[3px] rounded-bl border-primary" />
+                        <div className="absolute bottom-0 right-0 h-7 w-7 border-b-[3px] border-r-[3px] rounded-br border-primary" />
                       </div>
                     </div>
                     <div className="absolute bottom-3 left-1/2 z-30 -translate-x-1/2">
                       {isIdle && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary">
                           <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                           Point at QR code
                         </span>
                       )}
                       {isDetected && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 px-3 py-1.5 text-xs font-medium text-success">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/20 px-3 py-1.5 text-[11px] font-semibold text-success">
                           <CheckCircle className="h-3.5 w-3.5" />
                           QR found — scanning…
                         </span>
                       )}
                       {isConfirmed && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/10 px-3 py-1.5 text-xs font-medium text-primary">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-semibold text-amber-700">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           Verifying…
                         </span>
@@ -278,48 +294,46 @@ export default function ScannerPage() {
 
               <div className="mt-4">
                 {cameraActive ? (
-                  <Button variant="outline" className="w-full" onClick={cleanup}>
-                    <CameraOff className="h-4 w-4" /> Stop Camera
-                  </Button>
+                  <button onClick={cleanup} className="btn-secondary w-full"><CameraOff className="h-4 w-4" /> Stop Camera</button>
                 ) : (
-                  <Button className="w-full" onClick={startCamera} disabled={isLoading}>
+                  <button onClick={startCamera} disabled={isLoading} className="btn-primary w-full">
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                     Start Camera
-                  </Button>
+                  </button>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
             <div className="relative flex justify-center">
-              <span className="bg-background px-2 text-xs font-medium text-muted-foreground">or enter manually</span>
+              <span className="bg-background px-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50">or enter manually</span>
             </div>
           </div>
 
           {/* Manual Entry */}
-          <Card>
-            <CardContent>
+          <div className="panel-card">
+            <div className="p-4">
               <form onSubmit={handleManual} className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label>Paste QR Code Data</Label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">Paste QR Code Data</label>
                   <Input
                     placeholder="Paste QR data here..."
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading || !manualInput.trim()}>
+                <button type="submit" disabled={isLoading || !manualInput.trim()} className="btn-primary w-full">
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scan className="h-4 w-4" />}
                   Validate QR
-                </Button>
+                </button>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/40">
             Scan OUT or IN QR codes to record gate entries
           </p>
         </div>

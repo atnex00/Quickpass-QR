@@ -1,8 +1,6 @@
 import { Navigate, useLocation } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Outlet } from "react-router"
-import SecurityHeader from "./SecurityHeader"
-import { Loader2 } from "lucide-react"
 
 export default function SecurityShell() {
   const { user, isAuthenticated, isLoading } = useAuthStore()
@@ -11,7 +9,7 @@ export default function SecurityShell() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     )
   }
@@ -25,13 +23,8 @@ export default function SecurityShell() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <SecurityHeader />
-      <main className="flex-1 overflow-y-auto bg-background">
-        <div key={location.pathname + location.search} className="page-enter">
-          <Outlet />
-        </div>
-      </main>
+    <div key={location.pathname + location.search} className="page-enter">
+      <Outlet />
     </div>
   )
 }

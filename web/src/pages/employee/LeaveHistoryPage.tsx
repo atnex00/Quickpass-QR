@@ -8,7 +8,7 @@ import type { LeaveStatus } from "@/types"
 import { useAuthStore } from "@/stores/authStore"
 import api from "@/lib/api"
 import { toast } from "sonner"
-import { Inbox, CalendarDays, Trash2, Loader2 } from "lucide-react"
+import { Inbox, CalendarDays, Filter, Trash2 } from "lucide-react"
 
 export default function LeaveHistoryPage() {
   const { history, isLoading, loadHistory } = useLeaveStore()
@@ -64,16 +64,16 @@ export default function LeaveHistoryPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : history.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg border border-border bg-muted">
-            <Inbox className="h-5 w-5 text-muted-foreground" />
+        <div className="empty-state">
+          <div className="empty-icon">
+            <Inbox className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
-            <p className="text-base font-semibold text-foreground">No requests found</p>
-            <p className="text-sm text-muted-foreground">
+            <h3>No requests found</h3>
+            <p>
               {filter ? `No "${filter}" requests match your filter — try a different filter` : "Submit a leave request to see it here"}
             </p>
           </div>
@@ -82,7 +82,7 @@ export default function LeaveHistoryPage() {
         <div className="space-y-3">
           {history.map((leave) => (
             <Link key={leave.leave_id} to={`/employee/qr/${leave.leave_id}`}>
-              <Card className="p-4 transition-colors hover:border-border hover:bg-accent/50">
+              <Card className="card-hover p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
                     <CalendarDays className="mt-0.5 h-5 w-5 text-muted-foreground" />

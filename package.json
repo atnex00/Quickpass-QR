@@ -4,6 +4,7 @@
   "private": true,
   "description": "Quickpass - Smart Gatepass & Leave Management",
   "scripts": {
+    "start": "cd backend && node src/app.js",
     "dev": "NODE_ENV=dev bash dev.sh",
     "prod": "NODE_ENV=prod bash dev.sh",
     "dev:backend": "cd backend && npm run dev",

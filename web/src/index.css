@@ -21,88 +21,118 @@
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
-  --color-gold: var(--gold);
-  --color-gold-foreground: var(--gold-foreground);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
 }
 
 :root {
-  --radius: 0.5rem;
-
   --background: #fffbeb;
   --foreground: #292524;
-
   --card: #ffffff;
   --card-foreground: #292524;
-
   --popover: #ffffff;
   --popover-foreground: #292524;
-
   --primary: #b45309;
   --primary-foreground: #ffffff;
-
-  --secondary: #fef3c7;
-  --secondary-foreground: #92400e;
-
+  --secondary: #92400e;
+  --secondary-foreground: #ffffff;
   --muted: #f5f3f0;
   --muted-foreground: #78716c;
-
-  --accent: #fef3c7;
-  --accent-foreground: #92400e;
-
+  --accent: #f5f3f0;
+  --accent-foreground: #292524;
   --destructive: #dc2626;
-
   --border: #e7e5e4;
   --input: #e7e5e4;
-  --ring: #fbbf24;
-
+  --ring: #d97706;
   --success: #0d9488;
   --success-foreground: #ffffff;
-
-  --gold: #fbbf24;
-  --gold-foreground: #292524;
-}
-
-.dark {
-  --background: #1c1917;
-  --foreground: #f5f3f0;
-
-  --card: #292524;
-  --card-foreground: #f5f3f0;
-
-  --popover: #292524;
-  --popover-foreground: #f5f3f0;
-
-  --primary: #fbbf24;
-  --primary-foreground: #1c1917;
-
-  --secondary: #44403c;
-  --secondary-foreground: #f5f3f0;
-
-  --muted: #292524;
-  --muted-foreground: #a8a29e;
-
-  --accent: #44403c;
-  --accent-foreground: #f5f3f0;
-
-  --destructive: #ef4444;
-
-  --border: #44403c;
-  --input: #44403c;
-  --ring: #fbbf24;
-
-  --success: #2dd4bf;
-  --success-foreground: #134e4a;
-
-  --gold: #fbbf24;
-  --gold-foreground: #1c1917;
 }
 
 * { font-family: "Inter", sans-serif; }
+h1, h2, h3, .font-display { font-family: "Playfair Display", serif; }
 body { @apply bg-background text-foreground antialiased; }
+
+/* ── Labels ── */
+.label-stitch {
+  @apply mb-1 block text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground;
+}
+
+/* ── Inputs ── */
+.input-stitch {
+  @apply w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground/50;
+}
+.input-stitch:focus {
+  @apply border-primary shadow-[0_0_0_3px_rgba(251,191,36,0.15)];
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-xs font-black uppercase tracking-[0.08em] text-primary-foreground shadow-sm transition-all hover:shadow-[0_0_12px_rgba(251,191,36,0.3)] active:scale-[0.97];
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-transparent px-6 py-3 text-xs font-black uppercase tracking-[0.08em] text-primary transition-all hover:bg-primary/10 hover:shadow-[0_0_8px_rgba(251,191,36,0.15)] active:scale-[0.97];
+}
+
+/* ── Cards ── */
+.card-accent {
+  @apply overflow-hidden rounded border border-border bg-card;
+}
+
+/* Panel card — control-room equipment panel */
+.panel-card {
+  @apply rounded border border-border bg-card;
+}
+.panel-card-header {
+  @apply border-b border-border/50 px-4 py-3;
+}
+.panel-card-header h3 {
+  @apply text-xs font-bold text-foreground;
+}
+.panel-card-body {
+  @apply p-4;
+}
+.panel-card-footer {
+  @apply border-t border-border/50 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/50;
+}
+
+/* Structured section header */
+.section-header {
+  @apply flex items-center justify-between border-b border-border/60 pb-3 mb-4;
+}
+.section-header h2, .section-header h3 {
+  @apply text-sm font-bold text-foreground;
+}
+.section-header .section-action {
+  @apply text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-primary transition-colors;
+}
+
+/* Empty state */
+.empty-state {
+  @apply flex flex-col items-center gap-4 py-16 text-center;
+}
+.empty-state .empty-icon {
+  @apply flex items-center justify-center w-16 h-16 rounded-2xl border border-border bg-muted;
+}
+.empty-state h3 {
+  @apply text-base font-semibold text-foreground;
+}
+.empty-state p {
+  @apply text-sm text-muted-foreground max-w-sm;
+}
+
+/* ── Status Badges ── */
+.badge-stitch {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em];
+}
+
+/* ── Tables ── */
+.table-stitch th {
+  @apply border-b border-border/60 px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground;
+}
+.table-stitch td {
+  @apply px-6 py-4 text-sm;
+}
+.table-stitch tbody tr {
+  @apply border-b border-border/30 last:border-0 transition-all hover:bg-primary/[0.03];
+}
 
 /* ── Animations ── */
 .page-enter {
@@ -113,14 +143,16 @@ body { @apply bg-background text-foreground antialiased; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.stat-enter {
-  animation: statFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+.card-hover {
+  @apply transition-all duration-300;
 }
-@keyframes statFadeIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.card-hover:hover {
+  border-color: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.08);
+  transform: translateY(-2px);
 }
 
+/* Amber glow — signature live indicator */
 .amber-glow {
   animation: amberPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -130,6 +162,7 @@ body { @apply bg-background text-foreground antialiased; }
   100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
 }
 
+/* Amber border glow */
 .amber-border-glow {
   animation: amberBorderPulse 1.5s ease-in-out infinite;
 }
@@ -138,6 +171,7 @@ body { @apply bg-background text-foreground antialiased; }
   50% { border-color: rgba(251, 191, 36, 0.8); }
 }
 
+/* QR detection pulse (teal) */
 .detected-pulse {
   animation: detectedPulse 0.5s ease-in-out infinite alternate;
 }
@@ -146,6 +180,89 @@ body { @apply bg-background text-foreground antialiased; }
   to { border-color: rgba(13, 148, 136, 1); }
 }
 
+/* Stat counter fade-in */
+.stat-enter {
+  animation: statFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes statFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Sidebar active accent — left border indicator */
+.sidebar-active {
+  border-left: 3px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.06);
+}
+.sidebar-inactive {
+  @apply border-l-[3px] border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground;
+}
+.sidebar-section-label {
+  @apply px-3 pt-4 pb-1 text-[9px] font-black uppercase tracking-[0.12em] text-muted-foreground/40;
+}
+
+/* Mobile bottom navigation bar */
+.mobile-bottom-bar {
+  @apply fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-border bg-card px-1;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-bottom-link {
+  @apply flex flex-col items-center gap-0.5 rounded-sm px-2 py-1 text-[10px] font-semibold text-muted-foreground transition-colors duration-200;
+}
+
+.mobile-bottom-link:hover {
+  @apply text-foreground;
+}
+
+.mobile-bottom-link-active {
+  @apply text-primary;
+}
+
+.mobile-bottom-link-active .mobile-bottom-icon {
+  stroke-width: 2.5;
+}
+
+.mobile-bottom-icon {
+  @apply h-5 w-5 shrink-0;
+  stroke-width: 1.5;
+}
+
+.mobile-bottom-label {
+  @apply truncate max-w-14 leading-tight;
+}
+
+/* Status bar — top amber system strip */
+.status-bar {
+  @apply flex h-8 items-center justify-between border-b border-border bg-card px-4;
+}
+.status-bar-time {
+  @apply text-[11px] font-semibold tabular-nums text-primary;
+}
+.status-bar-user {
+  @apply text-[11px] text-muted-foreground;
+}
+.status-bar-dot {
+  @apply inline-block h-1.5 w-1.5 rounded-full bg-primary;
+  animation: amberPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* LED dot indicator */
+.led-dot {
+  @apply inline-block h-2 w-2 rounded-full;
+}
+.led-dot-amber {
+  @apply bg-primary;
+}
+.led-dot-teal {
+  @apply bg-success;
+}
+.led-dot-red {
+  @apply bg-destructive;
+}
+
+/* QR pulse ring (amber) */
 .qr-pulse {
   animation: qrPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -155,9 +272,10 @@ body { @apply bg-background text-foreground antialiased; }
   100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
 }
 
+/* Scan line (amber) */
 .scan-line {
   height: 2px;
-  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  background: linear-gradient(to right, transparent, #fbbf24, transparent);
   position: absolute;
   width: 100%;
   z-index: 20;
@@ -168,69 +286,4 @@ body { @apply bg-background text-foreground antialiased; }
   10% { opacity: 1; }
   90% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
-}
-
-/* ── Sidebar ── */
-.sidebar-active {
-  @apply border-l-[3px] border-l-gold bg-gold/8 text-primary;
-}
-.sidebar-inactive {
-  @apply border-l-[3px] border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground;
-}
-.sidebar-section-label {
-  @apply px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
-}
-
-/* ── Mobile bottom navigation ── */
-.mobile-bottom-bar {
-  @apply fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-border bg-card px-1;
-  height: 64px;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.mobile-bottom-link {
-  @apply flex flex-col items-center gap-0.5 rounded-sm px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors;
-}
-.mobile-bottom-link:hover {
-  @apply text-foreground;
-}
-.mobile-bottom-link-active {
-  @apply text-primary;
-}
-.mobile-bottom-link-active .mobile-bottom-icon {
-  stroke-width: 2.5;
-}
-.mobile-bottom-icon {
-  @apply h-5 w-5 shrink-0;
-  stroke-width: 1.5;
-}
-.mobile-bottom-label {
-  @apply truncate max-w-14 leading-tight;
-}
-
-/* ── LED dot indicator ── */
-.led-dot {
-  @apply inline-block h-2 w-2 rounded-full;
-}
-.led-dot-amber {
-  @apply bg-gold;
-}
-.led-dot-teal {
-  @apply bg-success;
-}
-.led-dot-red {
-  @apply bg-destructive;
-}
-
-/* Empty state */
-.empty-state {
-  @apply flex flex-col items-center gap-4 py-16 text-center;
-}
-.empty-state .empty-icon {
-  @apply flex items-center justify-center w-12 h-12 rounded-lg border border-border bg-muted;
-}
-.empty-state h3 {
-  @apply text-base font-semibold text-foreground;
-}
-.empty-state p {
-  @apply text-sm text-muted-foreground max-w-sm;
 }

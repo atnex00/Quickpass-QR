@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router"
 import {
   LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, User, BookOpen,
+  Scan, History, User, BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
@@ -105,16 +105,16 @@ export default function Sidebar() {
       )}>
         {!collapsed ? (
           <>
-            <img src="/logo.png" alt="ZANECO QuickPass" className="h-8 w-auto shrink-0" />
-            <span className="ml-auto text-sm tabular-nums text-muted-foreground">{fmt(h)}:{fmt(m)}</span>
+            <img src="/logo.png" alt="ZANECO QuickPass" className="h-7 w-auto shrink-0" />
+            <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60 ml-auto">{fmt(h)}:{fmt(m)}</span>
           </>
         ) : (
-          <img src="/app-icon.png" alt="ZANECO QuickPass" className="h-7 w-7 rounded-md" />
+          <img src="/app-icon.png" alt="ZANECO QuickPass" className="h-6 w-6" />
         )}
       </div>
 
       {/* Nav sections */}
-      <nav className="flex-1 overflow-y-auto py-1">
+      <nav className="flex-1 overflow-y-auto">
         {visibleSections.map((section) => (
           <div key={section.label}>
             {!collapsed && <p className="sidebar-section-label">{section.label}</p>}
@@ -132,8 +132,8 @@ export default function Sidebar() {
                   end={link.to === "/employee" || link.to === "/supervisor"}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-3 mx-2 my-0.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
-                      isActive ? "sidebar-active" : "sidebar-inactive"
+                      "flex items-center gap-3 mx-2 rounded-sm px-2.5 py-2 text-xs font-semibold transition-all duration-200",
+                      isActive ? "sidebar-active text-primary" : "sidebar-inactive"
                     )
                   }
                 >
@@ -149,23 +149,23 @@ export default function Sidebar() {
       <div className="border-t border-border p-2">
         <Link
           to="/employee/profile"
-          className="flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground"
         >
           <User className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Profile</span>}
         </Link>
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
+          className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-destructive"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Logout</span>}
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex w-full items-center justify-center rounded-md py-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          className="flex w-full items-center justify-center rounded-sm py-1.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
         >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
         </button>
       </div>
     </aside>

@@ -5,7 +5,6 @@ import { formatDate, formatTime } from "@/lib/utils"
 import type { LeaveRequest } from "@/types"
 import api from "@/lib/api"
 import { Loader2, ArrowLeft, RefreshCw, QrCode } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router"
 
@@ -34,7 +33,9 @@ export default function QrDisplayPage() {
 
   useEffect(() => {
     fetchLeave()
+
     pollRef.current = setInterval(() => fetchLeave(false), POLL_INTERVAL)
+
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
     }
@@ -55,7 +56,7 @@ export default function QrDisplayPage() {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
         <div className="flex flex-col items-center gap-4 py-12 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/5">
+          <div className="flex h-14 w-14 items-center justify-center rounded border border-destructive/30 bg-destructive/5">
             <QrCode className="h-7 w-7 text-destructive/60" />
           </div>
           <div>
@@ -95,11 +96,11 @@ export default function QrDisplayPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Leave Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+      <div className="panel-card">
+        <div className="panel-card-header">
+          <h3>Leave Details</h3>
+        </div>
+        <div className="panel-card-body space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Date</span>
             <span className="font-medium">{formatDate(dateStr)}</span>
@@ -112,8 +113,8 @@ export default function QrDisplayPage() {
             <span className="text-muted-foreground">Reason</span>
             <span className="font-medium">{leave.reason}</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {leave.out_qr_code && (
         <QrDisplay
@@ -146,16 +147,16 @@ export default function QrDisplayPage() {
       )}
 
       {!leave.out_qr_code && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
+        <div className="panel-card">
+          <div className="panel-card-body flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
             <QrCode className="h-16 w-16 text-muted-foreground/30" />
             <p className="text-base font-medium text-foreground">QR codes not available yet</p>
             <p className="text-sm">QR codes appear once a supervisor approves your request</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         QR codes are valid ±15 minutes from scheduled time
       </p>
     </div>

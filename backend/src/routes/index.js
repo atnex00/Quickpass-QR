@@ -69,7 +69,6 @@ router.get('/leave/history', authenticate, validateQuery(Joi.object({
 })), leaveController.getHistory);
 router.get('/leave/active', authenticate, leaveController.getActiveLeave);
 router.get('/leave/:id', authenticate, leaveController.getLeaveById);
-router.post('/leave/:id/cancel', authenticate, leaveController.cancelLeave);
 router.delete('/leave/:id', authenticate, requireAdmin, leaveController.deleteLeave);
 
 // ── Supervisor Routes ──
