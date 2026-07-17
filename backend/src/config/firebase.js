@@ -39,7 +39,7 @@ function initFirebase() {
 
 function getMessaging() {
   if (!firebaseApp) return null;
-  return admin.messaging();
+  return firebaseApp.messaging();
 }
 
 module.exports = { initFirebase, getMessaging };

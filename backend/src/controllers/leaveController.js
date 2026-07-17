@@ -199,6 +199,38 @@ async function getLeaveById(req, res, next) {
   }
 }
 
+async function cancelLeave(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const leave = await db('leave_requests').where({ leave_id: id }).first();
+    if (!leave) {
+      throw createError(404, 'Leave request not found');
+    }
+
+    if (leave.employee_id !== req.user.employee_id && !req.user.is_admin) {
+      throw createError(403, 'You can only cancel your own leave requests');
+    }
+
+    if (!['approved', 'pending'].includes(leave.status)) {
+      throw createError(400, `Cannot cancel a leave that is ${leave.status}`);
+    }
+
+    await db('leave_requests').where({ leave_id: id }).update({
+      status: 'cancelled',
+      out_qr_code: null,
+      in_qr_code: null,
+      out_qr_image: null,
+      in_qr_image: null,
+      updated_at: db.fn.now(),
+    });
+
+    res.json({ success: true, message: 'Leave request cancelled' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function deleteLeave(req, res, next) {
   try {
     const { id } = req.params;
@@ -221,4 +253,4 @@ async function deleteLeave(req, res, next) {
   }
 }
 
-module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, deleteLeave };
+module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, cancelLeave, deleteLeave };

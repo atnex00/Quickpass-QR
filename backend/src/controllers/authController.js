@@ -263,7 +263,9 @@ async function uploadProfilePhoto(req, res, next) {
     }
 
     const ext = path.extname(req.file.originalname) || '.jpg';
-    const filename = `${req.user.employee_id}${ext}`;
+    const oldFiles = fs.readdirSync(uploadDir).filter(f => f.startsWith(req.user.employee_id));
+    oldFiles.forEach(f => fs.unlinkSync(path.join(uploadDir, f)));
+    const filename = `${req.user.employee_id}_${Date.now()}${ext}`;
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, req.file.buffer);
 
