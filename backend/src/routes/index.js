@@ -36,6 +36,7 @@ router.post('/auth/login', validate(Joi.object({
     'any.required': 'Employee ID is required',
   }),
   password: Joi.string().min(8).required(),
+  device_fingerprint: Joi.string().allow('').optional(),
 })), authController.login);
 
 router.post('/auth/logout', authenticate, authController.logout);

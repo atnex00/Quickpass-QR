@@ -8,7 +8,7 @@ const { createError } = require('../middleware/errorHandler');
 
 async function login(req, res, next) {
   try {
-    const { employee_id, password } = req.body;
+    const { employee_id, password, device_fingerprint } = req.body;
 
     const employee = await db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
@@ -36,6 +36,7 @@ async function login(req, res, next) {
       created_at: db.fn.now(),
       expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
+      device_fingerprint: device_fingerprint || null,
     });
 
     await db('employees').where({ employee_id }).update({ last_login: db.fn.now() });
@@ -44,6 +45,7 @@ async function login(req, res, next) {
       {
         employee_id: employee.employee_id,
         session_id: sessionId,
+        device_fp: device_fingerprint || null,
         role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
@@ -101,6 +103,7 @@ async function refreshToken(req, res, next) {
   try {
     const isMobile = isMobileClient(req);
     const sessionId = req.signedCookies.refresh_sid || (isMobile && req.body?.refresh_sid);
+    const device_fingerprint = req.body?.device_fingerprint || null;
     if (!sessionId) {
       throw createError(401, 'No refresh token');
     }
@@ -129,6 +132,7 @@ async function refreshToken(req, res, next) {
       created_at: db.fn.now(),
       expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
+      device_fingerprint: device_fingerprint || session.device_fingerprint || null,
     });
     await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
 
@@ -144,6 +148,7 @@ async function refreshToken(req, res, next) {
       {
         employee_id: employee.employee_id,
         session_id: newSessionId,
+        device_fp: device_fingerprint || session.device_fingerprint || null,
         role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
