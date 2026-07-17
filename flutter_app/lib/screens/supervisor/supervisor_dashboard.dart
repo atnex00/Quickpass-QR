@@ -6,6 +6,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 import '../../widgets/offline_indicator.dart';
@@ -237,15 +238,15 @@ class _SupervisorAppBar extends StatelessWidget {
                     width: 18, height: 18),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Quickpass',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: context.onPrimary,
-                  height: 1.4,
+                Text(
+                  'Quickpass',
+                  style: TextStyle(
+                    fontSize: responsiveFontSize(context, 20),
+                    fontWeight: FontWeight.w600,
+                    color: context.onPrimary,
+                    height: 1.4,
+                  ),
                 ),
-              ),
               const Spacer(),
               const NotificationBell(),
               GestureDetector(
@@ -294,21 +295,21 @@ class _WelcomeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'COMMANDER VIEW',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.01,
-            color: context.outline,
-            height: 1.43,
+          Text(
+            'COMMANDER VIEW',
+            style: TextStyle(
+              fontSize: responsiveFontSize(context, 14),
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.01,
+              color: context.outline,
+              height: 1.43,
+            ),
           ),
-        ),
         const SizedBox(height: 4),
         Text(
           '${_greeting()}, ${userName.split(' ').first}',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: responsiveFontSize(context, 24),
             fontWeight: FontWeight.w700,
             color: context.onSurface,
             letterSpacing: -0.01,
@@ -345,7 +346,7 @@ class _PendingApprovalsHero extends StatelessWidget {
           Text(
             'PENDING APPROVALS',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: responsiveFontSize(context, 14),
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
               color: Colors.white.withValues(alpha: 0.8),
@@ -370,7 +371,7 @@ class _PendingApprovalsHero extends StatelessWidget {
               Text(
                 'Requests',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: responsiveFontSize(context, 20),
                   fontWeight: FontWeight.w600,
                   color: Colors.white.withValues(alpha: 0.6),
                 ),
@@ -469,7 +470,7 @@ class _PendingRequestsSection extends StatelessWidget {
             Text(
               'Pending Requests',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: responsiveFontSize(context, 16),
                 fontWeight: FontWeight.w600,
                 color: context.onSurface,
                 height: 1.5,
@@ -554,15 +555,15 @@ class _QuickActionCard extends StatelessWidget {
                 child: Icon(icon, size: 22, color: context.primary),
               ),
               const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: context.onSurface,
-                  height: 1.5,
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: responsiveFontSize(context, 16),
+                    fontWeight: FontWeight.w600,
+                    color: context.onSurface,
+                    height: 1.5,
+                  ),
                 ),
-              ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
