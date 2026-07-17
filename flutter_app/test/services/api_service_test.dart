@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/services/api_service.dart';
 
+import '../helpers/test_setup.dart';
+
 Map<String, dynamic> _mockResponse({Map<String, dynamic>? data, bool success = true, String? message}) {
   return {'success': success, 'data': data, 'message': message};
 }
@@ -12,7 +14,8 @@ void main() {
   late ApiService api;
   late Dio dio;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     api = ApiService();
     dio = Dio();
     dio.interceptors.add(InterceptorsWrapper(

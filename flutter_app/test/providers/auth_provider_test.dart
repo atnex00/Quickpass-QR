@@ -4,13 +4,15 @@ import 'package:quickpass/models/employee.dart';
 import 'package:quickpass/providers/auth_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late MockApiService mockApi;
   late AuthProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = AuthProvider(api: mockApi);
   });

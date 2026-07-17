@@ -3,12 +3,14 @@ import 'package:mockito/mockito.dart';
 import 'package:quickpass/providers/scan_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
   late MockApiService mockApi;
   late ScanProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = ScanProvider(api: mockApi);
   });

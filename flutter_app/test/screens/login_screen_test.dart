@@ -7,6 +7,7 @@ import 'package:quickpass/providers/auth_provider.dart';
 import 'package:quickpass/screens/auth/login_screen.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 Widget _buildTestApp(AuthProvider authProvider) {
   return MaterialApp(
@@ -22,7 +23,8 @@ void main() {
   late MockApiService mockApi;
   late AuthProvider authProvider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     authProvider = AuthProvider(api: mockApi);
   });

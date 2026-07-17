@@ -4,12 +4,14 @@ import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/providers/leave_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
   late MockApiService mockApi;
   late LeaveProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = LeaveProvider(api: mockApi);
   });

@@ -4,6 +4,7 @@ import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/providers/supervisor_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 LeaveRequest _mockLeave(String id, String status) {
   return LeaveRequest(
@@ -27,7 +28,8 @@ void main() {
   late MockApiService mockApi;
   late SupervisorProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = SupervisorProvider(api: mockApi);
   });

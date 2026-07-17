@@ -9,6 +9,7 @@ import 'package:quickpass/providers/settings_provider.dart';
 import 'package:quickpass/screens/employee/profile_screen.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 Widget _buildTestApp(AuthProvider authProvider, {SettingsProvider? settings}) {
   final settingsProvider = settings ?? SettingsProvider();
@@ -29,7 +30,8 @@ void main() {
   late AuthProvider authProvider;
   late Employee testUser;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     authProvider = AuthProvider(api: mockApi);
     testUser = Employee(
