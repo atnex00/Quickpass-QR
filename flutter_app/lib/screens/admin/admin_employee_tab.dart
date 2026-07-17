@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -109,15 +107,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
     });
   }
 
-  void _showImportDialog() {
-    showDialog<bool>(
-      context: context,
-      builder: (_) => const ImportEmployeesDialog(),
-    ).then((imported) {
-      if (imported == true) _loadData();
-    });
-  }
-
   void _showPasswordResetDialog(Map<String, dynamic> emp) {
     showDialog<bool>(
       context: context,
@@ -179,23 +168,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: _onSearchChanged,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _showImportDialog,
-                  icon: const Icon(Icons.upload_file, size: 18),
-                  label: const Text('Import HR Data'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: context.primary,
-                    side: BorderSide(color: context.primary),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 8),
             // ── Filter Row ──
@@ -1074,113 +1046,6 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
       if (e is DioException && e.response?.data is Map) {
         msg = (e.response!.data as Map)['message']?.toString() ??
             'Failed to update employee';
-      } else {
-        msg = e.toString();
-      }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    }
-  }
-}
-
-class ImportEmployeesDialog extends StatefulWidget {
-  const ImportEmployeesDialog({super.key});
-
-  @override
-  State<ImportEmployeesDialog> createState() => _ImportEmployeesDialogState();
-}
-
-class _ImportEmployeesDialogState extends State<ImportEmployeesDialog> {
-  final _ctl = TextEditingController();
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _ctl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Import Employees'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Paste employee JSON array:',
-                style:
-                    TextStyle(fontSize: 13, color: context.onSurfaceVariant)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _ctl,
-              maxLines: 10,
-              decoration: const InputDecoration(
-                  hintText:
-                      '[{"employee_id":"000010","full_name":"John Doe","position":"Engineer","department_id":"DEP-001","email":"john@company.com","password":"pass1234"}]',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.all(12),
-              ),
-              style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-            ),
-            const SizedBox(height: 8),
-            Text(
-                'Required: employee_id, full_name, position, department_id, email, password',
-                style: TextStyle(fontSize: 11, color: context.neutralGray)),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isLoading ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isLoading ? null : _import,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white))
-              : const Text('Import'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _import() async {
-    final trimmed = _ctl.text.trim();
-    if (trimmed.isEmpty) return;
-    setState(() => _isLoading = true);
-    try {
-      final list = (jsonDecode(trimmed) as List).cast<Map<String, dynamic>>();
-      if (list.isEmpty) {
-        if (!mounted) return;
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No employees found in data')));
-        return;
-      }
-      final api = context.read<ApiService>();
-      final result = await api.importEmployees(list);
-      if (!mounted) return;
-      Navigator.pop(context, true);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Imported ${result['imported'] ?? list.length} employees')),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      String msg;
-      if (e is DioException && e.response?.data is Map) {
-        msg = (e.response!.data as Map)['message']?.toString() ??
-            'Failed to import employees';
       } else {
         msg = e.toString();
       }
