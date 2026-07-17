@@ -23,11 +23,19 @@ import 'screens/employee/leave_history_screen.dart';
 import 'screens/security/scanner_screen.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
 import 'services/api_service.dart';
+import 'services/device_security_service.dart';
 import 'services/notification_service.dart';
 import 'widgets/connectivity_banner.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final isCompromised = await DeviceSecurityService.isDeviceCompromised();
+  if (isCompromised) {
+    await DeviceSecurityService.handleCompromisedDevice();
+    runApp(const BlockedApp());
+    return;
+  }
 
   try {
     await Firebase.initializeApp();
