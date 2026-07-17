@@ -532,7 +532,9 @@ class _EmployeeTabState extends State<EmployeeTab> {
                 ],
               ),
               const Divider(height: 12),
-              Row(
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                 children: [
                   AdminActionButton(
                     icon: Icons.admin_panel_settings,
@@ -641,7 +643,8 @@ class _EmployeeTabState extends State<EmployeeTab> {
                     color: context.tertiary,
                     onTap: () => _showPasswordResetDialog(emp),
                   ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
