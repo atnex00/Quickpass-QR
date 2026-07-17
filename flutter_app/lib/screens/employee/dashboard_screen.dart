@@ -194,7 +194,7 @@ class _DashboardAppBar extends StatelessWidget {
                   Text(
                     'Quickpass',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: responsiveFontSize(context, 20),
                       fontWeight: FontWeight.w700,
                       color: context.onPrimary,
                     ),
@@ -262,7 +262,7 @@ class _UserProfileCard extends StatelessWidget {
                 Text(
                   user?.fullName ?? '',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: responsiveFontSize(context, 20),
                     fontWeight: FontWeight.w600,
                     color: context.onSurface,
                     height: 1.4,
@@ -374,7 +374,7 @@ class _ActiveLeaveCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: responsiveFontSize(context, 24),
                             fontWeight: FontWeight.w700,
                             color: context.onSurface,
                             letterSpacing: -0.01,
@@ -565,7 +565,7 @@ class _RecentActivitySection extends StatelessWidget {
             Text(
               'Recent Activity',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: responsiveFontSize(context, 16),
                 fontWeight: FontWeight.w600,
                 color: context.onSurface,
                 height: 1.5,
@@ -648,15 +648,15 @@ class _StatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: color,
-              height: 1.4,
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: responsiveFontSize(context, 20),
+                fontWeight: FontWeight.w600,
+                color: color,
+                height: 1.4,
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -730,7 +730,7 @@ class _ActivityCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: responsiveFontSize(context, 14),
                           fontWeight: FontWeight.w600,
                           color: context.onSurface,
                           height: 1.43,
