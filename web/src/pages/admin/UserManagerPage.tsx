@@ -27,6 +27,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
+import Pagination from "@/components/shared/Pagination"
+import { downloadCsv } from "@/lib/download"
 import { toast } from "sonner"
 import type { Employee, Department } from "@/types"
 import api from "@/lib/api"
@@ -44,6 +46,7 @@ import {
   Trash2,
   CheckCircle2,
   XCircle,
+  Download,
 } from "lucide-react"
 
 const emptyForm = {
@@ -80,12 +83,14 @@ export default function UserManagerPage() {
   const [resetting, setResetting] = useState(false)
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   const loadEmployees = async () => {
     try {
       const params: Record<string, string | number | undefined> = {
         search: search || undefined,
         page,
+        limit: 20,
       }
       if (filterDept !== "all") params.department_id = filterDept
       if (filterStatus !== "all") params.is_active = filterStatus === "active" ? "true" : "false"
@@ -216,6 +221,21 @@ export default function UserManagerPage() {
     setTogglingId(null)
   }
 
+  const handleExportEmployees = async () => {
+    setExporting(true)
+    try {
+      const params = new URLSearchParams({ resource: "employees" })
+      if (search) params.set("search", search)
+      if (filterDept !== "all") params.set("department_id", filterDept)
+      if (filterStatus !== "all") params.set("is_active", filterStatus === "active" ? "true" : "false")
+      if (filterRole !== "all") params.set("role", filterRole)
+      await downloadCsv(`/admin/export?${params.toString()}`, "employees.csv")
+    } catch {
+      toast.error("Could not export CSV")
+    }
+    setExporting(false)
+  }
+
   const openEdit = (emp: Employee) => {
     setSelected(emp)
     setForm({
@@ -234,8 +254,6 @@ export default function UserManagerPage() {
     setPasswordOpen(true)
   }
 
-  const pages = Math.ceil(total / 20)
-
   return (
     <div className="page-enter space-y-4">
       <div className="flex items-center justify-between">
@@ -243,10 +261,15 @@ export default function UserManagerPage() {
           <h1 className="text-2xl font-bold">User Manager</h1>
           <p className="text-muted-foreground">{total} total employees</p>
         </div>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" /> Add Employee</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleExportEmployees} disabled={exporting}>
+            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            Export
+          </Button>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2"><Plus className="h-4 w-4" /> Add Employee</Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Employee</DialogTitle>
@@ -331,6 +354,7 @@ export default function UserManagerPage() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
       </div>
 
       { /* Filters */ }
@@ -457,18 +481,14 @@ export default function UserManagerPage() {
       </Card>
 
       { /* Pagination */ }
-      {pages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Page {page} of {pages}</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage(page + 1)}>
-              Next
-            </Button>
-          </div>
-        </div>
+      {total > 0 && (
+        <Pagination
+          page={page}
+          limit={20}
+          total={total}
+          onPageChange={(p) => setPage(p)}
+          onLimitChange={() => {}}
+        />
       )}
 
       { /* Edit Dialog */ }

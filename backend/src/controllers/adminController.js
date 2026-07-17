@@ -2,6 +2,22 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
+const { logAudit } = require('../utils/audit');
+
+function csvEscape(value) {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function toCsv(rows, columns) {
+  const header = columns.map((c) => csvEscape(c.header)).join(',');
+  const body = rows.map((row) => columns.map((c) => csvEscape(c.value(row))).join(',')).join('\n');
+  return `${header}\n${body}`;
+}
 
 async function createEmployee(req, res, next) {
   try {
@@ -44,6 +60,13 @@ async function createEmployee(req, res, next) {
       .first();
 
     res.status(201).json({ success: true, data: employee });
+
+    logAudit(req, {
+      action: 'create',
+      entity: 'employee',
+      entity_id: employee_id,
+      description: `Created employee ${full_name} (${employee_id})`,
+    });
   } catch (err) {
     next(err);
   }
@@ -136,6 +159,13 @@ async function updateEmployee(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated });
+
+    logAudit(req, {
+      action: 'update',
+      entity: 'employee',
+      entity_id: id,
+      description: `Updated employee ${id}`,
+    });
   } catch (err) {
     next(err);
   }
@@ -158,6 +188,13 @@ async function toggleSupervisor(req, res, next) {
     res.json({
       success: true,
       message: `Supervisor status toggled to ${!employee.is_supervisor}`,
+    });
+
+    logAudit(req, {
+      action: 'update',
+      entity: 'employee',
+      entity_id: id,
+      description: `Toggled supervisor status to ${!employee.is_supervisor} for ${id}`,
     });
   } catch (err) {
     next(err);
@@ -182,6 +219,13 @@ async function toggleAdmin(req, res, next) {
       success: true,
       message: `Admin status toggled to ${!employee.is_admin}`,
     });
+
+    logAudit(req, {
+      action: 'update',
+      entity: 'employee',
+      entity_id: id,
+      description: `Toggled admin status to ${!employee.is_admin} for ${id}`,
+    });
   } catch (err) {
     next(err);
   }
@@ -205,6 +249,13 @@ async function toggleActive(req, res, next) {
       success: true,
       message: `Employee ${employee.is_active ? 'deactivated' : 'activated'}`,
       data: { is_active: !employee.is_active },
+    });
+
+    logAudit(req, {
+      action: 'update',
+      entity: 'employee',
+      entity_id: id,
+      description: `Set active=${!employee.is_active} for ${id}`,
     });
   } catch (err) {
     next(err);
@@ -255,6 +306,13 @@ async function createDepartment(req, res, next) {
 
     const dept = await db('departments').where({ department_id }).first();
     res.status(201).json({ success: true, data: dept });
+
+    logAudit(req, {
+      action: 'create',
+      entity: 'department',
+      entity_id: department_id,
+      description: `Created department ${department_name} (${department_id})`,
+    });
   } catch (err) {
     next(err);
   }
@@ -279,6 +337,13 @@ async function updateDepartment(req, res, next) {
     await db('departments').where({ department_id: id }).update(updateData);
     const updated = await db('departments').where({ department_id: id }).first();
     res.json({ success: true, data: updated });
+
+    logAudit(req, {
+      action: 'update',
+      entity: 'department',
+      entity_id: id,
+      description: `Updated department ${id}`,
+    });
   } catch (err) {
     next(err);
   }
@@ -300,6 +365,13 @@ async function deleteDepartment(req, res, next) {
 
     await db('departments').where({ department_id: id }).del();
     res.json({ success: true, message: 'Department deleted' });
+
+    logAudit(req, {
+      action: 'delete',
+      entity: 'department',
+      entity_id: id,
+      description: `Deleted department ${dept.department_name} (${id})`,
+    });
   } catch (err) {
     next(err);
   }
@@ -322,6 +394,13 @@ async function deleteEmployee(req, res, next) {
     });
 
     res.json({ success: true, message: 'Employee deleted' });
+
+    logAudit(req, {
+      action: 'delete',
+      entity: 'employee',
+      entity_id: id,
+      description: `Deleted employee ${id} and all related records`,
+    });
   } catch (err) {
     next(err);
   }
@@ -439,6 +518,216 @@ async function getReports(req, res, next) {
   }
 }
 
+async function getAuditLog(req, res, next) {
+  try {
+    const { page = 1, limit = 25, action, actor_id, entity, start_date, end_date } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = db('audit_logs').orderBy('created_at', 'desc');
+
+    if (action) query = query.andWhere('action', action);
+    if (actor_id) query = query.andWhere('actor_id', actor_id);
+    if (entity) query = query.andWhere('entity', entity);
+    if (start_date) query = query.andWhere('created_at', '>=', `${start_date} 00:00:00`);
+    if (end_date) query = query.andWhere('created_at', '<=', `${end_date} 23:59:59`);
+
+    const { count } = await query.clone().clearSelect().count('* as count').first();
+    const logs = await query.limit(limit).offset(offset);
+
+    res.json({
+      success: true,
+      data: logs,
+      pagination: {
+        total: parseInt(count),
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(count / limit),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function exportData(req, res, next) {
+  try {
+    const { resource, type, start_date, end_date, status } = req.query;
+
+    if (resource === 'reports') {
+      let reportData;
+      if (type === 'department') {
+        reportData = await db('leave_requests')
+          .join('departments', 'leave_requests.department_id', 'departments.department_id')
+          .select(
+            'departments.department_name',
+            db.raw('COUNT(*) as total_requests'),
+            db.raw("COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved"),
+            db.raw("COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected"),
+            db.raw("COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending"),
+            db.raw("COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed")
+          )
+          .groupBy('departments.department_id', 'departments.department_name');
+      } else {
+        let q = db('leave_requests')
+          .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
+          .join('departments', 'leave_requests.department_id', 'departments.department_id')
+          .select(
+            'leave_requests.leave_id',
+            'leave_requests.leave_date',
+            'employees.employee_id',
+            'employees.full_name as employee_name',
+            'departments.department_name',
+            'leave_requests.start_time',
+            'leave_requests.end_time',
+            'leave_requests.status',
+            'leave_requests.rejection_reason'
+          );
+        if (start_date) q = q.andWhere('leave_requests.leave_date', '>=', start_date);
+        if (end_date) q = q.andWhere('leave_requests.leave_date', '<=', end_date);
+        if (status) q = q.andWhere('leave_requests.status', status);
+        reportData = await q.orderBy('leave_requests.leave_date', 'desc');
+      }
+      const columns = type === 'department'
+        ? [
+            { header: 'Department', value: (r) => r.department_name },
+            { header: 'Total', value: (r) => r.total_requests },
+            { header: 'Approved', value: (r) => r.approved },
+            { header: 'Rejected', value: (r) => r.rejected },
+            { header: 'Pending', value: (r) => r.pending },
+            { header: 'Completed', value: (r) => r.completed },
+          ]
+        : [
+            { header: 'Leave ID', value: (r) => r.leave_id },
+            { header: 'Date', value: (r) => r.leave_date },
+            { header: 'Employee ID', value: (r) => r.employee_id },
+            { header: 'Employee', value: (r) => r.employee_name },
+            { header: 'Department', value: (r) => r.department_name },
+            { header: 'Start', value: (r) => r.start_time },
+            { header: 'End', value: (r) => r.end_time },
+            { header: 'Status', value: (r) => r.status },
+            { header: 'Rejection Reason', value: (r) => r.rejection_reason },
+          ];
+      const csv = toCsv(reportData, columns);
+      res.attachment('leave_report.csv');
+      return res.status(200).send(`\uFEFF${csv}`);
+    }
+
+    if (resource === 'leaves') {
+      let q = db('leave_requests')
+        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .join('departments', 'leave_requests.department_id', 'departments.department_id')
+        .select(
+          'leave_requests.leave_id',
+          'leave_requests.leave_date',
+          'employees.employee_id',
+          'employees.full_name as employee_name',
+          'departments.department_name',
+          'leave_requests.start_time',
+          'leave_requests.end_time',
+          'leave_requests.status',
+          'leave_requests.rejection_reason'
+        );
+      if (status) q = q.andWhere('leave_requests.status', status);
+      const rows = await q.orderBy('leave_requests.created_at', 'desc');
+      const columns = [
+        { header: 'Leave ID', value: (r) => r.leave_id },
+        { header: 'Date', value: (r) => r.leave_date },
+        { header: 'Employee ID', value: (r) => r.employee_id },
+        { header: 'Employee', value: (r) => r.employee_name },
+        { header: 'Department', value: (r) => r.department_name },
+        { header: 'Start', value: (r) => r.start_time },
+        { header: 'End', value: (r) => r.end_time },
+        { header: 'Status', value: (r) => r.status },
+        { header: 'Rejection Reason', value: (r) => r.rejection_reason },
+      ];
+      const csv = toCsv(rows, columns);
+      res.attachment('leave_history.csv');
+      return res.status(200).send(`\uFEFF${csv}`);
+    }
+
+    if (resource === 'scans') {
+      const rows = await db('qr_scan_logs')
+        .leftJoin('employees', 'qr_scan_logs.employee_id', 'employees.employee_id')
+        .select(
+          'qr_scan_logs.log_id',
+          'qr_scan_logs.scan_time',
+          'employees.employee_id',
+          'employees.full_name as employee_name',
+          'qr_scan_logs.qr_type',
+          'qr_scan_logs.is_valid'
+        )
+        .orderBy('qr_scan_logs.scan_time', 'desc');
+      const columns = [
+        { header: 'Log ID', value: (r) => r.log_id },
+        { header: 'Scan Time', value: (r) => r.scan_time },
+        { header: 'Employee ID', value: (r) => r.employee_id },
+        { header: 'Employee', value: (r) => r.employee_name },
+        { header: 'Type', value: (r) => r.qr_type },
+        { header: 'Valid', value: (r) => r.is_valid },
+      ];
+      const csv = toCsv(rows, columns);
+      res.attachment('scan_history.csv');
+      return res.status(200).send(`\uFEFF${csv}`);
+    }
+
+    if (resource === 'employees') {
+      const rows = await db('employees')
+        .leftJoin('departments', 'employees.department_id', 'departments.department_id')
+        .select(
+          'employees.employee_id',
+          'employees.full_name',
+          'employees.position',
+          'departments.department_name',
+          'employees.email',
+          'employees.is_supervisor',
+          'employees.is_admin',
+          'employees.is_security',
+          'employees.is_active'
+        )
+        .orderBy('employees.employee_id');
+      const columns = [
+        { header: 'Employee ID', value: (r) => r.employee_id },
+        { header: 'Name', value: (r) => r.full_name },
+        { header: 'Position', value: (r) => r.position },
+        { header: 'Department', value: (r) => r.department_name },
+        { header: 'Email', value: (r) => r.email },
+        { header: 'Supervisor', value: (r) => r.is_supervisor },
+        { header: 'Admin', value: (r) => r.is_admin },
+        { header: 'Security', value: (r) => r.is_security },
+        { header: 'Active', value: (r) => r.is_active },
+      ];
+      const csv = toCsv(rows, columns);
+      res.attachment('employees.csv');
+      return res.status(200).send(`\uFEFF${csv}`);
+    }
+
+    if (resource === 'audit') {
+      let q = db('audit_logs').orderBy('created_at', 'desc');
+      if (start_date) q = q.andWhere('created_at', '>=', `${start_date} 00:00:00`);
+      if (end_date) q = q.andWhere('created_at', '<=', `${end_date} 23:59:59`);
+      const rows = await q;
+      const columns = [
+        { header: 'Timestamp', value: (r) => r.created_at },
+        { header: 'Actor ID', value: (r) => r.actor_id },
+        { header: 'Actor Name', value: (r) => r.actor_name },
+        { header: 'Role', value: (r) => r.actor_role },
+        { header: 'Action', value: (r) => r.action },
+        { header: 'Entity', value: (r) => r.entity },
+        { header: 'Entity ID', value: (r) => r.entity_id },
+        { header: 'Description', value: (r) => r.description },
+        { header: 'IP Address', value: (r) => r.ip_address },
+      ];
+      const csv = toCsv(rows, columns);
+      res.attachment('audit_log.csv');
+      return res.status(200).send(`\uFEFF${csv}`);
+    }
+
+    throw createError(400, 'Unknown export resource');
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createEmployee,
   listEmployees,
@@ -453,4 +742,6 @@ module.exports = {
   deleteDepartment,
   importEmployees,
   getReports,
+  getAuditLog,
+  exportData,
 };

@@ -32,14 +32,15 @@ const sections = [
       { to: "/supervisor/pending", icon: ShieldCheck, label: "Pending" },
     ],
   },
-  {
-    label: "Admin",
-    links: [
-      { to: "/admin/employees", icon: Users, label: "Employees" },
-      { to: "/admin/departments", icon: Building2, label: "Departments" },
-      { to: "/admin/reports", icon: BarChart3, label: "Reports" },
-    ],
-  },
+      {
+        label: "Admin",
+        links: [
+          { to: "/admin/employees", icon: Users, label: "Employees" },
+          { to: "/admin/departments", icon: Building2, label: "Departments" },
+          { to: "/admin/reports", icon: BarChart3, label: "Reports" },
+          { to: "/admin/audit", icon: History, label: "Audit Log" },
+        ],
+      },
   {
     label: "Help",
     links: [

@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
+const { logAudit } = require('../utils/audit');
 
 async function submitLeave(req, res, next) {
   try {
@@ -248,6 +249,13 @@ async function deleteLeave(req, res, next) {
     await db('leave_requests').where({ leave_id: id }).del();
 
     res.json({ success: true, message: 'Leave request deleted' });
+
+    logAudit(req, {
+      action: 'delete',
+      entity: 'leave_request',
+      entity_id: id,
+      description: `Deleted leave request ${id} for ${leave.employee_id}`,
+    });
   } catch (err) {
     next(err);
   }

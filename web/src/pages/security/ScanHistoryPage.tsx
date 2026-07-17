@@ -1,19 +1,33 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { useScanStore } from "@/stores/scanStore"
 import { useAuthStore } from "@/stores/authStore"
 import { Button } from "@/components/ui/button"
-import { Loader2, Scan, LogOut, ArrowLeft, CheckCircle, XCircle, Clock } from "lucide-react"
+import Pagination from "@/components/shared/Pagination"
+import { downloadCsv } from "@/lib/download"
+import { toast } from "sonner"
+import { Loader2, Scan, LogOut, ArrowLeft, CheckCircle, XCircle, Clock, Download } from "lucide-react"
 import { formatDateTime } from "@/lib/utils"
 
 export default function ScanHistoryPage() {
   const navigate = useNavigate()
-  const { history, historyLoading, loadHistory } = useScanStore()
+  const { history, historyLoading, loadHistory, historyTotal, historyPage, historyLimit, historyPages } = useScanStore()
   const { user, logout } = useAuthStore()
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
-    loadHistory()
+    loadHistory(1, historyLimit)
   }, [])
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      await downloadCsv("/admin/export?resource=scans", "scan_history.csv")
+    } catch {
+      toast.error("Could not export CSV")
+    }
+    setExporting(false)
+  }
 
   return (
     <div className="page-enter flex min-h-screen flex-col bg-background">
@@ -34,6 +48,16 @@ export default function ScanHistoryPage() {
 
       <main className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold">Scan History</h1>
+            {user?.is_admin && (
+              <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                Export
+              </Button>
+            )}
+          </div>
+
           {historyLoading ? (
             <div className="flex items-center justify-center py-24">
               <div className="flex flex-col items-center gap-3">
@@ -110,6 +134,16 @@ export default function ScanHistoryPage() {
                 ))}
               </div>
             </>
+          )}
+
+          {historyTotal > 0 && (
+            <Pagination
+              page={historyPage}
+              limit={historyLimit}
+              total={historyTotal}
+              onPageChange={(p) => loadHistory(p, historyLimit)}
+              onLimitChange={(l) => loadHistory(1, l)}
+            />
           )}
         </div>
       </main>
