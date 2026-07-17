@@ -4,6 +4,7 @@ import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/responsive.dart';
 import '../employee/profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -91,7 +92,7 @@ class _SettingsAppBar extends StatelessWidget {
                   Text(
                     'Settings',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: responsiveFontSize(context, 20),
                       fontWeight: FontWeight.w700,
                       color: context.onPrimary,
                     ),

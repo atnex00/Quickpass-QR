@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/errors.dart';
+import '../../utils/responsive.dart';
 import '../employee/dashboard_screen.dart';
 import '../security/scanner_screen.dart';
 import '../supervisor/supervisor_dashboard.dart';
@@ -436,7 +437,7 @@ class QuickActionsSection extends StatelessWidget {
         Text(
           'Quick Actions',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: responsiveFontSize(context, 16),
             fontWeight: FontWeight.w600,
             color: context.onSurface,
             height: 1.5,
@@ -499,7 +500,7 @@ class SwitchViewSection extends StatelessWidget {
         Text(
           'Switch View',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: responsiveFontSize(context, 16),
             fontWeight: FontWeight.w600,
             color: context.onSurface,
             height: 1.5,
@@ -618,7 +619,7 @@ class LeaveBreakdownSection extends StatelessWidget {
         Text(
           'Leave Breakdown',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: responsiveFontSize(context, 16),
             fontWeight: FontWeight.w600,
             color: context.onSurface,
             height: 1.5,

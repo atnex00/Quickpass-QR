@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/status_badge.dart';
 
 class TeamCalendarScreen extends StatefulWidget {

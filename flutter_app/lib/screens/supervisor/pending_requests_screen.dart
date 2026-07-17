@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/status_badge.dart';
 
@@ -64,7 +65,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
                           child: Text('Pending Requests',
                               style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: responsiveFontSize(context, 14),
                                   fontWeight: FontWeight.w600,
                                   color: context.onSurface)),
                         ),
@@ -130,7 +131,7 @@ class _PendingRequestsScreenState extends State<PendingRequestsScreen> {
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
                           child: Text('Approved Leaves',
                               style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: responsiveFontSize(context, 14),
                                   fontWeight: FontWeight.w600,
                                   color: context.onSurface)),
                         ),
