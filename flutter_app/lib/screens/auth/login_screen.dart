@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/constants.dart';
+import '../../utils/responsive.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -157,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Quickpass',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: responsiveFontSize(context, 24),
                         fontWeight: FontWeight.w700,
                         color: context.primary,
                         letterSpacing: -0.01,
@@ -168,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Employee Gatepass System',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: responsiveFontSize(context, 14),
                         color: context.onSurfaceVariant,
                         height: 1.43,
                       ),
@@ -214,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'Quickpass',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: responsiveFontSize(context, 24),
                             fontWeight: FontWeight.w700,
                             color: context.primary,
                             letterSpacing: -0.01,
@@ -225,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'Sign in to your workplace command center',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: responsiveFontSize(context, 14),
                             color: context.onSurfaceVariant,
                             height: 1.43,
                           ),
