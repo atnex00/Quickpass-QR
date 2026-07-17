@@ -7,6 +7,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 import '../../widgets/offline_indicator.dart';
@@ -512,15 +513,31 @@ class _StatGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _StatCard('Pending', pendingCount.toString(), context.warning),
-        const SizedBox(width: 8),
-        _StatCard('Approved', approvedCount.toString(), context.success),
-        const SizedBox(width: 8),
-        _StatCard('Completed', completedCount.toString(), context.primaryBlue),
-      ],
-    );
+    return isSmallScreen(context)
+        ? Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                      child: _StatCard('Pending', pendingCount.toString(), context.warning)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: _StatCard('Approved', approvedCount.toString(), context.success)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _StatCard('Completed', completedCount.toString(), context.primaryBlue),
+            ],
+          )
+        : Row(
+            children: [
+              Expanded(child: _StatCard('Pending', pendingCount.toString(), context.warning)),
+              const SizedBox(width: 8),
+              Expanded(child: _StatCard('Approved', approvedCount.toString(), context.success)),
+              const SizedBox(width: 8),
+              Expanded(child: _StatCard('Completed', completedCount.toString(), context.primaryBlue)),
+            ],
+          );
   }
 }
 
@@ -613,36 +630,34 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.outlineVariant),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.outline,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: context.outline,
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: color,
-                height: 1.4,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: color,
+              height: 1.4,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
