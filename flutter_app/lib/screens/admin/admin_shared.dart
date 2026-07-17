@@ -268,35 +268,33 @@ class AdminActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 72),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            decoration: BoxDecoration(
-              color: active ? color.withValues(alpha: 0.1) : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                  color: color.withValues(alpha: active ? 0.4 : 0.15)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon,
-                    size: 20, color: active ? color : context.neutralGray),
-                const SizedBox(height: 2),
-                Text(label,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: active ? color : context.neutralGray),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1),
-              ],
-            ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 72),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: BoxDecoration(
+            color: active ? color.withValues(alpha: 0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: color.withValues(alpha: active ? 0.4 : 0.15)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  size: 20, color: active ? color : context.neutralGray),
+              const SizedBox(height: 2),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: active ? color : context.neutralGray),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
+            ],
           ),
         ),
       ),
