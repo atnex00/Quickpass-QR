@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../services/api_service.dart';
 import '../../utils/debounce.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/shimmer_list.dart';
 import 'admin_shared.dart';
 import 'employee_detail_screen.dart';
 
@@ -303,11 +304,12 @@ class _EmployeeTabState extends State<EmployeeTab> {
                 ),
               )
             else if (_isLoading)
-              const Center(
-                  child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
-              ))
+              const SliverFillRemaining(
+                child: ShimmerList(
+                    itemCount: 5,
+                    itemBuilder: _employeeRowPlaceholder,
+                    scrollable: false),
+              )
             else if (_employees.isEmpty)
               const EmptyState(
                 icon: Icons.people_outline,
@@ -1148,3 +1150,82 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
     }
   }
 }
+
+Widget _employeeRowPlaceholder(int _) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: 140,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 60,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+

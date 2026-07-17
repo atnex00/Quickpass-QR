@@ -9,6 +9,7 @@ import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 import '../../widgets/offline_indicator.dart';
+import '../../widgets/shimmer_list.dart';
 import 'qr_display_screen.dart';
 import 'request_leave_screen.dart';
 
@@ -103,8 +104,9 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                   ),
                 ),
               if (leaveProv.isLoading)
-                const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()))
+                SliverFillRemaining(
+                    child: ShimmerList(
+                        itemCount: 4, itemBuilder: _leaveCardPlaceholder))
               else if (leaveProv.error != null)
                 SliverFillRemaining(
                   child: EmptyState(
@@ -588,4 +590,81 @@ class _HistoryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _leaveCardPlaceholder(int _) {
+  return Container(
+    margin: const EdgeInsets.only(bottom: 8),
+    decoration: BoxDecoration(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: IntrinsicHeight(
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 60,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: 160,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 120,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
