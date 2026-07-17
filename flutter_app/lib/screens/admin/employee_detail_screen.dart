@@ -568,7 +568,7 @@ class _InfoItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-              width: MediaQuery.of(context).size.width * 0.32,
+              width: (MediaQuery.of(context).size.width * 0.32).clamp(90.0, 130.0),
               child: Text(label,
                   style: TextStyle(fontSize: 13, color: context.neutralGray))),
           Expanded(
