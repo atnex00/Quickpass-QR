@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+import 'package:safe_device/safe_device.dart';
 
 import 'api_service.dart';
 
 class DeviceSecurityService {
   static Future<bool> isDeviceCompromised() async {
     try {
-      return await FlutterJailbreakDetection.jailbroken;
+      return await SafeDevice.isJailBroken;
     } catch (_) {
       return false;
     }
