@@ -15,9 +15,17 @@ class CacheService {
   static const _keyApproved = 'cache_approved';
   static const _keyProfile = 'cache_profile';
 
+  static Map<String, dynamic> _sanitize(Map<String, dynamic> json) {
+    json.remove('out_qr_code');
+    json.remove('in_qr_code');
+    json.remove('out_qr_image');
+    json.remove('in_qr_image');
+    return json;
+  }
+
   // ── Leave History ──
   Future<void> saveLeaves(List<LeaveRequest> leaves) async {
-    final data = leaves.map((l) => l.toJson()).toList();
+    final data = leaves.map((l) => _sanitize(l.toJson())).toList();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyLeaves, jsonEncode(data));
   }
@@ -36,7 +44,8 @@ class CacheService {
     if (leave == null) {
       await prefs.remove(_keyActiveLeave);
     } else {
-      await prefs.setString(_keyActiveLeave, jsonEncode(leave.toJson()));
+      await prefs.setString(
+          _keyActiveLeave, jsonEncode(_sanitize(leave.toJson())));
     }
   }
 
@@ -49,7 +58,7 @@ class CacheService {
 
   // ── Supervisor Pending ──
   Future<void> savePendingRequests(List<LeaveRequest> leaves) async {
-    final data = leaves.map((l) => l.toJson()).toList();
+    final data = leaves.map((l) => _sanitize(l.toJson())).toList();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyPending, jsonEncode(data));
   }
@@ -64,7 +73,7 @@ class CacheService {
 
   // ── Supervisor Approved ──
   Future<void> saveApprovedLeaves(List<LeaveRequest> leaves) async {
-    final data = leaves.map((l) => l.toJson()).toList();
+    final data = leaves.map((l) => _sanitize(l.toJson())).toList();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyApproved, jsonEncode(data));
   }
