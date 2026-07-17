@@ -5,6 +5,7 @@ import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/qr_countdown.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 
@@ -50,7 +51,7 @@ class QrDisplayScreen extends StatelessWidget {
                               Text(
                                 'Quickpass',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: responsiveFontSize(context, 20),
                                   fontWeight: FontWeight.w700,
                                   color: context.onPrimary,
                                 ),
@@ -146,7 +147,7 @@ class QrDisplayScreen extends StatelessWidget {
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: 20,
+                                                  fontSize: responsiveFontSize(context, 20),
                                                   fontWeight: FontWeight.w600,
                                                   color: context.onSurface,
                                                   height: 1.4,
@@ -291,7 +292,7 @@ class QrDisplayScreen extends StatelessWidget {
                                   Text(
                                     'Pass Guidelines',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: responsiveFontSize(context, 14),
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.01,
                                       color: context.onSurface,
@@ -533,7 +534,7 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: responsiveFontSize(context, 16),
                     fontWeight: FontWeight.w600,
                     color: widget.qrColor,
                   ),

@@ -5,6 +5,7 @@ import '../../models/leave_request.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../utils/date_formatter.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 import '../../widgets/offline_indicator.dart';
@@ -72,7 +73,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                             Text(
                               'Gate History',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: responsiveFontSize(context, 20),
                                 fontWeight: FontWeight.w700,
                                 color: context.onPrimary,
                               ),
@@ -256,7 +257,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                               children: [
                                 Text('Planning ahead?',
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: responsiveFontSize(context, 16),
                                         fontWeight: FontWeight.w600,
                                         color: context.onPrimaryContainer,
                                         height: 1.5)),
@@ -454,7 +455,7 @@ class _HistoryCard extends StatelessWidget {
                                   child: Text(
                                     leave.reason,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: responsiveFontSize(context, 16),
                                       fontWeight: FontWeight.w600,
                                       color: context.onSurface,
                                       height: 1.5,

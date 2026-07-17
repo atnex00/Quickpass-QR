@@ -6,6 +6,7 @@ import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/employee.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/responsive.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -249,7 +250,7 @@ class _ProfileAppBar extends StatelessWidget {
                   Text(
                     'My Profile',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: responsiveFontSize(context, 20),
                       fontWeight: FontWeight.w700,
                       color: context.onPrimary,
                     ),
