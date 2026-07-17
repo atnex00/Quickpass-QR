@@ -504,9 +504,10 @@ class _PendingRequestsSection extends StatelessWidget {
             child: CircularProgressIndicator(),
           ))
         else if (pendingRequests.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.inbox_outlined,
             title: 'No pending requests',
+            isOffline: context.read<SupervisorProvider>().fromCache,
           )
         else
           ...pendingRequests.take(5).map((leave) => _PendingCard(leave: leave)),

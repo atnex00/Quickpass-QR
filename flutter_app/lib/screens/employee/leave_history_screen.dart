@@ -104,6 +104,17 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
               if (leaveProv.isLoading)
                 const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()))
+              else if (leaveProv.error != null)
+                SliverFillRemaining(
+                  child: EmptyState(
+                    icon: Icons.inbox_outlined,
+                    title: 'No leave requests found',
+                    subtitle: _statusFilter != null
+                        ? 'No $_statusFilter requests match your filter'
+                        : 'Submit a leave request to get started',
+                    error: leaveProv.error,
+                  ),
+                )
               else if (leaveProv.history.isEmpty)
                 SliverFillRemaining(
                   child: EmptyState(
@@ -112,6 +123,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                     subtitle: _statusFilter != null
                         ? 'No $_statusFilter requests match your filter'
                         : 'Submit a leave request to get started',
+                    isOffline: leaveProv.fromCache,
                   ),
                 )
               else

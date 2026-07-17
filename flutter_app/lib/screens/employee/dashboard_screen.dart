@@ -592,9 +592,10 @@ class _RecentActivitySection extends StatelessWidget {
             ),
           )
         else if (history.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.inbox_outlined,
             title: 'No recent activity',
+            isOffline: context.read<LeaveProvider>().fromCache,
           )
         else
           ...history.take(10).map((leave) => _ActivityCard(leave: leave)),

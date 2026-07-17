@@ -119,34 +119,48 @@ class EmptyState extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.action,
+    this.isOffline = false,
+    this.error,
   });
   final IconData icon;
   final String title;
   final String? subtitle;
   final Widget? action;
+  final bool isOffline;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = error ?? title;
+    final displaySubtitle = error != null
+        ? 'Pull down to retry'
+        : (isOffline ? 'Check your internet connection' : subtitle);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: context.outlineVariant),
+            Icon(
+              error != null ? Icons.cloud_off : icon,
+              size: 64,
+              color: error != null ? context.warning : context.outlineVariant,
+            ),
             const SizedBox(height: 16),
             Text(
-              title,
+              displayTitle,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: context.onSurfaceVariant,
               ),
             ),
-            if (subtitle != null) ...[
+            if (displaySubtitle != null) ...[
               const SizedBox(height: 8),
               Text(
-                subtitle!,
+                displaySubtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: context.neutralGray),
               ),

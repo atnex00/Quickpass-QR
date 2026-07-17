@@ -29,7 +29,9 @@ import 'widgets/connectivity_banner.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (_) {}
 
   FlutterError.onError = (details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
