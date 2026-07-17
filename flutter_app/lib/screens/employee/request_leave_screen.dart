@@ -339,7 +339,7 @@ class _ReadOnlyField extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-              width: 110,
+              width: (MediaQuery.of(context).size.width * 0.3).clamp(90.0, 120.0),
               child: Text(label,
                   style: TextStyle(color: context.neutralGray, fontSize: 13))),
           Expanded(
