@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Loader2, Eye, EyeOff } from "lucide-react"
+import ThemeToggle from "@/components/layout/ThemeToggle"
 
 export default function LoginPage() {
   const [employeeId, setEmployeeId] = useState("")
@@ -25,6 +26,9 @@ export default function LoginPage() {
 
   return (
     <main className="page-enter flex min-h-screen flex-col bg-background">
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-14">
           {/* Left — Brand column */}

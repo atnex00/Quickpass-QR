@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, History, LogOut, ArrowLeft, Scan } from "lucide-react"
 import { useNavigate } from "react-router"
+import ThemeToggle from "./ThemeToggle"
 
 interface SecurityHeaderProps {
   showBack?: boolean
@@ -32,6 +33,7 @@ export default function SecurityHeader({ showBack, title }: SecurityHeaderProps)
         </div>
       </div>
       <div className="flex items-center gap-1">
+        <ThemeToggle />
         {user && (
           <span className="hidden text-sm text-muted-foreground sm:block">
             {user.full_name}

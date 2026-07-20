@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Outlet, Navigate, useLocation } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import Sidebar from "./Sidebar"
+import ThemeToggle from "./ThemeToggle"
 import { Toaster } from "sonner"
 
 function StatusBar() {
@@ -25,6 +26,7 @@ function StatusBar() {
         <span className="text-[11px] text-muted-foreground/50">System Online</span>
       </div>
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <span className="status-bar-user">{user?.full_name}</span>
         <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">{role}</span>
       </div>

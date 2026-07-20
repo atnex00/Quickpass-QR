@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { Employee } from "@/types"
 import api, { setAccessToken, getAccessToken, setOnAuthFailure } from "@/lib/api"
+import { rehydrateTheme } from "@/stores/themeStore"
 
 interface AuthState {
   user: Employee | null
@@ -35,6 +36,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           isAuthenticated: true,
           isLoading: false,
         })
+        rehydrateTheme()
         return true
       }
       set({ error: data.message, isLoading: false })
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
     setAccessToken(null)
     set({ user: null, isAuthenticated: false, isLoading: false })
+    rehydrateTheme()
   },
 
   loadUser: async () => {
@@ -78,6 +81,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const res = await api.get("/auth/profile")
       set({ user: res.data.data, isAuthenticated: true, isLoading: false })
+      rehydrateTheme()
     } catch {
       setAccessToken(null)
       set({ user: null, isAuthenticated: false, isLoading: false })
