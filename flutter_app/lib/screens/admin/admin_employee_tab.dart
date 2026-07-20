@@ -8,10 +8,10 @@ import '../../utils/debounce.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/shimmer_list.dart';
 import 'admin_shared.dart';
+import 'employee_detail_screen.dart';
 import 'widgets/add_employee_dialog.dart';
 import 'widgets/edit_employee_dialog.dart';
 import 'widgets/reset_password_dialog.dart';
-import 'employee_detail_screen.dart';
 
 class EmployeeTab extends StatefulWidget {
   const EmployeeTab({super.key});
