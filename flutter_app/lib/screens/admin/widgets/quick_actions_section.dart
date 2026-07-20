@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../config/theme.dart';
 import '../../../utils/responsive.dart';
-import '../../shared/admin_shared.dart';
+import '../admin_shared.dart';
 
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key, required this.onSwitchTab});

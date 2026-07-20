@@ -5,7 +5,7 @@ import '../../../utils/responsive.dart';
 import '../../employee/dashboard_screen.dart';
 import '../../security/scanner_screen.dart';
 import '../../supervisor/supervisor_dashboard.dart';
-import '../../shared/admin_shared.dart';
+import '../admin_shared.dart';
 
 class SwitchViewSection extends StatelessWidget {
   const SwitchViewSection({super.key});

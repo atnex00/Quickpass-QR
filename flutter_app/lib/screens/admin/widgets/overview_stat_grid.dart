@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../config/theme.dart';
-import '../../shared/admin_shared.dart';
+import '../admin_shared.dart';
 
 class OverviewStatGrid extends StatelessWidget {
   const OverviewStatGrid({
