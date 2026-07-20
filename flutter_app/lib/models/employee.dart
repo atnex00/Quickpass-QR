@@ -60,7 +60,7 @@ class Employee {
   final DateTime? hireDate;
 
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
-  static bool _boolActiveFromJson(dynamic v) => v != false && v != 0;
+  static bool _boolActiveFromJson(dynamic v) => v == true || v == 1;
   static DateTime? _hireDateFromJson(dynamic v) =>
       v != null ? DateTime.tryParse(v.toString()) : null;
   static String? _hireDateToJson(DateTime? v) =>
