@@ -94,7 +94,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
       context: context,
       builder: (_) => AddEmployeeDialog(departments: _departments),
     ).then((created) {
-      if (created == true) _loadData();
+      if (created == true && mounted) _loadData();
     });
   }
 
@@ -570,7 +570,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                       final messenger = ScaffoldMessenger.of(context);
                       try {
                         await _api.toggleActive(emp['employee_id']);
-                        _loadData();
+                        if (mounted) _loadData();
                       } catch (e) {
                         if (mounted) {
                           messenger.showSnackBar(

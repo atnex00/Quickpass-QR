@@ -40,7 +40,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
     } catch (e) {
       _error = friendlyError(e);
     }
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   void _showAddDialog() {
@@ -48,7 +48,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
       context: context,
       builder: (_) => const AddDepartmentDialog(),
     ).then((created) {
-      if (created == true) _loadDepartments();
+      if (created == true && mounted) _loadDepartments();
     });
   }
 
@@ -57,7 +57,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
       context: context,
       builder: (_) => EditDepartmentDialog(dept: dept),
     ).then((updated) {
-      if (updated == true) _loadDepartments();
+      if (updated == true && mounted) _loadDepartments();
     });
   }
 

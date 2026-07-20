@@ -160,6 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (cropped == null) return;
 
+    if (!mounted) return;
     setState(() => _uploading = true);
     final ok = await auth.uploadProfilePhoto(cropped.path);
     if (mounted) setState(() => _uploading = false);
