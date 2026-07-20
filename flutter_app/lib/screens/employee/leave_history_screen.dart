@@ -22,18 +22,33 @@ class LeaveHistoryScreen extends StatefulWidget {
 
 class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
   String? _statusFilter;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LeaveProvider>().loadHistory();
+      context.read<LeaveProvider>().loadHistory(page: _currentPage);
     });
   }
 
   void _setFilter(String? status) {
-    setState(() => _statusFilter = status);
-    context.read<LeaveProvider>().loadHistory(status: status);
+    setState(() {
+      _statusFilter = status;
+      _currentPage = 1;
+    });
+    context.read<LeaveProvider>().loadHistory(
+      status: status,
+      page: _currentPage,
+    );
+  }
+
+  void _goToPage(int page) {
+    setState(() => _currentPage = page);
+    context.read<LeaveProvider>().loadHistory(
+      status: _statusFilter,
+      page: page,
+    );
   }
 
   @override
@@ -131,7 +146,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -241,56 +256,94 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                             },
                           );
                         }
-                        final offset = index - leaveProv.history.length;
-                        if (offset == 0) return const SizedBox(height: 16);
-                        if (offset == 1) {
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: context.primaryContainer,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: context.primaryBlue
-                                      .withValues(alpha: 0.2)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Planning ahead?',
-                                    style: TextStyle(
-                                        fontSize: responsiveFontSize(context, 16),
-                                        fontWeight: FontWeight.w600,
-                                        color: context.onPrimaryContainer,
-                                        height: 1.5)),
-                                const SizedBox(height: 8),
-                                Text(
-                                    'Secure your holiday pass now to ensure quick approval from the command center.',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: context.onPrimaryContainer,
-                                        height: 1.43)),
-                                const SizedBox(height: 16),
-                                FilledButton(
-                                  onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const RequestLeaveScreen())),
-                                  child: const Text('New Request',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700)),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
                         return null;
                       },
-                      childCount: leaveProv.history.length + 2,
+                      childCount: leaveProv.history.length,
                     ),
                   ),
                 ),
+              if (!leaveProv.isLoading &&
+                  leaveProv.historyPages > 1 &&
+                  (leaveProv.error == null || leaveProv.history.isNotEmpty))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Page ${leaveProv.historyPage} of ${leaveProv.historyPages}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.neutralGray,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            FilledButton.tonal(
+                              onPressed: _currentPage > 1
+                                  ? () => _goToPage(_currentPage - 1)
+                                  : null,
+                              child: const Text('Prev'),
+                            ),
+                            const SizedBox(width: 8),
+                            FilledButton.tonal(
+                              onPressed: _currentPage < leaveProv.historyPages
+                                  ? () => _goToPage(_currentPage + 1)
+                                  : null,
+                              child: const Text('Next'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: context.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: context.primaryBlue
+                              .withValues(alpha: 0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Planning ahead?',
+                            style: TextStyle(
+                                fontSize: responsiveFontSize(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: context.onPrimaryContainer,
+                                height: 1.5)),
+                        const SizedBox(height: 8),
+                        Text(
+                            'Secure your holiday pass now to ensure quick approval from the command center.',
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: context.onPrimaryContainer,
+                                height: 1.43)),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const RequestLeaveScreen())),
+                          child: const Text('New Request',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

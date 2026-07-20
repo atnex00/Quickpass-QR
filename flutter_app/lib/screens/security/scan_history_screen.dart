@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
-import '../../models/scan_log.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/api_service.dart';
+import '../../providers/scan_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/loading_indicator.dart';
@@ -17,36 +16,29 @@ class ScanHistoryScreen extends StatefulWidget {
 }
 
 class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
-  late final ApiService _api;
-  List<ScanLog> _logs = [];
-  bool _isLoading = true;
-  String? _error;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
-    _api = context.read<ApiService>();
-    _loadHistory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ScanProvider>().loadHistory(page: _currentPage);
+    });
   }
 
-  Future<void> _loadHistory() async {
-    setState(() => _isLoading = true);
-    try {
-      final data = await _api.getScanHistory();
-      _logs = (data['data'] as List).map((j) => ScanLog.fromJson(j)).toList();
-      _error = null;
-    } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
-    }
-    if (mounted) setState(() => _isLoading = false);
+  void _goToPage(int page) {
+    setState(() => _currentPage = page);
+    context.read<ScanProvider>().loadHistory(page: page);
   }
 
   @override
   Widget build(BuildContext context) {
+    final scanProv = context.watch<ScanProvider>();
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _loadHistory,
+          onRefresh: () => scanProv.loadHistory(page: _currentPage),
           child: CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -164,10 +156,10 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   ),
                 ),
               ),
-              if (_isLoading)
+              if (scanProv.historyLoading)
                 const SliverFillRemaining(
                     child: Center(child: LoadingIndicator()))
-              else if (_error != null)
+              else if (scanProv.error != null && scanProv.history.isEmpty)
                 SliverFillRemaining(
                   child: Center(
                     child: Padding(
@@ -184,11 +176,11 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                                   fontWeight: FontWeight.w600,
                                   color: context.onSurface)),
                           const SizedBox(height: 8),
-                          Text(_error!,
+                          Text(scanProv.error!,
                               style: TextStyle(color: context.neutralGray)),
                           const SizedBox(height: 24),
                           FilledButton(
-                            onPressed: _loadHistory,
+                            onPressed: () => scanProv.loadHistory(page: _currentPage),
                             style: FilledButton.styleFrom(
                               backgroundColor: context.primary,
                               foregroundColor: context.onPrimary,
@@ -200,7 +192,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     ),
                   ),
                 )
-              else if (_logs.isEmpty)
+              else if (scanProv.history.isEmpty)
                 SliverFillRemaining(
                   child: EmptyState(
                     icon: Icons.qr_code_scanner_outlined,
@@ -215,45 +207,11 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        if (index == 0) {
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: context.surfaceContainerLowest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: context.outlineVariant),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.qr_code_scanner,
-                                    size: 28, color: context.primaryBlue),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('${_logs.length}',
-                                        style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w700,
-                                            color: context.onSurface)),
-                                    Text('Total Scans',
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            color: context.neutralGray)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        final logIndex = index - 1;
-                        final log = _logs[logIndex];
+                        final log = scanProv.history[index];
                         final isSuccess = log.isValid;
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -363,7 +321,44 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                           ),
                         );
                       },
-                      childCount: _logs.length + 1,
+                      childCount: scanProv.history.length,
+                    ),
+                  ),
+                ),
+              if (!scanProv.historyLoading &&
+                  scanProv.historyPages > 1 &&
+                  (scanProv.error == null || scanProv.history.isNotEmpty))
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Page ${scanProv.historyPage} of ${scanProv.historyPages}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.neutralGray,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            FilledButton.tonal(
+                              onPressed: _currentPage > 1
+                                  ? () => _goToPage(_currentPage - 1)
+                                  : null,
+                              child: const Text('Prev'),
+                            ),
+                            const SizedBox(width: 8),
+                            FilledButton.tonal(
+                              onPressed: _currentPage < scanProv.historyPages
+                                  ? () => _goToPage(_currentPage + 1)
+                                  : null,
+                              child: const Text('Next'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),

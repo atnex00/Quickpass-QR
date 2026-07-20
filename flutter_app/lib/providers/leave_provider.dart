@@ -19,6 +19,9 @@ class LeaveProvider extends ChangeNotifier {
   int _pendingCount = 0;
   int _approvedCount = 0;
   int _completedCount = 0;
+  int _historyPage = 1;
+  int _historyTotal = 0;
+  int _historyPages = 1;
 
   List<LeaveRequest> get history => _history;
   LeaveRequest? get activeLeave => _activeLeave;
@@ -28,6 +31,9 @@ class LeaveProvider extends ChangeNotifier {
   int get pendingCount => _pendingCount;
   int get approvedCount => _approvedCount;
   int get completedCount => _completedCount;
+  int get historyPage => _historyPage;
+  int get historyTotal => _historyTotal;
+  int get historyPages => _historyPages;
 
   void _recomputeCounts() {
     _pendingCount = 0;
@@ -44,15 +50,19 @@ class LeaveProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadHistory({String? status}) async {
+  Future<void> loadHistory({String? status, int page = 1}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final data = await _api.getLeaveHistory(status: status);
+      final data = await _api.getLeaveHistory(status: status, page: page);
       final list = data['data'] as List? ?? [];
       _history = list.map((j) => LeaveRequest.fromJson(j)).toList();
+      final p = data['pagination'] as Map<String, dynamic>?;
+      _historyTotal = int.tryParse('${p?['total']}') ?? _history.length;
+      _historyPage = int.tryParse('${p?['page']}') ?? page;
+      _historyPages = int.tryParse('${p?['pages']}') ?? 1;
       _recomputeCounts();
       _fromCache = false;
       CacheService().saveLeaves(_history);
@@ -162,6 +172,9 @@ class LeaveProvider extends ChangeNotifier {
     _pendingCount = 0;
     _approvedCount = 0;
     _completedCount = 0;
+    _historyPage = 1;
+    _historyTotal = 0;
+    _historyPages = 1;
     notifyListeners();
   }
 }
