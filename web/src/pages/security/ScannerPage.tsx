@@ -7,6 +7,7 @@ import jsQR from "jsqr"
 import { toast } from "sonner"
 import { useScanStore } from "@/stores/scanStore"
 import { useAuthStore } from "@/stores/authStore"
+import PageHeader from "@/components/layout/PageHeader"
 
 type ScanState = "idle" | "detected" | "confirmed"
 
@@ -173,30 +174,29 @@ export default function ScannerPage() {
   const isIdle = scanState === "idle"
 
   return (
-    <div className="page-enter flex min-h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="ZANECO QuickPass" className="h-8 w-auto" />
-          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Security Scanner</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {user && <span className="hidden text-sm text-muted-foreground sm:block">{user.full_name}</span>}
-          <Link to="/employee">
-            <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
-          </Link>
-          <Link to="/security/history">
-            <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
-          </Link>
-          <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
-        </div>
-      </header>
-
-      <main className="flex flex-1 items-start justify-center p-6">
+    <div className="page-enter flex min-h-screen flex-col bg-background app-aurora">
+      <main className="relative z-[1] flex flex-1 flex-col items-center p-6">
         <div className="w-full max-w-sm space-y-4">
 
+          <PageHeader
+            title="Gate Scanner"
+            subtitle="Scan OUT or IN QR codes to record gate entries"
+            icon={<QrCode className="h-5 w-5" />}
+            actions={
+              <div className="flex items-center gap-1">
+                <Link to="/employee">
+                  <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
+                </Link>
+                <Link to="/security/history">
+                  <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
+              </div>
+            }
+          />
+
           {/* Scanner Card */}
-          <div className="panel-card">
+          <div className="card-elevated">
             <div className="p-4">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xs font-black uppercase tracking-[0.1em] text-muted-foreground">Camera Scanner</h2>
@@ -226,17 +226,17 @@ export default function ScannerPage() {
               )}
 
               {/* Viewport */}
-              <div className="relative mx-auto overflow-hidden rounded-lg bg-black" style={{ width: "100%", maxWidth: 300, aspectRatio: "1/1" }}>
+              <div className="relative mx-auto overflow-hidden rounded-2xl bg-black ring-1 ring-border" style={{ width: "100%", maxWidth: 300, aspectRatio: "1/1" }}>
                 <video ref={videoRef} autoPlay playsInline muted className="size-full object-cover" />
 
                 {!cameraActive && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-muted">
-                    <div className="flex items-center justify-center rounded-xl bg-card p-4 border border-border">
-                      <QrCode className="h-10 w-10 text-muted-foreground/40" />
-                    </div>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-muted/95">
+                    <span className="stat-tile">
+                      <QrCode className="h-6 w-6" />
+                    </span>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-muted-foreground">Camera is off</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground/60">Position QR code within the frame</p>
+                      <p className="text-sm font-medium text-foreground">Camera is off</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/70">Position QR code within the frame</p>
                     </div>
                   </div>
                 )}
@@ -262,10 +262,10 @@ export default function ScannerPage() {
                     )}
                     <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                       <div className={`relative size-48 ${cameraActive && isIdle ? "amber-border-glow" : ""}`}>
-                        <div className="absolute top-0 left-0 h-7 w-7 border-t-[3px] border-l-[3px] rounded-tl border-primary" />
-                        <div className="absolute top-0 right-0 h-7 w-7 border-t-[3px] border-r-[3px] rounded-tr border-primary" />
-                        <div className="absolute bottom-0 left-0 h-7 w-7 border-b-[3px] border-l-[3px] rounded-bl border-primary" />
-                        <div className="absolute bottom-0 right-0 h-7 w-7 border-b-[3px] border-r-[3px] rounded-br border-primary" />
+                        <div className="absolute top-0 left-0 h-8 w-8 border-t-[3px] border-l-[3px] rounded-tl-lg border-primary shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                        <div className="absolute top-0 right-0 h-8 w-8 border-t-[3px] border-r-[3px] rounded-tr-lg border-primary shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                        <div className="absolute bottom-0 left-0 h-8 w-8 border-b-[3px] border-l-[3px] rounded-bl-lg border-primary shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                        <div className="absolute bottom-0 right-0 h-8 w-8 border-b-[3px] border-r-[3px] rounded-br-lg border-primary shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
                       </div>
                     </div>
                     <div className="absolute bottom-3 left-1/2 z-30 -translate-x-1/2">
@@ -314,7 +314,7 @@ export default function ScannerPage() {
           </div>
 
           {/* Manual Entry */}
-          <div className="panel-card">
+          <div className="card-elevated">
             <div className="p-4">
               <form onSubmit={handleManual} className="space-y-3">
                 <div className="space-y-1.5">

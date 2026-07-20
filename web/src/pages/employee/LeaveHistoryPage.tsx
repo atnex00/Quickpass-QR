@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/authStore"
 import api from "@/lib/api"
 import { toast } from "sonner"
 import { Inbox, CalendarDays, Filter, Trash2 } from "lucide-react"
+import PageHeader from "@/components/layout/PageHeader"
 
 export default function LeaveHistoryPage() {
   const { history, isLoading, loadHistory } = useLeaveStore()
@@ -41,10 +42,11 @@ export default function LeaveHistoryPage() {
 
   return (
     <div className="page-enter space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Leave History</h1>
-        <p className="text-muted-foreground">View all your leave requests</p>
-      </div>
+      <PageHeader
+        title="Leave History"
+        subtitle="View all your leave requests"
+        icon={<CalendarDays className="h-5 w-5" />}
+      />
 
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => (
@@ -53,7 +55,7 @@ export default function LeaveHistoryPage() {
             onClick={() => setFilter(f.value)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               filter === f.value
-                ? "bg-primary text-primary-foreground"
+                ? "bg-primary text-[#1c1917] shadow-sm"
                 : "bg-muted text-muted-foreground hover:bg-accent"
             }`}
           >
@@ -82,7 +84,7 @@ export default function LeaveHistoryPage() {
         <div className="space-y-3">
           {history.map((leave) => (
             <Link key={leave.leave_id} to={`/employee/qr/${leave.leave_id}`}>
-              <Card className="card-hover p-4">
+              <Card className="lift p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
                     <CalendarDays className="mt-0.5 h-5 w-5 text-muted-foreground" />

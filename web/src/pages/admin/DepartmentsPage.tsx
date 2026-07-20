@@ -11,6 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import PageHeader from "@/components/layout/PageHeader"
 import type { Department } from "@/types"
 import api from "@/lib/api"
 import { Building2, Loader2, Plus, Trash2 } from "lucide-react"
@@ -67,15 +68,16 @@ export default function DepartmentsPage() {
 
   return (
     <div className="page-enter space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Departments</h1>
-          <p className="text-muted-foreground">{departments.length} departments</p>
-        </div>
-        <Button className="gap-2" onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" /> Add Department
-        </Button>
-      </div>
+      <PageHeader
+        title="Departments"
+        subtitle={`${departments.length} departments`}
+        icon={<Building2 className="h-5 w-5" />}
+        actions={
+          <Button className="gap-2" onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Add Department
+          </Button>
+        }
+      />
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -90,18 +92,18 @@ export default function DepartmentsPage() {
             <h3>No departments</h3>
             <p>Create your first department to organize your organization</p>
           </div>
-          <Button className="btn-primary" onClick={() => setAddOpen(true)}>
+          <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" /> Add Department
           </Button>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {departments.map((dept) => (
-            <Card key={dept.department_id} className="card-hover relative group">
+            <Card key={dept.department_id} className="lift relative group">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-primary/10 p-3">
-                    <Building2 className="h-6 w-6 text-primary" />
+                  <div className="stat-tile">
+                    <Building2 className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold">{dept.department_name}</h3>

@@ -310,3 +310,181 @@ body { @apply bg-background text-foreground antialiased; }
   90% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
 }
+
+/* ── SaaS polish: ambient aurora background ── */
+.app-aurora {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(251, 191, 36, 0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(13, 148, 136, 0.08), transparent 55%),
+    var(--background);
+}
+.app-aurora::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(120, 113, 108, 0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  pointer-events: none;
+}
+.dark .app-aurora::before { background-image: radial-gradient(rgba(168, 162, 158, 0.12) 1px, transparent 1px); }
+
+/* Floating glow blob */
+.glow-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.dark .glow-blob { opacity: 0.35; }
+
+/* Glass surface */
+.glass {
+  background: color-mix(in srgb, var(--card) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+/* Brand gradient surface (for hero / login) */
+.brand-gradient {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(251, 191, 36, 0.18), transparent 50%),
+    linear-gradient(135deg, rgba(251, 191, 36, 0.10), rgba(13, 148, 136, 0.08));
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+.dark .brand-gradient {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(251, 191, 36, 0.22), transparent 55%),
+    linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(13, 148, 136, 0.10));
+}
+
+/* Gradient primary button */
+.btn-gradient {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-xs font-black uppercase tracking-[0.08em] text-[#1c1917] shadow-sm transition-all;
+  background-image: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+.btn-gradient:hover {
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+  transform: translateY(-1px);
+}
+.btn-gradient:active { transform: scale(0.98); }
+.dark .btn-gradient { color: #1c1917; }
+
+/* Icon tile for stat cards */
+.stat-tile {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary;
+  background-image: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(13, 148, 136, 0.12));
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+.dark .stat-tile {
+  background-image: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(13, 148, 136, 0.16));
+}
+
+/* Gradient text */
+.text-gradient {
+  background-image: linear-gradient(120deg, var(--primary), color-mix(in srgb, var(--primary) 55%, var(--success)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Refined scrollbars */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted-foreground) 30%, transparent);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--muted-foreground) 50%, transparent); }
+
+/* Soft card elevation for SaaS feel */
+.card-elevated {
+  @apply rounded-xl border border-border bg-card;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.12);
+}
+.dark .card-elevated { box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -16px rgba(0,0,0,0.6); }
+
+/* Lift-on-hover with brand tint */
+.lift {
+  @apply transition-all duration-300;
+}
+.lift:hover {
+  transform: translateY(-3px);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 12px 30px -16px rgba(251, 191, 36, 0.4);
+}
+
+/* ── SaaS page header band ── */
+.page-header {
+  @apply relative mb-5 overflow-hidden rounded-2xl border border-border p-5 sm:p-6;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(251, 191, 36, 0.16), transparent 55%),
+    radial-gradient(120% 140% at 0% 100%, rgba(13, 148, 136, 0.10), transparent 55%),
+    var(--card);
+}
+.page-header::before {
+  content: "";
+  @apply absolute left-0 top-0 h-full w-1.5;
+  background-image: linear-gradient(180deg, #fbbf24, #0d9488);
+}
+.dark .page-header {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(251, 191, 36, 0.20), transparent 55%),
+    radial-gradient(120% 140% at 0% 100%, rgba(13, 148, 136, 0.12), transparent 55%),
+    var(--card);
+}
+.page-header-row {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+.page-title {
+  @apply text-xl font-bold tracking-tight text-foreground sm:text-2xl;
+}
+.page-subtitle {
+  @apply mt-0.5 text-sm text-muted-foreground;
+}
+
+/* ── KPI stat cards ── */
+.kpi {
+  @apply relative overflow-hidden rounded-xl border border-border bg-card p-4;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -16px rgba(0,0,0,0.18);
+}
+.dark .kpi { box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -18px rgba(0,0,0,0.6); }
+.kpi::after {
+  content: "";
+  @apply pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-30 blur-2xl;
+  background-image: linear-gradient(135deg, rgba(251,191,36,0.5), rgba(13,148,136,0.3));
+}
+.kpi-value {
+  @apply text-3xl font-black leading-none text-foreground;
+}
+.kpi-label {
+  @apply text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
+}
+.kpi-delta {
+  @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold;
+}
+.kpi-delta-up { @apply bg-success/15 text-success; }
+.kpi-delta-down { @apply bg-destructive/15 text-destructive; }
+
+/* Empty state polish */
+.empty-state h3 { @apply text-base font-semibold text-foreground; }
+.empty-cta {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-[#1c1917] shadow-sm transition-all;
+  background-image: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+.empty-cta:hover {
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Section title */
+.section-title {
+  @apply mb-3 text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground;
+}

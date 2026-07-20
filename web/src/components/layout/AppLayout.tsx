@@ -54,11 +54,12 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="app-aurora flex h-screen overflow-hidden">
+      <div className="glow-blob h-72 w-72 bg-primary/20 -left-20 top-1/3" />
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <StatusBar />
-        <main className="flex-1 overflow-y-auto bg-background p-4 pb-16 md:pb-4">
+        <main className="relative flex-1 overflow-y-auto p-4 pb-16 md:pb-4">
           <div key={location.pathname + location.search} className="page-enter">
             <Outlet />
           </div>

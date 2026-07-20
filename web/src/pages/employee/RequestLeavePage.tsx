@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import PageHeader from "@/components/layout/PageHeader"
 import { toast } from "sonner"
-import { Loader2, Lock, CalendarDays } from "lucide-react"
+import { Loader2, Lock, CalendarDays, User } from "lucide-react"
 
 export default function RequestLeavePage() {
   const { user } = useAuthStore()
@@ -64,25 +65,28 @@ export default function RequestLeavePage() {
 
   return (
     <div className="page-enter mx-auto max-w-2xl space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Request Leave</h1>
-        <p className="text-muted-foreground">Submit a new temporary leave request</p>
-      </div>
+      <PageHeader
+        title="Request Leave"
+        subtitle="Submit a new temporary leave request"
+        icon={<CalendarDays className="h-5 w-5" />}
+      />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Employee Information</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-4 w-4 text-primary" /> Employee Information
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm">
-          <div className="flex justify-between border-b pb-2">
+          <div className="flex justify-between border-b border-border/50 pb-2">
             <span className="text-muted-foreground">Employee ID</span>
             <span className="font-medium">{user?.employee_id}</span>
           </div>
-          <div className="flex justify-between border-b pb-2">
+          <div className="flex justify-between border-b border-border/50 pb-2">
             <span className="text-muted-foreground">Full Name</span>
             <span className="font-medium">{user?.full_name}</span>
           </div>
-          <div className="flex justify-between border-b pb-2">
+          <div className="flex justify-between border-b border-border/50 pb-2">
             <span className="text-muted-foreground">Position</span>
             <span className="font-medium">{user?.position}</span>
           </div>
@@ -131,9 +135,9 @@ export default function RequestLeavePage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-secondary/20 bg-secondary/5 p-3 text-sm">
-              <span className="font-medium text-secondary">Duration: </span>
-              <span className="font-bold text-secondary">{calcDuration()}</span>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+              <span className="font-medium text-primary">Duration: </span>
+              <span className="font-bold text-primary">{calcDuration()}</span>
             </div>
 
             <div className="space-y-2">
