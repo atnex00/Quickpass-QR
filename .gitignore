@@ -48,9 +48,3 @@ tools/
 # Logs
 *.log
 npm-debug.log*
-
-# Build artifacts
-web/tsconfig.tsbuildinfo
-
-# Local Tauri desktop project (separate from web/)
-admin-desktop/

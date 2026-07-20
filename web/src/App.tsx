@@ -14,7 +14,6 @@ import PendingRequestsPage from "@/pages/supervisor/PendingRequestsPage"
 import UserManagerPage from "@/pages/admin/UserManagerPage"
 import DepartmentsPage from "@/pages/admin/DepartmentsPage"
 import ReportsPage from "@/pages/admin/ReportsPage"
-import AuditLogPage from "@/pages/admin/AuditLogPage"
 import ScannerPage from "@/pages/security/ScannerPage"
 import ScanResultPage from "@/pages/security/ScanResultPage"
 import ScanHistoryPage from "@/pages/security/ScanHistoryPage"
@@ -61,9 +60,6 @@ function AppRoutes() {
         } />
         <Route path="/admin/reports" element={
           <RequireRole roles={["is_admin"]}><ReportsPage /></RequireRole>
-        } />
-        <Route path="/admin/audit" element={
-          <RequireRole roles={["is_admin"]}><AuditLogPage /></RequireRole>
         } />
 
       </Route>

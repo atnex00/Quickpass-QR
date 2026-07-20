@@ -2,22 +2,18 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { useLeaveStore } from "@/stores/leaveStore"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
-import Pagination from "@/components/shared/Pagination"
 import { formatDate, formatTime } from "@/lib/utils"
 import type { LeaveStatus } from "@/types"
 import { useAuthStore } from "@/stores/authStore"
 import api from "@/lib/api"
-import { downloadCsv } from "@/lib/download"
 import { toast } from "sonner"
-import { Inbox, CalendarDays, Filter, Trash2, Loader2, Download } from "lucide-react"
+import { Inbox, CalendarDays, Filter, Trash2 } from "lucide-react"
 
 export default function LeaveHistoryPage() {
-  const { history, isLoading, loadHistory, historyTotal, historyPage, historyLimit, historyPages } = useLeaveStore()
+  const { history, isLoading, loadHistory } = useLeaveStore()
   const { user } = useAuthStore()
   const [filter, setFilter] = useState<string | undefined>()
-  const [exporting, setExporting] = useState(false)
 
   const handleDelete = async (e: React.MouseEvent, leaveId: string) => {
     e.preventDefault()
@@ -25,27 +21,15 @@ export default function LeaveHistoryPage() {
     try {
       await api.delete(`/leave/${leaveId}`)
       toast.success("Leave deleted")
-      loadHistory(filter, historyPage, historyLimit)
+      loadHistory(filter)
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Could not delete")
     }
   }
 
   useEffect(() => {
-    loadHistory(filter, 1, historyLimit)
+    loadHistory(filter)
   }, [filter])
-
-  const handleExport = async () => {
-    setExporting(true)
-    try {
-      const params = new URLSearchParams({ resource: "leaves" })
-      if (filter) params.set("status", filter)
-      await downloadCsv(`/admin/export?${params.toString()}`, "leave_history.csv")
-    } catch {
-      toast.error("Could not export CSV")
-    }
-    setExporting(false)
-  }
 
   const filters: { label: string; value: string | undefined }[] = [
     { label: "All", value: undefined },
@@ -57,15 +41,9 @@ export default function LeaveHistoryPage() {
 
   return (
     <div className="page-enter space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Leave History</h1>
-          <p className="text-muted-foreground">View all your leave requests</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          Export
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold">Leave History</h1>
+        <p className="text-muted-foreground">View all your leave requests</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -138,16 +116,6 @@ export default function LeaveHistoryPage() {
             </Link>
           ))}
         </div>
-      )}
-
-      {historyTotal > 0 && (
-        <Pagination
-          page={historyPage}
-          limit={historyLimit}
-          total={historyTotal}
-          onPageChange={(p) => loadHistory(filter, p, historyLimit)}
-          onLimitChange={(l) => { loadHistory(filter, 1, l); }}
-        />
       )}
     </div>
   )

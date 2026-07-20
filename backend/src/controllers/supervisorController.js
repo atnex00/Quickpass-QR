@@ -3,7 +3,6 @@ const qrService = require('../services/qrService');
 const qrImageService = require('../services/qrImageService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
-const { logAudit } = require('../utils/audit');
 
 function fmtDate(d) {
   if (d instanceof Date) return d.toISOString().split('T')[0];
@@ -127,13 +126,6 @@ async function approveLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave approved' });
-
-    logAudit(req, {
-      action: 'approve',
-      entity: 'leave_request',
-      entity_id: leaveId,
-      description: `Approved leave for ${leave.employee_id} on ${fmtDate(leave.leave_date)}`,
-    });
   } catch (err) {
     next(err);
   }
@@ -197,13 +189,6 @@ async function rejectLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave rejected' });
-
-    logAudit(req, {
-      action: 'reject',
-      entity: 'leave_request',
-      entity_id: leaveId,
-      description: `Rejected leave for ${leave.employee_id} on ${fmtDate(leave.leave_date)}: ${reason}`,
-    });
   } catch (err) {
     next(err);
   }
@@ -304,13 +289,6 @@ async function revokeApproval(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Approval revoked' });
-
-    logAudit(req, {
-      action: 'revoke',
-      entity: 'leave_request',
-      entity_id: leaveId,
-      description: `Revoked approval for leave ${leaveId} (${leave.employee_id})`,
-    });
   } catch (err) {
     next(err);
   }

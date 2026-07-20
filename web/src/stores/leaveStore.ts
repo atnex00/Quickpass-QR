@@ -4,16 +4,12 @@ import api from "@/lib/api"
 
 interface LeaveState {
   history: LeaveRequest[]
-  historyTotal: number
-  historyPage: number
-  historyLimit: number
-  historyPages: number
   activeLeave: LeaveRequest | null
   pendingRequests: LeaveRequest[]
   approvedLeaves: LeaveRequest[]
   isLoading: boolean
   error: string | null
-  loadHistory: (status?: string, page?: number, limit?: number) => Promise<void>
+  loadHistory: (status?: string) => Promise<void>
   loadActiveLeave: () => Promise<void>
   submitLeave: (data: {
     leave_date: string
@@ -30,31 +26,19 @@ interface LeaveState {
 
 export const useLeaveStore = create<LeaveState>((set) => ({
   history: [],
-  historyTotal: 0,
-  historyPage: 1,
-  historyLimit: 10,
-  historyPages: 1,
   activeLeave: null,
   pendingRequests: [],
   approvedLeaves: [],
   isLoading: false,
   error: null,
 
-  loadHistory: async (status, page = 1, limit = 10) => {
+  loadHistory: async (status) => {
     set({ isLoading: true, error: null })
     try {
-      const params: any = { page, limit }
+      const params: any = {}
       if (status) params.status = status
       const res = await api.get("/leave/history", { params })
-      const p = res.data.pagination || {}
-      set({
-        history: res.data.data,
-        historyTotal: p.total || 0,
-        historyPage: p.page || page,
-        historyLimit: p.limit || limit,
-        historyPages: p.pages || 1,
-        isLoading: false,
-      })
+      set({ history: res.data.data, isLoading: false })
     } catch (err: any) {
       set({ error: err.response?.data?.message || "Could not load history — refresh the page", isLoading: false })
     }

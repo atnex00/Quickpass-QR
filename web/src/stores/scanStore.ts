@@ -7,12 +7,8 @@ interface ScanState {
   lastResult: { success: boolean; data?: any; message?: string } | null
   history: any[]
   historyLoading: boolean
-  historyTotal: number
-  historyPage: number
-  historyLimit: number
-  historyPages: number
   validateScan: (qrData: string) => Promise<boolean>
-  loadHistory: (page?: number, limit?: number) => Promise<void>
+  loadHistory: () => Promise<void>
   clearResult: () => void
 }
 
@@ -22,10 +18,6 @@ export const useScanStore = create<ScanState>((set) => ({
   lastResult: null,
   history: [],
   historyLoading: false,
-  historyTotal: 0,
-  historyPage: 1,
-  historyLimit: 10,
-  historyPages: 1,
 
   validateScan: async (qrData) => {
     set({ isLoading: true, error: null, lastResult: null })
@@ -41,19 +33,11 @@ export const useScanStore = create<ScanState>((set) => ({
     }
   },
 
-  loadHistory: async (page = 1, limit = 10) => {
+  loadHistory: async () => {
     set({ historyLoading: true })
     try {
-      const res = await api.get("/scan/history", { params: { page, limit } })
-      const p = res.data.pagination || {}
-      set({
-        history: res.data.data,
-        historyLoading: false,
-        historyTotal: p.total || 0,
-        historyPage: p.page || page,
-        historyLimit: p.limit || limit,
-        historyPages: p.pages || 1,
-      })
+      const res = await api.get("/scan/history")
+      set({ history: res.data.data, historyLoading: false })
     } catch (_) {
       set({ historyLoading: false })
     }

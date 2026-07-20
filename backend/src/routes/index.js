@@ -164,21 +164,5 @@ router.get('/admin/reports', authenticate, requireAdmin, validateQuery(Joi.objec
   start_date: Joi.string().isoDate().optional(),
   end_date: Joi.string().isoDate().optional(),
 })), adminController.getReports);
-router.get('/admin/audit', authenticate, requireAdmin, validateQuery(Joi.object({
-  page: Joi.number().integer().min(1).optional(),
-  limit: Joi.number().integer().min(1).max(100).optional(),
-  action: Joi.string().max(40).optional(),
-  actor_id: Joi.string().max(6).optional(),
-  entity: Joi.string().max(40).optional(),
-  start_date: Joi.string().isoDate().optional(),
-  end_date: Joi.string().isoDate().optional(),
-})), adminController.getAuditLog);
-router.get('/admin/export', authenticate, requireAdmin, validateQuery(Joi.object({
-  resource: Joi.string().valid('reports', 'leaves', 'scans', 'employees', 'audit').required(),
-  type: Joi.string().valid('daily', 'department', 'summary').optional(),
-  start_date: Joi.string().isoDate().optional(),
-  end_date: Joi.string().isoDate().optional(),
-  status: Joi.string().valid('pending', 'approved', 'active', 'completed', 'rejected', 'cancelled').optional(),
-})), adminController.exportData);
 
 module.exports = router;
