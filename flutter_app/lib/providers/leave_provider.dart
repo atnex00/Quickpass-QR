@@ -138,21 +138,44 @@ class LeaveProvider extends ChangeNotifier {
   }
 
   Future<void> cancelLeave(String leaveId) async {
-    await _api.cancelLeave(leaveId);
+    final snapshot = List<LeaveRequest>.from(_history);
+    final wasActive = _activeLeave?.leaveId == leaveId;
+    final snapshotActive = _activeLeave;
+
     _history.removeWhere((l) => l.leaveId == leaveId);
-    if (_activeLeave?.leaveId == leaveId) _activeLeave = null;
+    if (wasActive) _activeLeave = null;
     _recomputeCounts();
-    CacheService().saveLeaves(_history);
-    CacheService().saveActiveLeave(_activeLeave);
     notifyListeners();
+
+    try {
+      await _api.cancelLeave(leaveId);
+      CacheService().saveLeaves(_history);
+      CacheService().saveActiveLeave(_activeLeave);
+    } catch (e) {
+      _history = snapshot;
+      _activeLeave = snapshotActive;
+      _recomputeCounts();
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> deleteLeave(String leaveId) async {
-    await _api.deleteLeave(leaveId);
+    final snapshot = List<LeaveRequest>.from(_history);
+
     _history.removeWhere((l) => l.leaveId == leaveId);
     _recomputeCounts();
-    CacheService().saveLeaves(_history);
     notifyListeners();
+
+    try {
+      await _api.deleteLeave(leaveId);
+      CacheService().saveLeaves(_history);
+    } catch (e) {
+      _history = snapshot;
+      _recomputeCounts();
+      notifyListeners();
+      rethrow;
+    }
   }
 
   void clearError() {
