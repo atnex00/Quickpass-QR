@@ -67,20 +67,21 @@ class _LeaveTabState extends State<LeaveTab> {
           ),
         ],
       ),
-    ).then((confirmed) {
+    ).then((confirmed) async {
       if (confirmed == true && mounted) {
-        _api.deleteLeave(leave['leave_id'] as String).then((_) {
+        try {
+          await _api.deleteLeave(leave['leave_id'] as String);
           _loadLeaves();
           if (mounted) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Leave deleted')));
           }
-        }).catchError((e) {
+        } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Failed to delete leave')));
           }
-        });
+        }
       }
     });
   }

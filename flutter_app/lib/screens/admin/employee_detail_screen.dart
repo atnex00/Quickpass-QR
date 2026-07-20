@@ -425,9 +425,10 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () {
+                            onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
-                              _api.toggleActive(emp['employee_id']).then((_) {
+                              try {
+                                await _api.toggleActive(emp['employee_id']);
                                 _refresh();
                                 if (mounted) {
                                   messenger.showSnackBar(
@@ -437,7 +438,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                                             : 'Employee activated')),
                                   );
                                 }
-                              }).catchError((_) {});
+                              } catch (_) {}
                             },
                             icon: Icon(
                                 isActive
