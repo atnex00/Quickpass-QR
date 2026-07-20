@@ -111,9 +111,8 @@ class ApiService {
             handler.reject(retryError as DioException);
           }
 
-          final pending = List<_PendingRequest>.from(_pendingRequests);
-          _pendingRequests.clear();
-          for (final p in pending) {
+          while (_pendingRequests.isNotEmpty) {
+            final p = _pendingRequests.removeAt(0);
             p.options.extra['_retry'] = true;
             p.options.headers['Authorization'] = 'Bearer $newToken';
             try {
@@ -128,18 +127,16 @@ class ApiService {
           if (_refreshRetryCount >= 3) {
             _refreshRetryCount = 0;
             await clearLocalAuth();
-            for (final p in _pendingRequests) {
-              p.handler.next(error);
+            while (_pendingRequests.isNotEmpty) {
+              _pendingRequests.removeAt(0).handler.next(error);
             }
-            _pendingRequests.clear();
             onForceLogout?.call();
             handler.next(error);
             return;
           }
-          for (final p in _pendingRequests) {
-            p.handler.next(error);
+          while (_pendingRequests.isNotEmpty) {
+            _pendingRequests.removeAt(0).handler.next(error);
           }
-          _pendingRequests.clear();
           return handler.next(error);
         } finally {
           _isRefreshing = false;
