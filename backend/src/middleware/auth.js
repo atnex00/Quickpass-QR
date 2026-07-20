@@ -20,11 +20,6 @@ async function authenticate(req, res, next) {
       return res.status(401).json({ success: false, message: 'Session expired' });
     }
 
-    if (session.device_fingerprint && decoded.device_fp && decoded.device_fp !== session.device_fingerprint) {
-      await db('sessions').where({ session_id: decoded.session_id }).update({ is_active: false });
-      return res.status(401).json({ success: false, message: 'Session invalidated — device mismatch' });
-    }
-
     const employee = await db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', decoded.employee_id)

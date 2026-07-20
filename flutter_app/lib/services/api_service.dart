@@ -83,10 +83,8 @@ class ApiService {
 
           final refreshDio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
           final refreshSid = await _storage.read(key: 'refresh_sid');
-          final deviceFp = await _storage.read(key: 'device_fp');
           final refreshData = <String, dynamic>{};
           if (refreshSid != null) refreshData['refresh_sid'] = refreshSid;
-          if (deviceFp != null) refreshData['device_fingerprint'] = deviceFp;
           final res = await refreshDio.post(
             '/auth/refresh',
             data: refreshData.isNotEmpty ? refreshData : null,
@@ -159,12 +157,9 @@ class ApiService {
 
   // ── Auth ──
   Future<Map<String, dynamic>> login(String employeeId, String password) async {
-    final fp = await DeviceService.getFingerprint();
-    await _storage.write(key: 'device_fp', value: fp);
     final res = await _dio.post('/auth/login', data: {
       'employee_id': employeeId,
       'password': password,
-      'device_fingerprint': fp,
     });
     final data = res.data;
     if (data['success'] != true) {
@@ -184,7 +179,6 @@ class ApiService {
     await _storage.delete(key: 'refresh_sid');
     await _storage.delete(key: 'user_data');
     await _storage.delete(key: 'employee_id');
-    await _storage.delete(key: 'device_fp');
   }
 
   Future<void> logout() async {
