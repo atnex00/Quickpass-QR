@@ -185,8 +185,8 @@ class LeaveRequest {
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint('Warning: Failed to parse date from "$v", using current time');
-      return DateTime.now();
+      debugPrint('Warning: Failed to parse date from "$v", using sentinel');
+      return DateTime(0);
     }
     return result;
   }
@@ -201,9 +201,8 @@ class LeaveRequest {
   static DateTime _dateTimeFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint(
-          'Warning: Failed to parse datetime from "$v", using current time');
-      return DateTime.now();
+      debugPrint('Warning: Failed to parse datetime from "$v", using sentinel');
+      return DateTime(0);
     }
     return result;
   }

@@ -56,9 +56,8 @@ class ScanLog {
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint(
-          'Warning: Failed to parse scan_time from "$v", using current time');
-      return DateTime.now();
+      debugPrint('Warning: Failed to parse scan_time from "$v", using sentinel');
+      return DateTime(0);
     }
     return result;
   }

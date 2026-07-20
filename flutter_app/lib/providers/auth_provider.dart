@@ -46,18 +46,22 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Auth initialization failed: $e');
-      final cached = await CacheService().loadProfile();
-      if (cached != null) {
-        _user = Employee.fromJson(cached);
-        _isAuthenticated = true;
-      } else {
-        await _api.clearLocalAuth();
+      try {
+        final cached = await CacheService().loadProfile();
+        if (cached != null) {
+          _user = Employee.fromJson(cached);
+          _isAuthenticated = true;
+        } else {
+          await _api.clearLocalAuth();
+        }
+      } catch (cacheError) {
+        debugPrint('Cache fallback also failed: $cacheError');
       }
+    } finally {
+      _isLoading = false;
+      _isInitializing = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    _isInitializing = false;
-    notifyListeners();
   }
 
   Future<bool> login(String employeeId, String password) async {
