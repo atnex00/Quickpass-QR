@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../models/leave_request.dart';
 import '../../services/api_service.dart';
-import '../../utils/constants.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
@@ -387,11 +387,9 @@ class _ReportsTabState extends State<ReportsTab> {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final entry = _reportData![index];
-                          final status =
-                              entry['status'] as String? ?? 'pending';
-                          final statusColor =
-                              AppConstants.statusColors[status] ??
-                                  context.neutralGray;
+                          final leaveStatus = LeaveStatus.fromString(
+                              entry['status'] as String? ?? '');
+                          final statusColor = leaveStatus.color;
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
@@ -443,7 +441,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                             statusColor.withValues(alpha: 0.3)),
                                   ),
                                   child: Text(
-                                    AppConstants.statusLabels[status] ?? status,
+                                    leaveStatus.label,
                                     style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,

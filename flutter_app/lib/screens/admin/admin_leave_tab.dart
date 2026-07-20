@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../models/leave_request.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../services/api_service.dart';
-import '../../utils/constants.dart';
 import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
 import 'admin_shared.dart';
@@ -315,9 +315,9 @@ class _LeaveTabState extends State<LeaveTab> {
   }
 
   Widget _buildLeaveItem(BuildContext context, Map<String, dynamic> leave) {
-    final status = leave['status'] as String? ?? 'pending';
-    final statusColor =
-        AppConstants.statusColors[status] ?? context.neutralGray;
+    final status = leave['status'] as String? ?? '';
+    final leaveStatus = LeaveStatus.fromString(status);
+    final statusColor = leaveStatus.color;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -360,7 +360,7 @@ class _LeaveTabState extends State<LeaveTab> {
                   border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
-                  AppConstants.statusLabels[status] ?? status,
+                  leaveStatus.label,
                   style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

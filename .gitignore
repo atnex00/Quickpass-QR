@@ -48,3 +48,7 @@ tools/
 # Logs
 *.log
 npm-debug.log*
+
+# Flutter env config
+flutter_app/env.dev.json
+flutter_app/env.prod.json
