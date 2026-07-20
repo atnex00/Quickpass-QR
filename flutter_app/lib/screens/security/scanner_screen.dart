@@ -353,12 +353,14 @@ class _ScannerAppBar extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (_) => const SettingsScreen()),
                         );
+                        break;
                       case 'history':
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => const ScanHistoryScreen()),
                         );
+                        break;
                       case 'logout':
                         final errorColor = context.error;
                         final confirm = await showDialog<bool>(
