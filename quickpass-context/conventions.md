@@ -34,7 +34,8 @@ tags:
 - Functional components with hooks
 - Zustand stores with `create` + `set` (not React Context for global state)
 - Axios from `@/lib/api` (cookie-based auth via `withCredentials`)
-- In-memory JWT (not localStorage)
+- In-memory JWT (not localStorage) — tokens are NEVER persisted to localStorage
+- Theme preference IS persisted to localStorage (per-user key `quickpass-theme-<employee_id>`); this is allowed because it is not a token
 - shadcn/ui from `@/components/ui/` (Radix primitives)
 - Tailwind v4 CSS-driven (`@theme` directive in `index.css`), no `tailwind.config.*`
 - Imports via `@/` path alias
@@ -52,11 +53,20 @@ tags:
 - Spacing: 8px grid, cards 16px padding, section gaps 24px
 
 ## Design Tokens
-| Token | Light | Dark |
+
+> Web and Flutter use **different** palettes. Do not copy values between them.
+
+### Web (Tailwind v4, `index.css` — warm amber/stone, same hues light & dark)
+| Token | Light | Dark (`.dark`) |
 |---|---|---|
-| Primary | `#1E40AF` / `#FFD700` | `#B8C4FF` / `#FFD700` |
-| Surface | `#FFFFFF` / `#FBF8FF` | `#1E2020` / `#0F172A` |
-| Success | `#16A34A` | `#6EE7B7` |
-| Error | `#DC2626` | `#FFB4AB` |
-| Warning | `#F59E0B` | `#FBBF24` |
-| Outline variant | `#C4C5D5` | `#334155` |
+| Primary | `#b45309` | `#fbbf24` |
+| Background | `#fffbeb` | `#1c1917` |
+| Card / Surface | `#ffffff` | `#292524` |
+| Foreground | `#292524` | `#f5f3f0` |
+| Muted foreground | `#78716c` | `#a8a29e` |
+| Border / Input | `#e7e5e4` | `#44403c` |
+| Success | `#0d9488` | `#34d399` |
+| Destructive | `#dc2626` | `#f87171` |
+
+### Flutter (`config/theme.dart` — QuickpassColors, gold `#FFD700` accent)
+See `flutter_app.md` and the Flutter Admin Panel Visual Patterns below.

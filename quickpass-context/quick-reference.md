@@ -114,7 +114,11 @@ tags:
 | `flutter_app/lib/config/theme.dart` | QuickpassColors + QuickpassTheme |
 | `flutter_app/lib/main.dart` | Flutter entry + provider setup |
 | `web/src/App.tsx` | React Router setup |
-| `web/src/index.css` | Tailwind v4 theme tokens |
+| `web/src/main.tsx` | Entry — mounts ThemeProvider |
+| `web/src/index.css` | Tailwind v4 theme tokens (light + `.dark`) |
+| `web/src/stores/themeStore.ts` | Per-user theme persistence + applyTheme |
+| `web/src/components/ThemeProvider.tsx` | Applies theme on mount + system change |
+| `web/src/components/layout/ThemeToggle.tsx` | Light/System/Dark toggle UI |
 | `web/src/lib/api.ts` | Axios client with 401 retry |
-| `database/migrations/` | 10 migration files |
+| `database/migrations/` | 11 migration files |
 | `database/seeds/` | Seed data |

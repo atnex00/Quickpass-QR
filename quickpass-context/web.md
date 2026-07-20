@@ -7,7 +7,7 @@ tags:
 # Web Frontend Architecture
 
 ## Entry — `src/main.tsx`
-Minimal: renders `<App />` inside `React.StrictMode`.
+Renders `<App />` inside `React.StrictMode`, wrapped by `<ThemeProvider>` (applies the persisted theme before first paint to avoid a flash). Calls `applyTheme()` synchronously before render.
 
 ## Routes (React Router v7, defined in `App.tsx`)
 
@@ -62,6 +62,14 @@ Minimal: renders `<App />` inside `React.StrictMode`.
 - `lastResult`, `isLoading`, `error`, `history`, `historyLoading`
 - Methods: `validateScan`, `loadHistory`, `clearResult`
 
+### themeStore
+- `theme`: `"light" | "dark" | "system"` (default `"system"`)
+- `setTheme(theme)`, `resolved()` → actual `"light" | "dark"`
+- Persisted via zustand `persist` to a **per-user** localStorage key: `quickpass-theme-<employee_id>` when logged in, else `quickpass-theme` (falls back to reading the global key).
+- `applyTheme()` toggles `dark` class on `<html>`.
+- `rehydrateTheme()` re-reads the store from the active user's key (called by authStore on login/logout/loadUser).
+- `ThemeProvider` (`components/ThemeProvider.tsx`) mounts the store and listens for system scheme changes.
+
 ## API Client (`lib/api.ts`)
 - Axios instance with `baseURL: "/api"`, `withCredentials: true`
 - Request interceptor: attach Bearer token
@@ -88,11 +96,19 @@ Badge, Button (with `asChild`), Card, Dialog, Input, Label, Select, Table, Texta
 
 ## Styling — Tailwind CSS v4
 - **CSS-driven** (no `tailwind.config.*` file)
-- `@theme inline` in `index.css` defines color tokens
-- Warm amber-primary theme: `--primary: #b45309`, success teal: `#0d9488`
+- `@theme inline` in `index.css` maps CSS vars to Tailwind color tokens
+- Warm amber/stone theme, shared hue family across light & dark (only luminance inverts)
+- Light tokens: `--primary: #b45309`, `--background: #fffbeb`, `--card: #ffffff`, `--success: #0d9488`
+- Dark tokens (`.dark` block): `--primary: #fbbf24`, `--background: #1c1917`, `--card: #292524`, `--success: #34d399`
 - Fonts: Inter (body) + Playfair Display (headings)
 - 30+ utility classes via `@apply` (panel-card, input-stitch, btn-primary, etc.)
 - Vite: dev server on port 8080, proxies `/api` → `localhost:3000`
+
+## Dark Mode
+- Driven by a `.dark` class on `<html>` (Tailwind v4 variant), not a media query.
+- Toggle UI: `ThemeToggle` (`components/layout/ThemeToggle.tsx`) — a Light/System/Dark segmented control, mounted in `AppLayout` StatusBar, `SecurityHeader`, and `LoginPage`.
+- Do NOT add `prefers-color-scheme` media queries; the store already handles system preference.
+- Theme choice persists per-user in localStorage (see `themeStore`).
 
 ## Key Dependencies
 | Package | Purpose |

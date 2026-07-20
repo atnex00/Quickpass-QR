@@ -149,6 +149,24 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 
 ## Design Language
 
+> **Web and Flutter use DIFFERENT palettes.** Web is warm amber/stone; Flutter is blue + gold. Do not mix them.
+
+### Web (warm amber/stone — `web/src/index.css`)
+| Token | Light | Dark (`.dark`) |
+|---|---|---|
+| Primary | `#b45309` | `#fbbf24` |
+| Background | `#fffbeb` | `#1c1917` |
+| Card / Surface | `#ffffff` | `#292524` |
+| Foreground | `#292524` | `#f5f3f0` |
+| Muted foreground | `#78716c` | `#a8a29e` |
+| Border / Input | `#e7e5e4` | `#44403c` |
+| Success | `#0d9488` | `#34d399` |
+| Destructive | `#dc2626` | `#f87171` |
+
+- Dark mode = `.dark` class on `<html>` (Tailwind v4 variant), toggled by `ThemeToggle` (Light/System/Dark)
+- Theme persists per-user in localStorage (`quickpass-theme-<employee_id>`)
+
+### Flutter (blue + gold — `flutter_app/lib/config/theme.dart`)
 | Token | Light | Dark |
 |---|---|---|
 | Primary / AppBar | `#1E40AF` / `#FFD700` | `#B8C4FF` / `#FFD700` |
