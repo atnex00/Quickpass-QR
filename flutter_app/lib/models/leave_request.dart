@@ -10,7 +10,8 @@ enum LeaveStatus {
   rejected,
   active,
   completed,
-  cancelled;
+  cancelled,
+  unknown;
 
   String get label {
     switch (this) {
@@ -26,6 +27,8 @@ enum LeaveStatus {
         return 'Completed';
       case LeaveStatus.cancelled:
         return 'Cancelled';
+      case LeaveStatus.unknown:
+        return 'Unknown';
     }
   }
 
@@ -42,6 +45,8 @@ enum LeaveStatus {
       case LeaveStatus.completed:
         return QuickpassColors.secondary;
       case LeaveStatus.cancelled:
+        return Colors.grey;
+      case LeaveStatus.unknown:
         return Colors.grey;
     }
   }
@@ -60,13 +65,15 @@ enum LeaveStatus {
         return Icons.check_circle_outline;
       case LeaveStatus.cancelled:
         return Icons.close;
+      case LeaveStatus.unknown:
+        return Icons.help_outline;
     }
   }
 
   static LeaveStatus fromString(String s) {
     return LeaveStatus.values.firstWhere(
       (e) => e.name == s,
-      orElse: () => LeaveStatus.pending,
+      orElse: () => LeaveStatus.unknown,
     );
   }
 }
