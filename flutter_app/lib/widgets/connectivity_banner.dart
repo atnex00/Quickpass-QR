@@ -21,6 +21,7 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
   bool _offline = false;
   bool _serverReachable = true;
   bool _expanded = true;
+  int _healthRetryCount = 0;
   StreamSubscription? _connSub;
   Timer? _healthTimer;
   Timer? _collapseTimer;
@@ -70,8 +71,8 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
 
   void _startHealthCheck() {
     _healthTimer?.cancel();
+    _healthRetryCount = 0;
     _checkServer();
-    _healthTimer = Timer.periodic(const Duration(seconds: 15), (_) => _checkServer());
   }
 
   Future<void> _checkServer() async {
@@ -88,6 +89,8 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
           _expanded = false;
         });
       }
+      _healthTimer?.cancel();
+      _healthTimer = null;
     } catch (_) {
       if (mounted && !_offline) {
         setState(() {
@@ -101,7 +104,17 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
           setState(() => _expanded = false);
         }
       });
+      _healthTimer?.cancel();
+      final delay = _nextHealthDelay();
+      _healthTimer = Timer(delay, _checkServer);
     }
+  }
+
+  Duration _nextHealthDelay() {
+    const delays = [15, 30, 60, 120, 240, 300];
+    final index = _healthRetryCount.clamp(0, delays.length - 1);
+    _healthRetryCount++;
+    return Duration(seconds: delays[index]);
   }
 
   @override
