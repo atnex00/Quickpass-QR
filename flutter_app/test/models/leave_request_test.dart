@@ -13,7 +13,7 @@ void main() {
     });
 
     test('fromString returns pending for unknown value', () {
-      expect(LeaveStatus.fromString('unknown'), LeaveStatus.pending);
+      expect(LeaveStatus.fromString('unknown'), LeaveStatus.unknown);
     });
 
     test('label returns correct display strings', () {

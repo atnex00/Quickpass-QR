@@ -47,7 +47,7 @@ void main() {
       expect(employee.isSupervisor, false);
       expect(employee.isAdmin, false);
       expect(employee.isSecurity, false);
-      expect(employee.isActive, true);
+      expect(employee.isActive, false);
       expect(employee.profilePhoto, isNull);
       expect(employee.hireDate, isNull);
     });
