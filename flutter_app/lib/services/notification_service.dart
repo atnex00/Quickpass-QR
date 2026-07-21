@@ -100,19 +100,12 @@ class NotificationService {
   }
 
   void _navigateByType(String type) {
-    Widget screen;
-    switch (type) {
-      case 'new_request':
-        screen = const SupervisorDashboard();
-      case 'approved':
-      case 'rejected':
-      case 'revoked':
-      case 'out_scan':
-      case 'in_scan':
-        screen = const LeaveHistoryScreen();
-      default:
-        screen = const EmployeeDashboard();
-    }
+    final screen = switch (type) {
+      'new_request' => const SupervisorDashboard(),
+      'approved' || 'rejected' || 'revoked' || 'out_scan' || 'in_scan'
+          => const LeaveHistoryScreen(),
+      _ => const EmployeeDashboard(),
+    };
     _navigatorKey?.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => screen),
       (route) => false,
