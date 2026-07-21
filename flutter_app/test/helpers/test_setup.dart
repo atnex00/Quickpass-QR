@@ -60,4 +60,10 @@ Future<void> setupTestInfrastructure() async {
     const MethodChannel('de.christiankappler.flutter_local_notifications'),
     (call) async => null,
   );
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+    const MethodChannel('safe_device'),
+    (call) async => false,
+  );
 }
