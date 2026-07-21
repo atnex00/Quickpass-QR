@@ -106,7 +106,8 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
       const raw = atob(qrData)
       const parsed = JSON.parse(raw)
       if (parsed.timestamp) target = new Date(parsed.timestamp).getTime()
-    } catch (_) {}
+    } catch {
+    }
     if (isNaN(target)) {
       const fallback = `${date}T${time}`
       target = new Date(fallback).getTime()

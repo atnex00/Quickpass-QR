@@ -33,7 +33,7 @@ async function validateScan(req, res, next) {
     await db.transaction(async (trx) => {
       leave = await trx('leave_requests')
         .where({ leave_id })
-        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',
@@ -145,8 +145,8 @@ async function getScanHistory(req, res, next) {
 
     const { count } = await db('qr_scan_logs').count('* as count').first();
     const logs = await db('qr_scan_logs')
-      .join('leave_requests', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
-      .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
+      .leftJoin('leave_requests', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
+      .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
       .select(
         'qr_scan_logs.*',
         'employees.full_name as employee_name',

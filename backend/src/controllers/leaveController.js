@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
 
 async function submitLeave(req, res, next) {
   try {
@@ -15,7 +16,7 @@ async function submitLeave(req, res, next) {
       throw createError(400, 'End time must be after start time');
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     if (leave_date !== today) {
       throw createError(400, 'Leave date must be today');
     }

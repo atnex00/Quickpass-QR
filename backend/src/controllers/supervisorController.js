@@ -3,6 +3,7 @@ const qrService = require('../services/qrService');
 const qrImageService = require('../services/qrImageService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
 
 function fmtDate(d) {
   if (d instanceof Date) return d.toISOString().split('T')[0];
@@ -67,7 +68,7 @@ async function approveLeave(req, res, next) {
       }
 
       const leaveDate = fmtDate(leave.leave_date);
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalDateString();
 
       const now = new Date();
       const schedOut = new Date(`${leaveDate}T${leave.start_time}`);
@@ -301,7 +302,7 @@ async function getTeamLeaves(req, res, next) {
     let query = db('leave_requests')
       .where('leave_requests.department_id', req.user.department_id)
       .whereIn('leave_requests.status', ['approved', 'active', 'pending'])
-      .join('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
+      .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
       .select(
         'leave_requests.*',
         'emp.full_name as employee_name',

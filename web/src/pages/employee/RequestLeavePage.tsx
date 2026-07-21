@@ -16,7 +16,10 @@ export default function RequestLeavePage() {
   const { submitLeave, isLoading } = useLeaveStore()
   const navigate = useNavigate()
 
-  const today = new Date().toISOString().split("T")[0]
+  const localDate = new Date()
+  const offset = localDate.getTimezoneOffset()
+  const adjusted = new Date(localDate.getTime() - offset * 60 * 1000)
+  const today = adjusted.toISOString().split("T")[0]
   const now = new Date()
   const defaultStart = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
   const defaultEnd = `${String(now.getHours() + 2).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`

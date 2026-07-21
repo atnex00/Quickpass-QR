@@ -1,7 +1,7 @@
 import { Link } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, History, LogOut, ArrowLeft, Scan } from "lucide-react"
+import { LayoutDashboard, History, LogOut, ArrowLeft } from "lucide-react"
 import { useNavigate } from "react-router"
 import ThemeToggle from "./ThemeToggle"
 

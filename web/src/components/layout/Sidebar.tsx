@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router"
 import {
   LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, History, User, BookOpen,
+  Scan, User, BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"

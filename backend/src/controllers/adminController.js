@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
 
 async function createEmployee(req, res, next) {
   try {
@@ -388,11 +389,11 @@ async function getReports(req, res, next) {
     let reportData;
 
     if (type === 'daily') {
-      const date = start_date || new Date().toISOString().split('T')[0];
+      const date = start_date || getLocalDateString();
       reportData = await db('leave_requests')
         .where({ leave_date: date })
-        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
-        .join('departments', 'leave_requests.department_id', 'departments.department_id')
+        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .leftJoin('departments', 'leave_requests.department_id', 'departments.department_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',
@@ -414,8 +415,8 @@ async function getReports(req, res, next) {
         .groupBy('departments.department_id', 'departments.department_name');
     } else {
       let query = db('leave_requests')
-        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
-        .join('departments', 'leave_requests.department_id', 'departments.department_id')
+        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .leftJoin('departments', 'leave_requests.department_id', 'departments.department_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',
