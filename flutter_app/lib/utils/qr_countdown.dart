@@ -27,6 +27,7 @@ mixin QrCountdownMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _tick(String date, String time, {DateTime? target}) {
+    if (!mounted) return;
     final result = target != null
         ? QrService.windowSecondsFromTimestamp(target)
         : QrService.windowSeconds(date, time);
