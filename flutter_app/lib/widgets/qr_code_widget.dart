@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../config/theme.dart';
@@ -130,11 +131,41 @@ class _QrCodeWidgetState extends State<QrCodeWidget> with QrCountdownMixin<QrCod
             )
           else ...[
             if (widget.qrImageUrl != null)
-              Image.network(
-                widget.qrImageUrl!,
+              CachedNetworkImage(
+                imageUrl: widget.qrImageUrl!,
                 width: 450,
                 height: 450,
                 fit: BoxFit.contain,
+                placeholder: (context, url) => Container(
+                  width: 450,
+                  height: 450,
+                  decoration: BoxDecoration(
+                    color: widget.color.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: widget.color,
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 450,
+                  height: 450,
+                  decoration: BoxDecoration(
+                    color: widget.color.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Icon(Icons.broken_image,
+                        color: context.neutralGray),
+                  ),
+                ),
               )
             else
               RepaintBoundary(
