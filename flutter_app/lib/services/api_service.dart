@@ -32,6 +32,7 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'User-Agent': 'Quickpass/1.0 Flutter/Dart',
       },
     ));
 
@@ -80,7 +81,11 @@ class ApiService {
             return handler.next(error);
           }
 
-          final refreshDio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+          final refreshDio = Dio(BaseOptions(
+            baseUrl: AppConfig.apiBaseUrl,
+            connectTimeout: AppConfig.connectTimeout,
+            receiveTimeout: AppConfig.receiveTimeout,
+          ));
           final refreshSid = await _storage.read(key: 'refresh_sid');
           final refreshData = <String, dynamic>{};
           if (refreshSid != null) refreshData['refresh_sid'] = refreshSid;
