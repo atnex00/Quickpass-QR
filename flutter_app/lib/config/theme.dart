@@ -505,6 +505,12 @@ class QuickpassTheme {
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: QuickpassColors.darkPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: QuickpassColors.darkSurface,
         indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
@@ -577,10 +583,17 @@ class QuickpassTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: QuickpassColors.darkError),
         ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkError, width: 2),
+        ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         labelStyle:
             const TextStyle(color: QuickpassColors.darkOnSurfaceVariant),
+        hintStyle: TextStyle(
+            color: QuickpassColors.darkOnSurfaceVariant.withValues(alpha: 0.6)),
       ),
       dividerTheme: DividerThemeData(
         color: QuickpassColors.darkOutlineVariant.withValues(alpha: 0.3),
