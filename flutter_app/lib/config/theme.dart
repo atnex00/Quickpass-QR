@@ -528,7 +528,18 @@ class QuickpassTheme {
               color: QuickpassColors.darkOnSurfaceVariant);
         }),
         elevation: 0,
-        height: 65,
+        height: 80,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: QuickpassColors.darkSurface,
+        selectedItemColor: QuickpassColors.darkPrimary,
+        unselectedItemColor: QuickpassColors.darkOnSurfaceVariant,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
