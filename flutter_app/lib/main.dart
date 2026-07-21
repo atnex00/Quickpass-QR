@@ -92,10 +92,16 @@ class QuickpassApp extends StatefulWidget {
 
 class _QuickpassAppState extends State<QuickpassApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
+  late final LeaveProvider _leaveProvider;
+  late final SupervisorProvider _supervisorProvider;
+  late final ScanProvider _scanProvider;
 
   @override
   void initState() {
     super.initState();
+    _leaveProvider = LeaveProvider(api: widget.apiService);
+    _supervisorProvider = SupervisorProvider(api: widget.apiService);
+    _scanProvider = ScanProvider(api: widget.apiService);
     widget.apiService.onForceLogout = _handleForceLogout;
     widget.auth.onLoggedOut = _handleForceLogout;
     widget.auth.onLoggedIn = _handleLoginSuccess;
@@ -148,23 +154,10 @@ class _QuickpassAppState extends State<QuickpassApp> {
   }
 
   void _resetProviders() {
-    final context = _navigatorKey.currentState?.context;
-    if (context == null) return;
-    try {
-      context.read<LeaveProvider>().reset();
-    } catch (_) {
-      debugPrint('LeaveProvider reset failed (already disposed)');
-    }
-    try {
-      context.read<SupervisorProvider>().reset();
-    } catch (_) {
-      debugPrint('SupervisorProvider reset failed (already disposed)');
-    }
-    try {
-      context.read<ScanProvider>().reset();
-    } catch (_) {
-      debugPrint('ScanProvider reset failed (already disposed)');
-    }  }
+    _leaveProvider.reset();
+    _supervisorProvider.reset();
+    _scanProvider.reset();
+  }
 
   void _handleLoginSuccess() {
     _resetProviders();
@@ -191,9 +184,9 @@ class _QuickpassAppState extends State<QuickpassApp> {
           ChangeNotifierProvider.value(value: widget.settings),
           ChangeNotifierProvider.value(value: widget.auth),
           ChangeNotifierProvider.value(value: widget.notifProv),
-          ChangeNotifierProvider(create: (_) => LeaveProvider(api: api)),
-          ChangeNotifierProvider(create: (_) => SupervisorProvider(api: api)),
-          ChangeNotifierProvider(create: (_) => ScanProvider(api: api)),
+          ChangeNotifierProvider.value(value: _leaveProvider),
+          ChangeNotifierProvider.value(value: _supervisorProvider),
+          ChangeNotifierProvider.value(value: _scanProvider),
         ],
         child: Consumer2<AuthProvider, SettingsProvider>(
           builder: (context, auth, settings, _) {
