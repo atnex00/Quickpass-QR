@@ -474,7 +474,7 @@ class QuickpassTheme {
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(
               color: QuickpassColors.darkOutlineVariant.withValues(alpha: 0.4)),
         ),
