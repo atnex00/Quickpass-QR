@@ -170,6 +170,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
                     _PendingRequestsSection(
                       isLoading: supProv.isLoading,
                       pendingRequests: supProv.pendingRequests,
+                      fromCache: supProv.fromCache,
                       onViewAll: widget.onViewRequests,
                     ),
                   ]),
@@ -451,10 +452,12 @@ class _PendingRequestsSection extends StatelessWidget {
   const _PendingRequestsSection({
     required this.isLoading,
     required this.pendingRequests,
+    required this.fromCache,
     required this.onViewAll,
   });
   final bool isLoading;
   final List<dynamic> pendingRequests;
+  final bool fromCache;
   final VoidCallback onViewAll;
 
   @override
@@ -506,7 +509,7 @@ class _PendingRequestsSection extends StatelessWidget {
           EmptyState(
             icon: Icons.inbox_outlined,
             title: 'No pending requests',
-            isOffline: context.read<SupervisorProvider>().fromCache,
+            isOffline: fromCache,
           )
         else
           ...pendingRequests.take(5).map((leave) => PendingCard(leave: leave, showAccentBorder: true)),
