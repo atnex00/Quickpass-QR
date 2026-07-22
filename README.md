@@ -449,7 +449,7 @@ Quickpass-QR/
 └── package.json               # Root scripts (dev, prod, build:web, migrate, seed)
 ```
 
-### Database Migrations (8 files)
+### Database Migrations (11 files)
 
 | # | File | Purpose |
 |---|------|---------|
@@ -461,6 +461,9 @@ Quickpass-QR/
 | 6 | `006_create_functions.js` | `generate_employee_id()` function |
 | 7 | `007_add_is_security.js` | Security role column |
 | 8 | `008_optional_department.js` | Make department optional |
+| 9 | `009_add_qr_images.js` | Add QR image paths to leave_requests |
+| 10 | `010_add_qr_scan_unique_constraint.js` | Enforce one scan per leave/qr_type |
+| 11 | `011_create_audit_logs.js` | Audit log table for tracking actions |
 
 ---
 

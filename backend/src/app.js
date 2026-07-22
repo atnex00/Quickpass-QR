@@ -156,26 +156,30 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Quickpass API running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Quickpass API running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
-// HTTPS server for camera access on mobile
-const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
-const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
-try {
-  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-    const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
-    https.createServer({
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-    }, app).listen(httpsPort, () => {
-      console.log(`Quickpass HTTPS running on port ${httpsPort}`);
-    });
+if (require.main === module) {
+  // HTTPS server for camera access on mobile
+  const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
+  const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
+  try {
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
+      https.createServer({
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      }, app).listen(httpsPort, () => {
+        console.log(`Quickpass HTTPS running on port ${httpsPort}`);
+      });
+    }
+  } catch {
+    // HTTPS setup is optional
   }
-} catch {
-  // HTTPS setup is optional
 }
 
 module.exports = app;
