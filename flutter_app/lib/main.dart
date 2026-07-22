@@ -146,6 +146,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
   }
 
   void _handleForceLogout() {
+    widget.auth.removeListener(_checkPendingNotification);
     _resetProviders();
     widget.auth.clearAuth();
     _navigatorKey.currentState?.pushAndRemoveUntil(
@@ -173,6 +174,12 @@ class _QuickpassAppState extends State<QuickpassApp> {
       MaterialPageRoute(builder: (_) => home),
       (route) => false,
     );
+  }
+
+  @override
+  void dispose() {
+    widget.auth.removeListener(_checkPendingNotification);
+    super.dispose();
   }
 
   @override
