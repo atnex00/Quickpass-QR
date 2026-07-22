@@ -159,7 +159,11 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
           ],
         ),
       ),
-    );
+    ).whenComplete(() {
+      nameCtl.dispose();
+      posCtl.dispose();
+      emailCtl.dispose();
+    });
   }
 
   void _showPasswordResetDialog() {
