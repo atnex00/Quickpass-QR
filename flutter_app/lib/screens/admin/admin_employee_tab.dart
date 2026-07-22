@@ -496,9 +496,11 @@ class _EmployeeTabState extends State<EmployeeTab> {
                     icon: const Icon(Icons.delete_outline, size: 18),
                     color: context.error,
                     onPressed: () => _confirmDelete(emp),
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints(minWidth: 32, minHeight: 32),
+                    style: IconButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(32, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ],
               ),
