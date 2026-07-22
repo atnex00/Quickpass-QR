@@ -140,7 +140,6 @@ class ApiService {
               _pendingRequests.removeAt(0).handler.next(error);
             }
             onForceLogout?.call();
-            handler.next(error);
             return;
           }
           while (_pendingRequests.isNotEmpty) {
@@ -155,6 +154,7 @@ class ApiService {
         if (response.data is Map && response.data['force_logout'] == true) {
           await clearLocalAuth();
           onForceLogout?.call();
+          return;
         }
         return handler.next(response);
       },
