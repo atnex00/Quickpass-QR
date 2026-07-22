@@ -35,6 +35,15 @@ class _ScannerScreenState extends State<ScannerScreen>
     _requestCameraPermission();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _controller != null) {
+      _controller!.start();
+    } else if (state == AppLifecycleState.paused && _controller != null) {
+      _controller!.stop();
+    }
+  }
+
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
     if (!mounted) return;
