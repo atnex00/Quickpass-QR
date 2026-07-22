@@ -14,14 +14,6 @@ describe('createError', () => {
 describe('errorHandler middleware', () => {
   const OLD_ENV = process.env;
 
-  beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterAll(() => {
-    console.error.mockRestore();
-  });
-
   afterEach(() => {
     process.env = OLD_ENV;
   });

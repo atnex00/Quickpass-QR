@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
+const logger = require('./config/logger');
 
 function loadEnv() {
   const baseEnv = path.join(__dirname, '..', '.env');
@@ -19,7 +20,7 @@ loadEnv();
 function requireEnv(name) {
   const value = process.env[name];
   if (!value) {
-    console.error(`ERROR: ${name} is required. Set it in your backend/.env file.`);
+    logger.error(`${name} is required. Set it in your backend/.env file.`);
     process.exit(1);
   }
   return value;
@@ -29,11 +30,11 @@ function secret(name) {
   const value = process.env[name];
   if (value) return value;
   if (process.env.NODE_ENV === 'production') {
-    console.error(`ERROR: ${name} is required in production. Set it in your backend/.env file.`);
+    logger.error(`${name} is required in production. Set it in your backend/.env file.`);
     process.exit(1);
   }
   const generated = crypto.randomBytes(64).toString('hex');
-  console.warn(`WARNING: ${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
+  logger.warn(`${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
   return generated;
 }
 
@@ -42,8 +43,12 @@ process.env.JWT_SECRET = secret('JWT_SECRET');
 process.env.COOKIE_SECRET = secret('COOKIE_SECRET');
 process.env.QR_SECRET = secret('QR_SECRET');
 
-if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
-  console.error('ERROR: CORS_ORIGIN is required in production. Set it in your backend/.env file.');
+const corsOrigin = process.env.CORS_ORIGIN || undefined;
+if (corsOrigin === '') {
+  logger.warn('CORS_ORIGIN is set but empty — CORS will be disabled');
+}
+if (process.env.NODE_ENV === 'production' && !corsOrigin) {
+  logger.error('CORS_ORIGIN is required in production. Set it in your backend/.env file.');
   process.exit(1);
 }
 
@@ -63,8 +68,6 @@ const PORT = process.env.PORT || 3000;
 // Initialize Firebase
 initFirebase();
 
-const corsOrigin = process.env.CORS_ORIGIN;
-
 // Middleware
 app.use(helmet());
 if (corsOrigin) {
@@ -82,6 +85,15 @@ if (corsOrigin) {
   }));
 }
 app.use(cors({ origin: corsOrigin || false, credentials: true }));
+
+// Request ID tracing
+app.use((req, res, next) => {
+  req.id = crypto.randomUUID();
+  res.setHeader('X-Request-Id', req.id);
+  req.log = logger.child({ reqId: req.id, method: req.method, url: req.url });
+  next();
+});
+
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -156,14 +168,20 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Quickpass API running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught exception — shutting down');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason }, 'Unhandled promise rejection');
+});
 
 if (require.main === module) {
+  app.listen(PORT, () => {
+    logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');
+  });
+
   // HTTPS server for camera access on mobile
   const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
   const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
@@ -174,7 +192,7 @@ if (require.main === module) {
         key: fs.readFileSync(keyPath),
         cert: fs.readFileSync(certPath),
       }, app).listen(httpsPort, () => {
-        console.log(`Quickpass HTTPS running on port ${httpsPort}`);
+        logger.info({ port: httpsPort }, 'Quickpass HTTPS running');
       });
     }
   } catch {

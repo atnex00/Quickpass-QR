@@ -43,7 +43,7 @@ async function submitLeave(req, res, next) {
       if (req.user.is_admin) {
         supervisors.push(req.user);
       } else {
-        throw createError(500, 'No supervisor found for your department');
+        throw createError(422, 'No supervisor found for your department');
       }
     }
 
@@ -70,7 +70,7 @@ async function submitLeave(req, res, next) {
           title: 'New Leave Request',
           body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
           data: { leave_id: leaveId, type: 'new_request' },
-        }).catch((err) => console.error('Notification error (submit):', err.message))
+        }).catch((err) => req.log?.error({ err }, 'Notification error (submit)'))
       )
     );
 

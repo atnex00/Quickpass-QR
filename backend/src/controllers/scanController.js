@@ -111,7 +111,7 @@ async function validateScan(req, res, next) {
         data: { leave_id, type: type === 'OUT' ? 'scanned_out' : 'scanned_in' },
       });
     } catch (notifErr) {
-      console.error('Notification error (scan):', notifErr.message);
+      req.log?.error({ err: notifErr }, 'Notification error (scan)');
     }
 
     res.json({

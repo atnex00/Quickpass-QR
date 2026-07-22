@@ -1,6 +1,9 @@
+const logger = require('../config/logger');
+
 function errorHandler(err, req, res, _next) {
   const isDev = process.env.NODE_ENV === 'development';
-  console.error(`[ERROR] ${err.statusCode || 500} ${isDev ? err.stack : err.message}`);
+  const log = req?.log || logger;
+  log.error({ err, statusCode: err.statusCode || 500 }, err.message);
 
   const statusCode = err.statusCode || 500;
   const isPrivileged = req.user && (req.user.is_admin || req.user.is_supervisor);

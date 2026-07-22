@@ -121,7 +121,7 @@ describe('POST /api/leave/request', () => {
     expect(res.status).toBe(409);
   });
 
-  it('returns 500 if no supervisor found and not admin', async () => {
+  it('returns 422 if no supervisor found and not admin', async () => {
     mockAuth({ employee_id: '000001', is_active: true });
     db.first
       .mockResolvedValueOnce(null);
@@ -130,8 +130,8 @@ describe('POST /api/leave/request', () => {
       .post('/api/leave/request')
       .set('Authorization', `Bearer ${authToken()}`)
       .send({ leave_date: today, start_time: '09:00', end_time: '17:00', reason: 'Family event' });
-    expect(res.status).toBe(500);
-    expect(res.body.success).toBe(false);
+    expect(res.status).toBe(422);
+    expect(res.body.message).toContain('No supervisor found');
   });
 
   it('returns 201 on successful submission', async () => {

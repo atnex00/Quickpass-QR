@@ -56,6 +56,9 @@ npm-debug.log*
 flutter_app/env.dev.json
 flutter_app/env.prod.json
 
+# Admin desktop build
+admin-desktop/
+
 # Test coverage
 backend/coverage/
 web/coverage/

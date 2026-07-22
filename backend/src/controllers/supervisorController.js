@@ -88,7 +88,7 @@ async function approveLeave(req, res, next) {
         outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
         inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
       } catch (qrErr) {
-        console.error('QR image generation failed (approval continues):', qrErr.message);
+        req.log?.error({ err: qrErr }, 'QR image generation failed (approval continues)');
       }
 
       await trx('leave_requests')
@@ -110,7 +110,7 @@ async function approveLeave(req, res, next) {
         data: { leave_id: leaveId, type: 'approved' },
       });
     } catch (notifErr) {
-      console.error('Notification error (approve):', notifErr.message);
+      req.log?.error({ err: notifErr }, 'Notification error (approve)');
     }
 
     const updated = await db('leave_requests')
@@ -173,7 +173,7 @@ async function rejectLeave(req, res, next) {
         data: { leave_id: leaveId, type: 'rejected' },
       });
     } catch (notifErr) {
-      console.error('Notification error (reject):', notifErr.message);
+      req.log?.error({ err: notifErr }, 'Notification error (reject)');
     }
 
     const updated = await db('leave_requests')
@@ -273,7 +273,7 @@ async function revokeApproval(req, res, next) {
         data: { leave_id: leaveId, type: 'revoked' },
       });
     } catch (notifErr) {
-      console.error('Notification error (revoke):', notifErr.message);
+      req.log?.error({ err: notifErr }, 'Notification error (revoke)');
     }
 
     const updated = await db('leave_requests')

@@ -25,8 +25,14 @@ const adminController = require('../controllers/adminController');
 const router = express.Router();
 
 // ── Health Check ──
-router.get('/health', (req, res) => {
-  res.json({ success: true, message: 'Quickpass API is running', timestamp: new Date().toISOString() });
+router.get('/health', async (req, res, next) => {
+  try {
+    const db = require('../config/database');
+    await db.raw('SELECT 1');
+    res.json({ success: true, message: 'Quickpass API is running', timestamp: new Date().toISOString() });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ── Auth Routes ──
