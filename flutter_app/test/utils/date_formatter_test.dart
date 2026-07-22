@@ -41,25 +41,25 @@ void main() {
 
     group('durationString', () {
       test('same-day 9-17 returns 8h 0m', () {
-        final start = DateTime(2026, 7, 21, 9, 0);
-        final end = DateTime(2026, 7, 21, 17, 0);
+        final start = DateTime(2026, 7, 21, 9);
+        final end = DateTime(2026, 7, 21, 17);
         expect(DateFormatter.durationString(start, end), '8h 0m');
       });
 
       test('under an hour returns minutes only', () {
-        final start = DateTime(2026, 7, 21, 10, 0);
+        final start = DateTime(2026, 7, 21, 10);
         final end = DateTime(2026, 7, 21, 10, 30);
         expect(DateFormatter.durationString(start, end), '30m');
       });
 
       test('exact hour returns Xh 0m', () {
-        final start = DateTime(2026, 7, 21, 9, 0);
-        final end = DateTime(2026, 7, 21, 12, 0);
+        final start = DateTime(2026, 7, 21, 9);
+        final end = DateTime(2026, 7, 21, 12);
         expect(DateFormatter.durationString(start, end), '3h 0m');
       });
 
       test('zero duration returns 0m', () {
-        final now = DateTime(2026, 7, 21, 10, 0);
+        final now = DateTime(2026, 7, 21, 10);
         expect(DateFormatter.durationString(now, now), '0m');
       });
     });

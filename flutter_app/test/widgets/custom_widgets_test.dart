@@ -33,8 +33,8 @@ void main() {
       await tester.pumpWidget(_wrap(
         const LoadingOverlay(
           isLoading: true,
-          child: Text('content'),
           message: 'Please wait...',
+          child: Text('content'),
         ),
       ));
       expect(find.text('Please wait...'), findsOneWidget);

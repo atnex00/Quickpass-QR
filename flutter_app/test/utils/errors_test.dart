@@ -71,7 +71,6 @@ void main() {
           () {
         final e = DioException(
           requestOptions: RequestOptions(),
-          type: DioExceptionType.unknown,
           message: 'SocketException: Connection refused',
         );
         expect(friendlyError(e),
@@ -81,7 +80,6 @@ void main() {
       test('unknown without SocketException returns generic message', () {
         final e = DioException(
           requestOptions: RequestOptions(),
-          type: DioExceptionType.unknown,
         );
         expect(friendlyError(e),
             'An unexpected error occurred. Please try again.');

@@ -14,7 +14,7 @@ class _TestWidget extends StatefulWidget {
 }
 
 Widget _buildTestApp() {
-  return MaterialApp(home: Scaffold(body: _TestWidget()));
+  return const MaterialApp(home: Scaffold(body: _TestWidget()));
 }
 
 void main() {

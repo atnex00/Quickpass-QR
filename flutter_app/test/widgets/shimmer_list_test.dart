@@ -10,7 +10,7 @@ void main() {
       await tester.pumpWidget(_wrap(
         ShimmerList(
           itemCount: 3,
-          itemBuilder: (i) => Container(height: 40, child: Text('Item $i')),
+          itemBuilder: (i) => SizedBox(height: 40, child: Text('Item $i')),
         ),
       ));
       expect(find.text('Item 0'), findsOneWidget);
@@ -22,7 +22,7 @@ void main() {
       await tester.pumpWidget(_wrap(
         ShimmerList(
           itemCount: 2,
-          itemBuilder: (i) => Container(height: 40),
+          itemBuilder: (i) => const SizedBox(height: 40),
         ),
       ));
       expect(find.byType(ListView), findsOneWidget);
@@ -33,7 +33,7 @@ void main() {
         ShimmerList(
           itemCount: 2,
           scrollable: false,
-          itemBuilder: (i) => Container(height: 40),
+          itemBuilder: (i) => const SizedBox(height: 40),
         ),
       ));
       expect(find.byType(Column), findsOneWidget);

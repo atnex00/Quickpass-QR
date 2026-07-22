@@ -16,8 +16,7 @@ async function submitLeave(req, res, next) {
       throw createError(400, 'End time must be after start time');
     }
 
-    const today = getLocalDateString();
-    if (leave_date !== today) {
+    if (getLocalDateString(new Date(leave_date)) !== getLocalDateString()) {
       throw createError(400, 'Leave date must be today');
     }
 
@@ -48,7 +47,8 @@ async function submitLeave(req, res, next) {
       }
     }
 
-    const leaveId = `LV-${leave_date.replace(/-/g, '')}-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const leaveDateStr = getLocalDateString(leave_date);
+    const leaveId = `LV-${leaveDateStr.replace(/-/g, '')}-${uuidv4().slice(0, 8).toUpperCase()}`;
 
     await db('leave_requests').insert({
       leave_id: leaveId,

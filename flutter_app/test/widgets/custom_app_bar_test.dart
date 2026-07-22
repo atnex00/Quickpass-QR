@@ -29,9 +29,9 @@ void main() {
 
     testWidgets('renders custom leading widget', (tester) async {
       await tester.pumpWidget(_wrap(
-        QuickpassAppBar(
+        const QuickpassAppBar(
           title: 'Details',
-          leading: const Icon(Icons.menu),
+          leading: Icon(Icons.menu),
         ),
       ));
       expect(find.byIcon(Icons.menu), findsOneWidget);
