@@ -48,9 +48,7 @@ bool isTablet(BuildContext context) {
 double responsiveFontSize(BuildContext context, double base) {
   final scaled = base *
       (MediaQuery.of(context).size.width / _designWidth).clamp(0.85, 1.2);
-  return MediaQuery.textScalerOf(context)
-      .scale(scaled)
-      .clamp(scaled * 0.85, scaled * 1.3);
+  return MediaQuery.textScalerOf(context).scale(scaled);
 }
 
 EdgeInsets responsivePadding(BuildContext context,
