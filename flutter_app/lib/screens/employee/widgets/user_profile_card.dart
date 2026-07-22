@@ -11,6 +11,11 @@ class UserProfileCard extends StatelessWidget {
 
   static String? _photo(Employee? u) => AppConfig.photoUrl(u?.profilePhoto);
 
+  static String _initial(Employee? user) {
+    final name = user?.fullName;
+    return (name != null && name.isNotEmpty ? name[0] : 'U').toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,7 +36,7 @@ class UserProfileCard extends StatelessWidget {
                 : null,
             child: _photo(user) == null
                 ? Text(
-                    (user?.fullName ?? 'U').substring(0, 1).toUpperCase(),
+                    _initial(user),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
