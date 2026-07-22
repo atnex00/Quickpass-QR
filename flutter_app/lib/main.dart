@@ -112,6 +112,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     await NotificationService().init(
       navigatorKey: _navigatorKey,
       apiService: widget.apiService,
+      onUnreadNotification: widget.notifProv.increment,
     );
 
     widget.auth.addListener(_checkPendingNotification);

@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../providers/notification_provider.dart';
 import '../screens/employee/dashboard_screen.dart';
 import '../screens/employee/leave_history_screen.dart';
 import '../screens/supervisor/supervisor_dashboard.dart';
@@ -17,6 +16,7 @@ class NotificationService {
   GlobalKey<NavigatorState>? _navigatorKey;
   ApiService? _api;
   String? _pendingScreen;
+  void Function()? _onUnreadNotification;
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -24,10 +24,12 @@ class NotificationService {
   Future<void> init({
     required GlobalKey<NavigatorState> navigatorKey,
     required ApiService apiService,
+    void Function()? onUnreadNotification,
   }) async {
     if (_initialized) return;
     _navigatorKey = navigatorKey;
     _api = apiService;
+    _onUnreadNotification = onUnreadNotification;
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
@@ -63,7 +65,7 @@ class NotificationService {
   }
 
   void _onForegroundMessage(RemoteMessage message) {
-    NotificationProvider().increment();
+    _onUnreadNotification?.call();
     final title = message.notification?.title ?? '';
     final body = message.notification?.body ?? '';
     if (title.isEmpty && body.isEmpty) return;
