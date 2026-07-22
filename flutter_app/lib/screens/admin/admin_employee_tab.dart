@@ -51,6 +51,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
   @override
   void dispose() {
     _searchCtl.dispose();
+    _searchDebouncer.cancel();
     super.dispose();
   }
 
