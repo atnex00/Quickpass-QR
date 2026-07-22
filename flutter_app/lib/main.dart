@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
 import 'config/theme.dart';
+import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/leave_provider.dart';
 import 'providers/notification_provider.dart';
@@ -38,7 +39,9 @@ void main() async {
   }
 
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (_) {}
 
   FlutterError.onError = (details) {
