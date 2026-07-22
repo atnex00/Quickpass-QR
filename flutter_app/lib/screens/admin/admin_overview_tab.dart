@@ -47,17 +47,20 @@ class _OverviewTabState extends State<OverviewTab> {
   Future<void> _loadReports() async {
     setState(() { _isLoading = true; _error = null; });
     try {
-      _reportData = await _api.getReports();
-      final deptRes = await _api.getReports(type: 'department');
+      final results = await Future.wait([
+        _api.getReports(),
+        _api.getReports(type: 'department'),
+        _api.listEmployees(limit: 1),
+        _api.getDepartments(),
+      ]);
+      _reportData = results[0] as Map<String, dynamic>;
+      final deptRes = results[1] as Map<String, dynamic>;
       _departmentReport = deptRes['data'] as List<dynamic>?;
       _computeCounts();
-
-      final empRes = await _api.listEmployees(limit: 1);
-      final pagination = empRes['pagination'] as Map<String, dynamic>?;
+      final pagination = (results[2] as Map<String, dynamic>)['pagination']
+          as Map<String, dynamic>?;
       _employeeCount = int.tryParse('${pagination?['total']}') ?? 0;
-
-      final depts = await _api.getDepartments();
-      _departmentCount = depts.length;
+      _departmentCount = (results[3] as List<dynamic>).length;
     } catch (e) {
       _error = friendlyError(e);
     }
