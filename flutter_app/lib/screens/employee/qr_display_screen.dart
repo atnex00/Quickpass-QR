@@ -22,12 +22,10 @@ class QrDisplayScreen extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            // ── Main Content ──
             Hero(
               tag: ValueKey('qr-leave-${leave.leaveId}'),
               child: CustomScrollView(
                 slivers: [
-                  // ── Electric Yellow App Bar ──
                   SliverAppBar(
                     pinned: true,
                     toolbarHeight: 64,
@@ -65,12 +63,10 @@ class QrDisplayScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // ── Body ──
                   SliverPadding(
                     padding: const EdgeInsets.all(16),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
-                        // ── Leave Details ──
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -206,7 +202,7 @@ class QrDisplayScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // ── QR Codes Grid ──
+                        
                         if (!leave.hasQrCodes)
                           Container(
                             width: double.infinity,
@@ -234,7 +230,6 @@ class QrDisplayScreen extends StatelessWidget {
                         else
                           Column(
                             children: [
-                              // ── OUT PASS ──
                               if (leave.outQrCode != null)
                                 _QrPassCard(
                                   label: 'Out Pass',
@@ -251,7 +246,6 @@ class QrDisplayScreen extends StatelessWidget {
                                   time: leave.startTime,
                                 ),
                               const SizedBox(height: 16),
-                              // ── IN PASS ──
                               if (leave.inQrCode != null)
                                 _QrPassCard(
                                   label: 'In Pass',
@@ -272,7 +266,6 @@ class QrDisplayScreen extends StatelessWidget {
                           ),
                         const SizedBox(height: 16),
 
-                        // ── Pass Guidelines ──
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -479,7 +472,6 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                   );
                 }(),
                 const SizedBox(height: 12),
-                // ── Live Countdown ──
                 if (!expired)
                   Container(
                     padding:

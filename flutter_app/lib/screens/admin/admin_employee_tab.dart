@@ -164,7 +164,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         sliver: SliverList(
           delegate: SliverChildListDelegate([
-            // ── Search Bar ──
             TextField(
               controller: _searchCtl,
               decoration: const InputDecoration(
@@ -174,7 +173,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
               onChanged: _onSearchChanged,
             ),
             const SizedBox(height: 8),
-            // ── Filter Row ──
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -272,7 +270,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
               ),
             ),
             const SizedBox(height: 12),
-            // ── Employee count ──
             if (_employees.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -281,7 +278,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
                   style: TextStyle(fontSize: 12, color: context.neutralGray),
                 ),
               ),
-            // ── Error / Loading / Empty states ──
             if (_loadingError)
               Container(
                 width: double.infinity,
@@ -324,7 +320,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
       ),
     ];
 
-    // ── Dynamic employee list (lazy-built) ──
     if (!_loadingError && !_isLoading && _employees.isNotEmpty) {
       slivers.add(
         SliverPadding(
@@ -339,7 +334,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
       );
     }
 
-    // ── Pagination ──
     if (_employees.isNotEmpty && _totalPages > 1) {
       slivers.add(
         SliverPadding(

@@ -96,7 +96,6 @@ class _LeaveTabState extends State<LeaveTab> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         sliver: SliverList(
           delegate: SliverChildListDelegate([
-            // ── Status Filters ──
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(

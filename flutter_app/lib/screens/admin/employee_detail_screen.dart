@@ -254,7 +254,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // ── Profile Header ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -322,7 +323,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Info Card ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -357,7 +359,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Roles Card ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -398,7 +401,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Actions ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),

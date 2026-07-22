@@ -62,7 +62,6 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
           onRefresh: () => leaveProv.loadHistory(status: _statusFilter),
           child: CustomScrollView(
             slivers: [
-              // ── Electric Yellow App Bar ──
               SliverAppBar(
                 pinned: true,
                 toolbarHeight: 64,
@@ -104,13 +103,11 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                 ),
               ),
 
-              // ── Sticky Filter Bar ──
               SliverPersistentHeader(
                 pinned: true,
                 delegate: LeaveFilterBarDelegate(_statusFilter, _setFilter),
               ),
 
-              // ── Content ──
               if (leaveProv.fromCache)
                 const SliverToBoxAdapter(
                   child: Padding(
