@@ -143,7 +143,7 @@ describe('leaveStore', () => {
 
     expect(result).toBe(true)
     expect(api.post).toHaveBeenCalledWith('/supervisor/approve/LV-001')
-    expect(useLeaveStore.getState().pendingRequests).toEqual([{ leave_id: 'LV-002' }])
+    expect(useLeaveStore.getState().pendingRequests).toEqual([makeLeave({ leave_id: 'LV-002' })])
   })
 
   it('rejectLeave posts rejection with reason', async () => {
