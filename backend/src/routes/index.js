@@ -16,6 +16,20 @@ const upload = multer({
   },
 });
 
+function handleMulterError(err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    const messages = {
+      LIMIT_FILE_SIZE: 'File too large — max 5MB',
+      LIMIT_UNEXPECTED_FILE: 'Unexpected file field',
+    };
+    return res.status(400).json({ success: false, message: messages[err.code] || err.message });
+  }
+  if (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next();
+}
+
 const authController = require('../controllers/authController');
 const leaveController = require('../controllers/leaveController');
 const supervisorController = require('../controllers/supervisorController');
@@ -60,7 +74,7 @@ router.put('/auth/profile', authenticate, validate(Joi.object({
   password: Joi.string().min(8),
 }).min(1)), authController.updateProfile);
 
-router.post('/auth/profile/photo', authenticate, upload.single('photo'), authController.uploadProfilePhoto);
+router.post('/auth/profile/photo', authenticate, upload.single('photo'), handleMulterError, authController.uploadProfilePhoto);
 
 router.put('/auth/fcm-token', authenticate, validate(Joi.object({
   fcm_token: Joi.string().required(),

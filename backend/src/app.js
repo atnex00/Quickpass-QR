@@ -59,6 +59,7 @@ if (process.env.NODE_ENV === 'production' && !corsOrigin) {
 
 const express = require('express');
 const https = require('https');
+const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -112,12 +113,25 @@ app.use(express.urlencoded({ extended: true }));
 // Trust proxy for rate limiting behind reverse proxy
 app.set('trust proxy', 1);
 
-// Global rate limit
+// Global rate limit — per-user when authenticated, per-IP otherwise
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    if (req.user) return `user:${req.user.employee_id}`;
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer ')) {
+      try {
+        const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        if (decoded && decoded.employee_id) return `user:${decoded.employee_id}`;
+      } catch {
+        // Token invalid or expired — fall through to IP-based key
+      }
+    }
+    return `ip:${req.ip}`;
+  },
   message: { success: false, message: 'Too many requests, please try again later' },
 });
 app.use(limiter);

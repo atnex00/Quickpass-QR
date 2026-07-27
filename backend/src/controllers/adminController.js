@@ -115,6 +115,7 @@ async function updateEmployee(req, res, next) {
     const updates = req.body;
 
     let updated;
+    let changedFields;
     await db.transaction(async (trx) => {
       const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
       if (!employee) {
@@ -142,6 +143,8 @@ async function updateEmployee(req, res, next) {
 
       await trx('employees').where({ employee_id: id }).update(toUpdate);
 
+      changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
+
       updated = await trx('employees')
         .leftJoin('departments', 'employees.department_id', 'departments.department_id')
         .where('employees.employee_id', id)
@@ -151,7 +154,6 @@ async function updateEmployee(req, res, next) {
 
     res.json({ success: true, data: updated });
 
-    const changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
     auditService.log({
       action: 'update',
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },

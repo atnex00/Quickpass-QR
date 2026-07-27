@@ -387,6 +387,26 @@ psql "$DB_CONNECTION" < quickpass-backup-20250101.sql
 
 > Restoring requires an empty or freshly migrated database. Run `npm run migrate` first, then apply the backup. Never restore over a live production database without first verifying the backup.
 
+### Automated database backups
+
+A backup script is provided. To set up daily backups via cron:
+
+```bash
+# 1. Make the script executable
+chmod +x scripts/backup-db.sh
+
+# 2. Test it manually
+DB_CONNECTION="postgresql://..." ./scripts/backup-db.sh
+
+# 3. Add to crontab (runs daily at 3 AM)
+crontab -e
+
+# Add this line (adjust the path to your Quickpass-QR directory):
+0 3 * * * cd /path/to/Quickpass-QR && DB_CONNECTION="postgresql://..." ./scripts/backup-db.sh >> /var/log/quickpass-backup.log 2>&1
+```
+
+> Backups are stored in `backups/` and automatically cleaned up after 30 days. Use `pg_restore` or `psql` to restore (see [Restoring the database](#restoring-the-database)).
+
 ### Monitoring
 
 Check the backend logs for errors:
