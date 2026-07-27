@@ -13,6 +13,7 @@ web/dist/
 .env.dev
 .env.prod
 .env.*
+!.env.example
 
 # IDE
 .idea/

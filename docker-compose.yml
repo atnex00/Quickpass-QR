@@ -42,6 +42,7 @@ services:
       - SESSION_EXPIRES_IN=7d
       - QR_SECRET=${QR_SECRET}
       - QR_VALIDITY_WINDOW_MINUTES=15
+      - COOKIE_SECRET=${COOKIE_SECRET}
     env_file:
       - ./backend/.env
     restart: unless-stopped

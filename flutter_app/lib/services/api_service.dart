@@ -192,9 +192,7 @@ class ApiService {
   Future<void> logout() async {
     try {
       await dio.post('/auth/logout');
-    } catch (e) {
-      debugPrint('logout error: $e');
-    }
+    } catch (_) {}
     await clearLocalAuth();
   }
 
@@ -268,8 +266,7 @@ class ApiService {
     try {
       final res = await dio.get('/leave/active');
       return LeaveRequest.fromJson(res.data['data']);
-    } catch (e) {
-      debugPrint('getActiveLeave error: $e');
+    } catch (_) {
       return null;
     }
   }
