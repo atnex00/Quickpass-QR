@@ -36,7 +36,8 @@ void main() {
       });
 
       test('returns error for too short password', () {
-        expect(Validators.password('abc'), 'Password must be at least 4 characters');
+        expect(Validators.password('abc'),
+            'Password must be at least 4 characters');
       });
 
       test('returns null for valid password', () {
@@ -71,8 +72,10 @@ void main() {
       });
 
       test('returns error if start >= end', () {
-        expect(Validators.timeRange('14:00', '09:00'), 'End time must be after start time');
-        expect(Validators.timeRange('09:00', '09:00'), 'End time must be after start time');
+        expect(Validators.timeRange('14:00', '09:00'),
+            'End time must be after start time');
+        expect(Validators.timeRange('09:00', '09:00'),
+            'End time must be after start time');
       });
 
       test('returns null if start < end', () {

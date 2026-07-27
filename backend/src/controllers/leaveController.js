@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
 
 async function submitLeave(req, res, next) {
   try {
@@ -15,9 +16,8 @@ async function submitLeave(req, res, next) {
       throw createError(400, 'End time must be after start time');
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    if (leave_date < today) {
-      throw createError(400, 'Leave date cannot be in the past');
+    if (getLocalDateString(new Date(leave_date)) !== getLocalDateString()) {
+      throw createError(400, 'Leave date must be today');
     }
 
     const conflict = await db('leave_requests')
@@ -36,26 +36,25 @@ async function submitLeave(req, res, next) {
       throw createError(409, 'You already have a leave request for this time period');
     }
 
-    let supervisor = await db('employees')
-      .where({ department_id: req.user.department_id, is_supervisor: true, is_active: true })
-      .first();
+    const supervisors = await db('employees')
+      .where({ department_id: req.user.department_id, is_supervisor: true, is_active: true });
 
-    if (!supervisor) {
+    if (supervisors.length === 0) {
       if (req.user.is_admin) {
-        supervisor = req.user;
+        supervisors.push(req.user);
       } else {
-        throw createError(500, 'No supervisor found for your department');
+        throw createError(422, 'No supervisor found for your department');
       }
     }
 
-    const leaveDateStr = typeof leave_date === 'string' ? leave_date : leave_date.toISOString().split('T')[0];
+    const leaveDateStr = getLocalDateString(leave_date);
     const leaveId = `LV-${leaveDateStr.replace(/-/g, '')}-${uuidv4().slice(0, 8).toUpperCase()}`;
 
     await db('leave_requests').insert({
       leave_id: leaveId,
       employee_id: req.user.employee_id,
       department_id: req.user.department_id,
-      supervisor_id: supervisor.employee_id,
+      supervisor_id: supervisors[0].employee_id,
       leave_date,
       start_time,
       end_time,
@@ -65,15 +64,15 @@ async function submitLeave(req, res, next) {
       updated_at: db.fn.now(),
     });
 
-    try {
-      await notificationService.sendToEmployee(supervisor.employee_id, {
-        title: 'New Leave Request',
-        body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
-        data: { leave_id: leaveId, type: 'new_request' },
-      });
-    } catch (_) {
-      // Notification failure is non-blocking
-    }
+    await Promise.allSettled(
+      supervisors.map((sup) =>
+        notificationService.sendToEmployee(sup.employee_id, {
+          title: 'New Leave Request',
+          body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
+          data: { leave_id: leaveId, type: 'new_request' },
+        }).catch((err) => req.log?.error({ err }, 'Notification error (submit)'))
+      )
+    );
 
     const leave = await db('leave_requests')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
@@ -154,7 +153,7 @@ async function getActiveLeave(req, res, next) {
       .first();
 
     if (!leave) {
-      return res.status(404).json({ success: false, message: 'No active leave found' });
+      throw createError(404, 'No active leave found');
     }
 
     res.json({ success: true, data: leave });
@@ -184,11 +183,50 @@ async function getLeaveById(req, res, next) {
       throw createError(404, 'Leave request not found');
     }
 
-    if (!req.user.is_admin && leave.employee_id !== req.user.employee_id && !req.user.is_supervisor) {
-      throw createError(403, 'You can only view your own leave requests');
+    if (!req.user.is_admin) {
+      if (leave.employee_id !== req.user.employee_id) {
+        if (!req.user.is_supervisor) {
+          throw createError(403, 'You can only view your own leave requests');
+        }
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This leave request is not in your department');
+        }
+      }
     }
 
     res.json({ success: true, data: leave });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function cancelLeave(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const leave = await db('leave_requests').where({ leave_id: id }).first();
+    if (!leave) {
+      throw createError(404, 'Leave request not found');
+    }
+
+    if (leave.employee_id !== req.user.employee_id && !req.user.is_admin) {
+      throw createError(403, 'You can only cancel your own leave requests');
+    }
+
+    if (!['approved', 'pending'].includes(leave.status)) {
+      throw createError(400, `Cannot cancel a leave that is ${leave.status}`);
+    }
+
+    await db('leave_requests').where({ leave_id: id }).update({
+      status: 'cancelled',
+      out_qr_code: null,
+      in_qr_code: null,
+      out_qr_image: null,
+      in_qr_image: null,
+      updated_at: db.fn.now(),
+    });
+
+    res.json({ success: true, message: 'Leave request cancelled' });
   } catch (err) {
     next(err);
   }
@@ -216,4 +254,4 @@ async function deleteLeave(req, res, next) {
   }
 }
 
-module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, deleteLeave };
+module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, cancelLeave, deleteLeave };

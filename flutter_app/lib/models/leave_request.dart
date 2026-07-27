@@ -10,7 +10,8 @@ enum LeaveStatus {
   rejected,
   active,
   completed,
-  cancelled;
+  cancelled,
+  unknown;
 
   String get label {
     switch (this) {
@@ -26,6 +27,8 @@ enum LeaveStatus {
         return 'Completed';
       case LeaveStatus.cancelled:
         return 'Cancelled';
+      case LeaveStatus.unknown:
+        return 'Unknown';
     }
   }
 
@@ -42,6 +45,8 @@ enum LeaveStatus {
       case LeaveStatus.completed:
         return QuickpassColors.secondary;
       case LeaveStatus.cancelled:
+        return Colors.grey;
+      case LeaveStatus.unknown:
         return Colors.grey;
     }
   }
@@ -60,19 +65,49 @@ enum LeaveStatus {
         return Icons.check_circle_outline;
       case LeaveStatus.cancelled:
         return Icons.close;
+      case LeaveStatus.unknown:
+        return Icons.help_outline;
     }
   }
 
   static LeaveStatus fromString(String s) {
     return LeaveStatus.values.firstWhere(
       (e) => e.name == s,
-      orElse: () => LeaveStatus.pending,
+      orElse: () => LeaveStatus.unknown,
     );
   }
 }
 
 @JsonSerializable()
 class LeaveRequest {
+
+  LeaveRequest({
+    required this.leaveId,
+    required this.employeeId,
+    required this.employeeName,
+    required this.departmentId,
+    required this.supervisorId,
+    required this.supervisorName,
+    required this.leaveDate,
+    required this.startTime,
+    required this.endTime,
+    required this.reason,
+    required this.status,
+    this.outQrCode,
+    this.inQrCode,
+    this.outQrImage,
+    this.inQrImage,
+    this.outScanTime,
+    this.inScanTime,
+    this.rejectionReason,
+    required this.createdAt,
+    required this.updatedAt,
+    this.employeePosition,
+    this.employeePhoto,
+  });
+
+  factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
+      _$LeaveRequestFromJson(json);
   @JsonKey(name: 'leave_id', defaultValue: '')
   final String leaveId;
 
@@ -112,6 +147,12 @@ class LeaveRequest {
   @JsonKey(name: 'in_qr_code')
   final String? inQrCode;
 
+  @JsonKey(name: 'out_qr_image')
+  final String? outQrImage;
+
+  @JsonKey(name: 'in_qr_image')
+  final String? inQrImage;
+
   @JsonKey(
       name: 'out_scan_time',
       fromJson: _dateTimeOrNullFromJson,
@@ -141,40 +182,16 @@ class LeaveRequest {
   @JsonKey(name: 'employee_photo')
   final String? employeePhoto;
 
-  LeaveRequest({
-    required this.leaveId,
-    required this.employeeId,
-    required this.employeeName,
-    required this.departmentId,
-    required this.supervisorId,
-    required this.supervisorName,
-    required this.leaveDate,
-    required this.startTime,
-    required this.endTime,
-    required this.reason,
-    required this.status,
-    this.outQrCode,
-    this.inQrCode,
-    this.outScanTime,
-    this.inScanTime,
-    this.rejectionReason,
-    required this.createdAt,
-    required this.updatedAt,
-    this.employeePosition,
-    this.employeePhoto,
-  });
-
   static DateTime _dateFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint('Warning: Failed to parse date from "$v", using current time');
-      return DateTime.now();
+      debugPrint('Warning: Failed to parse date from "$v", using sentinel');
+      return DateTime(0);
     }
     return result;
   }
 
-  static String _dateToJson(DateTime v) =>
-      v.toIso8601String().split('T').first;
+  static String _dateToJson(DateTime v) => v.toIso8601String().split('T').first;
 
   static DateTime? _dateTimeOrNullFromJson(dynamic v) =>
       v != null ? DateTime.tryParse(v.toString()) : null;
@@ -184,8 +201,8 @@ class LeaveRequest {
   static DateTime _dateTimeFromJson(dynamic v) {
     final result = DateTime.tryParse(v?.toString() ?? '');
     if (result == null) {
-      debugPrint('Warning: Failed to parse datetime from "$v", using current time');
-      return DateTime.now();
+      debugPrint('Warning: Failed to parse datetime from "$v", using sentinel');
+      return DateTime(0);
     }
     return result;
   }
@@ -197,9 +214,6 @@ class LeaveRequest {
 
   static String _statusToJson(LeaveStatus v) => v.name;
 
-  factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
-      _$LeaveRequestFromJson(json);
-
   Map<String, dynamic> toJson() => _$LeaveRequestToJson(this);
 
   bool get hasQrCodes => outQrCode != null && inQrCode != null;
@@ -208,8 +222,12 @@ class LeaveRequest {
     final startParts = startTime.split(':');
     final endParts = endTime.split(':');
     if (startParts.length < 2 || endParts.length < 2) return 0;
-    var startMin = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
-    var endMin = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+    final startH = int.tryParse(startParts[0]) ?? 0;
+    final startM = int.tryParse(startParts[1]) ?? 0;
+    final endH = int.tryParse(endParts[0]) ?? 0;
+    final endM = int.tryParse(endParts[1]) ?? 0;
+    final startMin = startH * 60 + startM;
+    var endMin = endH * 60 + endM;
     if (endMin < startMin) endMin += 1440;
     return endMin - startMin;
   }

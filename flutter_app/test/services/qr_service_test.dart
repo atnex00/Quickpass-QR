@@ -6,7 +6,8 @@ void main() {
     group('isWithinWindow', () {
       test('returns true for timestamps within window', () {
         final now = DateTime.now();
-        final recent = now.subtract(const Duration(minutes: 5)).toIso8601String();
+        final recent =
+            now.subtract(const Duration(minutes: 5)).toIso8601String();
         expect(QrService.isWithinWindow(recent, 15), true);
       });
 

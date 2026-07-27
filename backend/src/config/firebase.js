@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const logger = require('./logger');
 
 let firebaseApp = null;
 
@@ -12,13 +13,13 @@ function initFirebase() {
 
   const missing = required.filter(k => !process.env[k]);
   if (missing.length > 0) {
-    console.warn(`Firebase: missing env vars (${missing.join(', ')}). Push notifications disabled.`);
+    logger.warn({ missing }, 'Firebase env vars missing — push notifications disabled');
     return null;
   }
 
   try {
     firebaseApp = admin.initializeApp({
-      credential: admin.credential.cert({
+      credential: admin.cert({
         type: process.env.FCM_TYPE,
         project_id: process.env.FCM_PROJECT_ID,
         private_key_id: process.env.FCM_PRIVATE_KEY_ID,
@@ -29,17 +30,17 @@ function initFirebase() {
         token_uri: process.env.FCM_TOKEN_URI,
       }),
     });
-    console.log('Firebase initialized');
+    logger.info('Firebase initialized');
     return firebaseApp;
   } catch (err) {
-    console.warn('Firebase init failed:', err.message);
+    logger.warn({ err }, 'Firebase init failed');
     return null;
   }
 }
 
 function getMessaging() {
   if (!firebaseApp) return null;
-  return admin.messaging();
+  return firebaseApp.messaging();
 }
 
 module.exports = { initFirebase, getMessaging };

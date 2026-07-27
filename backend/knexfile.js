@@ -1,5 +1,19 @@
-const envFile = `.env.${process.env.NODE_ENV || 'dev'}`;
-require('dotenv').config({ path: require('path').join(__dirname, envFile) });
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+function loadEnv() {
+  const baseEnv = path.join(__dirname, '.env');
+  const envFile = path.join(__dirname, `.env.${process.env.NODE_ENV || 'dev'}`);
+  if (fs.existsSync(baseEnv)) {
+    dotenv.config({ path: baseEnv });
+  }
+  if (fs.existsSync(envFile) && envFile !== baseEnv) {
+    dotenv.config({ path: envFile });
+  }
+}
+
+loadEnv();
 
 module.exports = {
   dev: {

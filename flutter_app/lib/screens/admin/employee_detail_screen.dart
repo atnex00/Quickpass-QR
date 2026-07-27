@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../services/api_service.dart';
 
 class EmployeeDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> employee;
 
   const EmployeeDetailScreen({super.key, required this.employee});
+  final Map<String, dynamic> employee;
 
   @override
   State<EmployeeDetailScreen> createState() => _EmployeeDetailScreenState();
@@ -28,126 +29,149 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
     setState(() => _isLoading = true);
     try {
       final res = await _api.listEmployees(search: _employee!['employee_id']);
-      if (res['success'] && res['data'] != null && (res['data'] as List).isNotEmpty) {
+      if (res['success'] &&
+          res['data'] != null &&
+          (res['data'] as List).isNotEmpty) {
         _employee = (res['data'] as List).first as Map<String, dynamic>;
       }
-    } catch (_) {}
-    setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint('Failed to load employee detail: $e');
+    }
+    if (mounted) setState(() => _isLoading = false);
   }
+
+  static String? _empPhoto(Map<String, dynamic>? emp) =>
+      AppConfig.photoUrl(emp?['profile_photo'] as String?);
 
   void _showEditDialog() {
     final emp = _employee!;
+    final formKey = GlobalKey<FormState>();
     final nameCtl = TextEditingController(text: emp['full_name'] ?? '');
     final posCtl = TextEditingController(text: emp['position'] ?? '');
     final emailCtl = TextEditingController(text: emp['email'] ?? '');
     bool isSupervisor = emp['is_supervisor'] == true;
     bool isAdmin = emp['is_admin'] == true;
     bool isSecurity = emp['is_security'] == true;
+    bool saving = false;
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: const Text('Edit Employee'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(controller: nameCtl, decoration: const InputDecoration(labelText: 'Full Name')),
-                const SizedBox(height: 12),
-                TextField(controller: posCtl, decoration: const InputDecoration(labelText: 'Position')),
-                const SizedBox(height: 12),
-                TextField(controller: emailCtl, decoration: const InputDecoration(labelText: 'Email')),
-                const SizedBox(height: 8),
-                CheckboxListTile(
-                  title: const Text('Supervisor access'),
-                  value: isSupervisor,
-                  onChanged: (v) => setDialogState(() => isSupervisor = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Admin access'),
-                  value: isAdmin,
-                  onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                CheckboxListTile(
-                  title: const Text('Security access'),
-                  value: isSecurity,
-                  onChanged: (v) => setDialogState(() => isSecurity = v ?? false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                      controller: nameCtl,
+                      decoration: const InputDecoration(labelText: 'Full Name'),
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                      controller: posCtl,
+                      decoration: const InputDecoration(labelText: 'Position'),
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Required' : null),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                      controller: emailCtl,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'Required';
+                        if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(v.trim())) {
+                          return 'Invalid email format';
+                        }
+                        return null;
+                      }),
+                  const SizedBox(height: 8),
+                  CheckboxListTile(
+                    title: const Text('Supervisor access'),
+                    value: isSupervisor,
+                    onChanged: (v) =>
+                        setDialogState(() => isSupervisor = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Admin access'),
+                    value: isAdmin,
+                    onChanged: (v) => setDialogState(() => isAdmin = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Security access'),
+                    value: isSecurity,
+                    onChanged: (v) =>
+                        setDialogState(() => isSecurity = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(
+                onPressed: saving ? null : () => Navigator.pop(ctx),
+                child: const Text('Cancel')),
             FilledButton(
-              onPressed: () async {
-                try {
-                  await _api.updateEmployee(emp['employee_id'], {
-                    'full_name': nameCtl.text,
-                    'position': posCtl.text,
-                    'email': emailCtl.text,
-                  });
-                  if (emp['is_supervisor'] != isSupervisor) await _api.toggleSupervisor(emp['employee_id']);
-                  if (emp['is_admin'] != isAdmin) await _api.toggleAdmin(emp['employee_id']);
-                  if (!ctx.mounted) return;
-                  Navigator.pop(ctx);
-                  _refresh();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Employee updated')));
-                  }
-                } catch (e) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-                }
-              },
-              child: const Text('Save'),
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (!(formKey.currentState?.validate() ?? false)) return;
+                      setDialogState(() => saving = true);
+                      try {
+                        await _api.updateEmployee(emp['employee_id'], {
+                          'full_name': nameCtl.text.trim(),
+                          'position': posCtl.text.trim(),
+                          'email': emailCtl.text.trim(),
+                          'is_supervisor': isSupervisor,
+                          'is_admin': isAdmin,
+                          'is_security': isSecurity,
+                        });
+                        if (!ctx.mounted) return;
+                        Navigator.pop(ctx);
+                        _refresh();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Employee updated')));
+                        }
+                      } catch (e) {
+                        if (!mounted) return;
+                        setDialogState(() => saving = false);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(content: Text('Failed to update employee')));
+                      }
+                    },
+              child: saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Text('Save'),
             ),
           ],
         ),
       ),
-    );
+    ).whenComplete(() {
+      nameCtl.dispose();
+      posCtl.dispose();
+      emailCtl.dispose();
+    });
   }
 
   void _showPasswordResetDialog() {
-    final passCtl = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reset Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('New password for ${_employee!['full_name']}'),
-            const SizedBox(height: 12),
-            TextField(controller: passCtl, decoration: const InputDecoration(labelText: 'New Password'), obscureText: true),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (passCtl.text.length < 4) return;
-              try {
-                await _api.resetPassword(_employee!['employee_id'], passCtl.text);
-                if (!ctx.mounted) return;
-                Navigator.pop(ctx);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset')));
-                }
-              } catch (e) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-              }
-            },
-            child: const Text('Reset'),
-          ),
-        ],
+      builder: (ctx) => _PasswordResetDialog(
+        employee: _employee!,
+        api: _api,
       ),
     );
   }
@@ -160,7 +184,9 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         title: const Text('Delete Employee'),
         content: Text('Remove ${emp['full_name']}? This cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: ctx.error),
@@ -173,12 +199,14 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         try {
           await _api.deleteEmployee(emp['employee_id']);
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${emp['full_name']} deleted')));
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${emp['full_name']} deleted')));
             Navigator.pop(context, true);
           }
         } catch (e) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('Failed to delete employee')));
           }
         }
       }
@@ -194,7 +222,9 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600)),
+      child: Text(label,
+          style: TextStyle(
+              fontSize: 12, color: color, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -224,7 +254,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // ── Profile Header ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -238,26 +269,53 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                         CircleAvatar(
                           radius: 44,
                           backgroundColor: context.primary.withValues(alpha: 0.2),
-                          child: Text(
-                            ((emp['full_name'] as String?) ?? '?')[0].toUpperCase(),
-                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: context.primary),
-                          ),
+                          backgroundImage: _empPhoto(emp) != null
+                              ? NetworkImage(_empPhoto(emp)!)
+                              : null,
+                          child: _empPhoto(emp) == null
+                              ? Text(
+                                  ((emp['full_name'] as String?) ?? '?')[0]
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.primary),
+                                )
+                              : null,
                         ),
                         const SizedBox(height: 12),
-                        Text(emp['full_name'] ?? '', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: context.onSurface)),
+                        Text(emp['full_name'] ?? '',
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: context.onSurface)),
                         const SizedBox(height: 4),
-                        Text(emp['employee_id'] ?? '', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.outline, letterSpacing: 0.5)),
+                        Text(emp['employee_id'] ?? '',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: context.outline,
+                                letterSpacing: 0.5)),
                         const SizedBox(height: 12),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: (isActive ? context.success : context.error).withValues(alpha: 0.12),
+                            color: (isActive ? context.success : context.error)
+                                .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: (isActive ? context.success : context.error).withValues(alpha: 0.3)),
+                            border: Border.all(
+                                color:
+                                    (isActive ? context.success : context.error)
+                                        .withValues(alpha: 0.3)),
                           ),
                           child: Text(
                             isActive ? 'Active' : 'Inactive',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isActive ? context.success : context.error),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isActive ? context.success : context.error),
                           ),
                         ),
                       ],
@@ -265,7 +323,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Info Card ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -277,18 +336,31 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Employee Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        Text('Employee Information',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: context.onSurface,
+                                height: 1.5)),
                         const SizedBox(height: 12),
-                        _InfoItem(label: 'Position', value: emp['position'] ?? 'N/A'),
+                        _InfoItem(
+                            label: 'Position', value: emp['position'] ?? 'N/A'),
                         _InfoItem(label: 'Email', value: emp['email'] ?? 'N/A'),
-                        _InfoItem(label: 'Department', value: emp['department_name'] ?? emp['department_id'] ?? 'N/A'),
-                        _InfoItem(label: 'Employee ID', value: emp['employee_id'] ?? 'N/A'),
+                        _InfoItem(
+                            label: 'Department',
+                            value: emp['department_name'] ??
+                                emp['department_id'] ??
+                                'N/A'),
+                        _InfoItem(
+                            label: 'Employee ID',
+                            value: emp['employee_id'] ?? 'N/A'),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Roles Card ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -300,15 +372,28 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Roles & Permissions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        Text('Roles & Permissions',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: context.onSurface,
+                                height: 1.5)),
                         const SizedBox(height: 12),
                         Wrap(
                           children: [
-                            if (emp['is_admin'] == true) _badge('Admin', context.error),
-                            if (emp['is_supervisor'] == true) _badge('Supervisor', QuickpassColors.tertiary),
-                            if (emp['is_security'] == true) _badge('Security', context.warning),
-                            if (emp['is_admin'] != true && emp['is_supervisor'] != true && emp['is_security'] != true)
-                              Text('Standard Employee', style: TextStyle(color: context.neutralGray, fontSize: 14)),
+                            if (emp['is_admin'] == true)
+                              _badge('Admin', context.error),
+                            if (emp['is_supervisor'] == true)
+                              _badge('Supervisor', QuickpassColors.tertiary),
+                            if (emp['is_security'] == true)
+                              _badge('Security', context.warning),
+                            if (emp['is_admin'] != true &&
+                                emp['is_supervisor'] != true &&
+                                emp['is_security'] != true)
+                              Text('Standard Employee',
+                                  style: TextStyle(
+                                      color: context.neutralGray,
+                                      fontSize: 14)),
                           ],
                         ),
                       ],
@@ -316,7 +401,8 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Actions ──
+
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -328,7 +414,12 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: context.onSurface, height: 1.5)),
+                        Text('Quick Actions',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: context.onSurface,
+                                height: 1.5)),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -342,22 +433,34 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () {
+                            onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
-                              _api.toggleActive(emp['employee_id']).then((_) {
+                              try {
+                                await _api.toggleActive(emp['employee_id']);
                                 _refresh();
                                 if (mounted) {
                                   messenger.showSnackBar(
-                                    SnackBar(content: Text(isActive ? 'Employee deactivated' : 'Employee activated')),
+                                    SnackBar(
+                                        content: Text(isActive
+                                            ? 'Employee deactivated'
+                                            : 'Employee activated')),
                                   );
                                 }
-                              }).catchError((_) {});
+                              } catch (_) {}
                             },
-                            icon: Icon(isActive ? Icons.block : Icons.check_circle_outline, size: 18),
+                            icon: Icon(
+                                isActive
+                                    ? Icons.block
+                                    : Icons.check_circle_outline,
+                                size: 18),
                             label: Text(isActive ? 'Deactivate' : 'Activate'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: isActive ? context.error : context.success,
-                              side: BorderSide(color: isActive ? context.error : context.success),
+                              foregroundColor:
+                                  isActive ? context.error : context.success,
+                              side: BorderSide(
+                                  color: isActive
+                                      ? context.error
+                                      : context.success),
                             ),
                           ),
                         ),
@@ -366,16 +469,105 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                   ),
                 ],
               ),
-            ),
+      ),
+    );
+  }
+}
+
+class _PasswordResetDialog extends StatefulWidget {
+
+  const _PasswordResetDialog({
+    required this.employee,
+    required this.api,
+  });
+  final Map<String, dynamic> employee;
+  final ApiService api;
+
+  @override
+  State<_PasswordResetDialog> createState() => _PasswordResetDialogState();
+}
+
+class _PasswordResetDialogState extends State<_PasswordResetDialog> {
+  final _passCtl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool saving = false;
+
+  @override
+  void dispose() {
+    _passCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Reset Password'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('New password for ${widget.employee['full_name']}'),
+            const SizedBox(height: 12),
+            TextFormField(
+                controller: _passCtl,
+                decoration: const InputDecoration(
+                    labelText: 'New Password', hintText: 'Min 8 characters'),
+                obscureText: true,
+                validator: (v) {
+                  if (v == null || v.length < 8) return 'Min 8 characters';
+                  if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(v)) {
+                    return 'Must contain uppercase, lowercase, and number';
+                  }
+                  return null;
+                }),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: saving ? null : () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        FilledButton(
+          onPressed: saving
+              ? null
+              : () async {
+                  if (!(_formKey.currentState?.validate() ?? false)) return;
+                  setState(() => saving = true);
+                  try {
+                    await widget.api.resetPassword(
+                        widget.employee['employee_id'], _passCtl.text);
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Password reset')));
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    setState(() => saving = false);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Failed to reset password')));
+                  }
+                },
+          child: saving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white))
+              : const Text('Reset'),
+        ),
+      ],
     );
   }
 }
 
 class _InfoItem extends StatelessWidget {
-  final String label;
-  final String value;
 
   const _InfoItem({required this.label, required this.value});
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -384,8 +576,16 @@ class _InfoItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.32, child: Text(label, style: TextStyle(fontSize: 13, color: context.neutralGray))),
-          Expanded(child: Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: context.onSurface))),
+          SizedBox(
+              width: (MediaQuery.of(context).size.width * 0.32).clamp(90.0, 130.0),
+              child: Text(label,
+                  style: TextStyle(fontSize: 13, color: context.neutralGray))),
+          Expanded(
+              child: Text(value,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: context.onSurface))),
         ],
       ),
     );

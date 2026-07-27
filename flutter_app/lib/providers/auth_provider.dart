@@ -1,13 +1,17 @@
 import 'package:flutter/widgets.dart';
+
 import '../models/employee.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
+import '../services/cache_service.dart';
+import '../utils/errors.dart';
 
 class AuthProvider extends ChangeNotifier {
-  VoidCallback? onLoggedOut;
-  VoidCallback? onLoggedIn;
-  final ApiService _api;
 
   AuthProvider({required ApiService api}) : _api = api;
+  final ApiService _api;
+  VoidCallback? onLoggedOut;
+  VoidCallback? onLoggedIn;
 
   Employee? _user;
   bool _isLoading = true;
@@ -38,15 +42,26 @@ class AuthProvider extends ChangeNotifier {
         final user = await _api.getProfile();
         _user = user;
         _isAuthenticated = true;
+        CacheService().saveProfile(user.toJson());
       }
     } catch (e) {
       debugPrint('Auth initialization failed: $e');
-      await _api.logout();
+      try {
+        final cached = await CacheService().loadProfile();
+        if (cached != null) {
+          _user = Employee.fromJson(cached);
+          _isAuthenticated = true;
+        } else {
+          await _api.clearLocalAuth();
+        }
+      } catch (cacheError) {
+        debugPrint('Cache fallback also failed: $cacheError');
+      }
+    } finally {
+      _isLoading = false;
+      _isInitializing = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    _isInitializing = false;
-    notifyListeners();
   }
 
   Future<bool> login(String employeeId, String password) async {
@@ -64,9 +79,11 @@ class AuthProvider extends ChangeNotifier {
       _loginLoading = false;
       notifyListeners();
       onLoggedIn?.call();
+      final role = isAdmin ? 'admin' : isSupervisor ? 'supervisor' : isSecurity ? 'security' : 'employee';
+      AnalyticsService().logLogin(role: role);
       return true;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
       _isAuthenticated = false;
       _loginLoading = false;
       notifyListeners();
@@ -75,11 +92,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    _isLoading = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-
     try {
       await _api.logout();
     } catch (_) {}
@@ -88,7 +100,16 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     notifyListeners();
+    AnalyticsService().logLogout();
     onLoggedOut?.call();
+  }
+
+  Future<void> clearAuth() async {
+    _isAuthenticated = false;
+    _user = null;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<bool> updateProfile(Map<String, dynamic> data) async {
@@ -98,7 +119,20 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> uploadProfilePhoto(String filePath) async {
+    try {
+      final user = await _api.uploadProfilePhoto(filePath);
+      _user = user;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = friendlyError(e);
       notifyListeners();
       return false;
     }

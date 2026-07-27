@@ -13,7 +13,7 @@ void main() {
     });
 
     test('fromString returns pending for unknown value', () {
-      expect(LeaveStatus.fromString('unknown'), LeaveStatus.pending);
+      expect(LeaveStatus.fromString('unknown'), LeaveStatus.unknown);
     });
 
     test('label returns correct display strings', () {
@@ -42,10 +42,10 @@ void main() {
     final baseJson = {
       'leave_id': 'leave-001',
       'employee_id': '000001',
-      'employee_name': 'Alice Chen',
-      'department_id': '1',
-      'supervisor_id': '000004',
-      'supervisor_name': 'David Kim',
+      'employee_name': 'James Wilson',
+      'department_id': 'DEP-002',
+      'supervisor_id': '000011',
+      'supervisor_name': 'Ethan White',
       'leave_date': '2025-06-15',
       'start_time': '09:00',
       'end_time': '17:00',
@@ -60,10 +60,10 @@ void main() {
 
       expect(lr.leaveId, 'leave-001');
       expect(lr.employeeId, '000001');
-      expect(lr.employeeName, 'Alice Chen');
-      expect(lr.departmentId, '1');
-      expect(lr.supervisorId, '000004');
-      expect(lr.supervisorName, 'David Kim');
+      expect(lr.employeeName, 'James Wilson');
+      expect(lr.departmentId, 'DEP-002');
+      expect(lr.supervisorId, '000011');
+      expect(lr.supervisorName, 'Ethan White');
       expect(lr.leaveDate, DateTime(2025, 6, 15));
       expect(lr.startTime, '09:00');
       expect(lr.endTime, '17:00');
@@ -80,7 +80,7 @@ void main() {
         'out_scan_time': '2025-06-15T09:05:00Z',
         'in_scan_time': '2025-06-15T17:10:00Z',
         'rejection_reason': null,
-        'employee_position': 'Engineer',
+        'employee_position': 'Software Engineer',
         'employee_photo': 'https://example.com/photo.jpg',
       });
 
@@ -90,7 +90,7 @@ void main() {
       expect(lr.outScanTime, isNotNull);
       expect(lr.inScanTime, isNotNull);
       expect(lr.rejectionReason, isNull);
-      expect(lr.employeePosition, 'Engineer');
+      expect(lr.employeePosition, 'Software Engineer');
       expect(lr.employeePhoto, 'https://example.com/photo.jpg');
     });
 

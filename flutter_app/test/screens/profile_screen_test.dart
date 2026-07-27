@@ -5,16 +5,22 @@ import 'package:provider/provider.dart';
 import 'package:quickpass/config/theme.dart';
 import 'package:quickpass/models/employee.dart';
 import 'package:quickpass/providers/auth_provider.dart';
+import 'package:quickpass/providers/settings_provider.dart';
 import 'package:quickpass/screens/employee/profile_screen.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
-Widget _buildTestApp(AuthProvider authProvider) {
+Widget _buildTestApp(AuthProvider authProvider, {SettingsProvider? settings}) {
+  final settingsProvider = settings ?? SettingsProvider();
   return MaterialApp(
     theme: QuickpassTheme.light,
-    home: ChangeNotifierProvider<AuthProvider>.value(
-      value: authProvider,
-      child: const ProfileScreen(),
+    home: ChangeNotifierProvider<SettingsProvider>.value(
+      value: settingsProvider,
+      child: ChangeNotifierProvider<AuthProvider>.value(
+        value: authProvider,
+        child: const ProfileScreen(),
+      ),
     ),
   );
 }
@@ -24,16 +30,17 @@ void main() {
   late AuthProvider authProvider;
   late Employee testUser;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     authProvider = AuthProvider(api: mockApi);
     testUser = Employee(
       employeeId: '000001',
-      fullName: 'Alice Chen',
+      fullName: 'James Wilson',
       position: 'Software Engineer',
-      departmentId: '1',
-      departmentName: 'Engineering',
-      email: 'alice@example.com',
+      departmentId: 'DEP-002',
+      departmentName: 'TSD · Technical Services Department',
+      email: 'james.wilson@zaneco.com',
       isSupervisor: false,
       isAdmin: false,
       isSecurity: false,
@@ -42,29 +49,32 @@ void main() {
     when(mockApi.getStoredToken()).thenAnswer((_) async => 'test-token');
   });
 
-  testWidgets('renders profile with user information', (WidgetTester tester) async {
+  testWidgets('renders profile with user information',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     expect(find.text('My Profile'), findsOneWidget);
-    expect(find.text('Alice Chen'), findsAtLeast(1));
+    expect(find.text('James Wilson'), findsAtLeast(1));
     expect(find.text('000001'), findsOneWidget);
-    expect(find.text('Engineering'), findsOneWidget);
+    expect(find.text('TSD · Technical Services Department'), findsOneWidget);
     expect(find.text('Software Engineer'), findsAtLeast(1));
     expect(find.text('Account Information'), findsOneWidget);
     expect(find.text('Personal Information'), findsOneWidget);
     expect(find.text('Save Changes'), findsOneWidget);
   });
 
-  testWidgets('shows logout confirmation dialog on logout tap', (WidgetTester tester) async {
+  testWidgets('shows logout confirmation dialog on logout tap',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.logout));
+    await tester.pump();
     await tester.pump();
 
     expect(find.text('Logout'), findsAtLeast(2));
@@ -72,13 +82,15 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
   });
 
-  testWidgets('cancel dismisses logout dialog without logging out', (WidgetTester tester) async {
+  testWidgets('cancel dismisses logout dialog without logging out',
+      (WidgetTester tester) async {
     authProvider.setUserForTest(testUser);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.logout));
+    await tester.pump();
     await tester.pump();
 
     await tester.tap(find.text('Cancel'));

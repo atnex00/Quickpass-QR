@@ -4,13 +4,14 @@ import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/scan_provider.dart';
 import '../../widgets/loading_indicator.dart';
+import '../shared/settings_screen.dart';
 import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 
 class ScanResultScreen extends StatefulWidget {
-  final String qrData;
 
   const ScanResultScreen({super.key, required this.qrData});
+  final String qrData;
 
   @override
   State<ScanResultScreen> createState() => _ScanResultScreenState();
@@ -38,8 +39,11 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   @override
   Widget build(BuildContext context) {
     final scanProv = context.watch<ScanProvider>();
-    final isSuccess = scanProv.lastResult != null && scanProv.lastResult!['success'] == true;
-    final data = isSuccess ? scanProv.lastResult!['data'] as Map<String, dynamic>? : null;
+    final isSuccess =
+        scanProv.lastResult != null && scanProv.lastResult!['success'] == true;
+    final data = isSuccess
+        ? scanProv.lastResult!['data'] as Map<String, dynamic>?
+        : null;
 
     return Scaffold(
       body: Stack(
@@ -89,35 +93,52 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Image.asset('assets/icon/app-icon.png', width: 16, height: 16),
+            child:
+                Image.asset('assets/icon/app-icon.png', width: 16, height: 16),
           ),
           const SizedBox(width: 8),
           const Text(
             'Quickpass',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
           ),
           const Spacer(),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white70),
             color: context.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: (value) async {
               switch (value) {
+                case 'settings':
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const SettingsScreen()));
+                  break;
                 case 'history':
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanHistoryScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const ScanHistoryScreen()));
+                  break;
                 case 'logout':
                   final errorColor = context.error;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       title: const Text('Logout'),
                       content: const Text('Are you sure you want to logout?'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                        TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancel')),
                         FilledButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: FilledButton.styleFrom(backgroundColor: errorColor),
+                          style: FilledButton.styleFrom(
+                              backgroundColor: errorColor),
                           child: const Text('Logout'),
                         ),
                       ],
@@ -134,11 +155,21 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 child: Consumer<AuthProvider>(
                   builder: (_, auth, __) => Text(
                     auth.user?.fullName ?? 'Guard',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: context.onSurface),
                   ),
                 ),
               ),
               const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'settings',
+                child: ListTile(
+                  leading: Icon(Icons.settings, color: context.onSurface),
+                  title: const Text('Settings'),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
               PopupMenuItem(
                 value: 'history',
                 child: ListTile(
@@ -185,13 +216,17 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
             const SizedBox(height: 24),
             Text(
               isOut ? 'Exit Recorded' : 'Entry Recorded',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+              style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: (isOut ? context.primaryBlue : context.success).withValues(alpha: 0.2),
+                color: (isOut ? context.primaryBlue : context.success)
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -214,13 +249,21 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                 ),
                 child: Column(
                   children: [
-                    _ResultRow(label: 'Employee', value: data['employee_name'] ?? ''),
+                    _ResultRow(
+                        label: 'Employee', value: data['employee_name'] ?? ''),
                     _ResultRow(label: 'ID', value: data['employee_id'] ?? ''),
-                    if (data['position'] != null) _ResultRow(label: 'Position', value: data['position']),
-                    if (data['department_name'] != null) _ResultRow(label: 'Department', value: data['department_name']),
-                    if (data['leave_date'] != null) _ResultRow(label: 'Date', value: data['leave_date']),
-                    _ResultRow(label: 'Time', value: '${data['start_time']} - ${data['end_time']}'),
-                    _ResultRow(label: 'Status', value: data['new_status'] ?? ''),
+                    if (data['position'] != null)
+                      _ResultRow(label: 'Position', value: data['position']),
+                    if (data['department_name'] != null)
+                      _ResultRow(
+                          label: 'Department', value: data['department_name']),
+                    if (data['leave_date'] != null)
+                      _ResultRow(label: 'Date', value: data['leave_date']),
+                    _ResultRow(
+                        label: 'Time',
+                        value: '${data['start_time'] ?? '--'} - ${data['end_time'] ?? '--'}'),
+                    _ResultRow(
+                        label: 'Status', value: data['new_status'] ?? ''),
                   ],
                 ),
               ),
@@ -233,8 +276,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF064E3B),
                 ),
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ScannerScreen())),
-                child: const Text('Scan Next', style: TextStyle(fontWeight: FontWeight.w600)),
+                onPressed: () => Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (_) => const ScannerScreen())),
+                child: const Text('Scan Next',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -260,7 +305,11 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               child: Icon(Icons.cancel, size: 60, color: context.error),
             ),
             const SizedBox(height: 24),
-            const Text('Invalid QR Code', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+            const Text('Invalid QR Code',
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white)),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -279,14 +328,17 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ScannerScreen())),
+                onPressed: () => Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (_) => const ScannerScreen())),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white38),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.w600)),
+                child: const Text('Try Again',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -297,9 +349,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 }
 
 class _ResultRow extends StatelessWidget {
+  const _ResultRow({required this.label, required this.value});
   final String label;
   final String value;
-  const _ResultRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +362,12 @@ class _ResultRow extends StatelessWidget {
           Text(label, style: TextStyle(color: context.neutralGray)),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(value, textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w600, color: context.onSurface)),
+            child: Text(value,
+                textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: context.onSurface)),
           ),
         ],
       ),

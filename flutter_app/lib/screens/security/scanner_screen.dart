@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/scan_provider.dart';
+import '../shared/settings_screen.dart';
 import 'scan_history_screen.dart';
 import 'scan_result_screen.dart';
 
@@ -15,23 +17,59 @@ class ScannerScreen extends StatefulWidget {
   State<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserver {
+class _ScannerScreenState extends State<ScannerScreen>
+    with WidgetsBindingObserver {
   MobileScannerController? _controller;
   bool _isProcessing = false;
   bool _torchEnabled = false;
   String? _cameraError;
   bool _showManualEntry = false;
+  bool _permissionGranted = false;
+  bool _permissionChecked = false;
   final _manualCtl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _requestCameraPermission();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _controller != null) {
+      _controller!.start();
+    } else if (state == AppLifecycleState.paused && _controller != null) {
+      _controller!.stop();
+    }
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (!mounted) return;
+
+    if (status.isGranted) {
+      _permissionGranted = true;
+      _permissionChecked = true;
+      _initScanner();
+    } else if (status.isPermanentlyDenied) {
+      _cameraError = 'Camera permission permanently denied. '
+          'Enable it in app settings.';
+      _permissionChecked = true;
+      setState(() {});
+    } else {
+      _cameraError = 'Camera permission denied. '
+          'Use manual entry below to scan QR codes.';
+      _permissionChecked = true;
+      setState(() {});
+    }
+  }
+
+  void _initScanner() {
     _controller = MobileScannerController(
-      torchEnabled: false,
-      facing: CameraFacing.back,
       detectionSpeed: DetectionSpeed.noDuplicates,
     );
+    if (mounted) setState(() {});
   }
 
   @override
@@ -68,19 +106,24 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
     _processQr(text);
   }
 
+  void _openAppSettings() {
+    openAppSettings();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          if (_cameraError == null)
+          if (_cameraError == null && _permissionGranted)
             RepaintBoundary(
               child: MobileScanner(
                 controller: _controller,
                 onDetect: _onDetect,
                 errorBuilder: (context, error, _) {
                   if (_cameraError == null) {
-                    final msg = error.errorDetails?.message ?? error.errorCode.name;
+                    final msg =
+                        error.errorDetails?.message ?? error.errorCode.name;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) setState(() => _cameraError = msg);
                     });
@@ -106,7 +149,8 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                 _ScannerAppBar(
                   torchEnabled: _torchEnabled,
                   showManualEntry: _showManualEntry,
-                  onToggleManual: () => setState(() => _showManualEntry = !_showManualEntry),
+                  onToggleManual: () =>
+                      setState(() => _showManualEntry = !_showManualEntry),
                   onToggleTorch: () {
                     setState(() => _torchEnabled = !_torchEnabled);
                     _controller?.toggleTorch();
@@ -123,8 +167,8 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
           ),
         ],
       ),
-      );
-    }
+    );
+  }
 
   Widget _buildCameraError() {
     return Container(
@@ -135,9 +179,24 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
           children: [
             Icon(Icons.videocam_off, size: 64, color: context.error),
             const SizedBox(height: 12),
-            const Text('Camera unavailable', style: TextStyle(color: Colors.white70, fontSize: 16)),
+            const Text('Camera unavailable',
+                style: TextStyle(color: Colors.white70, fontSize: 16)),
             const SizedBox(height: 4),
-            const Text('Use the manual entry below to enter QR code', style: TextStyle(color: Colors.white38, fontSize: 13)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                _cameraError ?? 'Use the manual entry below to enter QR code',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white38, fontSize: 13),
+              ),
+            ),
+            if (_cameraError?.contains('permanently denied') == true) ...[
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: _openAppSettings,
+                child: const Text('Open Settings'),
+              ),
+            ],
           ],
         ),
       ),
@@ -153,6 +212,9 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
     } else if (_isProcessing) {
       color = context.warning;
       text = 'Processing...';
+    } else if (!_permissionChecked) {
+      color = context.warning;
+      text = 'Requesting camera permission...';
     } else {
       color = context.success;
       text = 'Scanner ready';
@@ -160,7 +222,10 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(text, style: const TextStyle(color: Colors.white70, fontSize: 13)),
       ],
@@ -180,10 +245,12 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_cameraError == null) ...[
-            const Text('Position QR code within the frame', style: TextStyle(color: Colors.white70, fontSize: 14)),
+          if (_cameraError == null && _permissionGranted) ...[
+            const Text('Position QR code within the frame',
+                style: TextStyle(color: Colors.white70, fontSize: 14)),
             const SizedBox(height: 4),
-            const Text('OUT (Blue) or IN (Green) QR', style: TextStyle(color: Colors.white38, fontSize: 12)),
+            const Text('OUT (Blue) or IN (Green) QR',
+                style: TextStyle(color: Colors.white38, fontSize: 12)),
           ],
           if (_showManualEntry) ...[
             const SizedBox(height: 12),
@@ -200,7 +267,8 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                       style: const TextStyle(fontSize: 13),
                       decoration: const InputDecoration(
                         hintText: 'Paste QR data or enter manually',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         border: InputBorder.none,
                       ),
                     ),
@@ -210,7 +278,9 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
                     margin: const EdgeInsets.all(4),
                     child: FilledButton(
                       onPressed: _submitManual,
-                      child: const Text('Submit', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      child: const Text('Submit',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 13)),
                     ),
                   ),
                 ],
@@ -224,10 +294,6 @@ class _ScannerScreenState extends State<ScannerScreen> with WidgetsBindingObserv
 }
 
 class _ScannerAppBar extends StatelessWidget {
-  final bool torchEnabled;
-  final bool showManualEntry;
-  final VoidCallback onToggleManual;
-  final VoidCallback onToggleTorch;
 
   const _ScannerAppBar({
     required this.torchEnabled,
@@ -235,6 +301,10 @@ class _ScannerAppBar extends StatelessWidget {
     required this.onToggleManual,
     required this.onToggleTorch,
   });
+  final bool torchEnabled;
+  final bool showManualEntry;
+  final VoidCallback onToggleManual;
+  final VoidCallback onToggleTorch;
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +324,8 @@ class _ScannerAppBar extends StatelessWidget {
                     color: context.onPrimary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icon/app-icon.png', width: 18, height: 18),
+                  child: Image.asset('assets/icon/app-icon.png',
+                      width: 18, height: 18),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -272,90 +343,117 @@ class _ScannerAppBar extends StatelessWidget {
                   onPressed: onToggleManual,
                 ),
                 IconButton(
-                  icon: Icon(torchEnabled ? Icons.flashlight_on : Icons.flashlight_off),
+                  icon: Icon(torchEnabled
+                      ? Icons.flashlight_on
+                      : Icons.flashlight_off),
                   color: context.onPrimary,
                   onPressed: onToggleTorch,
                 ),
                 PopupMenuButton<String>(
                   icon: Icon(Icons.more_vert, color: context.onPrimary),
                   color: context.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              onSelected: (value) async {
-                switch (value) {
-                  case 'history':
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ScanHistoryScreen()),
-                    );
-                  case 'logout':
-                    final errorColor = context.error;
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                          FilledButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            style: FilledButton.styleFrom(backgroundColor: errorColor),
-                            child: const Text('Logout'),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  onSelected: (value) async {
+                    switch (value) {
+                      case 'settings':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SettingsScreen()),
+                        );
+                        break;
+                      case 'history':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const ScanHistoryScreen()),
+                        );
+                        break;
+                      case 'logout':
+                        final errorColor = context.error;
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            title: const Text('Logout'),
+                            content:
+                                const Text('Are you sure you want to logout?'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Cancel')),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: FilledButton.styleFrom(
+                                    backgroundColor: errorColor),
+                                child: const Text('Logout'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true && context.mounted) {
-                      context.read<AuthProvider>().logout();
+                        );
+                        if (confirm == true && context.mounted) {
+                          context.read<AuthProvider>().logout();
+                        }
                     }
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem<String>(
-                  enabled: false,
-                  child: Consumer<AuthProvider>(
-                    builder: (_, auth, __) => Text(
-                      auth.user?.fullName ?? 'Guard',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: context.onSurface,
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      enabled: false,
+                      child: Consumer<AuthProvider>(
+                        builder: (_, auth, __) => Text(
+                          auth.user?.fullName ?? 'Guard',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: context.onSurface,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'history',
-                  child: ListTile(
-                    leading: Icon(Icons.history, color: context.onSurface),
-                    title: const Text('Scan History'),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'logout',
-                  child: ListTile(
-                    leading: Icon(Icons.logout, color: context.error),
-                    title: Text('Logout', style: TextStyle(color: context.error)),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'settings',
+                      child: ListTile(
+                        leading: Icon(Icons.settings, color: context.onSurface),
+                        title: const Text('Settings'),
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'history',
+                      child: ListTile(
+                        leading: Icon(Icons.history, color: context.onSurface),
+                        title: const Text('Scan History'),
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: ListTile(
+                        leading: Icon(Icons.logout, color: context.error),
+                        title: Text('Logout',
+                            style: TextStyle(color: context.error)),
+                        contentPadding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
-      ],
-      ),
       ),
     );
   }
 }
 
 class _QrScanFrame extends StatelessWidget {
-  final String? cameraError;
   const _QrScanFrame({this.cameraError});
+  final String? cameraError;
 
   @override
   Widget build(BuildContext context) {
@@ -370,14 +468,26 @@ class _QrScanFrame extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: cameraError != null ? context.error : context.secondary, width: 2),
+                  border: Border.all(
+                      color: cameraError != null
+                          ? context.error
+                          : context.secondary,
+                      width: 2),
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              Positioned(top: -1, left: -1, child: _CornerBracket(context.secondary)),
-              Positioned(top: -1, right: -1, child: _CornerBracket(context.secondary)),
-              Positioned(bottom: -1, left: -1, child: _CornerBracket(context.secondary)),
-              Positioned(bottom: -1, right: -1, child: _CornerBracket(context.secondary)),
+              Positioned(
+                  top: -1, left: -1, child: _CornerBracket(context.secondary)),
+              Positioned(
+                  top: -1, right: -1, child: _CornerBracket(context.secondary)),
+              Positioned(
+                  bottom: -1,
+                  left: -1,
+                  child: _CornerBracket(context.secondary)),
+              Positioned(
+                  bottom: -1,
+                  right: -1,
+                  child: _CornerBracket(context.secondary)),
               if (cameraError != null)
                 Icon(Icons.videocam_off, size: 48, color: context.error),
             ],
@@ -389,8 +499,8 @@ class _QrScanFrame extends StatelessWidget {
 }
 
 class _CornerBracket extends StatelessWidget {
-  final Color color;
   const _CornerBracket(this.color);
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -405,8 +515,8 @@ class _CornerBracket extends StatelessWidget {
 }
 
 class _BracketPainter extends CustomPainter {
-  final Color color;
   _BracketPainter(this.color);
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {

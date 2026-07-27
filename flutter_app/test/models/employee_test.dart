@@ -5,11 +5,11 @@ void main() {
   group('Employee', () {
     final validJson = {
       'employee_id': '000001',
-      'full_name': 'Alice Chen',
-      'position': 'Engineer',
-      'department_id': '1',
-      'department_name': 'Engineering',
-      'email': 'alice@example.com',
+      'full_name': 'James Wilson',
+      'position': 'Software Engineer',
+      'department_id': 'DEP-002',
+      'department_name': 'TSD · Technical Services Department',
+      'email': 'james.wilson@zaneco.com',
       'is_supervisor': false,
       'is_admin': false,
       'is_security': false,
@@ -22,11 +22,11 @@ void main() {
       final employee = Employee.fromJson(validJson);
 
       expect(employee.employeeId, '000001');
-      expect(employee.fullName, 'Alice Chen');
-      expect(employee.position, 'Engineer');
-      expect(employee.departmentId, '1');
-      expect(employee.departmentName, 'Engineering');
-      expect(employee.email, 'alice@example.com');
+      expect(employee.fullName, 'James Wilson');
+      expect(employee.position, 'Software Engineer');
+      expect(employee.departmentId, 'DEP-002');
+      expect(employee.departmentName, 'TSD · Technical Services Department');
+      expect(employee.email, 'james.wilson@zaneco.com');
       expect(employee.isSupervisor, false);
       expect(employee.isAdmin, false);
       expect(employee.isSecurity, false);
@@ -47,7 +47,7 @@ void main() {
       expect(employee.isSupervisor, false);
       expect(employee.isAdmin, false);
       expect(employee.isSecurity, false);
-      expect(employee.isActive, true);
+      expect(employee.isActive, false);
       expect(employee.profilePhoto, isNull);
       expect(employee.hireDate, isNull);
     });
@@ -71,7 +71,7 @@ void main() {
       final json = employee.toJson();
 
       expect(json['employee_id'], '000001');
-      expect(json['full_name'], 'Alice Chen');
+      expect(json['full_name'], 'James Wilson');
       expect(json['hire_date'], '2024-01-15');
     });
 

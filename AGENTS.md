@@ -22,7 +22,7 @@ cd backend && npm run dev
 cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
 ```
 
-Env: `NODE_ENV` selects `backend/.env.<NODE_ENV>` (defaults to `dev`). Knexfile loads the same way via dotenv.
+Env: `backend/.env` loads first if it exists, then `backend/.env.<NODE_ENV>` loads to override. `NODE_ENV` defaults to `dev`. This keeps old single-file `.env` setups working while also supporting `.env.dev`/`.env.prod`.
 
 Setup scripts (`scripts/setup.ps1` / `setup.sh`) install Flutter + Android SDK into `tools/` — no system-wide installs. `scripts/run_phone.ps1` uses ADB reverse tunnel (`localhost:3000`) for physical device testing.
 
@@ -33,6 +33,8 @@ No local PostgreSQL needed — `docker-compose.yml` provides only the backend se
 | Location | Command | Purpose |
 |---|---|---|
 | root | `npm run dev` | Backend + web concurrently (`dev.sh`) |
+| root | `./scripts/run.sh` | Start all: backend + web + flutter + ADB reverse (Ctrl+C to stop) |
+| root | `./scripts/stop.sh` | Force kill all processes (backend, web, flutter) + remove ADB tunnel |
 | root | `npm run prod` | Production mode |
 | root | `npm run build:web` | `cd web && vite build` |
 | root | `npm run migrate` / `seed` | Knex migrate:latest / seed:run |
@@ -110,9 +112,10 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 ### Test Users
 | ID | Name | Role |
 |---|---|---|
-| 000001 | Alice Chen | Employee (Engineering) |
-| 000004 | David Kim | Supervisor (Engineering) |
-| 090901 | Guard Mike | Security (no department) |
+| 000001 | James Wilson | Employee (TSD) |
+| 000011 | Ethan White | Supervisor (TSD Manager) |
+| 000015 | Liam Thomas | Supervisor (ISD Supervisor) |
+| 090901 | Mike Ross | Security (Head of Security) |
 | 999999 | System Admin | Admin + Supervisor + Security |
 
 ## Code Conventions
@@ -149,6 +152,24 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 
 ## Design Language
 
+> **Web and Flutter use DIFFERENT palettes.** Web is warm amber/stone; Flutter is blue + gold. Do not mix them.
+
+### Web (warm amber/stone — `web/src/index.css`)
+| Token | Light | Dark (`.dark`) |
+|---|---|---|
+| Primary | `#b45309` | `#fbbf24` |
+| Background | `#fffbeb` | `#1c1917` |
+| Card / Surface | `#ffffff` | `#292524` |
+| Foreground | `#292524` | `#f5f3f0` |
+| Muted foreground | `#78716c` | `#a8a29e` |
+| Border / Input | `#e7e5e4` | `#44403c` |
+| Success | `#0d9488` | `#34d399` |
+| Destructive | `#dc2626` | `#f87171` |
+
+- Dark mode = `.dark` class on `<html>` (Tailwind v4 variant), toggled by `ThemeToggle` (Light/System/Dark)
+- Theme persists per-user in localStorage (`quickpass-theme-<employee_id>`)
+
+### Flutter (blue + gold — `flutter_app/lib/config/theme.dart`)
 | Token | Light | Dark |
 |---|---|---|
 | Primary / AppBar | `#1E40AF` / `#FFD700` | `#B8C4FF` / `#FFD700` |

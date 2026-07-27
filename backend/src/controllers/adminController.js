@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
+const auditService = require('../services/auditService');
 
 async function createEmployee(req, res, next) {
   try {
@@ -43,6 +46,15 @@ async function createEmployee(req, res, next) {
       .first();
 
     res.status(201).json({ success: true, data: employee });
+
+    auditService.log({
+      action: 'create',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: employee_id,
+      description: `Created employee ${full_name} (${employee_id}) as ${position}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -67,6 +79,8 @@ async function listEmployees(req, res, next) {
       query = query.andWhere('employees.is_admin', true);
     } else if (role === 'supervisor') {
       query = query.andWhere('employees.is_supervisor', true);
+    } else if (role === 'security') {
+      query = query.andWhere('employees.is_security', true);
     }
 
     if (search) {
@@ -133,6 +147,16 @@ async function updateEmployee(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated });
+
+    const changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
+    auditService.log({
+      action: 'update',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Updated employee ${updated.full_name} (${id}): ${changedFields.join(', ')}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -156,6 +180,15 @@ async function toggleSupervisor(req, res, next) {
       success: true,
       message: `Supervisor status toggled to ${!employee.is_supervisor}`,
     });
+
+    auditService.log({
+      action: 'toggle_supervisor',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Toggled supervisor status of ${employee.full_name} (${id}) to ${!employee.is_supervisor}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -179,6 +212,15 @@ async function toggleAdmin(req, res, next) {
       success: true,
       message: `Admin status toggled to ${!employee.is_admin}`,
     });
+
+    auditService.log({
+      action: 'toggle_admin',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Toggled admin status of ${employee.full_name} (${id}) to ${!employee.is_admin}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -203,6 +245,15 @@ async function toggleActive(req, res, next) {
       message: `Employee ${employee.is_active ? 'deactivated' : 'activated'}`,
       data: { is_active: !employee.is_active },
     });
+
+    auditService.log({
+      action: employee.is_active ? 'deactivate' : 'activate',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `${employee.is_active ? 'Deactivated' : 'Activated'} employee ${employee.full_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -252,6 +303,15 @@ async function createDepartment(req, res, next) {
 
     const dept = await db('departments').where({ department_id }).first();
     res.status(201).json({ success: true, data: dept });
+
+    auditService.log({
+      action: 'create',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: department_id,
+      description: `Created department ${department_name} (${department_id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -276,6 +336,15 @@ async function updateDepartment(req, res, next) {
     await db('departments').where({ department_id: id }).update(updateData);
     const updated = await db('departments').where({ department_id: id }).first();
     res.json({ success: true, data: updated });
+
+    auditService.log({
+      action: 'update',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: id,
+      description: `Updated department ${updated.department_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -297,6 +366,15 @@ async function deleteDepartment(req, res, next) {
 
     await db('departments').where({ department_id: id }).del();
     res.json({ success: true, message: 'Department deleted' });
+
+    auditService.log({
+      action: 'delete',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: id,
+      description: `Deleted department ${dept.department_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -306,17 +384,28 @@ async function deleteEmployee(req, res, next) {
   try {
     const { id } = req.params;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
+      }
 
-    await db('qr_scan_logs').where({ scanned_by: id }).del();
-    await db('sessions').where({ employee_id: id }).del();
-    await db('leave_requests').where({ employee_id: id }).del();
-    await db('employees').where({ employee_id: id }).del();
+      await trx('qr_scan_logs').where({ scanned_by: id }).del();
+      await trx('sessions').where({ employee_id: id }).del();
+      await trx('leave_requests').where({ employee_id: id }).del();
+      await trx('employees').where({ employee_id: id }).del();
+    });
 
     res.json({ success: true, message: 'Employee deleted' });
+
+    auditService.log({
+      action: 'delete',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Deleted employee ${id}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -349,7 +438,7 @@ async function importEmployees(req, res, next) {
           continue;
         }
 
-        const password_hash = await bcrypt.hash(emp.password || 'quickpass123', 10);
+        const password_hash = await bcrypt.hash(emp.password || uuidv4().split('-')[0], 10);
 
         await db('employees').insert({
           employee_id: emp.employee_id,
@@ -371,6 +460,15 @@ async function importEmployees(req, res, next) {
     }
 
     res.json({ success: true, data: results });
+
+    auditService.log({
+      action: 'import',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: 'bulk',
+      description: `Imported ${results.created} employees (${results.skipped} skipped, ${results.errors.length} errors)`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -383,11 +481,11 @@ async function getReports(req, res, next) {
     let reportData;
 
     if (type === 'daily') {
-      const date = start_date || new Date().toISOString().split('T')[0];
+      const date = start_date || getLocalDateString();
       reportData = await db('leave_requests')
         .where({ leave_date: date })
-        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
-        .join('departments', 'leave_requests.department_id', 'departments.department_id')
+        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .leftJoin('departments', 'leave_requests.department_id', 'departments.department_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',
@@ -409,8 +507,8 @@ async function getReports(req, res, next) {
         .groupBy('departments.department_id', 'departments.department_name');
     } else {
       let query = db('leave_requests')
-        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
-        .join('departments', 'leave_requests.department_id', 'departments.department_id')
+        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .leftJoin('departments', 'leave_requests.department_id', 'departments.department_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',

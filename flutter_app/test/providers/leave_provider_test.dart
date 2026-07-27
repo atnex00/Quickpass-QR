@@ -4,12 +4,14 @@ import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/providers/leave_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
   late MockApiService mockApi;
   late LeaveProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = LeaveProvider(api: mockApi);
   });
@@ -22,10 +24,10 @@ void main() {
                   {
                     'leave_id': 'l1',
                     'employee_id': '000001',
-                    'employee_name': 'Alice',
-                    'department_id': '1',
-                    'supervisor_id': '000004',
-                    'supervisor_name': 'David',
+                    'employee_name': 'James Wilson',
+                    'department_id': 'DEP-002',
+                    'supervisor_id': '000011',
+                    'supervisor_name': 'Ethan White',
                     'leave_date': '2025-06-15',
                     'start_time': '09:00',
                     'end_time': '17:00',
@@ -37,10 +39,10 @@ void main() {
                   {
                     'leave_id': 'l2',
                     'employee_id': '000001',
-                    'employee_name': 'Alice',
-                    'department_id': '1',
-                    'supervisor_id': '000004',
-                    'supervisor_name': 'David',
+                    'employee_name': 'James Wilson',
+                    'department_id': 'DEP-002',
+                    'supervisor_id': '000011',
+                    'supervisor_name': 'Ethan White',
                     'leave_date': '2025-06-20',
                     'start_time': '09:00',
                     'end_time': '17:00',
@@ -52,10 +54,10 @@ void main() {
                   {
                     'leave_id': 'l3',
                     'employee_id': '000001',
-                    'employee_name': 'Alice',
-                    'department_id': '1',
-                    'supervisor_id': '000004',
-                    'supervisor_name': 'David',
+                    'employee_name': 'James Wilson',
+                    'department_id': 'DEP-002',
+                    'supervisor_id': '000011',
+                    'supervisor_name': 'Ethan White',
                     'leave_date': '2025-06-25',
                     'start_time': '09:00',
                     'end_time': '17:00',
@@ -94,7 +96,6 @@ void main() {
         endTime: anyNamed('endTime'),
         reason: anyNamed('reason'),
       )).thenAnswer((_) async {
-        // Return a LeaveRequest from the mock
         final mockLeave = _createMockLeaveRequest('l4', 'pending');
         return mockLeave;
       });
@@ -134,7 +135,8 @@ void main() {
 
   group('loadActiveLeave', () {
     test('loads active leave when present', () async {
-      when(mockApi.getActiveLeave()).thenAnswer((_) async => _createMockLeaveRequest('active-1', 'active'));
+      when(mockApi.getActiveLeave()).thenAnswer(
+          (_) async => _createMockLeaveRequest('active-1', 'active'));
 
       await provider.loadActiveLeave();
 
@@ -153,17 +155,16 @@ void main() {
 
   group('deleteLeave', () {
     test('removes leave from history on success', () async {
-      // Pre-populate with a leave
       when(mockApi.getLeaveHistory(status: anyNamed('status')))
           .thenAnswer((_) async => {
                 'data': [
                   {
                     'leave_id': 'l1',
                     'employee_id': '000001',
-                    'employee_name': 'Alice',
-                    'department_id': '1',
-                    'supervisor_id': '000004',
-                    'supervisor_name': 'David',
+                    'employee_name': 'James Wilson',
+                    'department_id': 'DEP-002',
+                    'supervisor_id': '000011',
+                    'supervisor_name': 'Ethan White',
                     'leave_date': '2025-06-15',
                     'start_time': '09:00',
                     'end_time': '17:00',
@@ -203,10 +204,10 @@ LeaveRequest _createMockLeaveRequest(String id, String status) {
   return LeaveRequest(
     leaveId: id,
     employeeId: '000001',
-    employeeName: 'Alice',
-    departmentId: '1',
-    supervisorId: '000004',
-    supervisorName: 'David',
+    employeeName: 'James Wilson',
+    departmentId: 'DEP-002',
+    supervisorId: '000011',
+    supervisorName: 'Ethan White',
     leaveDate: DateTime(2025, 6, 15),
     startTime: '09:00',
     endTime: '17:00',

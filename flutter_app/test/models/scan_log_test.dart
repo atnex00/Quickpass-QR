@@ -16,7 +16,7 @@ void main() {
         'ip_address': '192.168.1.1',
         'is_valid': true,
         'validation_message': 'Valid QR',
-        'employee_name': 'Alice Chen',
+        'employee_name': 'James Wilson',
         'employee_id': '000001',
       });
 
@@ -26,7 +26,7 @@ void main() {
       expect(log.scannedBy, 'security-1');
       expect(log.isValid, true);
       expect(log.validationMessage, 'Valid QR');
-      expect(log.employeeName, 'Alice Chen');
+      expect(log.employeeName, 'James Wilson');
       expect(log.employeeId, '000001');
     });
 
@@ -39,7 +39,7 @@ void main() {
       expect(log.leaveId, '');
       expect(log.qrType, '');
       expect(log.scannedBy, isNull);
-      expect(log.isValid, true);
+      expect(log.isValid, false);
       expect(log.validationMessage, isNull);
       expect(log.employeeName, isNull);
       expect(log.employeeId, isNull);
@@ -55,7 +55,7 @@ void main() {
         'ip_address': '192.168.1.1',
         'is_valid': true,
         'validation_message': 'Valid QR',
-        'employee_name': 'Alice Chen',
+        'employee_name': 'James Wilson',
         'employee_id': '000001',
       });
 

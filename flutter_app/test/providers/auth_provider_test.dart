@@ -4,12 +4,15 @@ import 'package:quickpass/models/employee.dart';
 import 'package:quickpass/providers/auth_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late MockApiService mockApi;
   late AuthProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = AuthProvider(api: mockApi);
   });
@@ -18,17 +21,17 @@ void main() {
     test('sets authenticated when token exists and profile loads', () async {
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token-123');
       when(mockApi.getProfile()).thenAnswer((_) async => Employee.fromJson({
-        'employee_id': '000001',
-        'full_name': 'Alice Chen',
-        'position': 'Engineer',
-        'department_id': '1',
-        'department_name': 'Engineering',
-        'email': 'alice@example.com',
-        'is_supervisor': false,
-        'is_admin': false,
-        'is_security': false,
-        'is_active': true,
-      }));
+            'employee_id': '000001',
+            'full_name': 'James Wilson',
+            'position': 'Software Engineer',
+            'department_id': 'DEP-002',
+            'department_name': 'TSD · Technical Services Department',
+            'email': 'james.wilson@zaneco.com',
+            'is_supervisor': false,
+            'is_admin': false,
+            'is_security': false,
+            'is_active': true,
+          }));
 
       await provider.initialize();
 
@@ -51,6 +54,7 @@ void main() {
     test('handles error during initialization', () async {
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token-123');
       when(mockApi.getProfile()).thenThrow(Exception('Network error'));
+      when(mockApi.clearLocalAuth()).thenAnswer((_) async {});
 
       await provider.initialize();
 
@@ -62,21 +66,21 @@ void main() {
   group('login', () {
     test('succeeds with valid credentials', () async {
       when(mockApi.login('000001', 'pass1234')).thenAnswer((_) async => {
-        'success': true,
-        'token': 'jwt-token',
-        'user': {
-          'employee_id': '000001',
-          'full_name': 'Alice Chen',
-          'position': 'Engineer',
-          'department_id': '1',
-          'department_name': 'Engineering',
-          'email': 'alice@example.com',
-          'is_supervisor': false,
-          'is_admin': false,
-          'is_security': false,
-          'is_active': true,
-        },
-      });
+            'success': true,
+            'token': 'jwt-token',
+            'user': {
+              'employee_id': '000001',
+              'full_name': 'James Wilson',
+              'position': 'Software Engineer',
+              'department_id': 'DEP-002',
+              'department_name': 'TSD · Technical Services Department',
+              'email': 'james.wilson@zaneco.com',
+              'is_supervisor': false,
+              'is_admin': false,
+              'is_security': false,
+              'is_active': true,
+            },
+          });
 
       final result = await provider.login('000001', 'pass1234');
 
@@ -87,7 +91,8 @@ void main() {
     });
 
     test('fails with invalid credentials', () async {
-      when(mockApi.login('000001', 'wrong')).thenThrow(Exception('Invalid credentials'));
+      when(mockApi.login('000001', 'wrong'))
+          .thenThrow(Exception('Invalid credentials'));
 
       final result = await provider.login('000001', 'wrong');
 
@@ -105,10 +110,17 @@ void main() {
       // Simulate being logged in
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token');
       when(mockApi.getProfile()).thenAnswer((_) async => Employee.fromJson({
-        'employee_id': '000001', 'full_name': 'Alice', 'position': '',
-        'department_id': '', 'department_name': '', 'email': '',
-        'is_supervisor': false, 'is_admin': false, 'is_security': false, 'is_active': true,
-      }));
+            'employee_id': '000001',
+            'full_name': 'James Wilson',
+            'position': '',
+            'department_id': '',
+            'department_name': '',
+            'email': '',
+            'is_supervisor': false,
+            'is_admin': false,
+            'is_security': false,
+            'is_active': true,
+          }));
       await provider.initialize();
       expect(provider.isAuthenticated, true);
 
@@ -121,14 +133,14 @@ void main() {
 
   group('updateProfile', () {
     test('updates user on success', () async {
-      when(mockApi.updateProfile({'full_name': 'Alice Updated'})).thenAnswer(
+      when(mockApi.updateProfile({'full_name': 'James Updated'})).thenAnswer(
         (_) async => Employee.fromJson({
           'employee_id': '000001',
-          'full_name': 'Alice Updated',
-          'position': 'Engineer',
-          'department_id': '1',
-          'department_name': 'Engineering',
-          'email': 'alice@example.com',
+          'full_name': 'James Updated',
+          'position': 'Software Engineer',
+          'department_id': 'DEP-002',
+          'department_name': 'TSD · Technical Services Department',
+          'email': 'james.wilson@zaneco.com',
           'is_supervisor': false,
           'is_admin': false,
           'is_security': false,
@@ -136,14 +148,16 @@ void main() {
         }),
       );
 
-      final result = await provider.updateProfile({'full_name': 'Alice Updated'});
+      final result =
+          await provider.updateProfile({'full_name': 'James Updated'});
 
       expect(result, true);
-      expect(provider.user?.fullName, 'Alice Updated');
+      expect(provider.user?.fullName, 'James Updated');
     });
 
     test('sets error on failure', () async {
-      when(mockApi.updateProfile({'full_name': 'Bad'})).thenThrow(Exception('Update failed'));
+      when(mockApi.updateProfile({'full_name': 'Bad'}))
+          .thenThrow(Exception('Update failed'));
 
       final result = await provider.updateProfile({'full_name': 'Bad'});
 

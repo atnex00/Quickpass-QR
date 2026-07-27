@@ -5,6 +5,7 @@ import { useLeaveStore } from "@/stores/leaveStore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import LoadingScreen from "@/components/shared/LoadingScreen"
+import PageHeader from "@/components/layout/PageHeader"
 import { UserCheck, ShieldCheck, CalendarDays, ArrowRight } from "lucide-react"
 
 export default function SupervisorDashboard() {
@@ -18,20 +19,21 @@ export default function SupervisorDashboard() {
   if (isLoading) return <LoadingScreen message="Loading pending requests" />
 
   return (
-    <div className="page-enter space-y-3">
-      <div>
-        <h1 className="text-2xl font-bold font-display">Supervisor Dashboard</h1>
-        <p className="text-sm text-muted-foreground">{user?.department_name}</p>
-      </div>
+    <div className="page-enter space-y-5">
+      <PageHeader
+        title="Supervisor Dashboard"
+        subtitle={user?.department_name}
+        icon={<ShieldCheck className="h-5 w-5" />}
+      />
 
-      <div className="panel-card border-l-4 border-l-primary">
-        <div className="panel-card-body flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded bg-primary/15">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+      <div className="kpi border-l-4 border-l-primary">
+        <div className="flex items-center gap-4">
+          <div className="stat-tile">
+            <ShieldCheck className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-3xl font-black text-foreground">{pendingRequests.length}</p>
-            <p className="text-[11px] font-semibold text-muted-foreground">Pending Requests</p>
+            <p className="kpi-value">{pendingRequests.length}</p>
+            <p className="kpi-label">Pending Requests</p>
           </div>
           <Link to="/supervisor/pending">
             <Button variant="outline" className="btn-secondary text-[10px] py-2">
@@ -42,7 +44,7 @@ export default function SupervisorDashboard() {
       </div>
 
       {pendingRequests.length > 0 && (
-        <div className="panel-card">
+        <div className="card-elevated">
           <div className="panel-card-header">
             <h3>Recent Pending Requests</h3>
           </div>
@@ -50,10 +52,10 @@ export default function SupervisorDashboard() {
             {pendingRequests.slice(0, 5).map((req) => (
               <div
                 key={req.leave_id}
-                className="flex items-center justify-between rounded px-3 py-2 border border-transparent hover:border-border transition-all"
+                className="lift flex items-center justify-between rounded-lg px-3 py-2 border border-transparent hover:border-border hover:bg-accent/40 transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-[10px] font-bold text-[#1c1917]">
                     {req.employee_name.charAt(0)}
                   </div>
                   <div>

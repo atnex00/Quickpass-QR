@@ -1,13 +1,19 @@
+const logger = require('../config/logger');
+
 function errorHandler(err, req, res, _next) {
-  console.error('Unhandled error:', err);
+  const isDev = process.env.NODE_ENV === 'development';
+  const log = req?.log || logger;
+  log.error({ err, statusCode: err.statusCode || 500 }, err.message);
 
   const statusCode = err.statusCode || 500;
-  const message = err.expose ? err.message : 'Internal server error';
+  const isPrivileged = req.user && (req.user.is_admin || req.user.is_supervisor);
+  const showMessage = err.expose && (isPrivileged || statusCode < 500);
+  const message = showMessage ? err.message : 'Internal server error';
 
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(isDev && { stack: err.stack }),
   });
 }
 

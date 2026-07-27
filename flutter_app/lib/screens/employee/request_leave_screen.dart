@@ -56,7 +56,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     final st =
         '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
@@ -82,7 +82,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
       reason: _reason,
     );
 
-    setState(() => _isSubmitting = false);
+    if (mounted) setState(() => _isSubmitting = false);
 
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,8 +148,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           decoration: BoxDecoration(
                             color: context.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: context.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,8 +158,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                       color: context.onSurface)),
-                              Divider(
-                                  color: context.outlineVariant),
+                              Divider(color: context.outlineVariant),
                               _ReadOnlyField(
                                   label: 'Employee ID',
                                   value: user?.employeeId ?? ''),
@@ -186,8 +184,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                             decoration: BoxDecoration(
                               color: context.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: context.outlineVariant),
+                              border: Border.all(color: context.outlineVariant),
                             ),
                             child: Row(
                               children: [
@@ -200,8 +197,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                                     Text('Date',
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color:
-                                                context.neutralGray)),
+                                            color: context.neutralGray)),
                                     Text(DateFormatter.formatDate(_leaveDate),
                                         style: TextStyle(
                                             fontWeight: FontWeight.w600,
@@ -244,13 +240,11 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
                           decoration: BoxDecoration(
                             color: context.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: context.outlineVariant),
+                            border: Border.all(color: context.outlineVariant),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time,
-                                  color: context.secondary),
+                              Icon(Icons.access_time, color: context.secondary),
                               const SizedBox(width: 12),
                               Text('Duration: ',
                                   style: TextStyle(
@@ -334,9 +328,9 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
 }
 
 class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({required this.label, required this.value});
   final String label;
   final String value;
-  const _ReadOnlyField({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -345,10 +339,9 @@ class _ReadOnlyField extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-              width: 110,
+              width: (MediaQuery.of(context).size.width * 0.3).clamp(90.0, 120.0),
               child: Text(label,
-                  style: TextStyle(
-                      color: context.neutralGray, fontSize: 13))),
+                  style: TextStyle(color: context.neutralGray, fontSize: 13))),
           Expanded(
               child: Text(value,
                   style: TextStyle(
@@ -362,12 +355,12 @@ class _ReadOnlyField extends StatelessWidget {
 }
 
 class _TimePickerCard extends StatelessWidget {
-  final String label;
-  final String time;
-  final VoidCallback onTap;
 
   const _TimePickerCard(
       {required this.label, required this.time, required this.onTap});
+  final String label;
+  final String time;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -386,13 +379,11 @@ class _TimePickerCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: TextStyle(
-                      fontSize: 12, color: context.neutralGray)),
+                  style: TextStyle(fontSize: 12, color: context.neutralGray)),
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.access_time,
-                      size: 18, color: context.primaryBlue),
+                  Icon(Icons.access_time, size: 18, color: context.primaryBlue),
                   const SizedBox(width: 6),
                   Text(time,
                       style: TextStyle(

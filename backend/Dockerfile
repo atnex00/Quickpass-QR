@@ -1,18 +1,17 @@
-# Stage 1: Build web frontend
-FROM node:20-alpine AS web-builder
-WORKDIR /web
-COPY web/package*.json ./
-RUN npm ci
-COPY web/ .
-RUN npm run build
-
-# Stage 2: Backend runtime
 FROM node:20-alpine
+
 WORKDIR /app
-COPY backend/package*.json ./
+
+COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
-COPY backend/ .
-COPY --from=web-builder /web/dist /web/dist
+
+COPY . .
+
+USER node
 
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
 CMD ["node", "src/app.js"]

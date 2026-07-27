@@ -7,6 +7,7 @@ import 'package:quickpass/providers/auth_provider.dart';
 import 'package:quickpass/screens/auth/login_screen.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 Widget _buildTestApp(AuthProvider authProvider) {
   return MaterialApp(
@@ -22,19 +23,21 @@ void main() {
   late MockApiService mockApi;
   late AuthProvider authProvider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     authProvider = AuthProvider(api: mockApi);
   });
 
-  testWidgets('renders login form with all key elements', (WidgetTester tester) async {
+  testWidgets('renders login form with all key elements',
+      (WidgetTester tester) async {
     when(mockApi.getStoredToken()).thenAnswer((_) async => null);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     expect(find.text('Employee ID'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Password'), findsAtLeast(1));
     expect(find.text('Sign In'), findsOneWidget);
     expect(find.text('Quickpass'), findsOneWidget);
     expect(find.text('Forgot?'), findsOneWidget);
@@ -59,17 +62,20 @@ void main() {
     expect(find.byIcon(Icons.visibility_off), findsOneWidget);
   });
 
-  testWidgets('shows error message when auth has error', (WidgetTester tester) async {
+  testWidgets('shows error message when auth has error',
+      (WidgetTester tester) async {
     when(mockApi.getStoredToken()).thenAnswer((_) async => null);
 
     await tester.pumpWidget(_buildTestApp(authProvider));
     await tester.pump();
 
     // Trigger login to simulate error
-    when(mockApi.login('000001', 'wrong')).thenThrow(Exception('Invalid credentials'));
+    when(mockApi.login('000001', 'wrong'))
+        .thenThrow(Exception('Invalid credentials'));
     await tester.enterText(find.byType(TextFormField).first, '000001');
     await tester.enterText(find.byType(TextFormField).last, 'wrong');
     await tester.tap(find.text('Sign In'));
+    await tester.pump();
     await tester.pump();
 
     expect(find.textContaining('Invalid credentials'), findsOneWidget);

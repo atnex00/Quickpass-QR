@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Outlet, Navigate, useLocation } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import Sidebar from "./Sidebar"
+import ThemeToggle from "./ThemeToggle"
 import { Toaster } from "sonner"
 
 function StatusBar() {
@@ -25,6 +26,7 @@ function StatusBar() {
         <span className="text-[11px] text-muted-foreground/50">System Online</span>
       </div>
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <span className="status-bar-user">{user?.full_name}</span>
         <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">{role}</span>
       </div>
@@ -52,11 +54,12 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="app-aurora flex h-screen overflow-hidden">
+      <div className="glow-blob h-72 w-72 bg-primary/20 -left-20 top-1/3" />
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <StatusBar />
-        <main className="flex-1 overflow-y-auto bg-background p-4 pb-16 md:pb-4">
+        <main className="relative flex-1 overflow-y-auto p-4 pb-16 md:pb-4">
           <div key={location.pathname + location.search} className="page-enter">
             <Outlet />
           </div>

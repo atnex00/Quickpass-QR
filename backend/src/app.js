@@ -1,10 +1,64 @@
-const envFile = `.env.${process.env.NODE_ENV || 'dev'}`;
-require('dotenv').config({ path: require('path').join(__dirname, '..', envFile) });
+const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const dotenv = require('dotenv');
+const logger = require('./config/logger');
+
+function loadEnv() {
+  const baseEnv = path.join(__dirname, '..', '.env');
+  const envFile = path.join(__dirname, '..', `.env.${process.env.NODE_ENV || 'dev'}`);
+  if (fs.existsSync(baseEnv)) {
+    dotenv.config({ path: baseEnv });
+  }
+  if (fs.existsSync(envFile) && envFile !== baseEnv) {
+    dotenv.config({ path: envFile });
+  }
+}
+
+loadEnv();
+
+function exitOrThrow(message) {
+  if (process.env.NODE_ENV === 'test') {
+    throw new Error(message);
+  }
+  logger.error(message);
+  process.exit(1);
+}
+
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    exitOrThrow(`${name} is required. Set it in your backend/.env file.`);
+  }
+  return value;
+}
+
+function secret(name) {
+  const value = process.env[name];
+  if (value) return value;
+  if (process.env.NODE_ENV === 'production') {
+    exitOrThrow(`${name} is required in production. Set it in your backend/.env file.`);
+  }
+  const generated = crypto.randomBytes(64).toString('hex');
+  logger.warn(`${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
+  return generated;
+}
+
+requireEnv('DB_CONNECTION');
+process.env.JWT_SECRET = secret('JWT_SECRET');
+process.env.COOKIE_SECRET = secret('COOKIE_SECRET');
+process.env.QR_SECRET = secret('QR_SECRET');
+
+const corsOrigin = process.env.CORS_ORIGIN || undefined;
+if (corsOrigin === '') {
+  logger.warn('CORS_ORIGIN is set but empty — CORS will be disabled');
+}
+if (process.env.NODE_ENV === 'production' && !corsOrigin) {
+  exitOrThrow('CORS_ORIGIN is required in production. Set it in your backend/.env file.');
+}
 
 const express = require('express');
 const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -18,11 +72,6 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase
 initFirebase();
-
-const corsOrigin = process.env.CORS_ORIGIN;
-if (!corsOrigin && process.env.NODE_ENV === 'production') {
-  console.warn('WARNING: CORS_ORIGIN not set in production. Set it to your frontend URL.');
-}
 
 // Middleware
 app.use(helmet());
@@ -41,7 +90,16 @@ if (corsOrigin) {
   }));
 }
 app.use(cors({ origin: corsOrigin || false, credentials: true }));
-app.use(cookieParser(process.env.COOKIE_SECRET || 'quickpass-cookie-secret-dev'));
+
+// Request ID tracing
+app.use((req, res, next) => {
+  req.id = crypto.randomUUID();
+  res.setHeader('X-Request-Id', req.id);
+  req.log = logger.child({ reqId: req.id, method: req.method, url: req.url });
+  next();
+});
+
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -67,6 +125,24 @@ const loginLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts, please try again later' },
 });
 
+// Rate limit for auth endpoints (refresh, etc.)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later' },
+});
+
+// Stricter rate limit for bulk import
+const importLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many import requests, please try again later' },
+});
+
 // Serve built frontend in production
 const webDist = path.join(__dirname, '../../web/dist');
 app.use(express.static(webDist));
@@ -77,6 +153,8 @@ app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/refresh', authLimiter);
+app.use('/api/admin/import/hr', importLimiter);
 app.use('/api', routes);
 
 // SPA fallback — serve index.html for any non-API, non-static route
@@ -95,26 +173,36 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Quickpass API running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught exception — shutting down');
+  process.exit(1);
 });
 
-// HTTPS server for camera access on mobile
-const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
-const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
-try {
-  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-    const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
-    https.createServer({
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-    }, app).listen(httpsPort, () => {
-      console.log(`Quickpass HTTPS running on port ${httpsPort}`);
-    });
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason }, 'Unhandled promise rejection');
+});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');
+  });
+
+  // HTTPS server for camera access on mobile
+  const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
+  const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
+  try {
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
+      https.createServer({
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      }, app).listen(httpsPort, () => {
+        logger.info({ port: httpsPort }, 'Quickpass HTTPS running');
+      });
+    }
+  } catch {
+    // HTTPS setup is optional
   }
-} catch {
-  // HTTPS setup is optional
 }
 
 module.exports = app;

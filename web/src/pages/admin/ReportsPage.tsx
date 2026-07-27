@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import api from "@/lib/api"
-import { Loader2 } from "lucide-react"
+import { Loader2, BarChart3 } from "lucide-react"
 import {
   BarChart,
   Bar,
@@ -16,6 +16,7 @@ import {
   Legend,
 } from "recharts"
 import { format } from "date-fns"
+import PageHeader from "@/components/layout/PageHeader"
 
 const COLORS = ["#f59e0b", "#0d9488", "#dc2626", "#fbbf24", "#a8a29e"]
 
@@ -55,10 +56,11 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Reports</h1>
-        <p className="text-muted-foreground">Department-wise leave statistics</p>
-      </div>
+      <PageHeader
+        title="Reports"
+        subtitle="Department-wise leave statistics"
+        icon={<BarChart3 className="h-5 w-5" />}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

@@ -4,16 +4,17 @@ import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/providers/supervisor_provider.dart';
 
 import '../helpers/mocks.mocks.dart';
+import '../helpers/test_setup.dart';
 
 LeaveRequest _mockLeave(String id, String status) {
   return LeaveRequest(
     leaveId: id,
-    employeeId: '000004',
-    employeeName: 'Bob',
-    departmentId: '1',
-    supervisorId: '000004',
-    supervisorName: 'David Kim',
-    leaveDate: DateTime(2025, 7, 1),
+    employeeId: '000001',
+    employeeName: 'James Wilson',
+    departmentId: 'DEP-001',
+    supervisorId: '000015',
+    supervisorName: 'Liam Thomas',
+    leaveDate: DateTime(2025, 7),
     startTime: '09:00',
     endTime: '17:00',
     reason: 'Test leave',
@@ -27,7 +28,8 @@ void main() {
   late MockApiService mockApi;
   late SupervisorProvider provider;
 
-  setUp(() {
+  setUp(() async {
+    await setupTestInfrastructure();
     mockApi = MockApiService();
     provider = SupervisorProvider(api: mockApi);
   });
@@ -35,9 +37,9 @@ void main() {
   group('loadPendingRequests', () {
     test('loads pending requests successfully', () async {
       when(mockApi.getPendingRequests()).thenAnswer((_) async => [
-        _mockLeave('l1', 'pending'),
-        _mockLeave('l2', 'pending'),
-      ]);
+            _mockLeave('l1', 'pending'),
+            _mockLeave('l2', 'pending'),
+          ]);
 
       await provider.loadPendingRequests();
 
@@ -59,13 +61,14 @@ void main() {
   group('approveLeave', () {
     test('removes approved leave from pending list', () async {
       when(mockApi.getPendingRequests()).thenAnswer((_) async => [
-        _mockLeave('l1', 'pending'),
-        _mockLeave('l2', 'pending'),
-      ]);
+            _mockLeave('l1', 'pending'),
+            _mockLeave('l2', 'pending'),
+          ]);
       await provider.loadPendingRequests();
       expect(provider.pendingCount, 2);
 
-      when(mockApi.approveLeave('l1')).thenAnswer((_) async => _mockLeave('l1', 'approved'));
+      when(mockApi.approveLeave('l1'))
+          .thenAnswer((_) async => _mockLeave('l1', 'approved'));
 
       final result = await provider.approveLeave('l1');
 
@@ -87,8 +90,8 @@ void main() {
   group('rejectLeave', () {
     test('removes rejected leave from pending list', () async {
       when(mockApi.getPendingRequests()).thenAnswer((_) async => [
-        _mockLeave('l1', 'pending'),
-      ]);
+            _mockLeave('l1', 'pending'),
+          ]);
       await provider.loadPendingRequests();
       expect(provider.pendingCount, 1);
 
@@ -106,8 +109,8 @@ void main() {
   group('loadApprovedLeaves', () {
     test('loads approved leaves', () async {
       when(mockApi.getApprovedLeaves()).thenAnswer((_) async => [
-        _mockLeave('l1', 'approved'),
-      ]);
+            _mockLeave('l1', 'approved'),
+          ]);
 
       await provider.loadApprovedLeaves();
 
@@ -118,12 +121,13 @@ void main() {
   group('revokeApproval', () {
     test('removes revoked leave from approved list', () async {
       when(mockApi.getApprovedLeaves()).thenAnswer((_) async => [
-        _mockLeave('l1', 'approved'),
-      ]);
+            _mockLeave('l1', 'approved'),
+          ]);
       await provider.loadApprovedLeaves();
       expect(provider.approvedLeaves.length, 1);
 
-      when(mockApi.revokeApproval('l1')).thenAnswer((_) async => _mockLeave('l1', 'pending'));
+      when(mockApi.revokeApproval('l1'))
+          .thenAnswer((_) async => _mockLeave('l1', 'pending'));
 
       final result = await provider.revokeApproval('l1');
 

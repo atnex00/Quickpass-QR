@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/constants.dart';
+import '../../utils/responsive.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
     final auth = context.read<AuthProvider>();
     auth.clearError();
     await auth.login(
@@ -99,11 +100,23 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text('Contact the IT Help Desk for support:'),
             SizedBox(height: 12),
-            Row(children: [Icon(Icons.email, size: 16), SizedBox(width: 8), Text(AppConstants.supportEmail)]),
+            Row(children: [
+              Icon(Icons.email, size: 16),
+              SizedBox(width: 8),
+              Text(AppConstants.supportEmail)
+            ]),
             SizedBox(height: 8),
-            Row(children: [Icon(Icons.phone, size: 16), SizedBox(width: 8), Text(AppConstants.supportPhone)]),
+            Row(children: [
+              Icon(Icons.phone, size: 16),
+              SizedBox(width: 8),
+              Text(AppConstants.supportPhone)
+            ]),
             SizedBox(height: 8),
-            Row(children: [Icon(Icons.access_time, size: 16), SizedBox(width: 8), Text(AppConstants.supportHours)]),
+            Row(children: [
+              Icon(Icons.access_time, size: 16),
+              SizedBox(width: 8),
+              Text(AppConstants.supportHours)
+            ]),
           ],
         ),
         actions: [
@@ -128,7 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
                       decoration: BoxDecoration(
                         color: context.surface,
                         borderRadius: BorderRadius.circular(12),
@@ -144,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Quickpass',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: responsiveFontSize(context, 24),
                         fontWeight: FontWeight.w700,
                         color: context.primary,
                         letterSpacing: -0.01,
@@ -155,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Employee Gatepass System',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: responsiveFontSize(context, 14),
                         color: context.onSurfaceVariant,
                         height: 1.43,
                       ),
@@ -176,14 +190,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
             return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
                           decoration: BoxDecoration(
                             color: context.surface,
                             borderRadius: BorderRadius.circular(12),
@@ -199,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'Quickpass',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: responsiveFontSize(context, 24),
                             fontWeight: FontWeight.w700,
                             color: context.primary,
                             letterSpacing: -0.01,
@@ -210,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text(
                           'Sign in to your workplace command center',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: responsiveFontSize(context, 14),
                             color: context.onSurfaceVariant,
                             height: 1.43,
                           ),
@@ -219,7 +235,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-
                     Container(
                       width: double.infinity,
                       constraints: const BoxConstraints(maxWidth: 400),
@@ -234,7 +249,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Employee ID',
+                            Text(
+                              'Employee ID',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -250,31 +266,35 @@ class _LoginScreenState extends State<LoginScreen> {
                               maxLength: 6,
                               decoration: InputDecoration(
                                 hintText: '6-digit ID',
-                                prefixIcon: Icon(Icons.badge_outlined, color: context.outline),
+                                prefixIcon: Icon(Icons.badge_outlined,
+                                    color: context.outline),
                                 counterText: '',
                                 filled: true,
                                 fillColor: context.surfaceContainerLow,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.outlineVariant),
+                                  borderSide:
+                                      BorderSide(color: context.outlineVariant),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.outlineVariant),
+                                  borderSide:
+                                      BorderSide(color: context.outlineVariant),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.secondary, width: 2),
+                                  borderSide: BorderSide(
+                                      color: context.secondary, width: 2),
                                 ),
                               ),
                               validator: Validators.employeeId,
                             ),
                             const SizedBox(height: 16),
-
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Password',
+                                Text(
+                                  'Password',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -289,9 +309,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                     foregroundColor: context.secondary,
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
-                                  child: Text('Forgot?',
+                                  child: Text(
+                                    'Forgot?',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -307,34 +329,40 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 hintText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outlined, color: context.outline),
+                                prefixIcon: Icon(Icons.lock_outlined,
+                                    color: context.outline),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                    _obscurePassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                     color: context.outline,
                                   ),
-                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                  onPressed: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                 ),
                                 filled: true,
                                 fillColor: context.surfaceContainerLow,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.outlineVariant),
+                                  borderSide:
+                                      BorderSide(color: context.outlineVariant),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.outlineVariant),
+                                  borderSide:
+                                      BorderSide(color: context.outlineVariant),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: context.secondary, width: 2),
+                                  borderSide: BorderSide(
+                                      color: context.secondary, width: 2),
                                 ),
                               ),
                               validator: Validators.password,
                               onFieldSubmitted: (_) => _login(),
                             ),
                             const SizedBox(height: 8),
-
                             Consumer<AuthProvider>(
                               builder: (context, auth, _) {
                                 if (auth.error != null) {
@@ -346,12 +374,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       decoration: BoxDecoration(
                                         color: context.errorContainer,
                                         borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: context.error.withValues(alpha: 0.2)),
+                                        border: Border.all(
+                                            color: context.error
+                                                .withValues(alpha: 0.2)),
                                       ),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(Icons.error_outline, size: 20, color: context.error),
+                                          Icon(Icons.error_outline,
+                                              size: 20, color: context.error),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
@@ -372,14 +404,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                             const SizedBox(height: 8),
-
                             Consumer<AuthProvider>(
                               builder: (context, auth, _) {
                                 return SizedBox(
                                   width: double.infinity,
                                   height: 56,
                                   child: FilledButton(
-                                    onPressed: auth.loginLoading ? null : _login,
+                                    onPressed:
+                                        auth.loginLoading ? null : _login,
                                     child: auth.loginLoading
                                         ? SizedBox(
                                             width: 24,
@@ -401,7 +433,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
-                                              Icon(Icons.arrow_forward, size: 20, color: context.onPrimary),
+                                              Icon(Icons.arrow_forward,
+                                                  size: 20,
+                                                  color: context.onPrimary),
                                             ],
                                           ),
                                   ),
@@ -412,7 +446,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
                     Container(
                       width: double.infinity,
@@ -425,16 +458,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _FooterBadge(icon: Icons.verified_user, label: 'Verified'),
+                              _FooterBadge(
+                                  icon: Icons.verified_user, label: 'Verified'),
                               SizedBox(width: 24),
-                              _FooterBadge(icon: Icons.security, label: 'Secured'),
+                              _FooterBadge(
+                                  icon: Icons.security, label: 'Secured'),
                             ],
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 32),
-
                     Text(
                       'ZANECO QUICKPASS AUTHORITY SYSTEM',
                       style: TextStyle(
@@ -457,11 +491,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text('Privacy Policy',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          child: const Text(
+                            'Privacy Policy',
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w500),
                           ),
                         ),
-                        Text('\u2022', style: TextStyle(color: context.outlineVariant)),
+                        Text('\u2022',
+                            style: TextStyle(color: context.outlineVariant)),
                         TextButton(
                           onPressed: _showSupport,
                           style: TextButton.styleFrom(
@@ -470,8 +507,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text('Internal Support',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          child: const Text(
+                            'Internal Support',
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
@@ -488,10 +527,10 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class _FooterBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const _FooterBadge({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

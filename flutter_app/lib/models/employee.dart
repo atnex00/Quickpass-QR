@@ -4,6 +4,24 @@ part 'employee.g.dart';
 
 @JsonSerializable()
 class Employee {
+
+  Employee({
+    required this.employeeId,
+    required this.fullName,
+    required this.position,
+    required this.departmentId,
+    required this.departmentName,
+    required this.email,
+    required this.isSupervisor,
+    required this.isAdmin,
+    required this.isSecurity,
+    required this.isActive,
+    this.profilePhoto,
+    this.hireDate,
+  });
+
+  factory Employee.fromJson(Map<String, dynamic> json) =>
+      _$EmployeeFromJson(json);
   @JsonKey(name: 'employee_id', defaultValue: '')
   final String employeeId;
 
@@ -37,33 +55,16 @@ class Employee {
   @JsonKey(name: 'profile_photo')
   final String? profilePhoto;
 
-  @JsonKey(name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)
+  @JsonKey(
+      name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)
   final DateTime? hireDate;
 
-  Employee({
-    required this.employeeId,
-    required this.fullName,
-    required this.position,
-    required this.departmentId,
-    required this.departmentName,
-    required this.email,
-    required this.isSupervisor,
-    required this.isAdmin,
-    required this.isSecurity,
-    required this.isActive,
-    this.profilePhoto,
-    this.hireDate,
-  });
-
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
-  static bool _boolActiveFromJson(dynamic v) => v != false && v != 0;
+  static bool _boolActiveFromJson(dynamic v) => v == true || v == 1;
   static DateTime? _hireDateFromJson(dynamic v) =>
       v != null ? DateTime.tryParse(v.toString()) : null;
   static String? _hireDateToJson(DateTime? v) =>
       v?.toIso8601String().split('T').first;
-
-  factory Employee.fromJson(Map<String, dynamic> json) =>
-      _$EmployeeFromJson(json);
 
   Map<String, dynamic> toJson() => _$EmployeeToJson(this);
 

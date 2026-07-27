@@ -292,12 +292,14 @@ cd flutter_app && flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/ap
 
 ## Environment Switching
 
-The project supports **dev** (local PostgreSQL) and **production** (Supabase cloud) environments via `NODE_ENV`. The backend loads the corresponding `.env.<env>` file.
+The project supports **dev** (local PostgreSQL) and **production** (Supabase cloud) environments via `NODE_ENV`.
 
-| Env | File | DB Target | Command |
-|-----|------|-----------|---------|
-| dev | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
-| prod | `backend/.env.prod` | Supabase cloud | `npm run prod` |
+The backend loads `backend/.env` first if it exists, then loads `backend/.env.<NODE_ENV>` to override. This keeps simple single-file `.env` setups working while also supporting `.env.dev` / `.env.prod`.
+
+| Env | Base file | Override file | DB Target | Command |
+|-----|-----------|---------------|-----------|---------|
+| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
+| prod | `backend/.env` | `backend/.env.prod` | Supabase cloud | `npm run prod` |
 
 ### Quick Switch
 
@@ -315,7 +317,7 @@ npm run prod        # runs backend serving web/dist
 ```bash
 docker-compose up --build
 ```
-This uses `NODE_ENV=production` and reads `backend/.env` (copy from `.env.prod`).
+This uses `NODE_ENV=production`. Copy `backend/.env.prod` to `backend/.env`, or keep `backend/.env` as base and `backend/.env.prod` as override.
 
 ---
 
@@ -345,14 +347,19 @@ Quickpass uses **Supabase** for its PostgreSQL database. No local PostgreSQL is 
 
 ### Step 3: Configure Environment
 
-Edit `backend/.env.prod`:
+Create `backend/.env` (base) or `backend/.env.prod` (production override) with at least these values:
 
 ```env
+NODE_ENV=production
 DB_CONNECTION=postgresql://postgres:YOUR_PASSWORD@db.YOUR_REF.supabase.co:5432/postgres
 DB_SSL=true
 JWT_SECRET=your-strong-random-secret
+COOKIE_SECRET=your-strong-random-cookie-secret
 QR_SECRET=your-strong-random-qr-secret
+CORS_ORIGIN=https://your-frontend-domain.com
 ```
+
+Production startup will fail if `DB_CONNECTION`, `JWT_SECRET`, `COOKIE_SECRET`, `QR_SECRET`, or `CORS_ORIGIN` are missing.
 
 ### Step 4: Run Migrations
 
@@ -442,7 +449,7 @@ Quickpass-QR/
 └── package.json               # Root scripts (dev, prod, build:web, migrate, seed)
 ```
 
-### Database Migrations (8 files)
+### Database Migrations (11 files)
 
 | # | File | Purpose |
 |---|------|---------|
@@ -454,33 +461,47 @@ Quickpass-QR/
 | 6 | `006_create_functions.js` | `generate_employee_id()` function |
 | 7 | `007_add_is_security.js` | Security role column |
 | 8 | `008_optional_department.js` | Make department optional |
+| 9 | `009_add_qr_images.js` | Add QR image paths to leave_requests |
+| 10 | `010_add_qr_scan_unique_constraint.js` | Enforce one scan per leave/qr_type |
+| 11 | `011_create_audit_logs.js` | Audit log table for tracking actions |
 
 ---
 
 ## Environment Variables
 
-### `backend/.env.dev` — Development
+### `backend/.env` / `backend/.env.dev` — Development
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable | Description | Default / Fallback |
+|----------|-------------|--------------------|
 | `PORT` | API server port | `3000` |
 | `NODE_ENV` | Environment | `development` |
-| `DB_CONNECTION` | PostgreSQL connection string | `postgresql://postgres:admin@localhost:5432/passlynx` |
+| `DB_CONNECTION` | PostgreSQL connection string | — (required) |
 | `DB_SSL` | Enable SSL for DB connection | `false` |
-| `JWT_SECRET` | JWT signing secret | `passlynx-dev-secret...` |
+| `JWT_SECRET` | JWT signing secret | loud dev fallback if unset |
+| `COOKIE_SECRET` | Signed cookie secret | loud dev fallback if unset |
+| `QR_SECRET` | QR code HMAC signing secret | loud dev fallback if unset |
 | `JWT_EXPIRES_IN` | Token expiration | `24h` |
 | `SESSION_EXPIRES_IN` | Session duration | `7d` |
-| `QR_SECRET` | QR code HMAC signing secret | `passlynx-qr-dev-secret...` |
 | `QR_VALIDITY_WINDOW_MINUTES` | QR code validity window | `15` |
 
 ### `backend/.env.prod` — Production
 
-Same variables as dev, plus:
+Required in production:
 
 | Variable | Description |
 |----------|-------------|
-| `FCM_*` | Firebase Cloud Messaging credentials (optional) |
-| `HTTPS_KEY` / `HTTPS_CERT` | Optional HTTPS server paths (port 3443 for camera access) |
+| `DB_CONNECTION` | PostgreSQL connection string |
+| `JWT_SECRET` | JWT signing secret |
+| `COOKIE_SECRET` | Signed cookie secret |
+| `QR_SECRET` | QR code HMAC signing secret |
+| `CORS_ORIGIN` | Allowed frontend origin |
+
+Optional:
+
+| Variable | Description |
+|----------|-------------|
+| `FCM_*` | Firebase Cloud Messaging credentials |
+| `HTTPS_KEY` / `HTTPS_CERT` | HTTPS server paths (port 3443 for camera access) |
 
 ---
 
@@ -539,6 +560,125 @@ Same variables as dev, plus:
 
 ---
 
+## Mobile Development
+
+### Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Flutter SDK | 3.27+ ([install guide](https://docs.flutter.dev/get-started/install)) |
+| Android Studio | Latest ([download](https://developer.android.com/studio)) |
+| .NET SDK | 8.0 (`winget install Microsoft.DotNet.SDK.8`) |
+| Physical device or emulator | — |
+
+> **Tip**: Use `scripts/setup.ps1` (Windows) or `scripts/setup.sh` (macOS/Linux) to install Flutter + Android SDK into `tools/`.
+
+### Verify Environment
+
+```bash
+cd flutter_app
+flutter doctor
+```
+
+Ensure all checkmarks are green. Common fixes:
+
+| Issue | Fix |
+|-------|-----|
+| `✗ Android SDK not found` | Set `ANDROID_HOME` to your SDK path (see OS-specific setup below) |
+| `✗ No connected device` | Start an emulator or connect a physical device via USB |
+| `✗ cmdline-tools missing` | Open Android Studio → SDK Manager → install `Android SDK Command-line Tools` |
+
+### Running on an Emulator
+
+1. Open **Android Studio** → **More Actions** → **Virtual Device Manager**
+2. Create a new device (e.g., Pixel 7 — API 35)
+3. Start the emulator
+4. Verify with `flutter devices`
+
+```bash
+cd flutter_app
+# 10.0.2.2 is the emulator alias for your host machine's localhost
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
+```
+
+### Running on a Physical Device
+
+1. Enable **Developer options** and **USB debugging** on your phone
+2. Connect via USB — accept the debugging prompt on your phone
+3. Verify with `flutter devices`
+
+```bash
+# ADB reverse tunnel so the phone can reach the backend
+scripts\run_phone.ps1
+
+cd flutter_app
+flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
+```
+
+### Building for Production
+
+```bash
+# Debug APK (fast, for testing)
+flutter build apk --debug
+
+# Release APK (split by ABI for smaller size)
+flutter build apk --split-per-abi
+
+# Android App Bundle (recommended for Play Store)
+flutter build appbundle
+
+# iOS (macOS only)
+flutter build ios
+```
+
+#### Android Keystore (Release Builds)
+
+Create a keystore:
+
+```bash
+# Generate a keystore (replace placeholders)
+keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA \
+  -keysize 2048 -validity 10000 -alias upload
+
+# Move it to flutter_app/android/app/
+```
+
+Then create `flutter_app/android/key.properties`:
+
+```properties
+storePassword=your-store-password
+keyPassword=your-key-password
+keyAlias=upload
+storeFile=../app/upload-keystore.jks
+```
+
+### Running Tests
+
+```bash
+# Static analysis
+flutter analyze
+
+# Unit & widget tests
+flutter test
+
+# Coverage
+flutter test --coverage
+```
+
+### Common Issues
+
+| Problem | Solution |
+|---------|----------|
+| `flutter pub get` fails | Check internet connection and `pubspec.yaml` syntax |
+| Gradle build fails | Open `flutter_app/android/` in Android Studio to sync Gradle |
+| App crashes on launch | Run `adb logcat \| grep flutter` to see crash logs |
+| Camera permission denied | Go to **Settings → Apps → Quickpass → Permissions → Camera** |
+| `API_BASE_URL` not working | Ensure the backend is running and the port matches (default `:3000`) |
+| Emulator is slow | Enable **Hardware acceleration** in AVD settings (HAXM on Windows, Hypervisor.framework on macOS) |
+| `flutter build apk` fails | Run `flutter clean && flutter pub get` and retry |
+
+---
+
 ## Architecture Overview
 
 ```
@@ -578,6 +718,8 @@ Same variables as dev, plus:
 3. **Security** scans OUT QR at exit → status: `active`
 4. **Security** scans IN QR at entry → status: `completed`
 
+Each OUT/IN QR can only be scanned once. The database enforces this with a unique constraint and the scan is wrapped in a transaction.
+
 ### Roles
 
 | Role | Access |
@@ -604,9 +746,9 @@ Same variables as dev, plus:
 | `/admin/employees` | is_admin | UserManagerPage | AppLayout |
 | `/admin/departments` | is_admin | DepartmentsPage | AppLayout |
 | `/admin/reports` | is_admin | ReportsPage | AppLayout |
-| `/security/scan` | Authenticated | ScannerPage | SecurityShell (no sidebar) |
-| `/security/result` | Authenticated | ScanResultPage | SecurityShell |
-| `/security/history` | Authenticated | ScanHistoryPage | SecurityShell |
+| `/security/scan` | is_security/is_admin | ScannerPage | SecurityShell (no sidebar) |
+| `/security/result` | is_security/is_admin | ScanResultPage | SecurityShell |
+| `/security/history` | is_security/is_admin | ScanHistoryPage | SecurityShell |
 | `/guides` | Any | GuidesPage | AppLayout |
 | `*` | — | Redirect → `/employee` | — |
 
@@ -685,16 +827,36 @@ All passwords are `pass1234`.
 
 | ID | Name | Role | Department |
 |----|------|------|------------|
-| 000001 | Alice Chen | Employee | Engineering |
-| 000002 | Bob Santos | Employee | Engineering |
-| 000003 | Charlie Reyes | Employee | Engineering |
-| 000004 | David Kim | Supervisor | Engineering |
-| 000005 | Eva Martinez | Employee | Human Resources |
-| 000006 | Frank Tan | Employee | Human Resources |
-| 000007 | Grace Lim | Employee | Finance |
-| 000008 | Henry Cruz | Employee | Finance |
-| 000009 | Irene Gonzales | Employee | Administration |
-| 090901 | Guard Mike | Security | — |
+| 000001 | James Wilson | Employee | TSD · Technical Services Department |
+| 000002 | Maria Garcia | Employee | IAD · Internal Audit Department |
+| 000003 | John Lee | Employee | HRAD · Human Resource & Administration |
+| 000004 | Sara Patel | Employee | FSD · Finance Services Department |
+| 000005 | Alex Turner | Employee | ISD · Institutional Services Department |
+| 000006 | Emily Davis | Employee | ISD · Institutional Services Department |
+| 000007 | Ryan Chen | Employee | CPD · Corporate Planning Department |
+| 000008 | Olivia Brown | Employee | FSD · Finance Services Department |
+| 000009 | Daniel Kim | Employee | TSD · Technical Services Department |
+| 000010 | Sophia Martinez | Employee | CPD · Corporate Planning Department |
+| 000011 | Ethan White | Supervisor | TSD · Technical Services Department |
+| 000012 | Ava Johnson | Employee | CPD · Corporate Planning Department |
+| 000013 | Noah Taylor | Supervisor | HRAD · Human Resource & Administration |
+| 000014 | Isabella Anderson | Supervisor | FSD · Finance Services Department |
+| 000015 | Liam Thomas | Supervisor | ISD · Institutional Services Department |
+| 000016 | Mia Jackson | Employee | CPD · Corporate Planning Department |
+| 000017 | Lucas Harris | Supervisor | CPD · Corporate Planning Department |
+| 000018 | Charlotte Martin | Supervisor | IAD · Internal Audit Department |
+| 000019 | Mason Thompson | Employee | TSD · Technical Services Department |
+| 000020 | Amelia Robinson | Employee | CPD · Corporate Planning Department |
+| 090901 | Mike Ross | Security | ISD · Institutional Services Department |
+| 090902 | Sarah Connor | Security | ISD · Institutional Services Department |
+| 090903 | John Smith | Security | ISD · Institutional Services Department |
+| 090904 | David Miller | Security | ISD · Institutional Services Department |
+| 090905 | Chris Evans | Security | ISD · Institutional Services Department |
+| 090906 | Tony Stark | Security | ISD · Institutional Services Department |
+| 090907 | Natasha Romanoff | Security | ISD · Institutional Services Department |
+| 090908 | Steve Rogers | Security | ISD · Institutional Services Department |
+| 090909 | Bruce Banner | Security | ISD · Institutional Services Department |
+| 090910 | Clint Barton | Security | ISD · Institutional Services Department |
 | 999999 | System Admin | Admin + Supervisor + Security | — |
 
 ---
@@ -709,7 +871,7 @@ All passwords are `pass1234`.
 | `npm run migrate` fails | Check `DB_CONNECTION` in `.env.<env>` and that Supabase allows your IP |
 | `flutter pub get` fails | Ensure you're in the `flutter_app` directory |
 | QR scanner not working | Grant camera permission in Android Settings → Apps → Quickpass |
-| Backend won't start | Check that port 3000 is free: `lsof -i :3000` (macOS/Linux) or `netstat -ano \| findstr :3000` (Windows) |
+| Backend won't start | Check missing required env vars (`DB_CONNECTION`, `JWT_SECRET`, `COOKIE_SECRET`, `QR_SECRET`, `CORS_ORIGIN` in production) and that port 3000 is free |
 | Web app shows blank page | Run `npm run build:web` first if using production mode, or check Vite dev server is running on port 8080 |
 
 ### Supabase Connection Issues
@@ -746,6 +908,60 @@ netstat -ano | findstr :3000
 $env:PORT=3001; npm run dev  # Windows PowerShell
 export PORT=3001 && npm run dev  # macOS/Linux
 ```
+
+---
+
+## Security
+
+This project follows defense-in-depth security practices across all layers.
+
+### Backend
+
+| Measure | Description |
+|---------|-------------|
+| **JWT algorithm pinning** | Tokens are signed and verified with `HS256` only — `"alg": "none"` attacks are rejected |
+| **Account enumeration prevention** | Login and token verification return identical messages for invalid credentials, inactive accounts, and deactivated employees |
+| **Rate limiting** | Global: 100 req/15min, login: 20 req/15min, auth refresh: 30 req/15min, bulk import: 5 req/hour |
+| **Magic byte validation** | Uploaded files are validated by content (JPEG, PNG, GIF, WebP magic bytes), not just MIME type |
+| **Password complexity** | Admin-created passwords require uppercase, lowercase, and digit (min 8 chars) |
+| **QR signature verification** | HMAC-SHA256 with constant-time comparison (`crypto.timingSafeEqual`) |
+| **Session rotation** | Refresh tokens are rotated on each use; old sessions are invalidated |
+| **HTTP-only cookies** | `refresh_sid` cookie uses `httpOnly`, `signed`, `sameSite: strict`, and `secure` (in production) |
+| **Helmet/CSP** | Security headers applied via Helmet; CSP restricts scripts, styles, and frame ancestors |
+| **CORS** | Configurable origin via `CORS_ORIGIN` env var; credentials support |
+| **Input validation** | Joi schemas on all routes; body size limited to 1 MB |
+| **Scan integrity** | Revoking an approved leave preserves scan timestamps if the employee has already exited |
+
+### Authorization
+
+| Check | Enforcement |
+|-------|-------------|
+| **Supervisor IDOR** | Supervisors can only view leave requests within their own department |
+| **Security routes** | Web `SecurityShell` requires `is_security` or `is_admin` role (frontend guard) |
+| **Backend role middleware** | `requireAdmin`, `requireSupervisor`, `requireSecurity` enforce roles server-side |
+| **Deactivated accounts** | Middleware invalidates sessions and returns generic `401` for deactivated users |
+
+### Web Frontend
+
+| Measure | Description |
+|---------|-------------|
+| **Role-gated routes** | Scanner/security pages require `is_security` or `is_admin` in addition to authentication |
+| **No console data leaks** | QR validation responses are not logged to the browser console |
+| **Dev-only routes** | `/load-preview` page stripped from production builds |
+| **In-memory token** | JWT stored in JavaScript closure (not localStorage/sessionStorage) |
+| **Cookie-based refresh** | Session refresh via httpOnly signed cookie |
+
+### Flutter App
+
+| Measure | Description |
+|---------|-------------|
+| **FlutterSecureStorage** | JWT tokens encrypted at rest (not SharedPreferences) |
+| **Certificate pinning** | OS-level TLS validation; pinning framework available (`CertificatePinner`) |
+| **Provider state cleanup** | `LeaveProvider`, `SupervisorProvider`, `ScanProvider` reset on logout |
+| **No raw exceptions** | SnackBars show generic messages instead of raw error details |
+| **Password validation** | Client-side enforces minimum 8 characters |
+| **`FLAG_SECURE`** | Screenshots and screen recording blocked on Android |
+| **`allowBackup: false`** | App data excluded from Android cloud backup |
 
 ---
 

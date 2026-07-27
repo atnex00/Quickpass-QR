@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { User, Camera, Loader2 } from "lucide-react"
 import PhotoCropper from "@/components/PhotoCropper"
+import PageHeader from "@/components/layout/PageHeader"
 
 export default function MyProfilePage() {
   const { user, updateProfilePhoto } = useAuthStore()
@@ -53,20 +54,21 @@ export default function MyProfilePage() {
 
   return (
     <div className="page-enter mx-auto max-w-lg space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">My Profile</h1>
-        <p className="text-muted-foreground">Your account information</p>
-      </div>
+      <PageHeader
+        title="My Profile"
+        subtitle="Your account information"
+        icon={<User className="h-5 w-5" />}
+      />
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <User className="h-5 w-5" /> Profile Photo
+            <User className="h-5 w-5 text-primary" /> Profile Photo
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-muted">
+            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-primary/30 bg-muted">
               {user?.profile_photo ? (
                 <img src={user.profile_photo} alt="Profile" className="size-full object-cover" />
               ) : (
@@ -100,11 +102,11 @@ export default function MyProfilePage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <User className="h-5 w-5" /> Personal Information
+            <User className="h-5 w-5 text-primary" /> Personal Information
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-lg border bg-muted/50 p-4 text-sm">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-border bg-muted/40 p-5 text-sm">
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Employee ID</span>
               <p className="mt-0.5 font-medium">{user?.employee_id}</p>

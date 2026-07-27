@@ -3,10 +3,6 @@ import '../config/theme.dart';
 import '../utils/responsive.dart';
 
 class AdaptiveScaffold extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final List<AdaptiveDestination> destinations;
-  final Widget body;
 
   const AdaptiveScaffold({
     super.key,
@@ -15,6 +11,10 @@ class AdaptiveScaffold extends StatelessWidget {
     required this.destinations,
     required this.body,
   });
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+  final List<AdaptiveDestination> destinations;
+  final Widget body;
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +39,18 @@ class AdaptiveScaffold extends StatelessWidget {
                     color: context.onPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
+                  child: Image.asset('assets/icon/app-icon.png',
+                      width: 22, height: 22),
                 ),
               ),
             ),
             destinations: destinations
                 .map((d) => NavigationRailDestination(
                       icon: Icon(d.icon, color: context.onSurfaceVariant),
-                      selectedIcon: Icon(d.selectedIcon, color: context.primary),
-                      label: Text(d.label, style: const TextStyle(fontSize: 12)),
+                      selectedIcon:
+                          Icon(d.selectedIcon, color: context.primary),
+                      label:
+                          Text(d.label, style: const TextStyle(fontSize: 12)),
                     ))
                 .toList(),
           ),
@@ -84,13 +87,13 @@ class AdaptiveScaffold extends StatelessWidget {
 }
 
 class AdaptiveDestination {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
 
   const AdaptiveDestination({
     required this.icon,
     required this.selectedIcon,
     required this.label,
   });
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
 }

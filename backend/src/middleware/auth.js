@@ -9,7 +9,7 @@ async function authenticate(req, res, next) {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
 
     const session = await db('sessions')
       .where({ session_id: decoded.session_id, is_active: true })
@@ -24,18 +24,24 @@ async function authenticate(req, res, next) {
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', decoded.employee_id)
       .select(
-        'employees.*',
+        'employees.employee_id',
+        'employees.full_name',
+        'employees.position',
+        'employees.department_id',
         'departments.department_name',
-        'departments.department_code'
+        'employees.email',
+        'employees.is_supervisor',
+        'employees.is_admin',
+        'employees.is_security',
+        'employees.is_active',
+        'employees.profile_photo',
+        'employees.hire_date'
       )
       .first();
 
-    if (!employee) {
-      return res.status(401).json({ success: false, message: 'Employee not found' });
-    }
-
-    if (!employee.is_active) {
-      return res.status(403).json({ success: false, message: 'Account deactivated' });
+    if (!employee || !employee.is_active) {
+      if (session) await db('sessions').where({ session_id: decoded.session_id }).update({ is_active: false });
+      return res.status(401).json({ success: false, message: 'Invalid token' });
     }
 
     req.user = employee;

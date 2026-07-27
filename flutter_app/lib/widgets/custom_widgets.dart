@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
 class LoadingOverlay extends StatelessWidget {
-  final bool isLoading;
-  final Widget child;
-  final String? message;
 
   const LoadingOverlay({
     super.key,
@@ -12,6 +9,9 @@ class LoadingOverlay extends StatelessWidget {
     required this.child,
     this.message,
   });
+  final bool isLoading;
+  final Widget child;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: Colors.black26,
+            color: context.onSurface.withValues(alpha: 0.3),
             child: Center(
               child: Container(
                 margin: const EdgeInsets.all(32),
@@ -36,7 +36,8 @@ class LoadingOverlay extends StatelessWidget {
                     CircularProgressIndicator(color: context.primaryBlue),
                     if (message != null) ...[
                       const SizedBox(height: 16),
-                      Text(message!, style: TextStyle(color: context.onSurfaceVariant)),
+                      Text(message!,
+                          style: TextStyle(color: context.onSurfaceVariant)),
                     ],
                   ],
                 ),
@@ -49,11 +50,12 @@ class LoadingOverlay extends StatelessWidget {
 }
 
 class InfoRow extends StatelessWidget {
+
+  const InfoRow(
+      {super.key, required this.label, required this.value, this.trailing});
   final String label;
   final String value;
   final Widget? trailing;
-
-  const InfoRow({super.key, required this.label, required this.value, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,7 @@ class InfoRow extends StatelessWidget {
       children: [
         Text(label,
             style: TextStyle(
-                fontSize: 14,
-                color: context.onSurfaceVariant,
-                height: 1.43)),
+                fontSize: 14, color: context.onSurfaceVariant, height: 1.43)),
         const SizedBox(width: 8),
         if (trailing != null) ...[
           const Spacer(),
@@ -87,9 +87,9 @@ class InfoRow extends StatelessWidget {
 }
 
 class GuidelineItem extends StatelessWidget {
-  final String text;
 
   const GuidelineItem({super.key, required this.text});
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -104,18 +104,14 @@ class GuidelineItem extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
             child: Text(text,
-                style: TextStyle(
-                    fontSize: 14, color: context.onSurfaceVariant))),
+                style:
+                    TextStyle(fontSize: 14, color: context.onSurfaceVariant))),
       ],
     );
   }
 }
 
 class EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Widget? action;
 
   const EmptyState({
     super.key,
@@ -123,30 +119,48 @@ class EmptyState extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.action,
+    this.isOffline = false,
+    this.error,
   });
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? action;
+  final bool isOffline;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = error ?? title;
+    final displaySubtitle = error != null
+        ? 'Pull down to retry'
+        : (isOffline ? 'Check your internet connection' : subtitle);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: context.outlineVariant),
+            Icon(
+              error != null ? Icons.cloud_off : icon,
+              size: 64,
+              color: error != null ? context.warning : context.outlineVariant,
+            ),
             const SizedBox(height: 16),
             Text(
-              title,
+              displayTitle,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: context.onSurfaceVariant,
               ),
             ),
-            if (subtitle != null) ...[
+            if (displaySubtitle != null) ...[
               const SizedBox(height: 8),
               Text(
-                subtitle!,
+                displaySubtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: context.neutralGray),
               ),

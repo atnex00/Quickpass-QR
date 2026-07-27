@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Loader2, Eye, EyeOff } from "lucide-react"
+import ThemeToggle from "@/components/layout/ThemeToggle"
 
 export default function LoginPage() {
   const [employeeId, setEmployeeId] = useState("")
@@ -24,27 +25,42 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="page-enter flex min-h-screen flex-col bg-background">
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-14">
-          {/* Left — Brand column */}
-          <div className="border-l-4 border-l-primary pl-4 shrink-0">
-            <img src="/app-icon.png" alt="ZANECO QuickPass" className="h-12 w-12 mb-3" />
-            <p className="text-lg font-bold font-display text-foreground leading-tight">
-              ZANECO<br />QuickPass
-            </p>
-            <div className="h-[3px] w-6 rounded-full bg-primary/40 mt-3" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50 mt-2">
-              Gate Access
-            </p>
+    <main className="app-aurora page-enter relative flex min-h-screen flex-col">
+      <div className="glow-blob h-80 w-80 bg-primary/20 left-1/4 -top-20" />
+      <div className="glow-blob h-72 w-72 bg-success/15 right-10 bottom-0" />
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+      <div className="relative z-[1] flex flex-1 items-center justify-center p-6">
+        <div className="flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border shadow-2xl lg:flex-row card-elevated">
+          {/* Left — Brand hero */}
+          <div className="brand-gradient relative hidden flex-col justify-between p-8 lg:flex lg:w-1/2">
+            <div className="flex items-center gap-3">
+              <div className="brand-gradient flex h-11 w-11 items-center justify-center rounded-xl border border-primary/30">
+                <img src="/app-icon.png" alt="" className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-lg font-bold font-display leading-tight text-foreground">QuickPass</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">Gate Access</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold font-display leading-tight text-foreground">
+                Leave & gate access,<br /><span className="text-gradient">made effortless.</span>
+              </h2>
+              <p className="text-sm text-muted-foreground/80">
+                Request temporary leaves, get supervisor approval, and scan in and out at the gate — all in one place.
+              </p>
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/40">ZANECO &middot; QuickPass</p>
           </div>
 
           {/* Right — Form panel */}
-          <div className="panel-card w-72">
-            <div className="panel-card-body space-y-4">
+          <div className="glass flex-1 p-7">
+            <div className="space-y-5">
               <div>
-                <p className="text-base font-bold text-foreground tracking-tight">Sign in</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Use your employee ID and password</p>
+                <p className="text-xl font-bold text-foreground tracking-tight">Sign in</p>
+                <p className="text-xs text-muted-foreground mt-1">Use your employee ID and password</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -89,13 +105,13 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="btn-primary w-full h-10 text-[11px]"
+                  className="btn-gradient w-full h-10 text-[11px]"
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Sign in"}
                 </button>
               </form>
             </div>
-            <div className="panel-card-footer flex items-center justify-between">
+            <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4 text-[10px] text-muted-foreground/60">
               <span>v1.0</span>
               <a href="#" className="hover:text-primary transition-colors">Need help? Contact IT</a>
             </div>
@@ -103,9 +119,9 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-8 pb-4">
-        <span className="text-[10px] text-muted-foreground/20">&copy; 2026 ZANECO QuickPass</span>
-        <span className="text-[10px] text-muted-foreground/20">v1.0</span>
+      <div className="relative z-[1] flex items-center justify-between px-8 pb-4">
+        <span className="text-[10px] text-muted-foreground/30">&copy; 2026 ZANECO QuickPass</span>
+        <span className="text-[10px] text-muted-foreground/30">v1.0</span>
       </div>
     </main>
   )

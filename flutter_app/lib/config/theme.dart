@@ -67,12 +67,6 @@ class QuickpassColors {
 }
 
 class StatusColors extends ThemeExtension<StatusColors> {
-  final Color success;
-  final Color onSuccess;
-  final Color successContainer;
-  final Color onSuccessContainer;
-  final Color warning;
-  final Color onWarning;
 
   const StatusColors({
     required this.success,
@@ -82,6 +76,12 @@ class StatusColors extends ThemeExtension<StatusColors> {
     required this.warning,
     required this.onWarning,
   });
+  final Color success;
+  final Color onSuccess;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color onWarning;
 
   @override
   StatusColors copyWith({
@@ -108,8 +108,10 @@ class StatusColors extends ThemeExtension<StatusColors> {
     return StatusColors(
       success: Color.lerp(success, other.success, t)!,
       onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
-      successContainer: Color.lerp(successContainer, other.successContainer, t)!,
-      onSuccessContainer: Color.lerp(onSuccessContainer, other.onSuccessContainer, t)!,
+      successContainer:
+          Color.lerp(successContainer, other.successContainer, t)!,
+      onSuccessContainer:
+          Color.lerp(onSuccessContainer, other.onSuccessContainer, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       onWarning: Color.lerp(onWarning, other.onWarning, t)!,
     );
@@ -135,11 +137,6 @@ class StatusColors extends ThemeExtension<StatusColors> {
 }
 
 class AppColors extends ThemeExtension<AppColors> {
-  final Color primaryBlue;
-  final Color neutralGray;
-  final Color qrOut;
-  final Color qrIn;
-  final Color surfaceNavy;
 
   const AppColors({
     required this.primaryBlue,
@@ -148,6 +145,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.qrIn,
     required this.surfaceNavy,
   });
+  final Color primaryBlue;
+  final Color neutralGray;
+  final Color qrOut;
+  final Color qrIn;
+  final Color surfaceNavy;
 
   @override
   AppColors copyWith({
@@ -197,7 +199,8 @@ class AppColors extends ThemeExtension<AppColors> {
 
 extension QuickpassColorsX on BuildContext {
   ColorScheme get _cs => Theme.of(this).colorScheme;
-  StatusColors get _st => Theme.of(this).extension<StatusColors>() ?? StatusColors.light;
+  StatusColors get _st =>
+      Theme.of(this).extension<StatusColors>() ?? StatusColors.light;
   AppColors get _ap => Theme.of(this).extension<AppColors>() ?? AppColors.light;
 
   Color get surface => _cs.surface;
@@ -235,7 +238,8 @@ extension QuickpassColorsX on BuildContext {
 
 class QuickpassTheme {
   static final TextTheme _lightTextTheme = GoogleFonts.interTextTheme();
-  static final TextTheme _darkTextTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
+  static final TextTheme _darkTextTheme =
+      GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
 
   static final ThemeData light = _buildLight();
   static final ThemeData dark = _buildDark();
@@ -256,10 +260,8 @@ class QuickpassTheme {
         onSecondaryContainer: QuickpassColors.onSecondaryContainer,
         tertiary: QuickpassColors.tertiary,
         error: QuickpassColors.error,
-        onError: QuickpassColors.onError,
         errorContainer: QuickpassColors.errorContainer,
         onErrorContainer: QuickpassColors.onErrorContainer,
-        surface: QuickpassColors.surface,
         onSurface: QuickpassColors.onSurface,
         surfaceContainerLowest: QuickpassColors.surfaceContainerLowest,
         surfaceContainerLow: QuickpassColors.surfaceContainerLow,
@@ -275,7 +277,6 @@ class QuickpassTheme {
         AppColors.light,
       ],
       scaffoldBackgroundColor: QuickpassColors.background,
-
       appBarTheme: AppBarTheme(
         backgroundColor: QuickpassColors.darkPrimary,
         foregroundColor: QuickpassColors.darkOnPrimary,
@@ -287,7 +288,6 @@ class QuickpassTheme {
           color: QuickpassColors.darkOnPrimary,
         ),
       ),
-
       cardTheme: CardThemeData(
         color: QuickpassColors.surface,
         elevation: 0,
@@ -299,7 +299,6 @@ class QuickpassTheme {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
-
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: QuickpassColors.darkPrimary,
@@ -314,7 +313,6 @@ class QuickpassTheme {
           ),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: QuickpassColors.darkPrimary,
@@ -325,14 +323,12 @@ class QuickpassTheme {
           ),
         ),
       ),
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: QuickpassColors.darkPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: QuickpassColors.surface,
@@ -346,7 +342,8 @@ class QuickpassTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: QuickpassColors.darkPrimary, width: 2),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -356,11 +353,12 @@ class QuickpassTheme {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: QuickpassColors.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         labelStyle: const TextStyle(color: QuickpassColors.onSurfaceVariant),
-        hintStyle: TextStyle(color: QuickpassColors.onSurfaceVariant.withValues(alpha: 0.6)),
+        hintStyle: TextStyle(
+            color: QuickpassColors.onSurfaceVariant.withValues(alpha: 0.6)),
       ),
-
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: QuickpassColors.surface,
         indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
@@ -372,24 +370,30 @@ class QuickpassTheme {
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.darkPrimary);
+            return GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.darkPrimary);
           }
-          return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: QuickpassColors.onSurfaceVariant);
+          return GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: QuickpassColors.onSurfaceVariant);
         }),
         elevation: 0,
         height: 80,
       ),
-
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: QuickpassColors.surface,
         selectedItemColor: QuickpassColors.darkPrimary,
         unselectedItemColor: QuickpassColors.onSurfaceVariant,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        selectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+        selectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
       ),
-
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
@@ -397,25 +401,21 @@ class QuickpassTheme {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         labelStyle: GoogleFonts.inter(fontSize: 13),
       ),
-
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         actionTextColor: QuickpassColors.darkOnPrimary,
       ),
-
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-
       dividerTheme: DividerThemeData(
         color: QuickpassColors.outlineVariant.withValues(alpha: 0.5),
         thickness: 1,
         space: 1,
       ),
-
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: QuickpassColors.darkPrimary,
         foregroundColor: QuickpassColors.darkOnPrimary,
@@ -457,7 +457,6 @@ class QuickpassTheme {
         AppColors.dark,
       ],
       scaffoldBackgroundColor: QuickpassColors.darkBackground,
-
       appBarTheme: AppBarTheme(
         backgroundColor: QuickpassColors.darkSurface,
         foregroundColor: QuickpassColors.darkOnSurface,
@@ -469,19 +468,18 @@ class QuickpassTheme {
           color: QuickpassColors.darkOnSurface,
         ),
       ),
-
       cardTheme: CardThemeData(
         color: QuickpassColors.darkSurface,
         elevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: QuickpassColors.darkOutlineVariant.withValues(alpha: 0.4)),
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+              color: QuickpassColors.darkOutlineVariant.withValues(alpha: 0.4)),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
-
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: QuickpassColors.darkPrimary,
@@ -497,7 +495,6 @@ class QuickpassTheme {
           ),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: QuickpassColors.darkPrimary,
@@ -508,7 +505,12 @@ class QuickpassTheme {
           ),
         ),
       ),
-
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: QuickpassColors.darkPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: QuickpassColors.darkSurface,
         indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
@@ -516,64 +518,88 @@ class QuickpassTheme {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: QuickpassColors.darkPrimary);
           }
-          return const IconThemeData(color: QuickpassColors.darkOnSurfaceVariant);
+          return const IconThemeData(
+              color: QuickpassColors.darkOnSurfaceVariant);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: QuickpassColors.darkPrimary);
+            return GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: QuickpassColors.darkPrimary);
           }
-          return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: QuickpassColors.darkOnSurfaceVariant);
+          return GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: QuickpassColors.darkOnSurfaceVariant);
         }),
         elevation: 0,
-        height: 65,
+        height: 80,
       ),
-
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: QuickpassColors.darkSurface,
+        selectedItemColor: QuickpassColors.darkPrimary,
+        unselectedItemColor: QuickpassColors.darkOnSurfaceVariant,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle:
+            GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: QuickpassColors.darkSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: QuickpassColors.darkOutlineVariant),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkOutlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: QuickpassColors.darkOutlineVariant),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkOutlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: QuickpassColors.darkPrimary, width: 2),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: QuickpassColors.darkError),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        labelStyle: const TextStyle(color: QuickpassColors.darkOnSurfaceVariant),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              const BorderSide(color: QuickpassColors.darkError, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle:
+            const TextStyle(color: QuickpassColors.darkOnSurfaceVariant),
+        hintStyle: TextStyle(
+            color: QuickpassColors.darkOnSurfaceVariant.withValues(alpha: 0.6)),
       ),
-
       dividerTheme: DividerThemeData(
         color: QuickpassColors.darkOutlineVariant.withValues(alpha: 0.3),
         thickness: 1,
         space: 1,
       ),
-
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: QuickpassColors.darkPrimary,
         foregroundColor: QuickpassColors.darkOnPrimary,

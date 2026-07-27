@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router"
 import {
   LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, History, User, BookOpen,
+  Scan, User, BookOpen, ScrollText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
@@ -38,6 +38,7 @@ const sections = [
       { to: "/admin/employees", icon: Users, label: "Employees" },
       { to: "/admin/departments", icon: Building2, label: "Departments" },
       { to: "/admin/reports", icon: BarChart3, label: "Reports" },
+      { to: "/admin/audit", icon: ScrollText, label: "Audit Log" },
     ],
   },
   {
@@ -95,26 +96,34 @@ export default function Sidebar() {
 
   return (
     <aside className={cn(
-      "flex flex-col border-r border-border bg-card transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0",
+      "flex flex-col border-r border-border glass transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0",
       collapsed ? "w-14" : "w-56"
     )}>
       {/* Logo + clock */}
       <div className={cn(
-        "flex items-center border-b border-border transition-all duration-300",
-        collapsed ? "h-14 justify-center px-1" : "h-14 gap-2 px-3"
+        "flex items-center border-b border-border/60 transition-all duration-300",
+        collapsed ? "h-16 justify-center px-1" : "h-16 gap-2 px-3"
       )}>
         {!collapsed ? (
           <>
-            <img src="/logo.png" alt="ZANECO QuickPass" className="h-7 w-auto shrink-0" />
-            <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60 ml-auto">{fmt(h)}:{fmt(m)}</span>
+            <div className="brand-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+              <img src="/app-icon.png" alt="" className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold font-display leading-tight text-foreground">QuickPass</p>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">Gate Access</p>
+            </div>
+            <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60">{fmt(h)}:{fmt(m)}</span>
           </>
         ) : (
-          <img src="/app-icon.png" alt="ZANECO QuickPass" className="h-6 w-6" />
+          <div className="brand-gradient flex h-9 w-9 items-center justify-center rounded-lg">
+            <img src="/app-icon.png" alt="QuickPass" className="h-5 w-5" />
+          </div>
         )}
       </div>
 
       {/* Nav sections */}
-      <nav className="flex-1 overflow-y-auto">
+      <nav className="flex-1 overflow-y-auto py-2">
         {visibleSections.map((section) => (
           <div key={section.label}>
             {!collapsed && <p className="sidebar-section-label">{section.label}</p>}
@@ -132,12 +141,12 @@ export default function Sidebar() {
                   end={link.to === "/employee" || link.to === "/supervisor"}
                   className={({ isActive }) =>
                     cn(
-                      "flex items-center gap-3 mx-2 rounded-sm px-2.5 py-2 text-xs font-semibold transition-all duration-200",
-                      isActive ? "sidebar-active text-primary" : "sidebar-inactive"
+                      "group relative flex items-center gap-3 mx-2 my-0.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition-all duration-200",
+                      isActive ? "sidebar-active text-primary" : "sidebar-inactive hover:bg-accent/60"
                     )
                   }
                 >
-                  <link.icon className="h-4 w-4 shrink-0" />
+                  <link.icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   {!collapsed && <span className="truncate">{link.label}</span>}
                 </NavLink>
               ))}
@@ -146,7 +155,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom controls */}
-      <div className="border-t border-border p-2">
+      <div className="border-t border-border/60 p-2">
         <Link
           to="/employee/profile"
           className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground"

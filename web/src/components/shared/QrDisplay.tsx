@@ -6,6 +6,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 interface Props {
   qrData: string
+  qrImageUrl?: string | null
   label: string
   color: "blue" | "green"
   date: string
@@ -45,7 +46,7 @@ function loadLogo(cb: () => void) {
   img.src = "/app-icon.png"
 }
 
-export default function QrDisplay({ qrData, label, color, date, time, scanTime, employeeName, employeePosition, isOut }: Props) {
+export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time, scanTime, employeeName, employeePosition, isOut }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const qrRef = useRef<QRCodeStyling | null>(null)
   const timerRef = useRef<number | null>(null)
@@ -105,7 +106,8 @@ export default function QrDisplay({ qrData, label, color, date, time, scanTime, 
       const raw = atob(qrData)
       const parsed = JSON.parse(raw)
       if (parsed.timestamp) target = new Date(parsed.timestamp).getTime()
-    } catch (_) {}
+    } catch {
+    }
     if (isNaN(target)) {
       const fallback = `${date}T${time}`
       target = new Date(fallback).getTime()
@@ -198,7 +200,11 @@ export default function QrDisplay({ qrData, label, color, date, time, scanTime, 
         ) : (
           <>
             <div className="flex justify-center overflow-hidden">
-              <div ref={containerRef} className={cn("max-w-full", flipped && "scale-x-[-1]")} />
+              {qrImageUrl ? (
+                <img src={qrImageUrl} alt="QR Code" className={cn("max-w-full", flipped && "scale-x-[-1]")} style={{ width: qrSize, height: qrSize }} />
+              ) : (
+                <div ref={containerRef} className={cn("max-w-full", flipped && "scale-x-[-1]")} />
+              )}
             </div>
             <div className="mt-4 flex items-center justify-center gap-2">
               {isOut ? (

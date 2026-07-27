@@ -9,6 +9,7 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:web": "cd web && npx vite --host 0.0.0.0",
     "build:web": "cd web && npx vite build",
+    "test": "bash scripts/test.sh",
     "migrate": "cd backend && npx knex migrate:latest",
     "migrate:rollback": "cd backend && npx knex migrate:rollback",
     "seed": "cd backend && npx knex seed:run",

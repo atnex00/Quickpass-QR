@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { formatDate, formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
 import api from "@/lib/api"
+import PageHeader from "@/components/layout/PageHeader"
 import { CheckCircle, XCircle, Loader2, Inbox, User, Undo2, Trash2 } from "lucide-react"
 
 export default function PendingRequestsPage() {
@@ -80,12 +81,11 @@ export default function PendingRequestsPage() {
 
   return (
     <div className="page-enter space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold font-display">Pending Requests</h1>
-        <p className="text-sm text-muted-foreground">
-          {pendingRequests.length} request{pendingRequests.length !== 1 ? "s" : ""} awaiting review
-        </p>
-      </div>
+      <PageHeader
+        title="Pending Requests"
+        subtitle={`${pendingRequests.length} request${pendingRequests.length !== 1 ? "s" : ""} awaiting review`}
+        icon={<Inbox className="h-5 w-5" />}
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-12">

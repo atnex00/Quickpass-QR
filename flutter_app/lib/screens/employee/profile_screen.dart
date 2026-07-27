@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
+import '../../models/employee.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/responsive.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _emailCtl;
   late TextEditingController _passCtl;
   bool _saving = false;
+  bool _uploading = false;
 
   @override
   void initState() {
@@ -53,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _saving = true);
     final ok = await context.read<AuthProvider>().updateProfile(data);
-    setState(() => _saving = false);
+    if (mounted) setState(() => _saving = false);
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +69,112 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.read<AuthProvider>().error ?? 'Could not update profile'),
+          content: Text(
+              context.read<AuthProvider>().error ?? 'Could not update profile'),
+        ),
+      );
+    }
+  }
+
+  void _showPhotoSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Change Profile Photo',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: context.onSurface,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAndUploadPhoto(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAndUploadPhoto(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadPhoto(ImageSource source) async {
+    final picker = ImagePicker();
+    final auth = context.read<AuthProvider>();
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (picked == null) return;
+
+    CroppedFile? cropped;
+    try {
+      cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Photo',
+            toolbarColor: const Color(0xFF1E40AF),
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(title: 'Crop Photo'),
+        ],
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not crop image: $e')),
+        );
+      }
+      return;
+    }
+
+    if (cropped == null) return;
+
+    if (!mounted) return;
+    setState(() => _uploading = true);
+    final ok = await auth.uploadProfilePhoto(cropped.path);
+    if (mounted) setState(() => _uploading = false);
+
+    if (ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile photo updated')),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.read<AuthProvider>().error ?? 'Could not upload photo',
+          ),
         ),
       );
     }
@@ -83,7 +194,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _UserAvatarCard(user: user),
+                  _UserAvatarCard(
+                    user: user,
+                    uploading: _uploading,
+                    onTap: _showPhotoSourceSheet,
+                  ),
                   const SizedBox(height: 12),
                   _AccountInfoCard(user: user),
                   const SizedBox(height: 12),
@@ -129,13 +244,14 @@ class _ProfileAppBar extends StatelessWidget {
                       color: context.onPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Image.asset('assets/icon/app-icon.png', width: 22, height: 22),
+                    child: Image.asset('assets/icon/app-icon.png',
+                        width: 22, height: 22),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     'My Profile',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: responsiveFontSize(context, 20),
                       fontWeight: FontWeight.w700,
                       color: context.onPrimary,
                     ),
@@ -149,12 +265,16 @@ class _ProfileAppBar extends StatelessWidget {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Logout'),
-                          content: const Text('Are you sure you want to logout?'),
+                          content:
+                              const Text('Are you sure you want to logout?'),
                           actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                            TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel')),
                             FilledButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              style: FilledButton.styleFrom(backgroundColor: errorColor),
+                              style: FilledButton.styleFrom(
+                                  backgroundColor: errorColor),
                               child: const Text('Logout'),
                             ),
                           ],
@@ -176,11 +296,22 @@ class _ProfileAppBar extends StatelessWidget {
 }
 
 class _UserAvatarCard extends StatelessWidget {
-  final dynamic user;
-  const _UserAvatarCard({required this.user});
+
+  const _UserAvatarCard({
+    required this.user,
+    required this.uploading,
+    required this.onTap,
+  });
+  final Employee? user;
+  final bool uploading;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final photo = user?.profilePhoto;
+    final photoUrl = AppConfig.photoUrl(photo);
+    final hasPhoto = photoUrl != null;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -191,12 +322,63 @@ class _UserAvatarCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
-            child: Text(
-              (user?.fullName ?? 'U')[0].toUpperCase(),
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: context.primaryBlue),
+          GestureDetector(
+            onTap: uploading ? null : onTap,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: context.primaryBlue.withValues(alpha: 0.1),
+                  backgroundImage:
+                      hasPhoto ? NetworkImage(photoUrl) : null,
+                  child: hasPhoto
+                      ? null
+                      : Text(
+                          (user?.fullName ?? 'U')[0].toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            color: context.primaryBlue,
+                          ),
+                        ),
+                ),
+                if (uploading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black38,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (!uploading)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: context.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: context.surfaceContainerLowest, width: 2),
+                      ),
+                      child: Icon(Icons.camera_alt,
+                          size: 12, color: context.onPrimary),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 16),
@@ -205,9 +387,12 @@ class _UserAvatarCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user?.fullName ?? '',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: context.onSurface)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: context.onSurface)),
                 Text(user?.position ?? '',
-                  style: TextStyle(color: context.neutralGray, fontSize: 13)),
+                    style: TextStyle(color: context.neutralGray, fontSize: 13)),
               ],
             ),
           ),
@@ -218,8 +403,8 @@ class _UserAvatarCard extends StatelessWidget {
 }
 
 class _AccountInfoCard extends StatelessWidget {
-  final dynamic user;
   const _AccountInfoCard({required this.user});
+  final Employee? user;
 
   @override
   Widget build(BuildContext context) {
@@ -235,10 +420,14 @@ class _AccountInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Account Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: context.onSurface)),
           Divider(color: context.outlineVariant),
           _ReadOnlyRow(label: 'Employee ID', value: user?.employeeId ?? ''),
-          _ReadOnlyRow(label: 'Department', value: user?.departmentName ?? 'N/A'),
+          _ReadOnlyRow(
+              label: 'Department', value: user?.departmentName ?? 'N/A'),
         ],
       ),
     );
@@ -246,12 +435,6 @@ class _AccountInfoCard extends StatelessWidget {
 }
 
 class _PersonalInfoForm extends StatelessWidget {
-  final TextEditingController nameCtl;
-  final TextEditingController posCtl;
-  final TextEditingController emailCtl;
-  final TextEditingController passCtl;
-  final bool saving;
-  final VoidCallback onSave;
 
   const _PersonalInfoForm({
     required this.nameCtl,
@@ -261,6 +444,12 @@ class _PersonalInfoForm extends StatelessWidget {
     required this.saving,
     required this.onSave,
   });
+  final TextEditingController nameCtl;
+  final TextEditingController posCtl;
+  final TextEditingController emailCtl;
+  final TextEditingController passCtl;
+  final bool saving;
+  final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +465,10 @@ class _PersonalInfoForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Personal Information',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.onSurface)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: context.onSurface)),
           Divider(color: context.outlineVariant),
           const SizedBox(height: 4),
           TextField(
@@ -313,7 +505,11 @@ class _PersonalInfoForm extends StatelessWidget {
                 foregroundColor: context.onPrimary,
               ),
               child: saving
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
                   : const Text('Save Changes'),
             ),
           ),
@@ -324,9 +520,9 @@ class _PersonalInfoForm extends StatelessWidget {
 }
 
 class _ReadOnlyRow extends StatelessWidget {
+  const _ReadOnlyRow({required this.label, required this.value});
   final String label;
   final String value;
-  const _ReadOnlyRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -334,8 +530,16 @@ class _ReadOnlyRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: MediaQuery.of(context).size.width * 0.3, child: Text(label, style: TextStyle(color: context.neutralGray, fontSize: 13))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.onSurface))),
+          SizedBox(
+              width: (MediaQuery.of(context).size.width * 0.3).clamp(90.0, 130.0),
+              child: Text(label,
+                  style: TextStyle(color: context.neutralGray, fontSize: 13))),
+          Expanded(
+              child: Text(value,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      color: context.onSurface))),
         ],
       ),
     );

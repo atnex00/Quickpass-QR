@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
+import PageHeader from "@/components/layout/PageHeader"
 import { toast } from "sonner"
 import type { Employee, Department } from "@/types"
 import api from "@/lib/api"
@@ -94,7 +95,9 @@ export default function UserManagerPage() {
       const res = await api.get("/admin/employees", { params })
       setEmployees(res.data.data)
       setTotal(res.data.pagination?.total || 0)
-    } catch (_) {}
+    } catch {
+      console.warn("Failed to load employees")
+    }
     finally { setLoading(false) }
   }
 
@@ -102,7 +105,9 @@ export default function UserManagerPage() {
     try {
       const res = await api.get("/admin/departments")
       setDepartments(res.data.data)
-    } catch (_) {}
+    } catch {
+      console.warn("Failed to load departments")
+    }
   }
 
   useEffect(() => {
@@ -234,15 +239,18 @@ export default function UserManagerPage() {
 
   return (
     <div className="page-enter space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">User Manager</h1>
-          <p className="text-muted-foreground">{total} total employees</p>
-        </div>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" /> Add Employee</Button>
-          </DialogTrigger>
+      <PageHeader
+        title="User Manager"
+        subtitle={`${total} total employees`}
+        icon={<UserCheck className="h-5 w-5" />}
+        actions={
+          <Button className="gap-2" onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" /> Add Employee
+          </Button>
+        }
+      />
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Employee</DialogTitle>
@@ -327,7 +335,6 @@ export default function UserManagerPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
 
       { /* Filters */ }
       <div className="flex flex-wrap gap-3">
@@ -368,7 +375,7 @@ export default function UserManagerPage() {
       </div>
 
       { /* Table */ }
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -399,7 +406,7 @@ export default function UserManagerPage() {
                 <TableRow key={emp.employee_id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white shrink-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-sm font-bold text-[#1c1917] shrink-0">
                         {emp.full_name.charAt(0)}
                       </div>
                       <div>
@@ -537,7 +544,7 @@ export default function UserManagerPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter new password"
                 required
-                minLength={4}
+                minLength={8}
               />
             </div>
             <Button type="submit" className="w-full" disabled={resetting}>

@@ -4,9 +4,15 @@ node_modules/
 build/
 web/dist/
 
+# Build info
+*.tsbuildinfo
+
 # Environment
 .env
 .env.local
+.env.dev
+.env.prod
+.env.*
 
 # IDE
 .idea/
@@ -36,13 +42,23 @@ flutter_app/android/key.properties
 # Docker
 docker-data/
 
-# Tools (local SDK installs)
-tools/
+# Backups
+*.zip
 
-# Devcontainer
-.devcontainer/devcontainer-lock.json
-.devcontainer/*.env
+# Local setup
+tools/
 
 # Logs
 *.log
 npm-debug.log*
+
+# Flutter env config
+flutter_app/env.dev.json
+flutter_app/env.prod.json
+
+# Admin desktop build
+admin-desktop/
+
+# Test coverage
+backend/coverage/
+web/coverage/

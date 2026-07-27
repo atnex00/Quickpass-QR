@@ -103,7 +103,9 @@ export const useLeaveStore = create<LeaveState>((set) => ({
     try {
       const res = await api.get("/supervisor/approved")
       set({ approvedLeaves: res.data.data })
-    } catch (_) {}
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || "Could not load approved leaves" })
+    }
   },
 
   revokeApproval: async (leaveId) => {

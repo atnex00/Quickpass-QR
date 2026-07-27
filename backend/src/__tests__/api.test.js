@@ -118,13 +118,13 @@ describe('GET /api/auth/profile', () => {
   it('returns user profile with valid token', async () => {
     mockAuth({
       employee_id: '000001',
-      full_name: 'Alice Chen',
-      position: 'Engineer',
+      full_name: 'James Wilson',
+      position: 'Software Engineer',
       is_active: true,
       is_supervisor: false,
       is_admin: false,
       is_security: false,
-      department_name: 'Engineering',
+      department_name: 'TSD · Technical Services Department',
     });
 
     const res = await request(app)

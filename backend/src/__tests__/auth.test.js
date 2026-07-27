@@ -113,10 +113,10 @@ describe('authenticate middleware', () => {
     await authenticate(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Employee not found' });
+    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Invalid token' });
   });
 
-  it('returns 403 if account deactivated', async () => {
+  it('returns 401 if account deactivated', async () => {
     const token = jwt.sign(
       { employee_id: '000001', session_id: 's1' },
       process.env.JWT_SECRET,
@@ -129,8 +129,8 @@ describe('authenticate middleware', () => {
     const { req, res, next } = mockReqRes({ authorization: `Bearer ${token}` });
     await authenticate(req, res, next);
 
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Account deactivated' });
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Invalid token' });
   });
 
   it('sets req.user and calls next on success', async () => {
@@ -141,9 +141,9 @@ describe('authenticate middleware', () => {
     );
     const mockEmployee = {
       employee_id: '000001',
-      full_name: 'Alice Chen',
+      full_name: 'James Wilson',
       is_active: true,
-      department_name: 'Engineering',
+      department_name: 'TSD · Technical Services Department',
     };
     db.first
       .mockResolvedValueOnce({ is_active: true, session_id: 's1' })

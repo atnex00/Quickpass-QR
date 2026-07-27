@@ -1,7 +1,10 @@
 const db = require('../config/database');
 const qrService = require('../services/qrService');
+const qrImageService = require('../services/qrImageService');
 const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
+const { getLocalDateString } = require('../utils/date');
+const auditService = require('../services/auditService');
 
 function fmtDate(d) {
   if (d instanceof Date) return d.toISOString().split('T')[0];
@@ -39,50 +42,67 @@ async function approveLeave(req, res, next) {
   try {
     const { leaveId } = req.params;
 
-    const leave = await db('leave_requests')
-      .where({ leave_id: leaveId, status: 'pending' })
-      .first();
+    let leave;
+    let outQrCode;
+    let inQrCode;
+    let outQrImage = null;
+    let inQrImage = null;
 
-    if (!leave) {
-      throw createError(404, 'Leave request not found or already processed');
-    }
+    await db.transaction(async (trx) => {
+      leave = await trx('leave_requests')
+        .where({ leave_id: leaveId, status: 'pending' })
+        .forUpdate()
+        .first();
 
-    if (!req.user.is_admin) {
-      if (leave.supervisor_id !== req.user.employee_id) {
-        throw createError(403, 'You are not the assigned supervisor for this request');
+      if (!leave) {
+        throw createError(404, 'Leave request not found or already processed');
       }
 
-      if (leave.department_id !== req.user.department_id) {
-        throw createError(403, 'This request is not in your department');
+      if (!req.user.is_admin) {
+        if (leave.supervisor_id !== req.user.employee_id) {
+          throw createError(403, 'You are not the assigned supervisor for this request');
+        }
+
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This request is not in your department');
+        }
       }
-    }
 
-    const leaveDate = fmtDate(leave.leave_date);
-    const todayStr = new Date().toISOString().split('T')[0];
+      const leaveDate = fmtDate(leave.leave_date);
+      const todayStr = getLocalDateString();
 
-    // Use current time if scheduled window has already passed
-    const now = new Date();
-    const schedOut = new Date(`${leaveDate}T${leave.start_time}`);
-    const outRef = schedOut > now ? leave.start_time : new Date().toTimeString().slice(0, 8);
-    const outDate = schedOut > now ? leaveDate : todayStr;
-    const schedIn = new Date(`${leaveDate}T${leave.end_time}`);
-    const inRef = schedIn > now ? leave.end_time : new Date().toTimeString().slice(0, 8);
-    const inDate = schedIn > now ? leaveDate : todayStr;
+      const now = new Date();
+      const schedOut = new Date(`${leaveDate}T${leave.start_time}`);
+      const outRef = schedOut > now ? leave.start_time : new Date().toTimeString().slice(0, 8);
+      const outDate = schedOut > now ? leaveDate : todayStr;
+      const schedIn = new Date(`${leaveDate}T${leave.end_time}`);
+      const inRef = schedIn > now ? leave.end_time : new Date().toTimeString().slice(0, 8);
+      const inDate = schedIn > now ? leaveDate : todayStr;
 
-    const outQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'OUT', outDate, outRef);
-    const inQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'IN', inDate, inRef);
+      const outQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'OUT', outDate, outRef);
+      const inQrData = qrService.generateQrData(leave.leave_id, leave.employee_id, 'IN', inDate, inRef);
 
-    const outQrCode = qrService.encodeQrData(outQrData);
-    const inQrCode = qrService.encodeQrData(inQrData);
+      outQrCode = qrService.encodeQrData(outQrData);
+      inQrCode = qrService.encodeQrData(inQrData);
 
-    await db('leave_requests')
-      .where({ leave_id: leaveId })
-      .update({
-        status: 'approved',
-        out_qr_code: outQrCode,
-        in_qr_code: inQrCode,
-        updated_at: db.fn.now(),
-      });
+      try {
+        outQrImage = await qrImageService.generateQrImage(outQrCode, 'OUT', leave.leave_id);
+        inQrImage = await qrImageService.generateQrImage(inQrCode, 'IN', leave.leave_id);
+      } catch (qrErr) {
+        req.log?.error({ err: qrErr }, 'QR image generation failed (approval continues)');
+      }
+
+      await trx('leave_requests')
+        .where({ leave_id: leaveId })
+        .update({
+          status: 'approved',
+          out_qr_code: outQrCode,
+          in_qr_code: inQrCode,
+          out_qr_image: outQrImage,
+          in_qr_image: inQrImage,
+          updated_at: trx.fn.now(),
+        });
+    });
 
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
@@ -90,7 +110,9 @@ async function approveLeave(req, res, next) {
         body: `Your leave for ${fmtDate(leave.leave_date)} has been approved`,
         data: { leave_id: leaveId, type: 'approved' },
       });
-    } catch (_) { /* Notification failure is non-blocking */ }
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (approve)');
+    }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
@@ -106,6 +128,15 @@ async function approveLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave approved' });
+
+    auditService.log({
+      action: 'approve',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Approved leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -132,6 +163,9 @@ async function rejectLeave(req, res, next) {
       if (leave.supervisor_id !== req.user.employee_id) {
         throw createError(403, 'You are not the assigned supervisor for this request');
       }
+      if (leave.department_id !== req.user.department_id) {
+        throw createError(403, 'This request is not in your department');
+      }
     }
 
     await db('leave_requests')
@@ -148,7 +182,9 @@ async function rejectLeave(req, res, next) {
         body: `Your leave for ${fmtDate(leave.leave_date)} was rejected: ${reason}`,
         data: { leave_id: leaveId, type: 'rejected' },
       });
-    } catch (_) { /* Notification failure is non-blocking */ }
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (reject)');
+    }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
@@ -164,6 +200,15 @@ async function rejectLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave rejected' });
+
+    auditService.log({
+      action: 'reject',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Rejected leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}: ${reason.trim()}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -219,16 +264,36 @@ async function revokeApproval(req, res, next) {
       }
     }
 
+    qrImageService.deleteQrImages(leaveId);
+
+    const updateData = {
+      status: 'pending',
+      out_qr_code: null,
+      in_qr_code: null,
+      out_qr_image: null,
+      in_qr_image: null,
+      updated_at: db.fn.now(),
+    };
+    if (!leave.out_scan_time) {
+      updateData.out_scan_time = null;
+    }
+    if (!leave.in_scan_time) {
+      updateData.in_scan_time = null;
+    }
+
     await db('leave_requests')
       .where({ leave_id: leaveId })
-      .update({
-        status: 'pending',
-        out_qr_code: null,
-        in_qr_code: null,
-        out_scan_time: null,
-        in_scan_time: null,
-        updated_at: db.fn.now(),
+      .update(updateData);
+
+    try {
+      await notificationService.sendToEmployee(leave.employee_id, {
+        title: 'Approval Revoked',
+        body: `Your leave for ${fmtDate(leave.leave_date)} approval has been revoked`,
+        data: { leave_id: leaveId, type: 'revoked' },
       });
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (revoke)');
+    }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
@@ -244,6 +309,15 @@ async function revokeApproval(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Approval revoked' });
+
+    auditService.log({
+      action: 'revoke',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Revoked approval for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -251,12 +325,12 @@ async function revokeApproval(req, res, next) {
 
 async function getTeamLeaves(req, res, next) {
   try {
-    const { date } = req.query;
+    const { date, start_date, end_date } = req.query;
 
     let query = db('leave_requests')
       .where('leave_requests.department_id', req.user.department_id)
-      .whereIn('leave_requests.status', ['approved', 'active'])
-      .join('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
+      .whereIn('leave_requests.status', ['approved', 'active', 'pending'])
+      .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
       .select(
         'leave_requests.*',
         'emp.full_name as employee_name',
@@ -265,6 +339,8 @@ async function getTeamLeaves(req, res, next) {
 
     if (date) {
       query = query.andWhere('leave_requests.leave_date', date);
+    } else if (start_date && end_date) {
+      query = query.whereBetween('leave_requests.leave_date', [start_date, end_date]);
     }
 
     const leaves = await query.orderBy('leave_requests.leave_date', 'asc');
