@@ -1,0 +1,7 @@
+yourquickpass.com {
+    reverse_proxy web:80
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    }
+}

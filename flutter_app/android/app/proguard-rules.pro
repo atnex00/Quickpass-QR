@@ -6,10 +6,6 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
-# Firebase / Crashlytics
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
-
 # JSON serialization (Dart → Java bridge)
 -keep class _InternalLinkedHashMap { *; }
 -keep class com.fasterxml.jackson.** { *; }

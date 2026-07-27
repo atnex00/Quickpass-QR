@@ -26,7 +26,7 @@ QR-based gate pass and leave management system. Employees request leave → supe
 ├── backend/          # Express API server
 │   ├── src/
 │   │   ├── app.js          # Main entry (Express bootstrap)
-│   │   ├── config/         # DB + Firebase config
+│   │   ├── config/         # DB config
 │   │   ├── controllers/    # Route handlers (5 controllers)
 │   │   ├── middleware/     # Auth, validation, error handling
 │   │   ├── routes/         # All routes in one file

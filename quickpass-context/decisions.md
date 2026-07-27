@@ -33,17 +33,14 @@ tags:
 ## 9. LEFT JOIN Convention
 **Why**: All `leave_requests` queries use LEFT JOIN to employees so that if an employee is deleted, historical leave data remains visible.
 
-## 10. Firebase FCM Graceful Degradation
-**Why**: Push notifications are optional. If FCM env vars are missing, the app still works — just without push notifications. No startup failure.
-
-## 11. Rate Limiting by Endpoint Type
+## 10. Rate Limiting by Endpoint Type
 **Why**: Different endpoints have different risk profiles. Login (20/15min) and refresh (30/15min) are stricter than general API (100/15min). HR import (5/hour) prevents accidental bulk operations.
 
-## 12. Optional HTTPS Server
+## 11. Optional HTTPS Server
 **Why**: Mobile camera access requires HTTPS. The optional HTTPS server on port 3443 allows local testing with real device cameras without a full production setup.
 
-## 13. Per-User Theme in localStorage (Web)
+## 12. Per-User Theme in localStorage (Web)
 **Why**: The theme choice (light/system/dark) is a non-sensitive UI preference, so it is safe to persist in `localStorage` (unlike JWTs, which stay in memory). The key is scoped per user — `quickpass-theme-<employee_id>` when authenticated, `quickpass-theme` when logged out — so multiple accounts on a shared browser keep separate preferences. `rehydrateTheme()` re-reads the store from the active user's key after login/logout so the correct preference loads. Dark mode is a `.dark` class on `<html>` (Tailwind v4 variant), not a media query.
 
-## 14. No `device_fingerprint` Column
+## 13. No `device_fingerprint` Column
 **Why**: An earlier attempt added a `device_fingerprint` column to `sessions` for device-bound token invalidation, but the migration was rolled back and all references removed from the backend (`authController.js`, `middleware/auth.js`, `routes/index.js`) and Flutter (`api_service.dart`). Session validation relies solely on the `session_id` + `is_active` + `expires_at` check. Do not reintroduce device fingerprinting.

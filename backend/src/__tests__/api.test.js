@@ -47,10 +47,6 @@ jest.mock('../config/database', () => {
   return db;
 });
 
-jest.mock('../services/notificationService', () => ({
-  sendToEmployee: jest.fn().mockResolvedValue(),
-}));
-
 const db = require('../config/database');
 
 process.env.JWT_SECRET = 'test-jwt-secret';

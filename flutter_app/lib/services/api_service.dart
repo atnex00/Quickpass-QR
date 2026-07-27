@@ -224,11 +224,6 @@ class ApiService {
     return Employee.fromJson(d);
   }
 
-  // ── Notifications ──
-  Future<void> updateFcmToken(String token) async {
-    await dio.put('/auth/fcm-token', data: {'fcm_token': token});
-  }
-
   // ── Leave Requests ──
   Future<LeaveRequest> submitLeave({
     required String leaveDate,

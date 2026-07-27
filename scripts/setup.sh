@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ═══════════════════════════════════════════════════════════════════
-# PassLynx Setup Script — Linux / macOS
+# Quickpass Setup Script — Linux / macOS
 #
 # Installs system dependencies and optionally Android SDK + Flutter
 # inside the project's tools/ directory. No system-wide installs,
@@ -52,7 +52,7 @@ esac
 
 br
 echo "  ${CYAN}╔══════════════════════════════════════════════╗${RESET}"
-echo "  ${CYAN}║${RESET}     PassLynx Environment Setup              ${CYAN}║${RESET}"
+echo "  ${CYAN}║${RESET}     Quickpass Environment Setup             ${CYAN}║${RESET}"
 echo "  ${CYAN}╚══════════════════════════════════════════════╝${RESET}"
 br
 info "Project: $PROJECT_DIR"

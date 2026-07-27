@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
-const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 
@@ -63,16 +62,6 @@ async function submitLeave(req, res, next) {
       created_at: db.fn.now(),
       updated_at: db.fn.now(),
     });
-
-    await Promise.allSettled(
-      supervisors.map((sup) =>
-        notificationService.sendToEmployee(sup.employee_id, {
-          title: 'New Leave Request',
-          body: `${req.user.full_name} requested leave (${start_time} - ${end_time})`,
-          data: { leave_id: leaveId, type: 'new_request' },
-        }).catch((err) => req.log?.error({ err }, 'Notification error (submit)'))
-      )
-    );
 
     const leave = await db('leave_requests')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')

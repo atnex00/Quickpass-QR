@@ -298,7 +298,7 @@ The backend loads `backend/.env` first if it exists, then loads `backend/.env.<N
 
 | Env | Base file | Override file | DB Target | Command |
 |-----|-----------|---------------|-----------|---------|
-| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
+| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/quickpass` | `npm run dev` |
 | prod | `backend/.env` | `backend/.env.prod` | Supabase cloud | `npm run prod` |
 
 ### Quick Switch
@@ -391,7 +391,7 @@ Quickpass-QR/
 │   ├── src/
 │   │   ├── app.js             # Express app entry point
 │   │   ├── index.js           # Refactored entry (WIP, unused)
-│   │   ├── config/            # DB, Firebase configuration
+│   │   ├── config/            # DB configuration
 │   │   ├── controllers/       # auth, leave, supervisor, scan, admin
 │   │   ├── middleware/        # auth (JWT), validate (Joi), errorHandler
 │   │   ├── routes/            # All API route definitions
@@ -500,7 +500,6 @@ Optional:
 
 | Variable | Description |
 |----------|-------------|
-| `FCM_*` | Firebase Cloud Messaging credentials |
 | `HTTPS_KEY` / `HTTPS_CERT` | HTTPS server paths (port 3443 for camera access) |
 
 ---
@@ -697,11 +696,11 @@ flutter test --coverage
 ┌───────────────────┐                                        │
 │ Flutter App       │ ◄──────────────────────────────────────┘
 │ (Android)         │
-│                   │                              ┌──────────────────┐
-│ • Employee UI     │                              │  Firebase Cloud  │
-│ • Supervisor      │                              │  Messaging       │
-│ • Admin Panel     │                              │  (Push Notifs)   │
-│ • QR Scanner      │                              └──────────────────┘
+│                   │
+│ • Employee UI     │
+│ • Supervisor      │
+│ • Admin Panel     │
+│ • QR Scanner      │
 │ • QR Display      │
 └───────────────────┘
 ```
@@ -771,7 +770,6 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | POST | `/api/auth/refresh` | — | Refresh JWT token |
 | GET | `/api/auth/profile` | ✓ | Get current user profile |
 | PUT | `/api/auth/profile` | ✓ | Update profile (name, position, email, password) |
-| PUT | `/api/auth/fcm-token` | ✓ | Update FCM push token |
 
 ### Leave Requests
 

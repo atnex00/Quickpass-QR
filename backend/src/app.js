@@ -58,15 +58,11 @@ const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
-const { initFirebase } = require('./config/firebase');
 const { errorHandler } = require('./middleware/errorHandler');
 const routes = require('./routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Initialize Firebase
-initFirebase();
 
 // Middleware
 app.use(helmet());

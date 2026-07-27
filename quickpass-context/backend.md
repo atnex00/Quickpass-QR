@@ -14,8 +14,7 @@ Startup sequence:
 2. Validate required env vars (`DB_CONNECTION`)
 3. Generate secrets if missing (JWT_SECRET, COOKIE_SECRET, QR_SECRET)
 4. Init Express with helmet, cors, cookie-parser, rate limiting
-5. Init Firebase (gracefully degrades if missing FCM env vars)
-6. Mount routes at `/api`
+5. Mount routes at `/api`
 7. SPA fallback, 404 handler, error handler
 8. Start HTTP on `PORT` (default 3000) + optional HTTPS on 3443
 
@@ -43,7 +42,6 @@ Startup sequence:
 | GET | `/auth/profile` | Get current profile |
 | PUT | `/auth/profile` | Update name/position/email/password |
 | POST | `/auth/profile/photo` | Upload profile photo (multipart) |
-| PUT | `/auth/fcm-token` | Store FCM push token |
 
 ### Employee Leave
 | Method | Path | Description |
@@ -91,10 +89,6 @@ Startup sequence:
 - `GET /supervisor/team-leaves` accepts optional `date` (single day) or `start_date` + `end_date` (range) — calendar view uses range
 - Also returns `pending` leaves for calendar visibility (shows upcoming approved + pending together)
 
-## Firebase Admin SDK
-- v14+ — `admin.cert()` is top-level (not `admin.credential.cert()`)
-- Graceful degradation: if FCM env vars missing, push notifications disabled (no crash)
-
 ## QR Code System
 
 - **Data payload**: `{ leave_id, employee_id, type (OUT|IN), timestamp, signature }`
@@ -125,7 +119,6 @@ Startup sequence:
 |---|---|
 | `qrService.js` | HMAC signing, base64url encode/decode, time window check |
 | `qrImageService.js` | QR SVG → PNG via sharp, with logo overlay, amber/teal accents |
-| `notificationService.js` | FCM push notifications (leave submitted/approved/rejected/scanned) |
 
 ## Middleware
 | Middleware | Purpose |

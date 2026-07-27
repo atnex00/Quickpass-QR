@@ -12,7 +12,7 @@ QR-based gate pass and leave management system.
 ```bash
 cp backend/.env.example backend/.env
 cd backend && npm install && cd ../flutter_app && flutter pub get
-createdb passlynx
+Created db with project name quickpass.
 cd backend && npm run migrate && npm run seed
 ```
 
@@ -70,7 +70,7 @@ QR data: JSON with `leave_id`, `employee_id`, `type`, `timestamp`, `signature`.
 - **Optional HTTPS server** on port 3443 for mobile camera access (reads key/cert from env paths, silently skipped if files missing).
 
 ### Backend Entry Points
-- **`src/app.js`** — Main entry (used by package.json). Loads env, Express + CORS + rate limit + Firebase init, serves `web/dist` in prod, SPA fallback.
+- **`src/app.js`** — Main entry (used by package.json). Loads env, Express + CORS + rate limit, serves `web/dist` in prod, SPA fallback.
 - **`src/index.js`** — Refactored/alternate version (WIP, not used by package.json).
 
 ### Web Routes (React Router v7)

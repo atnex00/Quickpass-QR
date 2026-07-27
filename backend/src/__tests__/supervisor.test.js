@@ -77,10 +77,6 @@ jest.mock('../services/qrImageService', () => ({
   deleteQrImages: jest.fn(),
 }));
 
-jest.mock('../services/notificationService', () => ({
-  sendToEmployee: jest.fn().mockResolvedValue(),
-}));
-
 const db = require('../config/database');
 
 process.env.JWT_SECRET = 'test-jwt-secret';

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/scan_log.dart';
-import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 import '../utils/errors.dart';
 
@@ -40,9 +39,6 @@ class ScanProvider extends ChangeNotifier {
       _lastResult = result;
       _isLoading = false;
       notifyListeners();
-      final qrType = result['data']?['qr_type'] as String? ?? 'unknown';
-      final isValid = result['success'] == true;
-      AnalyticsService().logQrScan(qrType: qrType, isValid: isValid);
       return isValid;
     } catch (e) {
       _lastResult = null;

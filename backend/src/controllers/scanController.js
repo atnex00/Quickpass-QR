@@ -1,6 +1,5 @@
 const db = require('../config/database');
 const qrService = require('../services/qrService');
-const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 
 async function validateScan(req, res, next) {
@@ -101,18 +100,6 @@ async function validateScan(req, res, next) {
         validation_message: `${type} scan successful`,
       });
     });
-
-    try {
-      await notificationService.sendToEmployee(leave.employee_id, {
-        title: type === 'OUT' ? 'Gate Exit' : 'Gate Entry',
-        body: type === 'OUT'
-          ? `You have exited the premises. Remember to scan IN before ${leave.end_time}`
-          : `You have returned to the premises. Leave completed.`,
-        data: { leave_id, type: type === 'OUT' ? 'scanned_out' : 'scanned_in' },
-      });
-    } catch (notifErr) {
-      req.log?.error({ err: notifErr }, 'Notification error (scan)');
-    }
 
     res.json({
       success: true,
