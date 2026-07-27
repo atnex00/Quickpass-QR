@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/database-PostgreSQL-4169E1" alt="Database: PostgreSQL" />
   <img src="https://img.shields.io/badge/flutter-3.x-02569B" alt="Flutter: 3.x" />
   <img src="https://img.shields.io/badge/react-19-61DAFB" alt="React: 19" />
+  <img src="https://img.shields.io/badge/deploy-DEPLOY.md-2ea44f" alt="Production Deployment Guide" />
 </p>
 
 ---
@@ -25,6 +26,7 @@
 - [Environment Switching](#environment-switching)
 - [Supabase Setup](#supabase-setup)
 - [Project Structure](#project-structure)
+- [Production Deployment](DEPLOY.md)
 - [Environment Variables](#environment-variables)
 - [Available Commands](#available-commands)
 - [Architecture Overview](#architecture-overview)
