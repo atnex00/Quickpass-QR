@@ -156,6 +156,7 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
         'department_id': _selectedDept,
         'is_supervisor': _isSupervisor,
         'is_admin': _isAdmin,
+        'is_security': _isSecurity,
         'is_active': _isActive,
       });
       if (!mounted) return;

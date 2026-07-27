@@ -17,11 +17,18 @@ function loadEnv() {
 
 loadEnv();
 
+function exitOrThrow(message) {
+  if (process.env.NODE_ENV === 'test') {
+    throw new Error(message);
+  }
+  logger.error(message);
+  process.exit(1);
+}
+
 function requireEnv(name) {
   const value = process.env[name];
   if (!value) {
-    logger.error(`${name} is required. Set it in your backend/.env file.`);
-    process.exit(1);
+    exitOrThrow(`${name} is required. Set it in your backend/.env file.`);
   }
   return value;
 }
@@ -30,8 +37,7 @@ function secret(name) {
   const value = process.env[name];
   if (value) return value;
   if (process.env.NODE_ENV === 'production') {
-    logger.error(`${name} is required in production. Set it in your backend/.env file.`);
-    process.exit(1);
+    exitOrThrow(`${name} is required in production. Set it in your backend/.env file.`);
   }
   const generated = crypto.randomBytes(64).toString('hex');
   logger.warn(`${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
@@ -48,8 +54,7 @@ if (corsOrigin === '') {
   logger.warn('CORS_ORIGIN is set but empty — CORS will be disabled');
 }
 if (process.env.NODE_ENV === 'production' && !corsOrigin) {
-  logger.error('CORS_ORIGIN is required in production. Set it in your backend/.env file.');
-  process.exit(1);
+  exitOrThrow('CORS_ORIGIN is required in production. Set it in your backend/.env file.');
 }
 
 const express = require('express');

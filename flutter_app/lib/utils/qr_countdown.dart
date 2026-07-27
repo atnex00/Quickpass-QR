@@ -13,6 +13,8 @@ mixin QrCountdownMixin<T extends StatefulWidget> on State<T> {
   int get remainingSeconds => _remainingSeconds;
 
   void initCountdown(String date, String time, {DateTime? target}) {
+    _timer?.cancel();
+    _timer = null;
     _tick(date, time, target: target);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick(date, time, target: target));
   }
@@ -27,7 +29,11 @@ mixin QrCountdownMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _tick(String date, String time, {DateTime? target}) {
-    if (!mounted) return;
+    if (!mounted) {
+      _timer?.cancel();
+      _timer = null;
+      return;
+    }
     final result = target != null
         ? QrService.windowSecondsFromTimestamp(target)
         : QrService.windowSeconds(date, time);
@@ -43,6 +49,7 @@ mixin QrCountdownMixin<T extends StatefulWidget> on State<T> {
 
   void disposeCountdown() {
     _timer?.cancel();
+    _timer = null;
   }
 
   String formatCountdown(int secs) {

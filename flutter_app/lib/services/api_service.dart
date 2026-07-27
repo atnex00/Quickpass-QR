@@ -19,6 +19,7 @@ class ApiService {
   void setDio(Dio value) => _dio = value;
 
   final _storage = const FlutterSecureStorage();
+  String? _cachedToken;
   bool _isRefreshing = false;
   final _pendingRequests = <_PendingRequest>[];
   int _refreshRetryCount = 0;
@@ -48,9 +49,11 @@ class ApiService {
       };
     }
 
+    _storage.read(key: 'auth_token').then((t) => _cachedToken = t);
+
     _dio!.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'auth_token');
+        final token = _cachedToken ?? await _storage.read(key: 'auth_token');
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -62,6 +65,7 @@ class ApiService {
         }
 
         if (error.requestOptions.extra['_retry'] == true) {
+          _cachedToken = null;
           await _storage.delete(key: 'auth_token');
           return handler.next(error);
         }
@@ -99,6 +103,7 @@ class ApiService {
             throw Exception('Invalid token response from refresh endpoint');
           }
           final newToken = rawToken;
+          _cachedToken = newToken;
           await _storage.write(key: 'auth_token', value: newToken);
           final rawRefreshSid = res.data?['refresh_sid'];
           if (rawRefreshSid is String && rawRefreshSid.isNotEmpty) {
@@ -135,7 +140,6 @@ class ApiService {
               _pendingRequests.removeAt(0).handler.next(error);
             }
             onForceLogout?.call();
-            handler.next(error);
             return;
           }
           while (_pendingRequests.isNotEmpty) {
@@ -150,6 +154,7 @@ class ApiService {
         if (response.data is Map && response.data['force_logout'] == true) {
           await clearLocalAuth();
           onForceLogout?.call();
+          return;
         }
         return handler.next(response);
       },
@@ -166,7 +171,8 @@ class ApiService {
     if (data['success'] != true) {
       throw Exception(data['message'] ?? 'Login failed');
     }
-    await _storage.write(key: 'auth_token', value: data['token']);
+    _cachedToken = data['token'] as String?;
+    await _storage.write(key: 'auth_token', value: _cachedToken);
     await _storage.write(key: 'employee_id', value: employeeId);
     await _storage.write(key: 'user_data', value: jsonEncode(data['user']));
     if (data['refresh_sid'] != null) {
@@ -176,6 +182,7 @@ class ApiService {
   }
 
   Future<void> clearLocalAuth() async {
+    _cachedToken = null;
     await _storage.delete(key: 'auth_token');
     await _storage.delete(key: 'refresh_sid');
     await _storage.delete(key: 'user_data');
@@ -196,7 +203,7 @@ class ApiService {
   }
 
   Future<String?> getStoredToken() async {
-    return await _storage.read(key: 'auth_token');
+    return _cachedToken ?? await _storage.read(key: 'auth_token');
   }
 
   // ── Employee ──

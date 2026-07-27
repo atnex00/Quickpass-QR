@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../providers/notification_provider.dart';
 import '../screens/employee/dashboard_screen.dart';
 import '../screens/employee/leave_history_screen.dart';
 import '../screens/supervisor/supervisor_dashboard.dart';
@@ -16,6 +15,7 @@ class NotificationService {
   GlobalKey<NavigatorState>? _navigatorKey;
   ApiService? _api;
   String? _pendingScreen;
+  void Function()? _onUnreadNotification;
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -23,10 +23,12 @@ class NotificationService {
   Future<void> init({
     required GlobalKey<NavigatorState> navigatorKey,
     required ApiService apiService,
+    void Function()? onUnreadNotification,
   }) async {
     if (_initialized) return;
     _navigatorKey = navigatorKey;
     _api = apiService;
+    _onUnreadNotification = onUnreadNotification;
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
@@ -38,7 +40,7 @@ class NotificationService {
     _initialized = true;
   }
 
-  String? consumePendingScreen() {
+String? consumePendingScreen() {
     final screen = _pendingScreen;
     _pendingScreen = null;
     return screen;

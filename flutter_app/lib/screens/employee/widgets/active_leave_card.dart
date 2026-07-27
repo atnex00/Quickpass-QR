@@ -58,7 +58,9 @@ class ActiveLeaveCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
-                            'ACTIVE PASS',
+                            leave.status == LeaveStatus.approved
+                                ? 'APPROVED'
+                                : 'ACTIVE PASS',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,

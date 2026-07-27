@@ -34,7 +34,7 @@ void main() async {
     return;
   }
 
-  final apiService = ApiService();
+final apiService = ApiService();
   apiService.init();
 
   await SystemChrome.setPreferredOrientations([
@@ -97,6 +97,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     await NotificationService().init(
       navigatorKey: _navigatorKey,
       apiService: widget.apiService,
+      onUnreadNotification: widget.notifProv.increment,
     );
 
     widget.auth.addListener(_checkPendingNotification);
@@ -130,6 +131,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
   }
 
   void _handleForceLogout() {
+    widget.auth.removeListener(_checkPendingNotification);
     _resetProviders();
     widget.auth.clearAuth();
     _navigatorKey.currentState?.pushAndRemoveUntil(
@@ -157,6 +159,12 @@ class _QuickpassAppState extends State<QuickpassApp> {
       MaterialPageRoute(builder: (_) => home),
       (route) => false,
     );
+  }
+
+  @override
+  void dispose() {
+    widget.auth.removeListener(_checkPendingNotification);
+    super.dispose();
   }
 
   @override
