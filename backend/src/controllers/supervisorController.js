@@ -3,6 +3,7 @@ const qrService = require('../services/qrService');
 const qrImageService = require('../services/qrImageService');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
+const auditService = require('../services/auditService');
 
 function fmtDate(d) {
   if (d instanceof Date) return d.toISOString().split('T')[0];
@@ -116,6 +117,15 @@ async function approveLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave approved' });
+
+    auditService.log({
+      action: 'approve',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Approved leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -169,6 +179,15 @@ async function rejectLeave(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Leave rejected' });
+
+    auditService.log({
+      action: 'reject',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Rejected leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}: ${reason.trim()}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -259,6 +278,15 @@ async function revokeApproval(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated, message: 'Approval revoked' });
+
+    auditService.log({
+      action: 'revoke',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
+      entity: 'leave_request',
+      entityId: leaveId,
+      description: `Revoked approval for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }

@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
+const auditService = require('../services/auditService');
 
 async function createEmployee(req, res, next) {
   try {
@@ -45,6 +46,15 @@ async function createEmployee(req, res, next) {
       .first();
 
     res.status(201).json({ success: true, data: employee });
+
+    auditService.log({
+      action: 'create',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: employee_id,
+      description: `Created employee ${full_name} (${employee_id}) as ${position}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -137,6 +147,16 @@ async function updateEmployee(req, res, next) {
       .first();
 
     res.json({ success: true, data: updated });
+
+    const changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
+    auditService.log({
+      action: 'update',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Updated employee ${updated.full_name} (${id}): ${changedFields.join(', ')}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -160,6 +180,15 @@ async function toggleSupervisor(req, res, next) {
       success: true,
       message: `Supervisor status toggled to ${!employee.is_supervisor}`,
     });
+
+    auditService.log({
+      action: 'toggle_supervisor',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Toggled supervisor status of ${employee.full_name} (${id}) to ${!employee.is_supervisor}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -183,6 +212,15 @@ async function toggleAdmin(req, res, next) {
       success: true,
       message: `Admin status toggled to ${!employee.is_admin}`,
     });
+
+    auditService.log({
+      action: 'toggle_admin',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Toggled admin status of ${employee.full_name} (${id}) to ${!employee.is_admin}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -207,6 +245,15 @@ async function toggleActive(req, res, next) {
       message: `Employee ${employee.is_active ? 'deactivated' : 'activated'}`,
       data: { is_active: !employee.is_active },
     });
+
+    auditService.log({
+      action: employee.is_active ? 'deactivate' : 'activate',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `${employee.is_active ? 'Deactivated' : 'Activated'} employee ${employee.full_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -256,6 +303,15 @@ async function createDepartment(req, res, next) {
 
     const dept = await db('departments').where({ department_id }).first();
     res.status(201).json({ success: true, data: dept });
+
+    auditService.log({
+      action: 'create',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: department_id,
+      description: `Created department ${department_name} (${department_id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -280,6 +336,15 @@ async function updateDepartment(req, res, next) {
     await db('departments').where({ department_id: id }).update(updateData);
     const updated = await db('departments').where({ department_id: id }).first();
     res.json({ success: true, data: updated });
+
+    auditService.log({
+      action: 'update',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: id,
+      description: `Updated department ${updated.department_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -301,6 +366,15 @@ async function deleteDepartment(req, res, next) {
 
     await db('departments').where({ department_id: id }).del();
     res.json({ success: true, message: 'Department deleted' });
+
+    auditService.log({
+      action: 'delete',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'department',
+      entityId: id,
+      description: `Deleted department ${dept.department_name} (${id})`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -323,6 +397,15 @@ async function deleteEmployee(req, res, next) {
     });
 
     res.json({ success: true, message: 'Employee deleted' });
+
+    auditService.log({
+      action: 'delete',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: id,
+      description: `Deleted employee ${id}`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }
@@ -377,6 +460,15 @@ async function importEmployees(req, res, next) {
     }
 
     res.json({ success: true, data: results });
+
+    auditService.log({
+      action: 'import',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'employee',
+      entityId: 'bulk',
+      description: `Imported ${results.created} employees (${results.skipped} skipped, ${results.errors.length} errors)`,
+      ip: req.ip,
+    }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
     next(err);
   }

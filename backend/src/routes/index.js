@@ -21,6 +21,7 @@ const leaveController = require('../controllers/leaveController');
 const supervisorController = require('../controllers/supervisorController');
 const scanController = require('../controllers/scanController');
 const adminController = require('../controllers/adminController');
+const auditController = require('../controllers/auditController');
 
 const router = express.Router();
 
@@ -166,5 +167,17 @@ router.get('/admin/reports', authenticate, requireAdmin, validateQuery(Joi.objec
   start_date: Joi.string().isoDate().optional(),
   end_date: Joi.string().isoDate().optional(),
 })), adminController.getReports);
+
+// ── Audit Routes ──
+router.get('/admin/audit', authenticate, requireAdmin, validateQuery(Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  actor_id: Joi.string().pattern(/^\d{6}$/).optional(),
+})), auditController.getAuditLogs);
+
+router.get('/admin/export', authenticate, requireAdmin, validateQuery(Joi.object({
+  resource: Joi.string().valid('audit').optional(),
+  actor_id: Joi.string().pattern(/^\d{6}$/).optional(),
+})), auditController.exportAuditLogs);
 
 module.exports = router;
