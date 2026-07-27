@@ -95,7 +95,6 @@ class _EmployeeTabState extends State<EmployeeTab> {
     } catch (e) {
       if (!mounted || version != _loadVersion) return;
       _loadingError = true;
-      debugPrint('EmployeeTab._loadData error: $e');
     }
     if (mounted && version == _loadVersion) {
       setState(() => _isLoading = false);

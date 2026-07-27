@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -42,7 +43,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  } catch (_) {}
+  } catch (e) {
+    // Non-fatal — app works without Firebase
+  }
 
   FlutterError.onError = (details) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
@@ -68,12 +71,16 @@ void main() async {
 
   final auth = AuthProvider(api: apiService);
 
-  runApp(QuickpassApp(
-    apiService: apiService,
-    settings: settings,
-    auth: auth,
-    notifProv: notifProv,
-  ));
+  runZonedGuarded(() {
+    runApp(QuickpassApp(
+      apiService: apiService,
+      settings: settings,
+      auth: auth,
+      notifProv: notifProv,
+    ));
+  }, (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  });
 }
 
 class QuickpassApp extends StatefulWidget {

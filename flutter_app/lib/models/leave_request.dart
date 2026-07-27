@@ -183,12 +183,7 @@ class LeaveRequest {
   final String? employeePhoto;
 
   static DateTime _dateFromJson(dynamic v) {
-    final result = DateTime.tryParse(v?.toString() ?? '');
-    if (result == null) {
-      debugPrint('Warning: Failed to parse date from "$v", using sentinel');
-      return DateTime(0);
-    }
-    return result;
+    return DateTime.tryParse(v?.toString() ?? '') ?? DateTime(0);
   }
 
   static String _dateToJson(DateTime v) => v.toIso8601String().split('T').first;
@@ -199,12 +194,7 @@ class LeaveRequest {
   static String? _dateTimeOrNullToJson(DateTime? v) => v?.toIso8601String();
 
   static DateTime _dateTimeFromJson(dynamic v) {
-    final result = DateTime.tryParse(v?.toString() ?? '');
-    if (result == null) {
-      debugPrint('Warning: Failed to parse datetime from "$v", using sentinel');
-      return DateTime(0);
-    }
-    return result;
+    return DateTime.tryParse(v?.toString() ?? '') ?? DateTime(0);
   }
 
   static String _dateTimeToJson(DateTime v) => v.toIso8601String();

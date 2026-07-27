@@ -54,12 +54,7 @@ class ScanLog {
   static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
   static DateTime _dateFromJson(dynamic v) {
-    final result = DateTime.tryParse(v?.toString() ?? '');
-    if (result == null) {
-      debugPrint('Warning: Failed to parse scan_time from "$v", using sentinel');
-      return DateTime(0);
-    }
-    return result;
+    return DateTime.tryParse(v?.toString() ?? '') ?? DateTime(0);
   }
 
   static String _dateToJson(DateTime v) => v.toIso8601String();

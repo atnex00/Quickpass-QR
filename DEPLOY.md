@@ -378,6 +378,15 @@ Supabase provides automated backups. You can also manually export:
 pg_dump --no-owner "$DB_CONNECTION" > quickpass-backup-$(date +%Y%m%d).sql
 ```
 
+### Restoring the database
+
+```bash
+# Restore from backup (will prompt for password)
+psql "$DB_CONNECTION" < quickpass-backup-20250101.sql
+```
+
+> Restoring requires an empty or freshly migrated database. Run `npm run migrate` first, then apply the backup. Never restore over a live production database without first verifying the backup.
+
 ### Monitoring
 
 Check the backend logs for errors:
@@ -430,10 +439,10 @@ Edit `flutter_app/env.prod.json`:
 cd flutter_app
 
 # Using the production config
-flutter build apk --split-per-abi --dart-define-from-file=env.prod.json
+flutter build apk --split-per-abi --obfuscate --split-debug-info=build/debug-info --dart-define-from-file=env.prod.json
 
 # Or for Play Store
-flutter build appbundle --dart-define-from-file=env.prod.json
+flutter build appbundle --obfuscate --split-debug-info=build/debug-info --dart-define-from-file=env.prod.json
 ```
 
 ### 3. Sign the APK

@@ -204,26 +204,28 @@ async function cancelLeave(req, res, next) {
   try {
     const { id } = req.params;
 
-    const leave = await db('leave_requests').where({ leave_id: id }).first();
-    if (!leave) {
-      throw createError(404, 'Leave request not found');
-    }
+    await db.transaction(async (trx) => {
+      const leave = await trx('leave_requests').where({ leave_id: id }).forUpdate().first();
+      if (!leave) {
+        throw createError(404, 'Leave request not found');
+      }
 
-    if (leave.employee_id !== req.user.employee_id && !req.user.is_admin) {
-      throw createError(403, 'You can only cancel your own leave requests');
-    }
+      if (leave.employee_id !== req.user.employee_id && !req.user.is_admin) {
+        throw createError(403, 'You can only cancel your own leave requests');
+      }
 
-    if (!['approved', 'pending'].includes(leave.status)) {
-      throw createError(400, `Cannot cancel a leave that is ${leave.status}`);
-    }
+      if (!['approved', 'pending'].includes(leave.status)) {
+        throw createError(400, `Cannot cancel a leave that is ${leave.status}`);
+      }
 
-    await db('leave_requests').where({ leave_id: id }).update({
-      status: 'cancelled',
-      out_qr_code: null,
-      in_qr_code: null,
-      out_qr_image: null,
-      in_qr_image: null,
-      updated_at: db.fn.now(),
+      await trx('leave_requests').where({ leave_id: id }).update({
+        status: 'cancelled',
+        out_qr_code: null,
+        in_qr_code: null,
+        out_qr_image: null,
+        in_qr_image: null,
+        updated_at: trx.fn.now(),
+      });
     });
 
     res.json({ success: true, message: 'Leave request cancelled' });
@@ -240,13 +242,15 @@ async function deleteLeave(req, res, next) {
       throw createError(403, 'Admin access required');
     }
 
-    const leave = await db('leave_requests').where({ leave_id: id }).first();
-    if (!leave) {
-      throw createError(404, 'Leave request not found');
-    }
+    await db.transaction(async (trx) => {
+      const leave = await trx('leave_requests').where({ leave_id: id }).first();
+      if (!leave) {
+        throw createError(404, 'Leave request not found');
+      }
 
-    await db('qr_scan_logs').where({ leave_id: id }).del();
-    await db('leave_requests').where({ leave_id: id }).del();
+      await trx('qr_scan_logs').where({ leave_id: id }).del();
+      await trx('leave_requests').where({ leave_id: id }).del();
+    });
 
     res.json({ success: true, message: 'Leave request deleted' });
   } catch (err) {

@@ -11,9 +11,25 @@
     "build:web": "cd web && npx vite build",
     "test": "bash scripts/test.sh",
     "migrate": "cd backend && npx knex migrate:latest",
-    "seed": "cd backend && npx knex seed:run"
+    "seed": "cd backend && npx knex seed:run",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "backend/src/**/*.js": [
+      "cd backend && npm run lint -- --fix"
+    ],
+    "web/src/**/*.{ts,tsx}": [
+      "cd web && npx tsc --noEmit"
+    ],
+    "flutter_app/**/*.dart": [
+      "cd flutter_app && flutter analyze --no-fatal-infos --no-fatal-warnings"
+    ]
   },
   "dependencies": {
     "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.2.0"
   }
 }

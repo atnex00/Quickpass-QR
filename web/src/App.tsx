@@ -5,6 +5,7 @@ import AppLayout from "@/components/layout/AppLayout"
 import RequireRole from "@/components/layout/RequireRole"
 import SecurityShell from "@/components/layout/SecurityShell"
 import LoadingScreen from "@/components/shared/LoadingScreen"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"))
 const GuidesPage = lazy(() => import("@/pages/guides/GuidesPage"))
@@ -86,8 +87,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

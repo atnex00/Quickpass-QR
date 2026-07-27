@@ -96,7 +96,6 @@ export default function UserManagerPage() {
       setEmployees(res.data.data)
       setTotal(res.data.pagination?.total || 0)
     } catch {
-      console.warn("Failed to load employees")
     }
     finally { setLoading(false) }
   }
@@ -106,7 +105,6 @@ export default function UserManagerPage() {
       const res = await api.get("/admin/departments")
       setDepartments(res.data.data)
     } catch {
-      console.warn("Failed to load departments")
     }
   }
 

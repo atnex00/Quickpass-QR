@@ -10,6 +10,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-label', '@radix-ui/react-slot'],
+          charts: ['recharts'],
+        },
+      },
+    },
+    sourcemap: false,
+  },
   server: {
     port: 8080,
     host: '0.0.0.0',

@@ -35,7 +35,6 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
         _employee = (res['data'] as List).first as Map<String, dynamic>;
       }
     } catch (e) {
-      debugPrint('Failed to load employee detail: $e');
     }
     if (mounted) setState(() => _isLoading = false);
   }

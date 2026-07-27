@@ -45,7 +45,6 @@ class AuthProvider extends ChangeNotifier {
         CacheService().saveProfile(user.toJson());
       }
     } catch (e) {
-      debugPrint('Auth initialization failed: $e');
       try {
         final cached = await CacheService().loadProfile();
         if (cached != null) {
@@ -55,7 +54,6 @@ class AuthProvider extends ChangeNotifier {
           await _api.clearLocalAuth();
         }
       } catch (cacheError) {
-        debugPrint('Cache fallback also failed: $cacheError');
       }
     } finally {
       _isLoading = false;

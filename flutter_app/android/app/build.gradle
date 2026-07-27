@@ -28,21 +28,30 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.quickpass.app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            def propsFile = rootProject.file('key.properties')
+            def props = new Properties()
+            if (propsFile.exists()) {
+                props.load(new FileInputStream(propsFile))
+            }
+            keyAlias = props['keyAlias'] ?: System.getenv('KEY_ALIAS') ?: ''
+            keyPassword = props['keyPassword'] ?: System.getenv('KEY_PASSWORD') ?: ''
+            storeFile = props['storeFile'] ? file(props['storeFile']) : (System.getenv('KEYSTORE_PATH') ? file(System.getenv('KEYSTORE_PATH')) : null)
+            storePassword = props['storePassword'] ?: System.getenv('STORE_PASSWORD') ?: ''
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig = rootProject.file('key.properties').exists() || System.getenv('KEYSTORE_PATH') ? signingConfigs.release : signingConfigs.debug
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

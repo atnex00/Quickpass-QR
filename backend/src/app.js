@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
+const compression = require('compression');
 const logger = require('./config/logger');
 
 function loadEnv() {
@@ -33,25 +34,24 @@ function requireEnv(name) {
   return value;
 }
 
-function secret(name) {
-  const value = process.env[name];
-  if (value) return value;
-  if (process.env.NODE_ENV === 'production') {
-    exitOrThrow(`${name} is required in production. Set it in your backend/.env file.`);
-  }
-  const generated = crypto.randomBytes(64).toString('hex');
-  logger.warn(`${name} is not set. Set it in your backend/.env file. Generated a random value for this session.`);
-  return generated;
+requireEnv('DB_CONNECTION');
+requireEnv('JWT_SECRET');
+requireEnv('COOKIE_SECRET');
+requireEnv('QR_SECRET');
+
+function parseCorsOrigins(origin) {
+  if (!origin) return undefined;
+  const origins = origin.split(',').map(s => s.trim()).filter(Boolean);
+  if (origins.length === 1) return origins[0];
+  return origins;
 }
 
-requireEnv('DB_CONNECTION');
-process.env.JWT_SECRET = secret('JWT_SECRET');
-process.env.COOKIE_SECRET = secret('COOKIE_SECRET');
-process.env.QR_SECRET = secret('QR_SECRET');
-
-const corsOrigin = process.env.CORS_ORIGIN || undefined;
-if (corsOrigin === '') {
-  logger.warn('CORS_ORIGIN is set but empty — CORS will be disabled');
+const corsOrigin = parseCorsOrigins(process.env.CORS_ORIGIN);
+if (corsOrigin === '' || corsOrigin === undefined) {
+  logger.warn('CORS_ORIGIN is not set — CORS will be disabled');
+}
+if (corsOrigin === '*') {
+  logger.warn('CORS_ORIGIN is set to wildcard — this is insecure and incompatible with cookie auth. Set a specific origin in production.');
 }
 if (process.env.NODE_ENV === 'production' && !corsOrigin) {
   exitOrThrow('CORS_ORIGIN is required in production. Set it in your backend/.env file.');
@@ -67,6 +67,7 @@ const { initFirebase } = require('./config/firebase');
 const sentry = require('./config/sentry');
 const { errorHandler } = require('./middleware/errorHandler');
 const routes = require('./routes');
+const db = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +80,7 @@ sentry.init();
 
 // Middleware
 app.use(helmet());
+app.use(compression());
 if (corsOrigin) {
   app.use(helmet.contentSecurityPolicy({
     directives: {
@@ -192,27 +194,64 @@ process.on('unhandledRejection', (reason) => {
   }
 });
 
+async function cleanupStartup() {
+  const expiredSessions = await db('sessions')
+    .where('expires_at', '<', db.fn.now())
+    .where('is_active', true)
+    .update({ is_active: false });
+  if (expiredSessions > 0) {
+    logger.info({ count: expiredSessions }, 'Expired stale sessions on startup');
+  }
+}
+
 if (require.main === module) {
-  app.listen(PORT, () => {
-    logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');
+  let server;
+
+  async function start() {
+    await db.testConnection();
+    await cleanupStartup();
+
+    server = app.listen(PORT, () => {
+      logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');
+    });
+
+    // HTTPS server for camera access on mobile
+    const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
+    const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
+    try {
+      if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+        const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
+        https.createServer({
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+        }, app).listen(httpsPort, () => {
+          logger.info({ port: httpsPort }, 'Quickpass HTTPS running');
+        });
+      }
+    } catch {
+      // HTTPS setup is optional
+    }
+  }
+
+  start().catch((err) => {
+    logger.fatal({ err }, 'Failed to start server');
+    process.exit(1);
   });
 
-  // HTTPS server for camera access on mobile
-  const keyPath = process.env.HTTPS_KEY || '/tmp/quickpass-key.pem';
-  const certPath = process.env.HTTPS_CERT || '/tmp/quickpass-cert.pem';
-  try {
-    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
-      const httpsPort = parseInt(process.env.HTTPS_PORT || '3443');
-      https.createServer({
-        key: fs.readFileSync(keyPath),
-        cert: fs.readFileSync(certPath),
-      }, app).listen(httpsPort, () => {
-        logger.info({ port: httpsPort }, 'Quickpass HTTPS running');
+  const shutdown = async (signal) => {
+    logger.info({ signal }, 'Shutting down gracefully');
+    if (server) {
+      server.close(() => {
+        db.destroy().then(() => process.exit(0)).catch(() => process.exit(1));
       });
+      setTimeout(() => process.exit(1), 10000).unref();
+    } else {
+      process.exit(0);
     }
-  } catch {
-    // HTTPS setup is optional
-  }
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 module.exports = app;
