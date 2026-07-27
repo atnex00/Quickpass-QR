@@ -16,13 +16,13 @@
   },
   "lint-staged": {
     "backend/src/**/*.js": [
-      "cd backend && npm run lint -- --fix"
+      "npm run lint --prefix backend -- --fix"
     ],
     "web/src/**/*.{ts,tsx}": [
-      "cd web && npx tsc --noEmit"
+      "npx --prefix web tsc --noEmit"
     ],
     "flutter_app/**/*.dart": [
-      "cd flutter_app && flutter analyze --no-fatal-infos --no-fatal-warnings"
+      "bash -c \"cd flutter_app && flutter analyze --no-fatal-infos --no-fatal-warnings\""
     ]
   },
   "dependencies": {
