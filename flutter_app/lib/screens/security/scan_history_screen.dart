@@ -334,11 +334,14 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Page ${scanProv.historyPage} of ${scanProv.historyPages}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.neutralGray,
+                        Expanded(
+                          child: Text(
+                            'Page ${scanProv.historyPage} of ${scanProv.historyPages}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.neutralGray,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Row(

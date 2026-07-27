@@ -62,5 +62,3 @@ admin-desktop/
 # Test coverage
 backend/coverage/
 web/coverage/
-
-sessions.txt

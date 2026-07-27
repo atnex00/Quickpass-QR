@@ -18,7 +18,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "╔════════════════════════════════════╗"
-echo "║        Quickpass Dev Server       ║"
+echo "║        PassLynx Dev Server        ║"
 echo "╚════════════════════════════════════╝"
 echo ""
 

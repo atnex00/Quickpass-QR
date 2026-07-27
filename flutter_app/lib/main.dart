@@ -1,11 +1,15 @@
 import 'dart:ui';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'config/app_config.dart';
 import 'config/theme.dart';
+import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/leave_provider.dart';
 import 'providers/notification_provider.dart';
@@ -34,7 +38,21 @@ void main() async {
     return;
   }
 
-final apiService = ApiService();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (_) {}
+
+  FlutterError.onError = (details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  final apiService = ApiService();
   apiService.init();
 
   await SystemChrome.setPreferredOrientations([
@@ -183,6 +201,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
         ],
         child: Consumer2<AuthProvider, SettingsProvider>(
           builder: (context, auth, settings, _) {
+            final analytics = FirebaseAnalytics.instance;
             return ConnectivityBanner(
               child: MaterialApp(
                 navigatorKey: _navigatorKey,
@@ -191,6 +210,9 @@ class _QuickpassAppState extends State<QuickpassApp> {
                 theme: QuickpassTheme.light,
                 darkTheme: QuickpassTheme.dark,
                 themeMode: settings.themeMode,
+                navigatorObservers: [
+                  FirebaseAnalyticsObserver(analytics: analytics),
+                ],
                 home: _buildHome(auth),
               ),
             );

@@ -65,6 +65,10 @@ jest.mock('../config/database', () => {
   return db;
 });
 
+jest.mock('../services/notificationService', () => ({
+  sendToEmployee: jest.fn().mockResolvedValue(),
+}));
+
 const db = require('../config/database');
 
 process.env.JWT_SECRET = 'test-jwt-secret';
@@ -108,7 +112,7 @@ describe('POST /api/leave/request', () => {
   it('returns 409 on time conflict', async () => {
     mockAuth({ is_active: true });
     db.first
-      .mockResolvedValueOnce({ employee_id: '000001', department_id: 'DEPT01', is_admin: false })
+      .mockResolvedValueOnce({ employee_id: '000001', department_id: 'DEP-002', is_admin: false })
       .mockResolvedValueOnce({ leave_id: 'LV-001' });
     const res = await request(app)
       .post('/api/leave/request')
@@ -135,9 +139,9 @@ describe('POST /api/leave/request', () => {
     db.first
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({
-        leave_id: 'LV-MOCK', employee_id: '000001', status: 'pending', employee_name: 'Alice Chen',
+        leave_id: 'LV-MOCK', employee_id: '000001', status: 'pending', employee_name: 'James Wilson',
       });
-    db().resolve([{ employee_id: '000004' }]);
+    db().resolve([{ employee_id: '000011' }]);
     const res = await request(app)
       .post('/api/leave/request')
       .set('Authorization', `Bearer ${authToken()}`)
@@ -156,8 +160,8 @@ describe('GET /api/leave/history', () => {
     mockAuth({ employee_id: '000001', is_active: true });
     db.first.mockResolvedValueOnce({ count: 2 });
     const leaves = [
-      { leave_id: 'LV-001', status: 'approved', employee_name: 'Alice Chen' },
-      { leave_id: 'LV-002', status: 'pending', employee_name: 'Alice Chen' },
+      { leave_id: 'LV-001', status: 'approved', employee_name: 'James Wilson' },
+      { leave_id: 'LV-002', status: 'pending', employee_name: 'James Wilson' },
     ];
     db().resolve(leaves);
     const res = await request(app)
@@ -176,7 +180,7 @@ describe('GET /api/leave/active', () => {
   it('returns active leave when found', async () => {
     mockAuth({ employee_id: '000001', is_active: true });
     db.first.mockResolvedValueOnce({
-      leave_id: 'LV-001', status: 'approved', employee_name: 'Alice Chen',
+      leave_id: 'LV-001', status: 'approved', employee_name: 'James Wilson',
     });
     const res = await request(app)
       .get('/api/leave/active')
@@ -203,7 +207,7 @@ describe('GET /api/leave/:id', () => {
   it('returns leave by id for own leave', async () => {
     mockAuth({ employee_id: '000001', is_active: true });
     db.first.mockResolvedValueOnce({
-      leave_id: 'LV-001', employee_id: '000001', department_id: 'DEPT01', employee_name: 'Alice Chen',
+      leave_id: 'LV-001', employee_id: '000001', department_id: 'DEP-002', employee_name: 'James Wilson',
     });
     const res = await request(app)
       .get('/api/leave/LV-001')

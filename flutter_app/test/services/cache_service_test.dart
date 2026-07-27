@@ -10,10 +10,10 @@ LeaveRequest _makeLeave(String id) {
   return LeaveRequest(
     leaveId: id,
     employeeId: '000001',
-    employeeName: 'Alice Chen',
+    employeeName: 'James Wilson',
     departmentId: 'DEP-001',
-    supervisorId: '000004',
-    supervisorName: 'David Kim',
+    supervisorId: '000015',
+    supervisorName: 'Liam Thomas',
     leaveDate: DateTime(2026, 7, 21),
     startTime: '09:00',
     endTime: '17:00',
@@ -120,11 +120,11 @@ void main() {
 
     group('profile', () {
       test('save and load round-trip', () async {
-        final profile = {'employee_id': '000001', 'full_name': 'Alice Chen'};
+        final profile = {'employee_id': '000001', 'full_name': 'James Wilson'};
         await CacheService().saveProfile(profile);
         final loaded = await CacheService().loadProfile();
         expect(loaded, isNotNull);
-        expect(loaded!['full_name'], 'Alice Chen');
+        expect(loaded!['full_name'], 'James Wilson');
       });
 
       test('loadProfile returns null when nothing cached', () async {

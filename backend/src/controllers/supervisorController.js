@@ -1,6 +1,7 @@
 const db = require('../config/database');
 const qrService = require('../services/qrService');
 const qrImageService = require('../services/qrImageService');
+const notificationService = require('../services/notificationService');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 const auditService = require('../services/auditService');
@@ -103,6 +104,16 @@ async function approveLeave(req, res, next) {
         });
     });
 
+    try {
+      await notificationService.sendToEmployee(leave.employee_id, {
+        title: 'Leave Approved',
+        body: `Your leave for ${fmtDate(leave.leave_date)} has been approved`,
+        data: { leave_id: leaveId, type: 'approved' },
+      });
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (approve)');
+    }
+
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
       .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
@@ -164,6 +175,16 @@ async function rejectLeave(req, res, next) {
         rejection_reason: reason.trim(),
         updated_at: db.fn.now(),
       });
+
+    try {
+      await notificationService.sendToEmployee(leave.employee_id, {
+        title: 'Leave Rejected',
+        body: `Your leave for ${fmtDate(leave.leave_date)} was rejected: ${reason}`,
+        data: { leave_id: leaveId, type: 'rejected' },
+      });
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (reject)');
+    }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })
@@ -263,6 +284,16 @@ async function revokeApproval(req, res, next) {
     await db('leave_requests')
       .where({ leave_id: leaveId })
       .update(updateData);
+
+    try {
+      await notificationService.sendToEmployee(leave.employee_id, {
+        title: 'Approval Revoked',
+        body: `Your leave for ${fmtDate(leave.leave_date)} approval has been revoked`,
+        data: { leave_id: leaveId, type: 'revoked' },
+      });
+    } catch (notifErr) {
+      req.log?.error({ err: notifErr }, 'Notification error (revoke)');
+    }
 
     const updated = await db('leave_requests')
       .where({ leave_id: leaveId })

@@ -46,17 +46,28 @@ tags:
 ## Test Users (all password: `pass1234`)
 | ID | Name | Role |
 |---|---|---|
-| 000001 | Alice Chen | Employee (Engineering) |
-| 000002 | Bob Smith | Employee (Marketing) |
-| 000003 | Carol White | Employee (HR) |
-| 000004 | David Kim | Supervisor (Engineering Manager) |
-| 000005 | Emma Brown | Supervisor (Marketing Director) |
-| 000006 | Frank Green | Supervisor (HR Manager) |
-| 000007 | Grace Lee | Employee (Engineering) |
-| 000008 | Henry Wilson | Supervisor (Product Manager) |
-| 000009 | Michael Park | Employee (Engineering) |
-| 000010 | Sarah Johnson | Supervisor (Tech Lead) |
-| 090901 | Guard Mike | Security |
+| 000001 | James Wilson | Employee (TSD · Technical Services Department) |
+| 000002 | Maria Garcia | Employee (IAD · Internal Audit Department) |
+| 000003 | John Lee | Employee (HRAD · Human Resource & Administration) |
+| 000004 | Sara Patel | Employee (FSD · Finance Services Department) |
+| 000005 | Alex Turner | Employee (ISD · Institutional Services Department) |
+| 000006 | Emily Davis | Employee (ISD · Institutional Services Department) |
+| 000007 | Ryan Chen | Employee (CPD · Corporate Planning Department) |
+| 000008 | Olivia Brown | Employee (FSD · Finance Services Department) |
+| 000009 | Daniel Kim | Employee (TSD · Technical Services Department) |
+| 000010 | Sophia Martinez | Employee (CPD · Corporate Planning Department) |
+| 000011 | Ethan White | Supervisor (TSD Manager) |
+| 000012 | Ava Johnson | Employee (CPD · Corporate Planning Department) |
+| 000013 | Noah Taylor | Supervisor (HRAD Manager) |
+| 000014 | Isabella Anderson | Supervisor (FSD Manager) |
+| 000015 | Liam Thomas | Supervisor (ISD Supervisor) |
+| 000016 | Mia Jackson | Employee (CPD · Corporate Planning Department) |
+| 000017 | Lucas Harris | Supervisor (CPD Manager) |
+| 000018 | Charlotte Martin | Supervisor (IAD Manager) |
+| 000019 | Mason Thompson | Employee (TSD · Technical Services Department) |
+| 000020 | Amelia Robinson | Employee (CPD · Corporate Planning Department) |
+| 090901 | Mike Ross | Security (Head of Security — ISD) |
+| 090902-090910 | Security Guards (10) | Security (ISD · Institutional Services Department) |
 | 999999 | System Admin | Admin + Supervisor + Security |
 
 ## API Base URLs

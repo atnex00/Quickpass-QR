@@ -9,11 +9,11 @@ import '../helpers/test_setup.dart';
 LeaveRequest _mockLeave(String id, String status) {
   return LeaveRequest(
     leaveId: id,
-    employeeId: '000004',
-    employeeName: 'Bob',
-    departmentId: '1',
-    supervisorId: '000004',
-    supervisorName: 'David Kim',
+    employeeId: '000001',
+    employeeName: 'James Wilson',
+    departmentId: 'DEP-001',
+    supervisorId: '000015',
+    supervisorName: 'Liam Thomas',
     leaveDate: DateTime(2025, 7),
     startTime: '09:00',
     endTime: '17:00',

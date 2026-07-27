@@ -36,11 +36,11 @@ void main() {
     authProvider = AuthProvider(api: mockApi);
     testUser = Employee(
       employeeId: '000001',
-      fullName: 'Alice Chen',
+      fullName: 'James Wilson',
       position: 'Software Engineer',
-      departmentId: '1',
-      departmentName: 'Engineering',
-      email: 'alice@example.com',
+      departmentId: 'DEP-002',
+      departmentName: 'TSD · Technical Services Department',
+      email: 'james.wilson@zaneco.com',
       isSupervisor: false,
       isAdmin: false,
       isSecurity: false,
@@ -57,9 +57,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('My Profile'), findsOneWidget);
-    expect(find.text('Alice Chen'), findsAtLeast(1));
+    expect(find.text('James Wilson'), findsAtLeast(1));
     expect(find.text('000001'), findsOneWidget);
-    expect(find.text('Engineering'), findsOneWidget);
+    expect(find.text('TSD · Technical Services Department'), findsOneWidget);
     expect(find.text('Software Engineer'), findsAtLeast(1));
     expect(find.text('Account Information'), findsOneWidget);
     expect(find.text('Personal Information'), findsOneWidget);

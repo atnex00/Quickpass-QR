@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../models/employee.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/errors.dart';
@@ -78,6 +79,8 @@ class AuthProvider extends ChangeNotifier {
       _loginLoading = false;
       notifyListeners();
       onLoggedIn?.call();
+      final role = isAdmin ? 'admin' : isSupervisor ? 'supervisor' : isSecurity ? 'security' : 'employee';
+      AnalyticsService().logLogin(role: role);
       return true;
     } catch (e) {
       _error = friendlyError(e);
@@ -97,6 +100,7 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     notifyListeners();
+    AnalyticsService().logLogout();
     onLoggedOut?.call();
   }
 

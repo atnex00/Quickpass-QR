@@ -77,6 +77,10 @@ jest.mock('../services/qrImageService', () => ({
   deleteQrImages: jest.fn(),
 }));
 
+jest.mock('../services/notificationService', () => ({
+  sendToEmployee: jest.fn().mockResolvedValue(),
+}));
+
 const db = require('../config/database');
 
 process.env.JWT_SECRET = 'test-jwt-secret';
@@ -90,7 +94,7 @@ const app = require('../app');
 
 function supToken() {
   return jwt.sign(
-    { employee_id: '000004', session_id: 's1', role: 'supervisor' },
+    { employee_id: '000015', session_id: 's1', role: 'supervisor' },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
@@ -117,9 +121,9 @@ describe('GET /api/supervisor/pending', () => {
   });
 
   it('returns pending requests for supervisor', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db().resolve([
-      { leave_id: 'LV-001', status: 'pending', employee_name: 'Alice Chen' },
+      { leave_id: 'LV-001', status: 'pending', employee_name: 'James Wilson' },
     ]);
     const res = await request(app)
       .get('/api/supervisor/pending')
@@ -131,8 +135,8 @@ describe('GET /api/supervisor/pending', () => {
   it('returns all pending for admin', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db().resolve([
-      { leave_id: 'LV-001', status: 'pending', employee_name: 'Alice' },
-      { leave_id: 'LV-002', status: 'pending', employee_name: 'Bob' },
+      { leave_id: 'LV-001', status: 'pending', employee_name: 'James' },
+      { leave_id: 'LV-002', status: 'pending', employee_name: 'Maria' },
     ]);
     const res = await request(app)
       .get('/api/supervisor/pending')
@@ -148,14 +152,14 @@ describe('POST /api/supervisor/approve/:leaveId', () => {
   });
 
   it('returns 200 on successful approval', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db.first.mockResolvedValueOnce({
-      leave_id: 'LV-001', employee_id: '000001', status: 'approved', employee_name: 'Alice Chen',
+      leave_id: 'LV-001', employee_id: '000001', status: 'approved', employee_name: 'James Wilson',
     });
     db.transaction.mockImplementationOnce((cb) => {
       const trx = makeChain();
       trx.fn = { now: jest.fn(() => 'NOW()') };
-      trx.first.mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', supervisor_id: '000004', department_id: 'DEPT01', leave_date: today, start_time: '09:00', end_time: '17:00' });
+      trx.first.mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', supervisor_id: '000015', department_id: 'DEP-001', leave_date: today, start_time: '09:00', end_time: '17:00' });
       return cb(trx);
     });
     const res = await request(app)
@@ -165,7 +169,7 @@ describe('POST /api/supervisor/approve/:leaveId', () => {
   });
 
   it('returns 404 if leave not found', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db.transaction.mockImplementationOnce((cb) => {
       const trx = makeChain();
       trx.fn = { now: jest.fn(() => 'NOW()') };
@@ -185,10 +189,10 @@ describe('POST /api/supervisor/reject/:leaveId', () => {
   });
 
   it('returns 200 on successful rejection', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db.first
-      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', supervisor_id: '000004', department_id: 'DEPT01', leave_date: today })
-      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'rejected', employee_name: 'Alice Chen' });
+      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', supervisor_id: '000015', department_id: 'DEP-001', leave_date: today })
+      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'rejected', employee_name: 'James Wilson' });
     const res = await request(app)
       .post('/api/supervisor/reject/LV-001')
       .set('Authorization', `Bearer ${supToken()}`)
@@ -197,7 +201,7 @@ describe('POST /api/supervisor/reject/:leaveId', () => {
   });
 
   it('returns 404 if leave not found', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db.first.mockResolvedValueOnce(null);
     const res = await request(app)
       .post('/api/supervisor/reject/LV-999')
@@ -213,10 +217,10 @@ describe('POST /api/supervisor/revoke/:leaveId', () => {
   });
 
   it('returns 200 on successful revocation', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db.first
-      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'approved', supervisor_id: '000004', department_id: 'DEPT01', leave_date: today })
-      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', employee_name: 'Alice Chen' });
+      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'approved', supervisor_id: '000015', department_id: 'DEP-001', leave_date: today })
+      .mockResolvedValueOnce({ leave_id: 'LV-001', employee_id: '000001', status: 'pending', employee_name: 'James Wilson' });
     const res = await request(app)
       .post('/api/supervisor/revoke/LV-001')
       .set('Authorization', `Bearer ${supToken()}`);
@@ -230,9 +234,9 @@ describe('GET /api/supervisor/team-leaves', () => {
   });
 
   it('returns team leaves with date filter', async () => {
-    mockAuth({ employee_id: '000004', department_id: 'DEPT01', is_supervisor: true, is_active: true });
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
     db().resolve([
-      { leave_id: 'LV-001', status: 'approved', employee_name: 'Alice Chen' },
+      { leave_id: 'LV-001', status: 'approved', employee_name: 'James Wilson' },
     ]);
     const res = await request(app)
       .get('/api/supervisor/team-leaves')

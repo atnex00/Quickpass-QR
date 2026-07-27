@@ -12,7 +12,7 @@ QR-based gate pass and leave management system.
 ```bash
 cp backend/.env.example backend/.env
 cd backend && npm install && cd ../flutter_app && flutter pub get
-Created db with project name quickpass.
+createdb passlynx
 cd backend && npm run migrate && npm run seed
 ```
 
@@ -33,6 +33,8 @@ No local PostgreSQL needed — `docker-compose.yml` provides only the backend se
 | Location | Command | Purpose |
 |---|---|---|
 | root | `npm run dev` | Backend + web concurrently (`dev.sh`) |
+| root | `./scripts/run.sh` | Start all: backend + web + flutter + ADB reverse (Ctrl+C to stop) |
+| root | `./scripts/stop.sh` | Force kill all processes (backend, web, flutter) + remove ADB tunnel |
 | root | `npm run prod` | Production mode |
 | root | `npm run build:web` | `cd web && vite build` |
 | root | `npm run migrate` / `seed` | Knex migrate:latest / seed:run |
@@ -70,7 +72,7 @@ QR data: JSON with `leave_id`, `employee_id`, `type`, `timestamp`, `signature`.
 - **Optional HTTPS server** on port 3443 for mobile camera access (reads key/cert from env paths, silently skipped if files missing).
 
 ### Backend Entry Points
-- **`src/app.js`** — Main entry (used by package.json). Loads env, Express + CORS + rate limit, serves `web/dist` in prod, SPA fallback.
+- **`src/app.js`** — Main entry (used by package.json). Loads env, Express + CORS + rate limit + Firebase init, serves `web/dist` in prod, SPA fallback.
 - **`src/index.js`** — Refactored/alternate version (WIP, not used by package.json).
 
 ### Web Routes (React Router v7)
@@ -110,9 +112,10 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 ### Test Users
 | ID | Name | Role |
 |---|---|---|
-| 000001 | Alice Chen | Employee (Engineering) |
-| 000004 | David Kim | Supervisor (Engineering) |
-| 090901 | Guard Mike | Security (no department) |
+| 000001 | James Wilson | Employee (TSD) |
+| 000011 | Ethan White | Supervisor (TSD Manager) |
+| 000015 | Liam Thomas | Supervisor (ISD Supervisor) |
+| 090901 | Mike Ross | Security (Head of Security) |
 | 999999 | System Admin | Admin + Supervisor + Security |
 
 ## Code Conventions

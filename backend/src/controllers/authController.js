@@ -229,6 +229,16 @@ async function updateProfile(req, res, next) {
   }
 }
 
+async function fcmToken(req, res, next) {
+  try {
+    const { fcm_token } = req.body;
+    await db('employees').where({ employee_id: req.user.employee_id }).update({ fcm_token });
+    res.json({ success: true, message: 'FCM token updated' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function uploadProfilePhoto(req, res, next) {
   try {
     if (!req.file) {
@@ -295,4 +305,4 @@ function isMobileClient(req) {
   return ua.includes('Dart');
 }
 
-module.exports = { login, logout, refreshToken, getProfile, updateProfile, uploadProfilePhoto };
+module.exports = { login, logout, refreshToken, getProfile, updateProfile, fcmToken, uploadProfilePhoto };

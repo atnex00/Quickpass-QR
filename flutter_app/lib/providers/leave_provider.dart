@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/leave_request.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/errors.dart';
@@ -126,6 +127,7 @@ class LeaveProvider extends ChangeNotifier {
       _fromCache = false;
       CacheService().saveLeaves(_history);
       notifyListeners();
+      AnalyticsService().logLeaveSubmitted();
       return leave;
     } catch (e) {
       _error = friendlyError(e);

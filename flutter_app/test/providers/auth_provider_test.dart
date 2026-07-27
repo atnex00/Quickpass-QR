@@ -22,11 +22,11 @@ void main() {
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token-123');
       when(mockApi.getProfile()).thenAnswer((_) async => Employee.fromJson({
             'employee_id': '000001',
-            'full_name': 'Alice Chen',
-            'position': 'Engineer',
-            'department_id': '1',
-            'department_name': 'Engineering',
-            'email': 'alice@example.com',
+            'full_name': 'James Wilson',
+            'position': 'Software Engineer',
+            'department_id': 'DEP-002',
+            'department_name': 'TSD · Technical Services Department',
+            'email': 'james.wilson@zaneco.com',
             'is_supervisor': false,
             'is_admin': false,
             'is_security': false,
@@ -70,11 +70,11 @@ void main() {
             'token': 'jwt-token',
             'user': {
               'employee_id': '000001',
-              'full_name': 'Alice Chen',
-              'position': 'Engineer',
-              'department_id': '1',
-              'department_name': 'Engineering',
-              'email': 'alice@example.com',
+              'full_name': 'James Wilson',
+              'position': 'Software Engineer',
+              'department_id': 'DEP-002',
+              'department_name': 'TSD · Technical Services Department',
+              'email': 'james.wilson@zaneco.com',
               'is_supervisor': false,
               'is_admin': false,
               'is_security': false,
@@ -111,7 +111,7 @@ void main() {
       when(mockApi.getStoredToken()).thenAnswer((_) async => 'token');
       when(mockApi.getProfile()).thenAnswer((_) async => Employee.fromJson({
             'employee_id': '000001',
-            'full_name': 'Alice',
+            'full_name': 'James Wilson',
             'position': '',
             'department_id': '',
             'department_name': '',
@@ -133,14 +133,14 @@ void main() {
 
   group('updateProfile', () {
     test('updates user on success', () async {
-      when(mockApi.updateProfile({'full_name': 'Alice Updated'})).thenAnswer(
+      when(mockApi.updateProfile({'full_name': 'James Updated'})).thenAnswer(
         (_) async => Employee.fromJson({
           'employee_id': '000001',
-          'full_name': 'Alice Updated',
-          'position': 'Engineer',
-          'department_id': '1',
-          'department_name': 'Engineering',
-          'email': 'alice@example.com',
+          'full_name': 'James Updated',
+          'position': 'Software Engineer',
+          'department_id': 'DEP-002',
+          'department_name': 'TSD · Technical Services Department',
+          'email': 'james.wilson@zaneco.com',
           'is_supervisor': false,
           'is_admin': false,
           'is_security': false,
@@ -149,10 +149,10 @@ void main() {
       );
 
       final result =
-          await provider.updateProfile({'full_name': 'Alice Updated'});
+          await provider.updateProfile({'full_name': 'James Updated'});
 
       expect(result, true);
-      expect(provider.user?.fullName, 'Alice Updated');
+      expect(provider.user?.fullName, 'James Updated');
     });
 
     test('sets error on failure', () async {

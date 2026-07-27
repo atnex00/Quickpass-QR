@@ -16,10 +16,10 @@ LeaveRequest _makeLeave(String id) {
   return LeaveRequest(
     leaveId: id,
     employeeId: '000001',
-    employeeName: 'Alice Chen',
+    employeeName: 'James Wilson',
     departmentId: 'DEP-001',
-    supervisorId: '000004',
-    supervisorName: 'David Kim',
+    supervisorId: '000015',
+    supervisorName: 'Liam Thomas',
     leaveDate: DateTime(2026, 7, 21),
     startTime: '09:00',
     endTime: '17:00',
@@ -27,7 +27,7 @@ LeaveRequest _makeLeave(String id) {
     status: LeaveStatus.pending,
     createdAt: _now,
     updatedAt: _now,
-    employeePosition: 'Engineer',
+    employeePosition: 'Software Engineer',
   );
 }
 
@@ -61,8 +61,8 @@ void main() {
     testWidgets('renders employee info and leave details', (tester) async {
       await tester.pumpWidget(_buildApp(leave: _makeLeave('LV-001')));
       await tester.pump();
-      expect(find.text('Alice Chen'), findsOneWidget);
-      expect(find.text('Engineer'), findsOneWidget);
+      expect(find.text('James Wilson'), findsOneWidget);
+      expect(find.text('Software Engineer'), findsOneWidget);
       expect(find.text('Pending'), findsOneWidget);
       expect(find.text('Medical appointment'), findsOneWidget);
     });

@@ -4,13 +4,13 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i7;
-import 'dart:ui' as _i5;
+import 'dart:ui' as _i6;
 
-import 'package:dio/dio.dart' as _i6;
+import 'package:dio/dio.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:quickpass/models/employee.dart' as _i2;
-import 'package:quickpass/models/leave_request.dart' as _i3;
-import 'package:quickpass/services/api_service.dart' as _i4;
+import 'package:quickpass/models/employee.dart' as _i3;
+import 'package:quickpass/models/leave_request.dart' as _i4;
+import 'package:quickpass/services/api_service.dart' as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -27,8 +27,8 @@ import 'package:quickpass/services/api_service.dart' as _i4;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeEmployee_0 extends _i1.SmartFake implements _i2.Employee {
-  _FakeEmployee_0(
+class _FakeDio_0 extends _i1.SmartFake implements _i2.Dio {
+  _FakeDio_0(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -37,8 +37,18 @@ class _FakeEmployee_0 extends _i1.SmartFake implements _i2.Employee {
         );
 }
 
-class _FakeLeaveRequest_1 extends _i1.SmartFake implements _i3.LeaveRequest {
-  _FakeLeaveRequest_1(
+class _FakeEmployee_1 extends _i1.SmartFake implements _i3.Employee {
+  _FakeEmployee_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeLeaveRequest_2 extends _i1.SmartFake implements _i4.LeaveRequest {
+  _FakeLeaveRequest_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -50,9 +60,22 @@ class _FakeLeaveRequest_1 extends _i1.SmartFake implements _i3.LeaveRequest {
 /// A class which mocks [ApiService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockApiService extends _i1.Mock implements _i4.ApiService {
+class MockApiService extends _i1.Mock implements _i5.ApiService {
   @override
-  set onForceLogout(_i5.VoidCallback? value) => super.noSuchMethod(
+  _i2.Dio get dio => (super.noSuchMethod(
+        Invocation.getter(#dio),
+        returnValue: _FakeDio_0(
+          this,
+          Invocation.getter(#dio),
+        ),
+        returnValueForMissingStub: _FakeDio_0(
+          this,
+          Invocation.getter(#dio),
+        ),
+      ) as _i2.Dio);
+
+  @override
+  set onForceLogout(_i6.VoidCallback? value) => super.noSuchMethod(
         Invocation.setter(
           #onForceLogout,
           value,
@@ -61,10 +84,10 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
       );
 
   @override
-  void setDio(_i6.Dio? dio) => super.noSuchMethod(
+  void setDio(_i2.Dio? value) => super.noSuchMethod(
         Invocation.method(
           #setDio,
-          [dio],
+          [value],
         ),
         returnValueForMissingStub: null,
       );
@@ -138,12 +161,12 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
       ) as _i7.Future<String?>);
 
   @override
-  _i7.Future<_i2.Employee> getProfile() => (super.noSuchMethod(
+  _i7.Future<_i3.Employee> getProfile() => (super.noSuchMethod(
         Invocation.method(
           #getProfile,
           [],
         ),
-        returnValue: _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+        returnValue: _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #getProfile,
@@ -151,23 +174,23 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+            _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #getProfile,
             [],
           ),
         )),
-      ) as _i7.Future<_i2.Employee>);
+      ) as _i7.Future<_i3.Employee>);
 
   @override
-  _i7.Future<_i2.Employee> updateProfile(Map<String, dynamic>? data) =>
+  _i7.Future<_i3.Employee> updateProfile(Map<String, dynamic>? data) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateProfile,
           [data],
         ),
-        returnValue: _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+        returnValue: _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #updateProfile,
@@ -175,23 +198,23 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+            _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #updateProfile,
             [data],
           ),
         )),
-      ) as _i7.Future<_i2.Employee>);
+      ) as _i7.Future<_i3.Employee>);
 
   @override
-  _i7.Future<_i2.Employee> uploadProfilePhoto(String? filePath) =>
+  _i7.Future<_i3.Employee> uploadProfilePhoto(String? filePath) =>
       (super.noSuchMethod(
         Invocation.method(
           #uploadProfilePhoto,
           [filePath],
         ),
-        returnValue: _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+        returnValue: _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #uploadProfilePhoto,
@@ -199,14 +222,14 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i2.Employee>.value(_FakeEmployee_0(
+            _i7.Future<_i3.Employee>.value(_FakeEmployee_1(
           this,
           Invocation.method(
             #uploadProfilePhoto,
             [filePath],
           ),
         )),
-      ) as _i7.Future<_i2.Employee>);
+      ) as _i7.Future<_i3.Employee>);
 
   @override
   _i7.Future<void> updateFcmToken(String? token) => (super.noSuchMethod(
@@ -219,7 +242,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
       ) as _i7.Future<void>);
 
   @override
-  _i7.Future<_i3.LeaveRequest> submitLeave({
+  _i7.Future<_i4.LeaveRequest> submitLeave({
     required String? leaveDate,
     required String? startTime,
     required String? endTime,
@@ -236,7 +259,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
             #reason: reason,
           },
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+        returnValue: _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #submitLeave,
@@ -250,7 +273,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+            _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #submitLeave,
@@ -263,7 +286,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
             },
           ),
         )),
-      ) as _i7.Future<_i3.LeaveRequest>);
+      ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
   _i7.Future<Map<String, dynamic>> getLeaveHistory({
@@ -288,22 +311,22 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
       ) as _i7.Future<Map<String, dynamic>>);
 
   @override
-  _i7.Future<_i3.LeaveRequest?> getActiveLeave() => (super.noSuchMethod(
+  _i7.Future<_i4.LeaveRequest?> getActiveLeave() => (super.noSuchMethod(
         Invocation.method(
           #getActiveLeave,
           [],
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest?>.value(),
-        returnValueForMissingStub: _i7.Future<_i3.LeaveRequest?>.value(),
-      ) as _i7.Future<_i3.LeaveRequest?>);
+        returnValue: _i7.Future<_i4.LeaveRequest?>.value(),
+        returnValueForMissingStub: _i7.Future<_i4.LeaveRequest?>.value(),
+      ) as _i7.Future<_i4.LeaveRequest?>);
 
   @override
-  _i7.Future<_i3.LeaveRequest> getLeaveById(String? id) => (super.noSuchMethod(
+  _i7.Future<_i4.LeaveRequest> getLeaveById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getLeaveById,
           [id],
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+        returnValue: _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #getLeaveById,
@@ -311,36 +334,36 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+            _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #getLeaveById,
             [id],
           ),
         )),
-      ) as _i7.Future<_i3.LeaveRequest>);
+      ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
-  _i7.Future<List<_i3.LeaveRequest>> getPendingRequests() =>
+  _i7.Future<List<_i4.LeaveRequest>> getPendingRequests() =>
       (super.noSuchMethod(
         Invocation.method(
           #getPendingRequests,
           [],
         ),
         returnValue:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
         returnValueForMissingStub:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
-      ) as _i7.Future<List<_i3.LeaveRequest>>);
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+      ) as _i7.Future<List<_i4.LeaveRequest>>);
 
   @override
-  _i7.Future<_i3.LeaveRequest> approveLeave(String? leaveId) =>
+  _i7.Future<_i4.LeaveRequest> approveLeave(String? leaveId) =>
       (super.noSuchMethod(
         Invocation.method(
           #approveLeave,
           [leaveId],
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+        returnValue: _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #approveLeave,
@@ -348,17 +371,17 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+            _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #approveLeave,
             [leaveId],
           ),
         )),
-      ) as _i7.Future<_i3.LeaveRequest>);
+      ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
-  _i7.Future<_i3.LeaveRequest> rejectLeave(
+  _i7.Future<_i4.LeaveRequest> rejectLeave(
     String? leaveId,
     String? reason,
   ) =>
@@ -370,7 +393,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
             reason,
           ],
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+        returnValue: _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #rejectLeave,
@@ -381,7 +404,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+            _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #rejectLeave,
@@ -391,28 +414,28 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
             ],
           ),
         )),
-      ) as _i7.Future<_i3.LeaveRequest>);
+      ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
-  _i7.Future<List<_i3.LeaveRequest>> getApprovedLeaves() => (super.noSuchMethod(
+  _i7.Future<List<_i4.LeaveRequest>> getApprovedLeaves() => (super.noSuchMethod(
         Invocation.method(
           #getApprovedLeaves,
           [],
         ),
         returnValue:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
         returnValueForMissingStub:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
-      ) as _i7.Future<List<_i3.LeaveRequest>>);
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+      ) as _i7.Future<List<_i4.LeaveRequest>>);
 
   @override
-  _i7.Future<_i3.LeaveRequest> revokeApproval(String? leaveId) =>
+  _i7.Future<_i4.LeaveRequest> revokeApproval(String? leaveId) =>
       (super.noSuchMethod(
         Invocation.method(
           #revokeApproval,
           [leaveId],
         ),
-        returnValue: _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+        returnValue: _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #revokeApproval,
@@ -420,17 +443,17 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           ),
         )),
         returnValueForMissingStub:
-            _i7.Future<_i3.LeaveRequest>.value(_FakeLeaveRequest_1(
+            _i7.Future<_i4.LeaveRequest>.value(_FakeLeaveRequest_2(
           this,
           Invocation.method(
             #revokeApproval,
             [leaveId],
           ),
         )),
-      ) as _i7.Future<_i3.LeaveRequest>);
+      ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
-  _i7.Future<List<_i3.LeaveRequest>> getTeamLeaves({
+  _i7.Future<List<_i4.LeaveRequest>> getTeamLeaves({
     String? date,
     String? startDate,
     String? endDate,
@@ -446,10 +469,10 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           },
         ),
         returnValue:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
         returnValueForMissingStub:
-            _i7.Future<List<_i3.LeaveRequest>>.value(<_i3.LeaveRequest>[]),
-      ) as _i7.Future<List<_i3.LeaveRequest>>);
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+      ) as _i7.Future<List<_i4.LeaveRequest>>);
 
   @override
   _i7.Future<Map<String, dynamic>> validateScan(String? qrData) =>
@@ -501,7 +524,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
   _i7.Future<Map<String, dynamic>> listEmployees({
     String? search,
     String? departmentId,
-    String? status,
+    String? isActive,
     String? role,
     int? page = 1,
     int? limit = 20,
@@ -513,7 +536,7 @@ class MockApiService extends _i1.Mock implements _i4.ApiService {
           {
             #search: search,
             #departmentId: departmentId,
-            #status: status,
+            #isActive: isActive,
             #role: role,
             #page: page,
             #limit: limit,

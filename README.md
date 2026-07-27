@@ -298,7 +298,7 @@ The backend loads `backend/.env` first if it exists, then loads `backend/.env.<N
 
 | Env | Base file | Override file | DB Target | Command |
 |-----|-----------|---------------|-----------|---------|
-| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/quickpass` | `npm run dev` |
+| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
 | prod | `backend/.env` | `backend/.env.prod` | Supabase cloud | `npm run prod` |
 
 ### Quick Switch
@@ -391,7 +391,7 @@ Quickpass-QR/
 │   ├── src/
 │   │   ├── app.js             # Express app entry point
 │   │   ├── index.js           # Refactored entry (WIP, unused)
-│   │   ├── config/            # DB configuration
+│   │   ├── config/            # DB, Firebase configuration
 │   │   ├── controllers/       # auth, leave, supervisor, scan, admin
 │   │   ├── middleware/        # auth (JWT), validate (Joi), errorHandler
 │   │   ├── routes/            # All API route definitions
@@ -500,6 +500,7 @@ Optional:
 
 | Variable | Description |
 |----------|-------------|
+| `FCM_*` | Firebase Cloud Messaging credentials |
 | `HTTPS_KEY` / `HTTPS_CERT` | HTTPS server paths (port 3443 for camera access) |
 
 ---
@@ -696,11 +697,11 @@ flutter test --coverage
 ┌───────────────────┐                                        │
 │ Flutter App       │ ◄──────────────────────────────────────┘
 │ (Android)         │
-│                   │
-│ • Employee UI     │
-│ • Supervisor      │
-│ • Admin Panel     │
-│ • QR Scanner      │
+│                   │                              ┌──────────────────┐
+│ • Employee UI     │                              │  Firebase Cloud  │
+│ • Supervisor      │                              │  Messaging       │
+│ • Admin Panel     │                              │  (Push Notifs)   │
+│ • QR Scanner      │                              └──────────────────┘
 │ • QR Display      │
 └───────────────────┘
 ```
@@ -770,6 +771,7 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | POST | `/api/auth/refresh` | — | Refresh JWT token |
 | GET | `/api/auth/profile` | ✓ | Get current user profile |
 | PUT | `/api/auth/profile` | ✓ | Update profile (name, position, email, password) |
+| PUT | `/api/auth/fcm-token` | ✓ | Update FCM push token |
 
 ### Leave Requests
 
@@ -825,16 +827,36 @@ All passwords are `pass1234`.
 
 | ID | Name | Role | Department |
 |----|------|------|------------|
-| 000001 | Alice Chen | Employee | Engineering |
-| 000002 | Bob Santos | Employee | Engineering |
-| 000003 | Charlie Reyes | Employee | Engineering |
-| 000004 | David Kim | Supervisor | Engineering |
-| 000005 | Eva Martinez | Employee | Human Resources |
-| 000006 | Frank Tan | Employee | Human Resources |
-| 000007 | Grace Lim | Employee | Finance |
-| 000008 | Henry Cruz | Employee | Finance |
-| 000009 | Irene Gonzales | Employee | Administration |
-| 090901 | Guard Mike | Security | — |
+| 000001 | James Wilson | Employee | TSD · Technical Services Department |
+| 000002 | Maria Garcia | Employee | IAD · Internal Audit Department |
+| 000003 | John Lee | Employee | HRAD · Human Resource & Administration |
+| 000004 | Sara Patel | Employee | FSD · Finance Services Department |
+| 000005 | Alex Turner | Employee | ISD · Institutional Services Department |
+| 000006 | Emily Davis | Employee | ISD · Institutional Services Department |
+| 000007 | Ryan Chen | Employee | CPD · Corporate Planning Department |
+| 000008 | Olivia Brown | Employee | FSD · Finance Services Department |
+| 000009 | Daniel Kim | Employee | TSD · Technical Services Department |
+| 000010 | Sophia Martinez | Employee | CPD · Corporate Planning Department |
+| 000011 | Ethan White | Supervisor | TSD · Technical Services Department |
+| 000012 | Ava Johnson | Employee | CPD · Corporate Planning Department |
+| 000013 | Noah Taylor | Supervisor | HRAD · Human Resource & Administration |
+| 000014 | Isabella Anderson | Supervisor | FSD · Finance Services Department |
+| 000015 | Liam Thomas | Supervisor | ISD · Institutional Services Department |
+| 000016 | Mia Jackson | Employee | CPD · Corporate Planning Department |
+| 000017 | Lucas Harris | Supervisor | CPD · Corporate Planning Department |
+| 000018 | Charlotte Martin | Supervisor | IAD · Internal Audit Department |
+| 000019 | Mason Thompson | Employee | TSD · Technical Services Department |
+| 000020 | Amelia Robinson | Employee | CPD · Corporate Planning Department |
+| 090901 | Mike Ross | Security | ISD · Institutional Services Department |
+| 090902 | Sarah Connor | Security | ISD · Institutional Services Department |
+| 090903 | John Smith | Security | ISD · Institutional Services Department |
+| 090904 | David Miller | Security | ISD · Institutional Services Department |
+| 090905 | Chris Evans | Security | ISD · Institutional Services Department |
+| 090906 | Tony Stark | Security | ISD · Institutional Services Department |
+| 090907 | Natasha Romanoff | Security | ISD · Institutional Services Department |
+| 090908 | Steve Rogers | Security | ISD · Institutional Services Department |
+| 090909 | Bruce Banner | Security | ISD · Institutional Services Department |
+| 090910 | Clint Barton | Security | ISD · Institutional Services Department |
 | 999999 | System Admin | Admin + Supervisor + Security | — |
 
 ---

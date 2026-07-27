@@ -231,6 +231,11 @@ class ApiService {
     return Employee.fromJson(d);
   }
 
+  // ── Notifications ──
+  Future<void> updateFcmToken(String token) async {
+    await dio.put('/auth/fcm-token', data: {'fcm_token': token});
+  }
+
   // ── Leave Requests ──
   Future<LeaveRequest> submitLeave({
     required String leaveDate,
@@ -348,14 +353,14 @@ class ApiService {
   Future<Map<String, dynamic>> listEmployees(
       {String? search,
       String? departmentId,
-      String? status,
+      String? isActive,
       String? role,
       int page = 1,
       int limit = 20}) async {
     final params = <String, dynamic>{'page': page, 'limit': limit};
     if (search != null) params['search'] = search;
     if (departmentId != null) params['department_id'] = departmentId;
-    if (status != null) params['status'] = status;
+    if (isActive != null) params['is_active'] = isActive;
     if (role != null) params['role'] = role;
     final res = await dio.get('/admin/employees', queryParameters: params);
     return res.data;

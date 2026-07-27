@@ -82,6 +82,10 @@ jest.mock('../services/qrService', () => ({
   isWithinTimeWindow: jest.fn(() => true),
 }));
 
+jest.mock('../services/notificationService', () => ({
+  sendToEmployee: jest.fn().mockResolvedValue(),
+}));
+
 const db = require('../config/database');
 
 process.env.JWT_SECRET = 'test-jwt-secret';
@@ -129,7 +133,7 @@ describe('POST /api/scan/validate', () => {
       .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
       .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
     const qr = signQR({ leave_id: 'LV-001', employee_id: '000001', type: 'OUT', timestamp: now });
-    const leaveRow = { leave_id: 'LV-001', employee_id: '000001', status: 'approved', employee_name: 'Alice', out_scan_time: null, leave_date: today, start_time: '09:00', end_time: '17:00' };
+    const leaveRow = { leave_id: 'LV-001', employee_id: '000001', status: 'approved', employee_name: 'James Wilson', out_scan_time: null, leave_date: today, start_time: '09:00', end_time: '17:00' };
     db.transaction.mockImplementationOnce((cb) => {
       const trx = makeChain();
       trx.fn = { now: jest.fn(() => 'NOW()') };
@@ -183,7 +187,7 @@ describe('GET /api/scan/history', () => {
       .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true })
       .mockResolvedValueOnce({ count: 2 });
     db().resolve([
-      { log_id: 1, leave_id: 'LV-001', scanned_by: '090901', qr_type: 'OUT', scan_time: now, employee_name: 'Alice' },
+      { log_id: 1, leave_id: 'LV-001', scanned_by: '090901', qr_type: 'OUT', scan_time: now, employee_name: 'James Wilson' },
     ]);
     const res = await request(app)
       .get('/api/scan/history')

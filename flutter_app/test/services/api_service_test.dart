@@ -33,11 +33,11 @@ void main() {
       const refreshSid = 'test-refresh-sid';
       final userJson = {
         'employee_id': employeeId,
-        'full_name': 'Alice Chen',
-        'position': 'Engineer',
-        'department_id': '1',
-        'department_name': 'Engineering',
-        'email': 'alice@test.com',
+        'full_name': 'James Wilson',
+        'position': 'Software Engineer',
+        'department_id': 'DEP-002',
+        'department_name': 'TSD · Technical Services Department',
+        'email': 'james.wilson@zaneco.com',
         'is_supervisor': false,
         'is_admin': false,
         'is_security': false,
@@ -108,11 +108,11 @@ void main() {
             statusCode: 200,
             data: _mockResponse(data: {
               'employee_id': '000001',
-              'full_name': 'Alice Chen',
-              'position': 'Engineer',
-              'department_id': '1',
-              'department_name': 'Engineering',
-              'email': 'alice@test.com',
+              'full_name': 'James Wilson',
+              'position': 'Software Engineer',
+              'department_id': 'DEP-002',
+              'department_name': 'TSD · Technical Services Department',
+              'email': 'james.wilson@zaneco.com',
               'is_supervisor': false,
               'is_admin': false,
               'is_security': false,
@@ -125,9 +125,9 @@ void main() {
       final employee = await api.getProfile();
 
       expect(employee.employeeId, '000001');
-      expect(employee.fullName, 'Alice Chen');
-      expect(employee.position, 'Engineer');
-      expect(employee.departmentName, 'Engineering');
+      expect(employee.fullName, 'James Wilson');
+      expect(employee.position, 'Software Engineer');
+      expect(employee.departmentName, 'TSD · Technical Services Department');
     });
 
     test('getProfile throws on missing data', () async {
@@ -157,10 +157,10 @@ void main() {
             data: _mockResponse(data: {
               'leave_id': 'l1',
               'employee_id': '000001',
-              'employee_name': 'Alice Chen',
-              'department_id': '1',
-              'supervisor_id': 'sup1',
-              'supervisor_name': 'David Kim',
+              'employee_name': 'James Wilson',
+              'department_id': 'DEP-002',
+              'supervisor_id': '000011',
+              'supervisor_name': 'Ethan White',
               'leave_date': '2025-07-15',
               'start_time': '09:00',
               'end_time': '12:00',
@@ -200,10 +200,10 @@ void main() {
                 {
                   'leave_id': 'l1',
                   'employee_id': '000001',
-                  'employee_name': 'Alice Chen',
-                  'department_id': '1',
-                  'supervisor_id': 'sup1',
-                  'supervisor_name': 'David Kim',
+                  'employee_name': 'James Wilson',
+                  'department_id': 'DEP-002',
+                  'supervisor_id': '000011',
+                  'supervisor_name': 'Ethan White',
                   'leave_date': '2025-07-15',
                   'start_time': '09:00',
                   'end_time': '12:00',
@@ -253,7 +253,7 @@ void main() {
             data: {
               'success': true,
               'message': 'Valid QR code',
-              'data': {'type': 'OUT', 'employee_name': 'Alice Chen'},
+              'data': {'type': 'OUT', 'employee_name': 'James Wilson'},
             },
           ));
         },
@@ -279,11 +279,11 @@ void main() {
               'data': [
                 {
                   'employee_id': '000001',
-                  'full_name': 'Alice Chen',
-                  'position': 'Engineer',
-                  'department_id': '1',
-                  'department_name': 'Engineering',
-                  'email': 'alice@test.com',
+                  'full_name': 'James Wilson',
+                  'position': 'Software Engineer',
+                  'department_id': 'DEP-002',
+                  'department_name': 'TSD · Technical Services Department',
+                  'email': 'james.wilson@zaneco.com',
                   'is_supervisor': false,
                   'is_admin': false,
                   'is_security': false,
@@ -308,7 +308,7 @@ void main() {
             requestOptions: options,
             statusCode: 200,
             data: {'success': true, 'data': [
-              {'department_id': '1', 'department_name': 'Engineering', 'department_code': 'ENG', 'is_active': true},
+              {'department_id': 'DEP-001', 'department_name': 'ISD · Institutional Services Department', 'department_code': 'ISD', 'is_active': true},
             ]},
           ));
         },
@@ -317,7 +317,7 @@ void main() {
       final list = await api.getDepartments();
 
       expect(list.length, 1);
-      expect(list.first['department_name'], 'Engineering');
+      expect(list.first['department_name'], 'ISD · Institutional Services Department');
     });
   });
 

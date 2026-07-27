@@ -98,8 +98,8 @@ describe('GET /api/admin/employees', () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db.first.mockResolvedValueOnce({ count: 3 });
     db().resolve([
-      { employee_id: '000001', full_name: 'Alice', department_name: 'Engineering', is_active: true },
-      { employee_id: '000002', full_name: 'Bob', department_name: 'Engineering', is_active: true },
+      { employee_id: '000001', full_name: 'James Wilson', department_name: 'TSD · Technical Services Department', is_active: true },
+      { employee_id: '000002', full_name: 'Maria Garcia', department_name: 'IAD · Internal Audit Department', is_active: true },
     ]);
     const res = await request(app)
       .get('/api/admin/employees')
@@ -118,7 +118,7 @@ describe('POST /api/admin/employees', () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db.first
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ employee_id: 'EMP-001', full_name: 'New User', position: 'Engineer', email: 'new@example.com', department_name: 'Engineering', is_active: true });
+      .mockResolvedValueOnce({ employee_id: 'EMP-001', full_name: 'New User', position: 'Engineer', email: 'new@example.com', department_name: 'TSD · Technical Services Department', is_active: true });
     const res = await request(app)
       .post('/api/admin/employees')
       .set('Authorization', `Bearer ${adminToken()}`)
@@ -128,7 +128,7 @@ describe('POST /api/admin/employees', () => {
         position: 'Engineer',
         email: 'new@example.com',
         password: 'Password1',
-        department_id: 'DEPT01',
+        department_id: 'DEP-002',
       });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
@@ -146,7 +146,7 @@ describe('POST /api/admin/employees', () => {
         position: 'Engineer',
         email: 'existing@example.com',
         password: 'Password1',
-        department_id: 'DEPT01',
+        department_id: 'DEP-002',
       });
     expect(res.status).toBe(409);
   });
@@ -185,7 +185,7 @@ describe('GET /api/admin/departments', () => {
   it('lists active departments', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db().resolve([
-      { department_id: 'DEPT01', department_name: 'Engineering', is_active: true },
+      { department_id: 'DEP-001', department_name: 'ISD · Institutional Services Department', is_active: true },
     ]);
     const res = await request(app)
       .get('/api/admin/departments')
@@ -205,21 +205,21 @@ describe('POST /api/admin/departments', () => {
     db.first
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ department_id: 'DEPT03', department_name: 'New Dept', is_active: true });
+      .mockResolvedValueOnce({ department_id: 'DEP-007', department_name: 'New Dept', is_active: true });
     const res = await request(app)
       .post('/api/admin/departments')
       .set('Authorization', `Bearer ${adminToken()}`)
-      .send({ department_id: 'DEPT03', department_name: 'New Dept' });
+      .send({ department_id: 'DEP-007', department_name: 'New Dept' });
     expect(res.status).toBe(201);
   });
 
   it('returns 409 on duplicate name', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
-    db.first.mockResolvedValueOnce({ department_id: 'DEPT01' });
+    db.first.mockResolvedValueOnce({ department_id: 'DEP-001' });
     const res = await request(app)
       .post('/api/admin/departments')
       .set('Authorization', `Bearer ${adminToken()}`)
-      .send({ department_id: 'DEPT01', department_name: 'Engineering' });
+      .send({ department_id: 'DEP-001', department_name: 'ISD · Institutional Services Department' });
     expect(res.status).toBe(409);
   });
 });
@@ -232,10 +232,10 @@ describe('DELETE /api/admin/departments/:id', () => {
   it('returns 200 on deletion', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db.first
-      .mockResolvedValueOnce({ department_id: 'DEPT02', department_name: 'HR' })
+      .mockResolvedValueOnce({ department_id: 'DEP-002', department_name: 'TSD · Technical Services Department' })
       .mockResolvedValueOnce({ count: 0 });
     const res = await request(app)
-      .delete('/api/admin/departments/DEPT02')
+      .delete('/api/admin/departments/DEP-002')
       .set('Authorization', `Bearer ${adminToken()}`);
     expect(res.status).toBe(200);
   });
@@ -244,7 +244,7 @@ describe('DELETE /api/admin/departments/:id', () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db.first.mockResolvedValueOnce(null);
     const res = await request(app)
-      .delete('/api/admin/departments/DEPT99')
+      .delete('/api/admin/departments/DEP-099')
       .set('Authorization', `Bearer ${adminToken()}`);
     expect(res.status).toBe(404);
   });
@@ -258,7 +258,7 @@ describe('GET /api/admin/reports', () => {
   it('returns summary report data', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db().resolve([
-      { leave_id: 'LV-001', status: 'approved', employee_name: 'Alice', department_name: 'Engineering' },
+      { leave_id: 'LV-001', status: 'approved', employee_name: 'James Wilson', department_name: 'TSD · Technical Services Department' },
     ]);
     const res = await request(app)
       .get('/api/admin/reports')
@@ -270,7 +270,7 @@ describe('GET /api/admin/reports', () => {
   it('returns department report', async () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db().resolve([
-      { department_name: 'Engineering', department_id: 'DEPT01', total_requests: 10, approved: 5, rejected: 2, pending: 3, completed: 0 },
+      { department_name: 'TSD · Technical Services Department', department_id: 'DEP-002', total_requests: 10, approved: 5, rejected: 2, pending: 3, completed: 0 },
     ]);
     const res = await request(app)
       .get('/api/admin/reports')

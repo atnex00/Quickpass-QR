@@ -141,9 +141,9 @@ describe('authenticate middleware', () => {
     );
     const mockEmployee = {
       employee_id: '000001',
-      full_name: 'Alice Chen',
+      full_name: 'James Wilson',
       is_active: true,
-      department_name: 'Engineering',
+      department_name: 'TSD · Technical Services Department',
     };
     db.first
       .mockResolvedValueOnce({ is_active: true, session_id: 's1' })

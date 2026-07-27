@@ -57,6 +57,10 @@ router.put('/auth/profile', authenticate, validate(Joi.object({
 
 router.post('/auth/profile/photo', authenticate, upload.single('photo'), authController.uploadProfilePhoto);
 
+router.put('/auth/fcm-token', authenticate, validate(Joi.object({
+  fcm_token: Joi.string().required(),
+})), authController.fcmToken);
+
 // ── Employee Leave Routes ──
 router.post('/leave/request', authenticate, validate(Joi.object({
   leave_date: Joi.date().iso().required(),

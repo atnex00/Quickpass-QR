@@ -128,8 +128,8 @@ approved → pending (supervisor revokes approval)
 | 010 | `010_add_qr_scan_unique_constraint.js` | UNIQUE (leave_id, qr_type) |
 
 ## Seeds
-- **8 departments** (Engineering, Marketing, HR, Finance, Operations, Sales, IT, R&D)
-- **12 employees** — all password `pass1234`
+- **6 departments** (ISD, TSD, FSD, IAD, HRAD, CPD)
+- **33 employees** — all password `pass1234`
 
 ## Database Function
 `generate_employee_id()` — PL/pgSQL function using sequence `employee_id_seq`, returns zero-padded 6-digit string.

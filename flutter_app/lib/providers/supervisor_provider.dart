@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/leave_request.dart';
+import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 import '../utils/errors.dart';
@@ -54,6 +55,7 @@ class SupervisorProvider extends ChangeNotifier {
       _pendingRequests.removeWhere((l) => l.leaveId == leaveId);
       _approvedLeaves.insert(0, leave);
       notifyListeners();
+      AnalyticsService().logLeaveApproved();
       return leave;
     } catch (e) {
       _error = friendlyError(e);
@@ -91,6 +93,7 @@ class SupervisorProvider extends ChangeNotifier {
       _approvedLeaves.removeWhere((l) => l.leaveId == leaveId);
       _pendingRequests.insert(0, leave);
       notifyListeners();
+      AnalyticsService().logLeaveRevoked();
       return leave;
     } catch (e) {
       _error = friendlyError(e);
@@ -104,6 +107,7 @@ class SupervisorProvider extends ChangeNotifier {
       final leave = await _api.rejectLeave(leaveId, reason);
       _pendingRequests.removeWhere((l) => l.leaveId == leaveId);
       notifyListeners();
+      AnalyticsService().logLeaveRejected();
       return leave;
     } catch (e) {
       _error = friendlyError(e);

@@ -38,7 +38,7 @@ describe('authStore', () => {
   })
 
   it('login succeeds with valid credentials', async () => {
-    const mockUser = { employee_id: '000001', full_name: 'Alice Chen' }
+    const mockUser = { employee_id: '000001', full_name: 'James Wilson' }
     ;(api.post as any).mockResolvedValueOnce({
       data: { success: true, token: 'mock-token', user: mockUser },
     })
@@ -82,7 +82,7 @@ describe('authStore', () => {
     ;(api.post as any).mockResolvedValueOnce({
       data: { token: 'refreshed-token' },
     })
-    const mockProfile = { data: { employee_id: '000001', full_name: 'Alice Chen' } }
+    const mockProfile = { data: { employee_id: '000001', full_name: 'James Wilson' } }
     ;(api.get as any).mockResolvedValueOnce({ data: { data: mockProfile } })
 
     await useAuthStore.getState().loadUser()
@@ -94,16 +94,16 @@ describe('authStore', () => {
   })
 
   it('updateProfile updates user data', async () => {
-    const existingUser = { employee_id: '000001', full_name: 'Alice' }
+    const existingUser = { employee_id: '000001', full_name: 'James Wilson' }
     useAuthStore.setState({ user: existingUser as any })
     ;(api.put as any).mockResolvedValueOnce({
-      data: { data: { full_name: 'Alice Updated' } },
+      data: { data: { full_name: 'James Updated' } },
     })
 
-    const result = await useAuthStore.getState().updateProfile({ full_name: 'Alice Updated' })
+    const result = await useAuthStore.getState().updateProfile({ full_name: 'James Updated' })
     const state = useAuthStore.getState()
 
     expect(result).toBe(true)
-    expect(state.user?.full_name).toBe('Alice Updated')
+    expect(state.user?.full_name).toBe('James Updated')
   })
 })

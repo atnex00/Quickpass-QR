@@ -37,6 +37,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
   int _currentPage = 1;
   int _totalPages = 1;
   int _totalEmployees = 0;
+  int _loadVersion = 0;
 
   @override
   void initState() {
@@ -59,18 +60,28 @@ class _EmployeeTabState extends State<EmployeeTab> {
       AppConfig.photoUrl(emp['profile_photo'] as String?);
 
   Future<void> _loadData() async {
+    _loadVersion++;
+    final version = _loadVersion;
     setState(() {
       _isLoading = true;
       _loadingError = false;
     });
     try {
+      String? isActiveParam;
+      if (_filterStatus == 'active') {
+        isActiveParam = 'true';
+      } else if (_filterStatus == 'inactive') {
+        isActiveParam = 'false';
+      }
+
       final empRes = await _api.listEmployees(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
         departmentId: _filterDepartment?.isNotEmpty == true ? _filterDepartment : null,
-        status: _filterStatus.isNotEmpty ? _filterStatus : null,
+        isActive: isActiveParam,
         role: _filterRole.isNotEmpty ? _filterRole : null,
         page: _currentPage,
       );
+      if (!mounted || version != _loadVersion) return;
       if (empRes['success']) {
         _employees = List<Map<String, dynamic>>.from(empRes['data'] ?? []);
         final pagination = empRes['pagination'] as Map<String, dynamic>?;
@@ -79,11 +90,16 @@ class _EmployeeTabState extends State<EmployeeTab> {
             int.tryParse('${pagination?['total']}') ?? _employees.length;
       }
       final deps = await _api.getDepartments();
+      if (!mounted || version != _loadVersion) return;
       _departments = List<Map<String, dynamic>>.from(deps);
     } catch (e) {
+      if (!mounted || version != _loadVersion) return;
       _loadingError = true;
+      debugPrint('EmployeeTab._loadData error: $e');
     }
-    if (mounted) setState(() => _isLoading = false);
+    if (mounted && version == _loadVersion) {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _onSearchChanged(String v) {
@@ -303,7 +319,8 @@ class _EmployeeTabState extends State<EmployeeTab> {
                 ),
               )
             else if (_isLoading)
-              const SliverFillRemaining(
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
                 child: ShimmerList(
                     itemCount: 5,
                     itemBuilder: _employeeRowPlaceholder,
@@ -487,7 +504,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                         if (badges.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Row(children: badges),
+                            child: Wrap(children: badges, spacing: 0),
                           ),
                       ],
                     ),
