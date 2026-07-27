@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Web frontend
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: quickpass-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - quickpass-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quickpass-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_SSL=true
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=24h
+      - SESSION_EXPIRES_IN=7d
+      - QR_SECRET=${QR_SECRET}
+      - QR_VALIDITY_WINDOW_MINUTES=15
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - quickpass-network
+
+volumes:
+  # No local volumes — using Supabase cloud PostgreSQL
+
+networks:
+  quickpass-network:
+    driver: bridge

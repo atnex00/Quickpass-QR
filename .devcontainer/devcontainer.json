@@ -1,0 +1,44 @@
+{
+  "name": "Quickpass Dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-from-docker:1": {}
+  },
+  "runArgs": [
+    "--env-file=.devcontainer/devcontainer.env"
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.android,target=/home/vscode/.android,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/Android/Sdk,target=/opt/android-sdk,type=bind,consistency=cached"
+  ],
+  "containerEnv": {
+    "ANDROID_HOME": "/opt/android-sdk",
+    "ANDROID_SDK_ROOT": "/opt/android-sdk",
+    "FLUTTER_HOME": "/opt/flutter"
+  },
+  "forwardPorts": [3000],
+  "postCreateCommand": "cd backend && npm install && cd ../flutter_app && flutter pub get",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        "dbaeumer.vscode-eslint",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-docker",
+        "bierner.markdown-mermaid",
+        "EditorConfig.EditorConfig"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}

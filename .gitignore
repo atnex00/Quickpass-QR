@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pub/
+build/
+web/dist/
+
+# Build info
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.dev
+.env.prod
+.env.*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter
+flutter_app/ios/
+flutter_app/build/
+flutter_app/.dart_tool/
+flutter_app/.packages
+flutter_app/.pub-cache/
+flutter_app/lib/generated/
+
+# Android
+flutter_app/android/.gradle/
+flutter_app/android/build/
+flutter_app/android/local.properties
+flutter_app/android/key.properties
+
+# Docker
+docker-data/
+
+# Backups
+*.zip
+
+# Local setup
+tools/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Flutter env config
+flutter_app/env.dev.json
+flutter_app/env.prod.json
+
+# Admin desktop build
+admin-desktop/
+
+# Test coverage
+backend/coverage/
+web/coverage/
