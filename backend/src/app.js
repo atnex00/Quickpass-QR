@@ -64,6 +64,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const { initFirebase } = require('./config/firebase');
+const sentry = require('./config/sentry');
 const { errorHandler } = require('./middleware/errorHandler');
 const routes = require('./routes');
 
@@ -72,6 +73,9 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase
 initFirebase();
+
+// Initialize Sentry (optional, skips if SENTRY_DSN not set)
+sentry.init();
 
 // Middleware
 app.use(helmet());
@@ -173,6 +177,9 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
+// Sentry error handler (must be after all other middleware/controllers)
+sentry.setupErrorHandler(app);
+
 process.on('uncaughtException', (err) => {
   logger.fatal({ err }, 'Uncaught exception — shutting down');
   process.exit(1);
@@ -180,6 +187,9 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', (reason) => {
   logger.error({ err: reason }, 'Unhandled promise rejection');
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 });
 
 if (require.main === module) {

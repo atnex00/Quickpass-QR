@@ -17,7 +17,7 @@ echo ""
 
 echo "[1/2] Building Web Frontend..."
 cd "$WEB_DIR"
-npx vite build
+npm run build
 echo "  ✓ Build complete"
 
 echo "[2/2] Starting Backend API (port ${PORT:-3000})..."

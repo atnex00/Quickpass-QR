@@ -5,7 +5,7 @@
   "description": "Quickpass - Smart Gatepass & Leave Management",
   "scripts": {
     "dev": "NODE_ENV=dev bash dev.sh",
-    "prod": "NODE_ENV=prod bash dev.sh",
+    "prod": "NODE_ENV=production bash prod.sh",
     "dev:backend": "cd backend && npm run dev",
     "dev:web": "cd web && npx vite --host 0.0.0.0",
     "build:web": "cd web && npx vite build",

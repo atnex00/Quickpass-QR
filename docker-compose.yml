@@ -9,11 +9,14 @@ services:
     container_name: quickpass-web
     ports:
       - "8080:80"
+      - "8443:443"
     depends_on:
       - backend
     restart: unless-stopped
     networks:
       - quickpass-network
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
 
   # Backend API
   backend:

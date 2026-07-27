@@ -48,16 +48,22 @@ docker-data/
 # Local setup
 tools/
 
+# SSL certificates (generated, never commit)
+certs/
+
 # Logs
 *.log
 npm-debug.log*
 
 # Flutter env config
 flutter_app/env.dev.json
-flutter_app/env.prod.json
+!flutter_app/env.prod.json
 
 # Admin desktop build
 admin-desktop/
+
+# Session data
+sessions.txt
 
 # Test coverage
 backend/coverage/
