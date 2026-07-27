@@ -268,11 +268,14 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Page ${leaveProv.historyPage} of ${leaveProv.historyPages}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.neutralGray,
+                        Expanded(
+                          child: Text(
+                            'Page ${leaveProv.historyPage} of ${leaveProv.historyPages}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.neutralGray,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Row(

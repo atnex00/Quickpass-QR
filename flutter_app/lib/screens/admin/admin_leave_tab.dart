@@ -399,47 +399,50 @@ class _LeaveTabState extends State<LeaveTab> {
               status == 'approved' ||
               status == 'active') ...[
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.delete_outline,
-                      color: context.error, size: 20),
-                  tooltip: 'Delete',
-                  onPressed: () => _confirmDeleteLeave(leave),
-                ),
-                if (status == 'pending') ...[
-                  OutlinedButton.icon(
-                    onPressed: () => _rejectLeave(leave),
-                    icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Reject'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: context.error,
-                      side: BorderSide(color: context.error),
-                    ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.delete_outline,
+                        color: context.error, size: 20),
+                    tooltip: 'Delete',
+                    onPressed: () => _confirmDeleteLeave(leave),
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton.icon(
-                    onPressed: () => _approveLeave(leave),
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Approve'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: context.primary,
-                      foregroundColor: context.onPrimary,
+                  if (status == 'pending') ...[
+                    OutlinedButton.icon(
+                      onPressed: () => _rejectLeave(leave),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: const Text('Reject'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.error,
+                        side: BorderSide(color: context.error),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: () => _approveLeave(leave),
+                      icon: const Icon(Icons.check, size: 18),
+                      label: const Text('Approve'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: context.primary,
+                        foregroundColor: context.onPrimary,
+                      ),
+                    ),
+                  ],
+                  if (status == 'approved')
+                    OutlinedButton.icon(
+                      onPressed: () => _revokeApproval(leave),
+                      icon: const Icon(Icons.undo, size: 18),
+                      label: const Text('Revoke'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.warning,
+                        side: BorderSide(color: context.warning),
+                      ),
+                    ),
                 ],
-                if (status == 'approved')
-                  OutlinedButton.icon(
-                    onPressed: () => _revokeApproval(leave),
-                    icon: const Icon(Icons.undo, size: 18),
-                    label: const Text('Revoke'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: context.warning,
-                      side: BorderSide(color: context.warning),
-                    ),
-                  ),
-              ],
+              ),
             ),
           ],
         ],

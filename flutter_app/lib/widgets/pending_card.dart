@@ -129,36 +129,39 @@ class PendingCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: context.neutralGray, fontSize: 13)),
                 const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (showAdminActions)
-                      IconButton(
-                        icon: Icon(Icons.delete_outline,
-                            color: context.error, size: 20),
-                        tooltip: 'Delete',
-                        onPressed: () => _confirmDelete(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (showAdminActions)
+                        IconButton(
+                          icon: Icon(Icons.delete_outline,
+                              color: context.error, size: 20),
+                          tooltip: 'Delete',
+                          onPressed: () => _confirmDelete(context),
+                        ),
+                      OutlinedButton.icon(
+                        onPressed: () => showRejectDialog(context, leave),
+                        icon: const Icon(Icons.close, size: 18),
+                        label: const Text('Reject'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.error,
+                          side: BorderSide(color: context.error),
+                        ),
                       ),
-                    OutlinedButton.icon(
-                      onPressed: () => showRejectDialog(context, leave),
-                      icon: const Icon(Icons.close, size: 18),
-                      label: const Text('Reject'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: context.error,
-                        side: BorderSide(color: context.error),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () => approveLeave(context, leave),
+                        icon: const Icon(Icons.check, size: 18),
+                        label: const Text('Approve'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: context.primary,
+                          foregroundColor: context.onPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: () => approveLeave(context, leave),
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('Approve'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: context.primary,
-                        foregroundColor: context.onPrimary,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

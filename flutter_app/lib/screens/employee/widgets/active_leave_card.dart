@@ -47,41 +47,43 @@ class ActiveLeaveCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: context.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            leave.status == LeaveStatus.approved
-                                ? 'APPROVED'
-                                : 'ACTIVE PASS',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: context.success,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: context.success.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              leave.status == LeaveStatus.approved
+                                  ? 'APPROVED'
+                                  : 'ACTIVE PASS',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: context.success,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          leave.reason,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: responsiveFontSize(context, 24),
-                            fontWeight: FontWeight.w700,
-                            color: context.onSurface,
-                            letterSpacing: -0.01,
-                            height: 1.33,
+                          const SizedBox(height: 8),
+                          Text(
+                            leave.reason,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: responsiveFontSize(context, 24),
+                              fontWeight: FontWeight.w700,
+                              color: context.onSurface,
+                              letterSpacing: -0.01,
+                              height: 1.33,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Icon(Icons.check_circle, color: context.success, size: 28),
                   ],
