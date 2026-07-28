@@ -33,7 +33,7 @@ async function validateScan(req, res, next) {
     await db.transaction(async (trx) => {
       leave = await trx('leave_requests')
         .where({ leave_id })
-        .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+        .join('employees', 'leave_requests.employee_id', 'employees.employee_id')
         .select(
           'leave_requests.*',
           'employees.full_name as employee_name',
