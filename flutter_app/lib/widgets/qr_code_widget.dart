@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../config/app_config.dart';
 import '../config/theme.dart';
 import '../utils/qr_countdown.dart';
 
@@ -132,7 +133,7 @@ class _QrCodeWidgetState extends State<QrCodeWidget> with QrCountdownMixin<QrCod
           else ...[
             if (widget.qrImageUrl != null)
               CachedNetworkImage(
-                imageUrl: widget.qrImageUrl!,
+                imageUrl: AppConfig.photoUrl(widget.qrImageUrl)!,
                 width: 450,
                 height: 450,
                 fit: BoxFit.contain,

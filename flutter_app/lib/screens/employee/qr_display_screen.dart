@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../utils/date_formatter.dart';
@@ -439,10 +440,21 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
-                          widget.qrImageUrl!,
+                          AppConfig.photoUrl(widget.qrImageUrl)!,
                           width: displaySize,
                           height: displaySize,
                           fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              QrImageView(
+                            data: widget.qrData,
+                            size: displaySize,
+                            eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.circle,
+                                color: widget.qrColor),
+                            dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.circle,
+                                color: widget.qrColor),
+                          ),
                         ),
                       ),
                     );
