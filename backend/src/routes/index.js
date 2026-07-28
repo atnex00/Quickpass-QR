@@ -1,7 +1,7 @@
 const express = require('express');
 const Joi = require('joi');
 const multer = require('multer');
-const { validate, validateQuery } = require('../middleware/validate');
+const { validate, validateQuery, validateParams } = require('../middleware/validate');
 const { authenticate, requireSupervisor, requireAdmin, requireSecurity } = require('../middleware/auth');
 
 const upload = multer({
@@ -15,6 +15,20 @@ const upload = multer({
     }
   },
 });
+
+function handleMulterError(err, req, res, next) {
+  if (err instanceof multer.MulterError) {
+    const messages = {
+      LIMIT_FILE_SIZE: 'File too large — max 5MB',
+      LIMIT_UNEXPECTED_FILE: 'Unexpected file field',
+    };
+    return res.status(400).json({ success: false, message: messages[err.code] || err.message });
+  }
+  if (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next();
+}
 
 const authController = require('../controllers/authController');
 const leaveController = require('../controllers/leaveController');
@@ -30,7 +44,7 @@ router.get('/health', async (req, res, next) => {
   try {
     const db = require('../config/database');
     await db.raw('SELECT 1');
-    res.json({ success: true, message: 'Quickpass API is running', timestamp: new Date().toISOString() });
+    res.json({ success: true, message: 'OK', timestamp: new Date().toISOString() });
   } catch (err) {
     next(err);
   }
@@ -45,8 +59,13 @@ router.post('/auth/login', validate(Joi.object({
   password: Joi.string().min(8).required(),
 })), authController.login);
 
-router.post('/auth/logout', authenticate, authController.logout);
-router.post('/auth/refresh', authController.refreshToken);
+router.post('/auth/logout', authenticate, validate(Joi.object({
+  refresh_sid: Joi.string().optional(),
+}).min(0)), authController.logout);
+
+router.post('/auth/refresh', validate(Joi.object({
+  refresh_sid: Joi.string().optional(),
+})), authController.refreshToken);
 router.get('/auth/profile', authenticate, authController.getProfile);
 router.put('/auth/profile', authenticate, validate(Joi.object({
   full_name: Joi.string().min(2).max(100),
@@ -55,7 +74,7 @@ router.put('/auth/profile', authenticate, validate(Joi.object({
   password: Joi.string().min(8),
 }).min(1)), authController.updateProfile);
 
-router.post('/auth/profile/photo', authenticate, upload.single('photo'), authController.uploadProfilePhoto);
+router.post('/auth/profile/photo', authenticate, upload.single('photo'), handleMulterError, authController.uploadProfilePhoto);
 
 router.put('/auth/fcm-token', authenticate, validate(Joi.object({
   fcm_token: Joi.string().required(),
@@ -75,15 +94,25 @@ router.get('/leave/history', authenticate, validateQuery(Joi.object({
   limit: Joi.number().integer().min(1).max(100).optional(),
 })), leaveController.getHistory);
 router.get('/leave/active', authenticate, leaveController.getActiveLeave);
-router.get('/leave/:id', authenticate, leaveController.getLeaveById);
-router.post('/leave/:id/cancel', authenticate, leaveController.cancelLeave);
-router.delete('/leave/:id', authenticate, requireAdmin, leaveController.deleteLeave);
+router.get('/leave/:id', authenticate, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), leaveController.getLeaveById);
+router.post('/leave/:id/cancel', authenticate, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), leaveController.cancelLeave);
+router.delete('/leave/:id', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), leaveController.deleteLeave);
 
 // ── Supervisor Routes ──
 router.get('/supervisor/pending', authenticate, requireSupervisor, supervisorController.getPendingRequests);
-router.post('/supervisor/approve/:leaveId', authenticate, requireSupervisor, supervisorController.approveLeave);
+router.post('/supervisor/approve/:leaveId', authenticate, requireSupervisor, validateParams(Joi.object({
+  leaveId: Joi.string().required(),
+})), supervisorController.approveLeave);
 router.get('/supervisor/approved', authenticate, requireSupervisor, supervisorController.getApprovedLeaves);
-router.post('/supervisor/revoke/:leaveId', authenticate, requireSupervisor, supervisorController.revokeApproval);
+router.post('/supervisor/revoke/:leaveId', authenticate, requireSupervisor, validateParams(Joi.object({
+  leaveId: Joi.string().required(),
+})), supervisorController.revokeApproval);
 router.post('/supervisor/reject/:leaveId', authenticate, requireSupervisor, validate(Joi.object({
   reason: Joi.string().min(2).max(500).required(),
 })), supervisorController.rejectLeave);
@@ -137,10 +166,18 @@ router.put('/admin/employees/:id', authenticate, requireAdmin, validate(Joi.obje
   is_security: Joi.boolean(),
   is_active: Joi.boolean(),
 }).min(1)), adminController.updateEmployee);
-router.put('/admin/employees/:id/supervisor', authenticate, requireAdmin, adminController.toggleSupervisor);
-router.put('/admin/employees/:id/admin', authenticate, requireAdmin, adminController.toggleAdmin);
-router.put('/admin/employees/:id/status', authenticate, requireAdmin, adminController.toggleActive);
-router.delete('/admin/employees/:id', authenticate, requireAdmin, adminController.deleteEmployee);
+router.put('/admin/employees/:id/supervisor', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), adminController.toggleSupervisor);
+router.put('/admin/employees/:id/admin', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), adminController.toggleAdmin);
+router.put('/admin/employees/:id/status', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), adminController.toggleActive);
+router.delete('/admin/employees/:id', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), adminController.deleteEmployee);
 router.post('/admin/import/hr', authenticate, requireAdmin, validate(Joi.object({
   employees: Joi.array().items(Joi.object({
     employee_id: Joi.string().pattern(/^\d{6}$/).required(),
@@ -165,7 +202,9 @@ router.put('/admin/departments/:id', authenticate, requireAdmin, validate(Joi.ob
   head_of_department: Joi.string().allow(null, ''),
   is_active: Joi.boolean(),
 }).min(1)), adminController.updateDepartment);
-router.delete('/admin/departments/:id', authenticate, requireAdmin, adminController.deleteDepartment);
+router.delete('/admin/departments/:id', authenticate, requireAdmin, validateParams(Joi.object({
+  id: Joi.string().required(),
+})), adminController.deleteDepartment);
 router.get('/admin/reports', authenticate, requireAdmin, validateQuery(Joi.object({
   type: Joi.string().valid('daily', 'department', 'summary').optional(),
   start_date: Joi.string().isoDate().optional(),

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -12,44 +12,59 @@ jobs:
     defaults:
       run:
         working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
+
       - run: npm ci
+      - run: npm audit --production
       - run: npm run lint
       - run: npm test
+        env:
+          DB_CONNECTION: postgresql://postgres:postgres@localhost:5432/quickpass_test
+          JWT_SECRET: test-jwt-secret
+          QR_SECRET: test-qr-secret
+          COOKIE_SECRET: test-cookie-secret
+          NODE_ENV: test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: quickpass_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
   web:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: web
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: "npm"
           cache-dependency-path: web/package-lock.json
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
 
-  flutter-analyze:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    defaults:
-      run:
-        working-directory: flutter_app
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.4'
-          channel: stable
-      - run: flutter pub get
-      - run: flutter analyze
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+        env:
+          NODE_ENV: test
+      - run: npm run build

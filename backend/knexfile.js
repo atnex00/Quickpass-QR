@@ -93,6 +93,10 @@ module.exports = {
     pool: {
       min: 2,
       max: 20,
+      acquireTimeoutMillis: 30000,
+      createTimeoutMillis: 5000,
+      idleTimeoutMillis: 600000,
+      reapIntervalMillis: 1000,
     },
   },
 };

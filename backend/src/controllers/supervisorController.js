@@ -151,30 +151,34 @@ async function rejectLeave(req, res, next) {
       throw createError(400, 'Rejection reason is required');
     }
 
-    const leave = await db('leave_requests')
-      .where({ leave_id: leaveId, status: 'pending' })
-      .first();
+    let leave;
+    await db.transaction(async (trx) => {
+      leave = await trx('leave_requests')
+        .where({ leave_id: leaveId, status: 'pending' })
+        .forUpdate()
+        .first();
 
-    if (!leave) {
-      throw createError(404, 'Leave request not found or already processed');
-    }
-
-    if (!req.user.is_admin) {
-      if (leave.supervisor_id !== req.user.employee_id) {
-        throw createError(403, 'You are not the assigned supervisor for this request');
+      if (!leave) {
+        throw createError(404, 'Leave request not found or already processed');
       }
-      if (leave.department_id !== req.user.department_id) {
-        throw createError(403, 'This request is not in your department');
-      }
-    }
 
-    await db('leave_requests')
-      .where({ leave_id: leaveId })
-      .update({
-        status: 'rejected',
-        rejection_reason: reason.trim(),
-        updated_at: db.fn.now(),
-      });
+      if (!req.user.is_admin) {
+        if (leave.supervisor_id !== req.user.employee_id) {
+          throw createError(403, 'You are not the assigned supervisor for this request');
+        }
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This request is not in your department');
+        }
+      }
+
+      await trx('leave_requests')
+        .where({ leave_id: leaveId })
+        .update({
+          status: 'rejected',
+          rejection_reason: reason.trim(),
+          updated_at: trx.fn.now(),
+        });
+    });
 
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
@@ -247,43 +251,47 @@ async function revokeApproval(req, res, next) {
   try {
     const { leaveId } = req.params;
 
-    const leave = await db('leave_requests')
-      .where({ leave_id: leaveId, status: 'approved' })
-      .first();
+    let leave;
+    await db.transaction(async (trx) => {
+      leave = await trx('leave_requests')
+        .where({ leave_id: leaveId, status: 'approved' })
+        .forUpdate()
+        .first();
 
-    if (!leave) {
-      throw createError(404, 'Approved leave request not found');
-    }
-
-    if (!req.user.is_admin) {
-      if (leave.supervisor_id !== req.user.employee_id) {
-        throw createError(403, 'You are not the assigned supervisor for this request');
+      if (!leave) {
+        throw createError(404, 'Approved leave request not found');
       }
-      if (leave.department_id !== req.user.department_id) {
-        throw createError(403, 'This request is not in your department');
+
+      if (!req.user.is_admin) {
+        if (leave.supervisor_id !== req.user.employee_id) {
+          throw createError(403, 'You are not the assigned supervisor for this request');
+        }
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This request is not in your department');
+        }
       }
-    }
 
-    qrImageService.deleteQrImages(leaveId);
+      qrImageService.deleteQrImages(leaveId);
 
-    const updateData = {
-      status: 'pending',
-      out_qr_code: null,
-      in_qr_code: null,
-      out_qr_image: null,
-      in_qr_image: null,
-      updated_at: db.fn.now(),
-    };
-    if (!leave.out_scan_time) {
-      updateData.out_scan_time = null;
-    }
-    if (!leave.in_scan_time) {
-      updateData.in_scan_time = null;
-    }
+      const updateData = {
+        status: 'pending',
+        out_qr_code: null,
+        in_qr_code: null,
+        out_qr_image: null,
+        in_qr_image: null,
+        updated_at: trx.fn.now(),
+      };
+      if (!leave.out_scan_time) {
+        updateData.out_scan_time = null;
+      }
+      if (!leave.in_scan_time) {
+        updateData.in_scan_time = null;
+      }
 
-    await db('leave_requests')
-      .where({ leave_id: leaveId })
-      .update(updateData);
+      await trx('leave_requests')
+        .where({ leave_id: leaveId })
+        .update(updateData);
+    });
 
     try {
       await notificationService.sendToEmployee(leave.employee_id, {

@@ -105,32 +105,46 @@ async function refreshToken(req, res, next) {
       throw createError(401, 'No refresh token');
     }
 
-    const session = await db('sessions')
-      .where({ session_id: sessionId, is_active: true })
-      .where('expires_at', '>', db.fn.now())
-      .first();
+    let token;
+    let newSessionId;
 
-    if (!session) {
-      res.clearCookie('refresh_sid');
-      throw createError(401, 'Session expired');
-    }
+    await db.transaction(async (trx) => {
+      const session = await trx('sessions')
+        .where({ session_id: sessionId, is_active: true })
+        .where('expires_at', '>', trx.fn.now())
+        .forUpdate()
+        .first();
 
-    const employee = await db('employees').where({ employee_id: session.employee_id }).first();
-    if (!employee || !employee.is_active) {
-      res.clearCookie('refresh_sid');
-      await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
-      throw createError(401, 'Employee not found or deactivated');
-    }
+      if (!session) {
+        throw createError(401, 'Session expired');
+      }
 
-    const newSessionId = uuidv4();
-    await db('sessions').insert({
-      session_id: newSessionId,
-      employee_id: employee.employee_id,
-      created_at: db.fn.now(),
-      expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
-      is_active: true,
+      const employee = await trx('employees').where({ employee_id: session.employee_id }).first();
+      if (!employee || !employee.is_active) {
+        await trx('sessions').where({ session_id: sessionId }).update({ is_active: false });
+        throw createError(401, 'Employee not found or deactivated');
+      }
+
+      newSessionId = uuidv4();
+      await trx('sessions').insert({
+        session_id: newSessionId,
+        employee_id: employee.employee_id,
+        created_at: trx.fn.now(),
+        expires_at: trx.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
+        is_active: true,
+      });
+      await trx('sessions').where({ session_id: sessionId }).update({ is_active: false });
+
+      token = jwt.sign(
+        {
+          employee_id: employee.employee_id,
+          session_id: newSessionId,
+          role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
+        },
+        process.env.JWT_SECRET,
+        { algorithm: 'HS256', expiresIn: '15m' }
+      );
     });
-    await db('sessions').where({ session_id: sessionId }).update({ is_active: false });
 
     res.cookie('refresh_sid', newSessionId, {
       signed: true,
@@ -140,22 +154,15 @@ async function refreshToken(req, res, next) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const token = jwt.sign(
-      {
-        employee_id: employee.employee_id,
-        session_id: newSessionId,
-        role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
-      },
-      process.env.JWT_SECRET,
-      { algorithm: 'HS256', expiresIn: '15m' }
-    );
-
     const responsePayload = { success: true, token };
     if (isMobile) {
       responsePayload.refresh_sid = newSessionId;
     }
     res.json(responsePayload);
   } catch (err) {
+    if (err.status === 401) {
+      res.clearCookie('refresh_sid');
+    }
     next(err);
   }
 }

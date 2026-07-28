@@ -5,7 +5,7 @@
   "description": "Quickpass - Smart Gatepass & Leave Management",
   "scripts": {
     "dev": "NODE_ENV=dev bash dev.sh",
-    "prod": "NODE_ENV=prod bash dev.sh",
+    "prod": "NODE_ENV=production bash prod.sh",
     "dev:backend": "cd backend && npm run dev",
     "dev:web": "cd web && npx vite --host 0.0.0.0",
     "build:web": "cd web && npx vite build",
@@ -13,10 +13,24 @@
     "migrate": "cd backend && npx knex migrate:latest",
     "migrate:rollback": "cd backend && npx knex migrate:rollback",
     "seed": "cd backend && npx knex seed:run",
-    "test": "cd backend && npm test",
-    "docker:build": "docker compose build"
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "backend/src/**/*.js": [
+      "npm run lint --prefix backend -- --fix"
+    ],
+    "web/src/**/*.{ts,tsx}": [
+      "npx --prefix web tsc --noEmit"
+    ],
+    "flutter_app/**/*.dart": [
+      "bash -c \"cd flutter_app && flutter analyze --no-fatal-infos --no-fatal-warnings\""
+    ]
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.2.0"
   }
 }

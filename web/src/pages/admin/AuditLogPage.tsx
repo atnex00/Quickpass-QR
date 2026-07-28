@@ -47,7 +47,6 @@ export default function AuditLogPage() {
       setLogs(res.data.data)
       setTotal(res.data.pagination?.total || 0)
     } catch {
-      console.warn("Failed to load audit log")
     } finally {
       setLoading(false)
     }

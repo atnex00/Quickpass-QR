@@ -114,41 +114,46 @@ async function updateEmployee(req, res, next) {
     const { id } = req.params;
     const updates = req.body;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
-
-    const allowed = ['full_name', 'position', 'department_id', 'email', 'is_supervisor', 'is_admin', 'is_security', 'is_active'];
-    const toUpdate = {};
-
-    for (const field of allowed) {
-      if (updates[field] !== undefined) {
-        toUpdate[field] = updates[field] === '' ? null : updates[field];
+    let updated;
+    let changedFields;
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
       }
-    }
 
-    if (updates.password) {
-      toUpdate.password_hash = await bcrypt.hash(updates.password, 10);
-    }
+      const allowed = ['full_name', 'position', 'department_id', 'email', 'is_supervisor', 'is_admin', 'is_security', 'is_active'];
+      const toUpdate = {};
 
-    if (Object.keys(toUpdate).length === 0) {
-      throw createError(400, 'No valid fields to update');
-    }
+      for (const field of allowed) {
+        if (updates[field] !== undefined) {
+          toUpdate[field] = updates[field] === '' ? null : updates[field];
+        }
+      }
 
-    toUpdate.updated_at = db.fn.now();
+      if (updates.password) {
+        toUpdate.password_hash = await bcrypt.hash(updates.password, 10);
+      }
 
-    await db('employees').where({ employee_id: id }).update(toUpdate);
+      if (Object.keys(toUpdate).length === 0) {
+        throw createError(400, 'No valid fields to update');
+      }
 
-    const updated = await db('employees')
-      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
-      .where('employees.employee_id', id)
-      .select('employees.*', 'departments.department_name')
-      .first();
+      toUpdate.updated_at = trx.fn.now();
+
+      await trx('employees').where({ employee_id: id }).update(toUpdate);
+
+      changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
+
+      updated = await trx('employees')
+        .leftJoin('departments', 'employees.department_id', 'departments.department_id')
+        .where('employees.employee_id', id)
+        .select('employees.*', 'departments.department_name')
+        .first();
+    });
 
     res.json({ success: true, data: updated });
 
-    const changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
     auditService.log({
       action: 'update',
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
@@ -166,19 +171,25 @@ async function toggleSupervisor(req, res, next) {
   try {
     const { id } = req.params;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
+    let toggledTo;
+    let fullName;
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
+      }
 
-    await db('employees').where({ employee_id: id }).update({
-      is_supervisor: !employee.is_supervisor,
-      updated_at: db.fn.now(),
+      fullName = employee.full_name;
+      toggledTo = !employee.is_supervisor;
+      await trx('employees').where({ employee_id: id }).update({
+        is_supervisor: toggledTo,
+        updated_at: trx.fn.now(),
+      });
     });
 
     res.json({
       success: true,
-      message: `Supervisor status toggled to ${!employee.is_supervisor}`,
+      message: `Supervisor status toggled to ${toggledTo}`,
     });
 
     auditService.log({
@@ -186,7 +197,7 @@ async function toggleSupervisor(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
       entity: 'employee',
       entityId: id,
-      description: `Toggled supervisor status of ${employee.full_name} (${id}) to ${!employee.is_supervisor}`,
+      description: `Toggled supervisor status of ${fullName} (${id}) to ${toggledTo}`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
@@ -198,19 +209,25 @@ async function toggleAdmin(req, res, next) {
   try {
     const { id } = req.params;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
+    let toggledTo;
+    let fullName;
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
+      }
 
-    await db('employees').where({ employee_id: id }).update({
-      is_admin: !employee.is_admin,
-      updated_at: db.fn.now(),
+      fullName = employee.full_name;
+      toggledTo = !employee.is_admin;
+      await trx('employees').where({ employee_id: id }).update({
+        is_admin: toggledTo,
+        updated_at: trx.fn.now(),
+      });
     });
 
     res.json({
       success: true,
-      message: `Admin status toggled to ${!employee.is_admin}`,
+      message: `Admin status toggled to ${toggledTo}`,
     });
 
     auditService.log({
@@ -218,7 +235,7 @@ async function toggleAdmin(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
       entity: 'employee',
       entityId: id,
-      description: `Toggled admin status of ${employee.full_name} (${id}) to ${!employee.is_admin}`,
+      description: `Toggled admin status of ${fullName} (${id}) to ${toggledTo}`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
@@ -230,28 +247,36 @@ async function toggleActive(req, res, next) {
   try {
     const { id } = req.params;
 
-    const employee = await db('employees').where({ employee_id: id }).first();
-    if (!employee) {
-      throw createError(404, 'Employee not found');
-    }
+    let isNowActive;
+    let wasActive;
+    let fullName;
+    await db.transaction(async (trx) => {
+      const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
+      if (!employee) {
+        throw createError(404, 'Employee not found');
+      }
 
-    await db('employees').where({ employee_id: id }).update({
-      is_active: !employee.is_active,
-      updated_at: db.fn.now(),
+      fullName = employee.full_name;
+      wasActive = employee.is_active;
+      isNowActive = !employee.is_active;
+      await trx('employees').where({ employee_id: id }).update({
+        is_active: isNowActive,
+        updated_at: trx.fn.now(),
+      });
     });
 
     res.json({
       success: true,
-      message: `Employee ${employee.is_active ? 'deactivated' : 'activated'}`,
-      data: { is_active: !employee.is_active },
+      message: `Employee ${wasActive ? 'deactivated' : 'activated'}`,
+      data: { is_active: isNowActive },
     });
 
     auditService.log({
-      action: employee.is_active ? 'deactivate' : 'activate',
+      action: wasActive ? 'deactivate' : 'activate',
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
       entity: 'employee',
       entityId: id,
-      description: `${employee.is_active ? 'Deactivated' : 'Activated'} employee ${employee.full_name} (${id})`,
+      description: `${wasActive ? 'Deactivated' : 'Activated'} employee ${fullName} (${id})`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
@@ -354,17 +379,21 @@ async function deleteDepartment(req, res, next) {
   try {
     const { id } = req.params;
 
-    const dept = await db('departments').where({ department_id: id }).first();
-    if (!dept) {
-      throw createError(404, 'Department not found');
-    }
+    let deptName;
+    await db.transaction(async (trx) => {
+      const dept = await trx('departments').where({ department_id: id }).forUpdate().first();
+      if (!dept) {
+        throw createError(404, 'Department not found');
+      }
 
-    const empCount = await db('employees').where({ department_id: id }).count('* as count').first();
-    if (parseInt(empCount?.count || 0) > 0) {
-      throw createError(400, `Cannot delete: ${empCount.count} employee(s) still belong to this department`);
-    }
+      deptName = dept.department_name;
+      const empCount = await trx('employees').where({ department_id: id }).count('* as count').first();
+      if (parseInt(empCount?.count || 0) > 0) {
+        throw createError(400, `Cannot delete: ${empCount.count} employee(s) still belong to this department`);
+      }
 
-    await db('departments').where({ department_id: id }).del();
+      await trx('departments').where({ department_id: id }).del();
+    });
     res.json({ success: true, message: 'Department deleted' });
 
     auditService.log({
@@ -372,7 +401,7 @@ async function deleteDepartment(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
       entity: 'department',
       entityId: id,
-      description: `Deleted department ${dept.department_name} (${id})`,
+      description: `Deleted department ${deptName} (${id})`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {

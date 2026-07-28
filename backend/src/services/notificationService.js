@@ -34,7 +34,15 @@ async function sendToEmployee(employeeId, payload) {
     await messaging.send(message);
   } catch (err) {
     if (err.code === 'messaging/registration-token-not-registered') {
-      await db('employees').where({ employee_id: employeeId }).update({ fcm_token: null });
+      await db.transaction(async (trx) => {
+        const emp = await trx('employees')
+          .where({ employee_id: employeeId, fcm_token: employee.fcm_token })
+          .forUpdate()
+          .first();
+        if (emp) {
+          await trx('employees').where({ employee_id: employeeId }).update({ fcm_token: null });
+        }
+      });
     }
     throw err;
   }

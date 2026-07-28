@@ -9,11 +9,20 @@ services:
     container_name: quickpass-web
     ports:
       - "8080:80"
+      - "8443:443"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - quickpass-network
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Backend API
   backend:
@@ -33,11 +42,17 @@ services:
       - SESSION_EXPIRES_IN=7d
       - QR_SECRET=${QR_SECRET}
       - QR_VALIDITY_WINDOW_MINUTES=15
+      - COOKIE_SECRET=${COOKIE_SECRET}
     env_file:
       - ./backend/.env
     restart: unless-stopped
     networks:
       - quickpass-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   # No local volumes — using Supabase cloud PostgreSQL
