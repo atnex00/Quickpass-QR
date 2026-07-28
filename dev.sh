@@ -25,6 +25,11 @@ echo ""
 [ -d "$BACKEND_DIR" ] || { echo "ERROR: Backend directory not found at $BACKEND_DIR"; exit 1; }
 [ -d "$WEB_DIR" ] || { echo "ERROR: Web directory not found at $WEB_DIR"; exit 1; }
 
+# Free port 3000 before starting
+echo "[0/2] Freeing port 3000..."
+node "$BACKEND_DIR/scripts/free-port.js" 3000
+sleep 1
+
 # Start backend
 echo "[1/2] Starting Backend API (port 3000)..."
 cd "$BACKEND_DIR"

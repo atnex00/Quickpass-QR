@@ -20,6 +20,7 @@ const UserManagerPage = lazy(() => import("@/pages/admin/UserManagerPage"))
 const DepartmentsPage = lazy(() => import("@/pages/admin/DepartmentsPage"))
 const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"))
 const AuditLogPage = lazy(() => import("@/pages/admin/AuditLogPage"))
+const AdminPanelPage = lazy(() => import("@/pages/admin/AdminPanelPage"))
 const ScannerPage = lazy(() => import("@/pages/security/ScannerPage"))
 const ScanResultPage = lazy(() => import("@/pages/security/ScanResultPage"))
 const ScanHistoryPage = lazy(() => import("@/pages/security/ScanHistoryPage"))
@@ -79,6 +80,9 @@ function AppRoutes() {
         </Route>
 
         {import.meta.env.DEV && <Route path="/load-preview" element={<LoadPreviewPage />} />}
+        <Route path="/admin/panel" element={
+          <RequireRole roles={["is_admin"]}><AdminPanelPage /></RequireRole>
+        } />
         <Route path="*" element={<Navigate to="/employee" replace />} />
       </Routes>
     </Suspense>

@@ -55,6 +55,7 @@ certs/
 
 # Logs
 *.log
+logs/
 npm-debug.log*
 
 # Flutter env config

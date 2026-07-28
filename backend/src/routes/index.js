@@ -36,6 +36,7 @@ const supervisorController = require('../controllers/supervisorController');
 const scanController = require('../controllers/scanController');
 const adminController = require('../controllers/adminController');
 const auditController = require('../controllers/auditController');
+const panelController = require('../controllers/panelController');
 
 const router = express.Router();
 
@@ -222,5 +223,13 @@ router.get('/admin/export', authenticate, requireAdmin, validateQuery(Joi.object
   resource: Joi.string().valid('audit').optional(),
   actor_id: Joi.string().pattern(/^\d{6}$/).optional(),
 })), auditController.exportAuditLogs);
+
+// ── Admin Panel Routes ──
+router.get('/admin/panel/status', authenticate, requireAdmin, panelController.getStatus);
+router.post('/admin/panel/migrate', authenticate, requireAdmin, panelController.runMigrate);
+router.post('/admin/panel/seed', authenticate, requireAdmin, panelController.runSeed);
+router.get('/admin/panel/logs', authenticate, requireAdmin, panelController.getLogs);
+router.get('/admin/panel/metrics', authenticate, requireAdmin, panelController.getMetrics);
+router.post('/admin/panel/restart', authenticate, requireAdmin, panelController.restartServer);
 
 module.exports = router;

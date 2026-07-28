@@ -15,6 +15,10 @@ echo ""
 [ -d "$BACKEND_DIR" ] || { echo "ERROR: Backend directory not found at $BACKEND_DIR"; exit 1; }
 [ -d "$WEB_DIR" ] || { echo "ERROR: Web directory not found at $WEB_DIR"; exit 1; }
 
+echo "[0/2] Freeing port 3000..."
+node "$BACKEND_DIR/scripts/free-port.js" 3000
+sleep 1
+
 echo "[1/2] Building Web Frontend..."
 cd "$WEB_DIR"
 npm run build

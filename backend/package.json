@@ -7,7 +7,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "predev": "node scripts/free-port.js 3000",
     "dev": "nodemon src/app.js",
+    "prestart": "node scripts/free-port.js 3000",
     "start": "node src/app.js",
     "test": "jest --coverage --forceExit --detectOpenHandles",
     "migrate": "knex migrate:latest --knexfile knexfile.js",

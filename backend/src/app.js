@@ -110,6 +110,18 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Metrics collection for admin panel
+app.locals.metrics = { requests: 0, errors: 0, totalTime: 0 };
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    app.locals.metrics.requests++;
+    app.locals.metrics.totalTime += Date.now() - start;
+    if (res.statusCode >= 400) app.locals.metrics.errors++;
+  });
+  next();
+});
+
 // Trust proxy for rate limiting behind reverse proxy
 app.set('trust proxy', 1);
 
