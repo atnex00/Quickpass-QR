@@ -6,7 +6,6 @@ import '../../providers/scan_provider.dart';
 import '../../widgets/loading_indicator.dart';
 import '../shared/settings_screen.dart';
 import 'scan_history_screen.dart';
-import 'scanner_screen.dart';
 
 class ScanResultScreen extends StatefulWidget {
 
@@ -276,8 +275,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF064E3B),
                 ),
-                onPressed: () => Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => const ScannerScreen())),
+                onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                 child: const Text('Scan Next',
                     style: TextStyle(fontWeight: FontWeight.w600)),
               ),
@@ -328,8 +326,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) => const ScannerScreen())),
+                onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white38),

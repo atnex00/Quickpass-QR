@@ -171,4 +171,48 @@ async function getScanHistory(req, res, next) {
   }
 }
 
-module.exports = { validateScan, getScanHistory };
+async function getScanStats(req, res, next) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats = await db('qr_scan_logs')
+      .select(
+        db.raw('COUNT(*) as total'),
+        db.raw('COUNT(*) FILTER (WHERE is_valid = true) as valid'),
+        db.raw('COUNT(*) FILTER (WHERE is_valid = false) as invalid'),
+        db.raw("COUNT(*) FILTER (WHERE qr_type = 'OUT') as out_count"),
+        db.raw("COUNT(*) FILTER (WHERE qr_type = 'IN') as in_count"),
+      )
+      .where('scan_time', '>=', today)
+      .first();
+
+    const recent = await db('qr_scan_logs')
+      .leftJoin('leave_requests', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
+      .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+      .select(
+        'qr_scan_logs.*',
+        'employees.full_name as employee_name',
+        'employees.employee_id as employee_id'
+      )
+      .where('qr_scan_logs.scan_time', '>=', today)
+      .orderBy('qr_scan_logs.scan_time', 'desc')
+      .limit(10);
+
+    res.json({
+      success: true,
+      data: {
+        today_total: parseInt(stats.total) || 0,
+        today_valid: parseInt(stats.valid) || 0,
+        today_invalid: parseInt(stats.invalid) || 0,
+        today_out: parseInt(stats.out_count) || 0,
+        today_in: parseInt(stats.in_count) || 0,
+        recent,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { validateScan, getScanHistory, getScanStats };

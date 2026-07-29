@@ -127,6 +127,8 @@ router.get('/supervisor/team-leaves', authenticate, requireSupervisor, validateQ
 router.post('/scan/validate', authenticate, requireSecurity, validate(Joi.object({
   qr_data: Joi.string().required(),
 })), scanController.validateScan);
+router.get('/scan/stats', authenticate, requireSecurity, scanController.getScanStats);
+
 router.get('/scan/history', authenticate, requireSecurity, validateQuery(Joi.object({
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(100).optional(),

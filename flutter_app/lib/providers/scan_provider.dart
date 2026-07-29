@@ -20,6 +20,14 @@ class ScanProvider extends ChangeNotifier {
   int _historyTotal = 0;
   int _historyPages = 1;
 
+  int _todayTotal = 0;
+  int _todayValid = 0;
+  int _todayInvalid = 0;
+  int _todayOut = 0;
+  int _todayIn = 0;
+  List<ScanLog> _recentScans = [];
+  bool _statsLoading = false;
+
   Map<String, dynamic>? get lastResult => _lastResult;
   bool get isScanning => _isScanning;
   bool get isLoading => _isLoading;
@@ -29,6 +37,14 @@ class ScanProvider extends ChangeNotifier {
   int get historyPage => _historyPage;
   int get historyTotal => _historyTotal;
   int get historyPages => _historyPages;
+
+  int get todayTotal => _todayTotal;
+  int get todayValid => _todayValid;
+  int get todayInvalid => _todayInvalid;
+  int get todayOut => _todayOut;
+  int get todayIn => _todayIn;
+  List<ScanLog> get recentScans => _recentScans;
+  bool get statsLoading => _statsLoading;
 
   Future<bool> validateScan(String qrData) async {
     _isLoading = true;
@@ -73,6 +89,31 @@ class ScanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadStats() async {
+    _statsLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _api.getScanStats();
+      final stats = data['data'] as Map<String, dynamic>?;
+      if (stats != null) {
+        _todayTotal = stats['today_total'] as int? ?? 0;
+        _todayValid = stats['today_valid'] as int? ?? 0;
+        _todayInvalid = stats['today_invalid'] as int? ?? 0;
+        _todayOut = stats['today_out'] as int? ?? 0;
+        _todayIn = stats['today_in'] as int? ?? 0;
+        final recent = stats['recent'] as List? ?? [];
+        _recentScans = recent.map((j) => ScanLog.fromJson(j)).toList();
+      }
+      _error = null;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+    }
+
+    _statsLoading = false;
+    notifyListeners();
+  }
+
   void setScanning(bool value) {
     _isScanning = value;
     notifyListeners();
@@ -94,6 +135,13 @@ class ScanProvider extends ChangeNotifier {
     _historyPage = 1;
     _historyTotal = 0;
     _historyPages = 1;
+    _todayTotal = 0;
+    _todayValid = 0;
+    _todayInvalid = 0;
+    _todayOut = 0;
+    _todayIn = 0;
+    _recentScans = [];
+    _statsLoading = false;
     notifyListeners();
   }
 }

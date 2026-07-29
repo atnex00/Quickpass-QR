@@ -22,7 +22,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/employee/dashboard_screen.dart';
 import 'screens/employee/leave_history_screen.dart';
-import 'screens/security/scanner_screen.dart';
+import 'screens/security/security_shell.dart';
 import 'screens/supervisor/supervisor_dashboard.dart';
 import 'services/api_service.dart';
 import 'services/device_security_service.dart';
@@ -178,7 +178,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
         : widget.auth.isSupervisor
             ? const SupervisorDashboard()
             : widget.auth.isScanner
-                ? const ScannerScreen()
+                ? const SecurityShell()
                 : const EmployeeDashboard();
     _navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => home),
@@ -251,7 +251,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     }
 
     if (auth.isScanner) {
-      return const ScannerScreen();
+      return const SecurityShell();
     }
 
     return const EmployeeDashboard();

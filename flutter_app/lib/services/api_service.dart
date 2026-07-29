@@ -344,6 +344,11 @@ class ApiService {
     return res.data;
   }
 
+  Future<Map<String, dynamic>> getScanStats() async {
+    final res = await dio.get('/scan/stats');
+    return res.data;
+  }
+
   // ── Admin ──
   Future<Map<String, dynamic>> createEmployee(Map<String, dynamic> data) async {
     final res = await dio.post('/admin/employees', data: data);
