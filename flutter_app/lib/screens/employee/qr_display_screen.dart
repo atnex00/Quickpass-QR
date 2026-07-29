@@ -1,30 +1,65 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
+import '../../services/api_service.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/qr_countdown.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
 import '../../widgets/notification_bell.dart';
 
-class QrDisplayScreen extends StatelessWidget {
+class QrDisplayScreen extends StatefulWidget {
 
   const QrDisplayScreen({super.key, required this.leave});
   final LeaveRequest leave;
 
   @override
+  State<QrDisplayScreen> createState() => _QrDisplayScreenState();
+}
+
+class _QrDisplayScreenState extends State<QrDisplayScreen> {
+  late LeaveRequest _leave;
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _leave = widget.leave;
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      if (!mounted) return;
+      try {
+        final api = context.read<ApiService>();
+        final updated = await api.getLeaveById(_leave.leaveId);
+        setState(() => _leave = updated);
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormatter.formatDateApi(leave.leaveDate);
+    final dateStr = DateFormatter.formatDateApi(_leave.leaveDate);
 
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
             Hero(
-              tag: ValueKey('qr-leave-${leave.leaveId}'),
+              tag: ValueKey('qr-leave-${_leave.leaveId}'),
               child: CustomScrollView(
                 slivers: [
                   SliverAppBar(
@@ -140,7 +175,7 @@ class QrDisplayScreen extends StatelessWidget {
                                               ),
                                               const SizedBox(height: 8),
                                               Text(
-                                                leave.reason,
+                                                _leave.reason,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
@@ -154,7 +189,7 @@ class QrDisplayScreen extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          'ID: #${leave.leaveId}',
+                                          'ID: #${_leave.leaveId}',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -186,7 +221,7 @@ class QrDisplayScreen extends StatelessWidget {
                                               color: context.primaryBlue),
                                           const SizedBox(width: 8),
                                           Text(
-                                            '${leave.startTime} - ${leave.endTime}',
+                                            '${_leave.startTime} - ${_leave.endTime}',
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: context.onSurfaceVariant,
@@ -204,7 +239,7 @@ class QrDisplayScreen extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         
-                        if (!leave.hasQrCodes)
+                        if (!_leave.hasQrCodes)
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(32),
@@ -231,37 +266,41 @@ class QrDisplayScreen extends StatelessWidget {
                         else
                           Column(
                             children: [
-                              if (leave.outQrCode != null)
+                              if (_leave.outQrCode != null)
                                 _QrPassCard(
                                   label: 'Out Pass',
                                   icon: Icons.logout,
                                   headerColor: context.primary,
                                   headerTextColor: context.onPrimary,
-                                  qrData: leave.outQrCode!,
-                                  qrImageUrl: leave.outQrImage,
+                                  qrData: _leave.outQrCode!,
+                                  qrImageUrl: _leave.outQrImage,
                                   qrColor: context.primaryBlue,
                                   title: 'Exit Authorized',
                                   subtitle: 'Scan at Main Gate (Exit)',
                                   pulseColor: context.primaryBlue,
                                   date: dateStr,
-                                  time: leave.startTime,
+                                  time: _leave.startTime,
+                                  isOut: true,
+                                  scanTime: _leave.outScanTime,
                                 ),
                               const SizedBox(height: 16),
-                              if (leave.inQrCode != null)
+                              if (_leave.inQrCode != null)
                                 _QrPassCard(
                                   label: 'In Pass',
                                   icon: Icons.login,
                                   headerColor:
                                       context.success.withValues(alpha: 0.1),
                                   headerTextColor: context.success,
-                                  qrData: leave.inQrCode!,
-                                  qrImageUrl: leave.inQrImage,
+                                  qrData: _leave.inQrCode!,
+                                  qrImageUrl: _leave.inQrImage,
                                   qrColor: context.success,
                                   title: 'Entry Authorized',
                                   subtitle: 'Scan at Main Gate (Entry)',
                                   pulseColor: context.success,
                                   date: dateStr,
-                                  time: leave.endTime,
+                                  time: _leave.endTime,
+                                  isOut: false,
+                                  scanTime: _leave.inScanTime,
                                 ),
                             ],
                           ),
@@ -335,6 +374,8 @@ class _QrPassCard extends StatefulWidget {
     required this.pulseColor,
     required this.date,
     required this.time,
+    required this.isOut,
+    this.scanTime,
   });
   final String label;
   final IconData icon;
@@ -348,6 +389,8 @@ class _QrPassCard extends StatefulWidget {
   final Color pulseColor;
   final String date;
   final String time;
+  final bool isOut;
+  final DateTime? scanTime;
 
   @override
   State<_QrPassCard> createState() => _QrPassCardState();
@@ -357,7 +400,18 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
   @override
   void initState() {
     super.initState();
-    initCountdown(widget.date, widget.time, target: _resolveTarget());
+    if (widget.scanTime == null) {
+      initCountdown(widget.date, widget.time, target: _resolveTarget());
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _QrPassCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.scanTime != null && oldWidget.scanTime == null) {
+      disposeCountdown();
+      if (mounted) setState(() {});
+    }
   }
 
   DateTime? _resolveTarget() {
@@ -379,7 +433,8 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
 
   @override
   Widget build(BuildContext context) {
-    final expired = windowState == 'after';
+    final used = widget.scanTime != null;
+    final expired = !used && widget.isOut && windowState == 'after';
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -412,7 +467,19 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                     color: widget.headerTextColor,
                   ),
                 ),
-                Icon(widget.icon, color: widget.headerTextColor),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (used) ...[
+                      Icon(Icons.check_circle, size: 16, color: widget.headerTextColor.withValues(alpha: 0.7)),
+                      const SizedBox(width: 4),
+                      Text('Scanned',
+                        style: TextStyle(fontSize: 12, color: widget.headerTextColor.withValues(alpha: 0.7))),
+                      const SizedBox(width: 8),
+                    ],
+                    Icon(widget.icon, color: widget.headerTextColor),
+                  ],
+                ),
               ],
             ),
           ),
@@ -422,11 +489,55 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                () {
-                  final qrSize = (MediaQuery.of(context).size.width - 80)
-                      .clamp(180.0, 240.0);
-                  final displaySize = qrSize - 32;
-                  if (widget.qrImageUrl != null) {
+                if (used)
+                  Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Icon(Icons.check_circle, size: 48, color: context.neutralGray),
+                      const SizedBox(height: 8),
+                      Text('Already Scanned',
+                          style: TextStyle(color: context.neutralGray, fontSize: 16)),
+                      const SizedBox(height: 16),
+                    ],
+                  )
+                else ...[
+                  () {
+                    final qrSize = (MediaQuery.of(context).size.width - 80)
+                        .clamp(180.0, 240.0);
+                    final displaySize = qrSize - 32;
+                    if (widget.qrImageUrl != null) {
+                      return Container(
+                        width: qrSize,
+                        height: qrSize,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: widget.qrColor.withValues(alpha: 0.2)),
+                          borderRadius: BorderRadius.circular(12),
+                          color: context.surfaceContainerLow,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            AppConfig.photoUrl(widget.qrImageUrl)!,
+                            width: displaySize,
+                            height: displaySize,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                QrImageView(
+                              data: widget.qrData,
+                              size: displaySize,
+                              eyeStyle: QrEyeStyle(
+                                  eyeShape: QrEyeShape.circle,
+                                  color: widget.qrColor),
+                              dataModuleStyle: QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.circle,
+                                  color: widget.qrColor),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                     return Container(
                       width: qrSize,
                       height: qrSize,
@@ -437,104 +548,96 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                         borderRadius: BorderRadius.circular(12),
                         color: context.surfaceContainerLow,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          AppConfig.photoUrl(widget.qrImageUrl)!,
-                          width: displaySize,
-                          height: displaySize,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              QrImageView(
-                            data: widget.qrData,
-                            size: displaySize,
-                            eyeStyle: QrEyeStyle(
-                                eyeShape: QrEyeShape.circle,
-                                color: widget.qrColor),
-                            dataModuleStyle: QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.circle,
-                                color: widget.qrColor),
-                          ),
+                      child: RepaintBoundary(
+                        child: QrImageView(
+                          data: widget.qrData,
+                          size: displaySize,
+                          eyeStyle: QrEyeStyle(
+                              eyeShape: QrEyeShape.circle,
+                              color: widget.qrColor),
+                          dataModuleStyle: QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.circle,
+                              color: widget.qrColor),
                         ),
                       ),
                     );
-                  }
-                  return Container(
-                    width: qrSize,
-                    height: qrSize,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: widget.qrColor.withValues(alpha: 0.2)),
-                      borderRadius: BorderRadius.circular(12),
-                      color: context.surfaceContainerLow,
-                    ),
-                    child: RepaintBoundary(
-                      child: QrImageView(
-                        data: widget.qrData,
-                        size: displaySize,
-                        eyeStyle: QrEyeStyle(
-                            eyeShape: QrEyeShape.circle,
-                            color: widget.qrColor),
-                        dataModuleStyle: QrDataModuleStyle(
-                            dataModuleShape: QrDataModuleShape.circle,
-                            color: widget.qrColor),
-                      ),
-                    ),
-                  );
-                }(),
-                const SizedBox(height: 12),
-                if (!expired)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: widget.qrColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.timer_outlined,
-                            size: 16, color: widget.qrColor),
-                        const SizedBox(width: 6),
-                        Text(
-                          windowState == 'before'
-                              ? 'Opens in ${formatCountdown(remainingSeconds)}'
-                              : 'Expires in ${formatCountdown(remainingSeconds)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'monospace',
-                            color: widget.qrColor,
-                          ),
+                  }(),
+                  const SizedBox(height: 12),
+                  if (!expired)
+                    if (!widget.isOut && windowState == 'during')
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: widget.qrColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ],
-                    ),
-                  ),
-                if (expired)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: context.error.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.timer_off_outlined,
-                            size: 16, color: context.error),
-                        const SizedBox(width: 6),
-                        Text('Expired',
-                            style: TextStyle(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_circle,
+                                size: 16, color: widget.qrColor),
+                            const SizedBox(width: 6),
+                            Text('Ready to scan',
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: context.error)),
-                      ],
+                                color: widget.qrColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: widget.qrColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.timer_outlined,
+                                size: 16, color: widget.qrColor),
+                            const SizedBox(width: 6),
+                            Text(
+                              windowState == 'before'
+                                  ? 'Opens in ${formatCountdown(remainingSeconds)}'
+                                  : 'Expires in ${formatCountdown(remainingSeconds)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'monospace',
+                                color: widget.qrColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  if (expired)
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: context.error.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.timer_off_outlined,
+                              size: 16, color: context.error),
+                          const SizedBox(width: 6),
+                          Text('Expired',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.error)),
+                        ],
+                      ),
                     ),
-                  ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
+                ],
                 Text(
                   widget.title,
                   style: TextStyle(
