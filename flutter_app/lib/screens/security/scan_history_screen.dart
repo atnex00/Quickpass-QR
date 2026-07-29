@@ -9,7 +9,8 @@ import '../../widgets/loading_indicator.dart';
 import '../shared/settings_screen.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
-  const ScanHistoryScreen({super.key});
+  const ScanHistoryScreen({super.key, this.showBack = true});
+  final bool showBack;
 
   @override
   State<ScanHistoryScreen> createState() => _ScanHistoryScreenState();

@@ -94,10 +94,18 @@ class _ScannerScreenState extends State<ScannerScreen>
     HapticFeedback.heavyImpact();
     context.read<ScanProvider>().setScanning(false);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => ScanResultScreen(qrData: qrData)),
-    );
+    Navigator.of(context, rootNavigator: true)
+        .push(MaterialPageRoute(
+            builder: (_) => ScanResultScreen(qrData: qrData)))
+        .then((_) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _showManualEntry = false;
+          _manualCtl.clear();
+        });
+      }
+    });
   }
 
   void _submitManual() {
@@ -234,6 +242,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Widget _buildBottomSection() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
