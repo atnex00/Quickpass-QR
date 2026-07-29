@@ -11,7 +11,7 @@ async function getStatus(req, res) {
   try {
     await db.raw('SELECT 1');
     dbStatus = 'connected';
-  } catch (e) {
+  } catch {
     // DB unreachable — leave as disconnected
   }
   res.json({
