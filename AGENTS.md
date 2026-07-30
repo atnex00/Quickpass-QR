@@ -26,6 +26,16 @@ Env: `backend/.env` loads first if it exists, then `backend/.env.<NODE_ENV>` loa
 
 Setup scripts (`scripts/setup.ps1` / `setup.sh`) install Flutter + Android SDK into `tools/` — no system-wide installs. `scripts/run_phone.ps1` uses ADB reverse tunnel (`localhost:3000`) for physical device testing.
 
+### iOS (requires macOS + Xcode)
+
+```bash
+cd flutter_app/ios && pod install && cd ..
+open ios/Runner.xcworkspace
+```
+Then select your team in Xcode → Signing & Capabilities. Build to device with free provisioning (7-day expiry) or a paid developer account.
+
+Firebase: add an iOS app in [Firebase Console](https://console.firebase.google.com) for Quickpass-QR, download `GoogleService-Info.plist` to `flutter_app/ios/Runner/`, and update the `ios` config in `flutter_app/lib/firebase_options.dart` with the actual API key and app ID.
+
 No local PostgreSQL needed — `docker-compose.yml` provides only the backend service, DB is Supabase cloud.
 
 ## Commands
