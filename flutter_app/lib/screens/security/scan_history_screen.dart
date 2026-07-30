@@ -63,8 +63,10 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                             color: context.onPrimary.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Image.asset('assets/icon/app-icon.png',
-                              width: 16, height: 16),
+                          child: ColorFiltered(
+                              colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                              child: Image.asset('assets/icon/app-icon.png',
+                                  width: 16, height: 16)),
                         ),
                         const SizedBox(width: 8),
                         Text(

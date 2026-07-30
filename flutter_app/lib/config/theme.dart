@@ -458,14 +458,14 @@ class QuickpassTheme {
       ],
       scaffoldBackgroundColor: QuickpassColors.darkBackground,
       appBarTheme: AppBarTheme(
-        backgroundColor: QuickpassColors.darkSurface,
-        foregroundColor: QuickpassColors.darkOnSurface,
+        backgroundColor: QuickpassColors.darkPrimary,
+        foregroundColor: QuickpassColors.darkOnPrimary,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: QuickpassColors.darkOnSurface,
+          color: QuickpassColors.darkOnPrimary,
         ),
       ),
       cardTheme: CardThemeData(

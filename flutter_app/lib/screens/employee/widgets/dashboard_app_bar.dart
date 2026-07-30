@@ -28,8 +28,10 @@ class DashboardAppBar extends StatelessWidget {
                       color: context.onPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Image.asset('assets/icon/app-icon.png',
-                        width: 22, height: 22),
+                    child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                        child: Image.asset('assets/icon/app-icon.png',
+                            width: 22, height: 22)),
                   ),
                   const SizedBox(width: 8),
                   Text(

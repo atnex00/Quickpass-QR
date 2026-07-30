@@ -12,22 +12,22 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.12),
+        color: status.color(context).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
         border:
-            Border.all(color: status.color.withValues(alpha: 0.3)),
+            Border.all(color: status.color(context).withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(status.icon, size: fontSize + 2, color: status.color),
+          Icon(status.icon, size: fontSize + 2, color: status.color(context)),
           const SizedBox(width: 4),
           Text(
             status.label,
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w600,
-              color: status.color,
+              color: status.color(context),
             ),
           ),
         ],

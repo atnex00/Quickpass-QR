@@ -293,7 +293,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: context.outline,
+                                color: context.onSurfaceVariant,
                                 letterSpacing: 0.5)),
                         const SizedBox(height: 12),
                         Container(

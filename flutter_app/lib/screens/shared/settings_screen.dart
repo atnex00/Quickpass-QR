@@ -35,9 +35,9 @@ class SettingsScreen extends StatelessWidget {
                                 color: context.onSurface)),
                         subtitle: Text(user?.fullName ?? '',
                             style: TextStyle(
-                                color: context.neutralGray, fontSize: 13)),
+                                color: context.onSurfaceVariant, fontSize: 13)),
                         trailing: Icon(Icons.chevron_right,
-                            color: context.outline),
+                            color: context.onSurfaceVariant),
                         contentPadding: EdgeInsets.zero,
                         onTap: () {
                           Navigator.push(
@@ -85,8 +85,10 @@ class _SettingsAppBar extends StatelessWidget {
                       color: context.onPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Image.asset('assets/icon/app-icon.png',
-                        width: 22, height: 22),
+                    child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                        child: Image.asset('assets/icon/app-icon.png',
+                            width: 22, height: 22)),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -154,7 +156,7 @@ class _AppearanceCard extends StatelessWidget {
           Divider(color: context.outlineVariant),
           Row(
             children: [
-              Icon(Icons.dark_mode, color: context.neutralGray),
+              Icon(Icons.dark_mode, color: context.onSurfaceVariant),
               const SizedBox(width: 12),
               Expanded(
                 child: Text('Dark Mode',

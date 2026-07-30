@@ -37,8 +37,12 @@ class LeaveBreakdownSection extends StatelessWidget {
           title: '${e.$2}',
           color: e.$3,
           radius: 40,
-          titleStyle: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+          titleStyle: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white),
         ));
       }
     }

@@ -233,8 +233,10 @@ class _SupervisorAppBar extends StatelessWidget {
                   color: context.onPrimary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Image.asset('assets/icon/app-icon.png',
-                    width: 18, height: 18),
+                child: ColorFiltered(
+                    colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                    child: Image.asset('assets/icon/app-icon.png',
+                        width: 18, height: 18)),
               ),
               const SizedBox(width: 12),
                 Text(
@@ -263,8 +265,8 @@ class _SupervisorAppBar extends StatelessWidget {
                           (userName.isNotEmpty ? userName[0] : 'S').toUpperCase(),
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    color: context.onPrimary,
                           ),
                         )
                       : null,
@@ -300,7 +302,7 @@ class _WelcomeSection extends StatelessWidget {
               fontSize: responsiveFontSize(context, 14),
               fontWeight: FontWeight.w600,
               letterSpacing: 0.01,
-              color: context.outline,
+              color: context.onSurfaceVariant,
               height: 1.43,
             ),
           ),
@@ -472,8 +474,8 @@ class _PendingRequestsSection extends StatelessWidget {
               'Pending Requests',
               style: TextStyle(
                 fontSize: responsiveFontSize(context, 16),
-                fontWeight: FontWeight.w600,
-                color: context.onSurface,
+                            fontWeight: FontWeight.w600,
+                            color: context.onPrimary,
                 height: 1.5,
               ),
             ),
@@ -571,7 +573,7 @@ class _QuickActionCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: context.outline,
+                  color: context.onSurfaceVariant,
                 ),
               ),
             ],

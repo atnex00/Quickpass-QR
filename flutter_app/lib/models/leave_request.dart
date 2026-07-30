@@ -32,22 +32,22 @@ enum LeaveStatus {
     }
   }
 
-  Color get color {
+  Color color(BuildContext context) {
     switch (this) {
       case LeaveStatus.pending:
-        return QuickpassColors.warning;
+        return context.warning;
       case LeaveStatus.approved:
-        return QuickpassColors.primary;
+        return context.primary;
       case LeaveStatus.rejected:
-        return QuickpassColors.error;
+        return context.error;
       case LeaveStatus.active:
-        return QuickpassColors.success;
+        return context.success;
       case LeaveStatus.completed:
-        return QuickpassColors.secondary;
+        return context.secondary;
       case LeaveStatus.cancelled:
-        return Colors.grey;
+        return context.neutralGray;
       case LeaveStatus.unknown:
-        return Colors.grey;
+        return context.neutralGray;
     }
   }
 

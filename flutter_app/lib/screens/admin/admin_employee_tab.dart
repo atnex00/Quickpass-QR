@@ -498,7 +498,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                         Text(
                           '${emp['employee_id']} | ${emp['position'] ?? ''}',
                           style:
-                              TextStyle(fontSize: 12, color: context.outline),
+                              TextStyle(fontSize: 12, color: context.onSurfaceVariant),
                         ),
                         if (badges.isNotEmpty)
                           Padding(

@@ -32,16 +32,19 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
+                color: context.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/icon/app-icon.png',
-                  width: 52,
-                  height: 52,
-                  fit: BoxFit.cover,
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(context.onSurface, BlendMode.srcIn),
+                  child: Image.asset(
+                    'assets/icon/app-icon.png',
+                    width: 52,
+                    height: 52,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -50,16 +53,15 @@ class _SplashScreenState extends State<SplashScreen> {
               'Quickpass',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: QuickpassColors.darkPrimary,
+                    color: context.primary,
                   ),
-            ),
-            const SizedBox(height: 32),
-            const SizedBox(
+                ),
+            SizedBox(
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: QuickpassColors.darkPrimary,
+                color: context.primary,
               ),
             ),
           ],
