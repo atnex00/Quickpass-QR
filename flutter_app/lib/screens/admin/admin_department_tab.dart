@@ -209,7 +209,7 @@ class _DepartmentTabState extends State<DepartmentTab> {
                                                     style: TextStyle(
                                                         fontSize: 14,
                                                         color:
-                                                            context.outline)),
+                                                            context.onSurfaceVariant)),
                                               ],
                                             ),
                                           ),

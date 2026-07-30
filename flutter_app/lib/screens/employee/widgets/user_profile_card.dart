@@ -55,7 +55,7 @@ class UserProfileCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: context.outline,
+                    color: context.onSurfaceVariant,
                   ),
                 ),
                 Text(
@@ -87,7 +87,7 @@ class UserProfileCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Text(
                         '\u2022',
-                        style: TextStyle(fontSize: 10, color: context.outline),
+                        style: TextStyle(fontSize: 10, color: context.onSurfaceVariant),
                       ),
                     ),
                     Text(
@@ -96,7 +96,7 @@ class UserProfileCard extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.05,
-                        color: context.outline,
+                        color: context.onSurfaceVariant,
                       ),
                     ),
                   ],

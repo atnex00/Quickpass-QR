@@ -92,8 +92,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
               color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
-            child:
-                Image.asset('assets/icon/app-icon.png', width: 16, height: 16),
+            child: ColorFiltered(
+                colorFilter: ColorFilter.mode(context.onSurface, BlendMode.srcIn),
+                child:
+                    Image.asset('assets/icon/app-icon.png', width: 16, height: 16)),
           ),
           const SizedBox(width: 8),
           const Text(

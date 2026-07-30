@@ -222,7 +222,7 @@ class _ConnectivityBannerState extends State<ConnectivityBanner>
               Icon(
                 Icons.expand_less,
                 size: 14,
-                color: context.outline,
+                color: context.onSurfaceVariant,
               ),
             ],
           ],

@@ -53,8 +53,10 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                           color: context.onPrimary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Image.asset('assets/icon/app-icon.png',
-                            width: 16, height: 16),
+                        child: ColorFiltered(
+                            colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                            child: Image.asset('assets/icon/app-icon.png',
+                                width: 16, height: 16)),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -230,23 +232,23 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
                   child: Text('Recent Scans',
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87)),
+                          color: context.onSurface)),
                 ),
               ),
               if (scanProv.recentScans.isEmpty)
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(24),
                     child: Center(
                       child: Text('No scans today',
-                          style: TextStyle(color: Colors.grey)),
+                          style: TextStyle(color: context.onSurfaceVariant)),
                     ),
                   ),
                 )

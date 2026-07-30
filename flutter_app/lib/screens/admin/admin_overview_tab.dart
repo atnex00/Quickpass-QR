@@ -126,28 +126,28 @@ class _OverviewTabState extends State<OverviewTab> {
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: context.outline))),
+                          color: context.onSurfaceVariant))),
               Expanded(
                   flex: 3,
                   child: Text('Department',
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: context.outline))),
+                          color: context.onSurfaceVariant))),
               Expanded(
                   child: Text('Total',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: context.outline))),
+                          color: context.onSurfaceVariant))),
               Expanded(
                   child: Text('Pending',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: context.outline))),
+                          color: context.onSurfaceVariant))),
             ],
           ),
           const SizedBox(height: 8),

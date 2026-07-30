@@ -330,11 +330,13 @@ class _ScannerAppBar extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: context.onPrimary.withValues(alpha: 0.15),
+                    color: Colors.white70.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icon/app-icon.png',
-                      width: 18, height: 18),
+                  child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(context.onSurface, BlendMode.srcIn),
+                      child: Image.asset('assets/icon/app-icon.png',
+                          width: 18, height: 18)),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -342,24 +344,24 @@ class _ScannerAppBar extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: context.onPrimary,
+                    color: Colors.white,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.keyboard),
-                  color: context.onPrimary,
+                  color: Colors.white,
                   onPressed: onToggleManual,
                 ),
                 IconButton(
                   icon: Icon(torchEnabled
                       ? Icons.flashlight_on
                       : Icons.flashlight_off),
-                  color: context.onPrimary,
+                  color: Colors.white,
                   onPressed: onToggleTorch,
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: context.onPrimary),
+                  icon: Icon(Icons.more_vert, color: Colors.white),
                   color: context.surface,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),

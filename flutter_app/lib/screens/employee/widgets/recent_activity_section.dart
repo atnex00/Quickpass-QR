@@ -165,7 +165,7 @@ class _ActivityCard extends StatelessWidget {
                         DateFormatter.formatDateApi(leave.leaveDate),
                         style: TextStyle(
                           fontSize: 14,
-                          color: context.outline,
+                          color: context.onSurfaceVariant,
                           height: 1.43,
                         ),
                       ),
@@ -176,7 +176,7 @@ class _ActivityCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: leave.status.color.withValues(alpha: 0.1),
+                    color: leave.status.color(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -184,7 +184,7 @@ class _ActivityCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: leave.status.color,
+                      color: leave.status.color(context),
                     ),
                   ),
                 ),

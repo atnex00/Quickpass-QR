@@ -148,10 +148,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: context.outlineVariant),
                       ),
-                      child: Image.asset(
-                        'assets/icon/logo.png',
-                        height: 56,
-                        fit: BoxFit.contain,
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(context.onSurface, BlendMode.srcIn),
+                        child: Image.asset(
+                          'assets/icon/logo.png',
+                          height: 56,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -201,7 +204,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 16),
                           decoration: BoxDecoration(
-                            color: context.surface,
+                            color: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.85)
+                                : context.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: context.outlineVariant),
                           ),
@@ -267,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 hintText: '6-digit ID',
                                 prefixIcon: Icon(Icons.badge_outlined,
-                                    color: context.outline),
+                                    color: context.onSurfaceVariant),
                                 counterText: '',
                                 filled: true,
                                 fillColor: context.surfaceContainerLow,
@@ -330,13 +335,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 hintText: 'Password',
                                 prefixIcon: Icon(Icons.lock_outlined,
-                                    color: context.outline),
+                                    color: context.onSurfaceVariant),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscurePassword
                                         ? Icons.visibility
                                         : Icons.visibility_off,
-                                    color: context.outline,
+                                    color: context.onSurfaceVariant,
                                   ),
                                   onPressed: () => setState(() =>
                                       _obscurePassword = !_obscurePassword),
@@ -475,7 +480,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.5,
-                        color: context.outline,
+                        color: context.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -537,14 +542,14 @@ class _FooterBadge extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: context.outline),
+        Icon(icon, size: 16, color: context.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: context.outline,
+            color: context.onSurfaceVariant,
           ),
         ),
       ],

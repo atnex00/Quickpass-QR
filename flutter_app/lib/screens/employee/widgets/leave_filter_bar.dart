@@ -89,7 +89,11 @@ class _FilterChip extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.01,
-            color: selected ? Colors.white : context.onSurface,
+            color: selected
+                ? Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black
+                    : Colors.white
+                : context.onSurface,
           ),
         ),
       ),

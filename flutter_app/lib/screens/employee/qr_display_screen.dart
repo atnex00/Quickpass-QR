@@ -193,7 +193,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: context.outline,
+                                            color: context.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -652,7 +652,7 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: context.outline,
+                    color: context.onSurfaceVariant,
                   ),
                 ),
               ],

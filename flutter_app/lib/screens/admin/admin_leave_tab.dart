@@ -316,7 +316,7 @@ class _LeaveTabState extends State<LeaveTab> {
   Widget _buildLeaveItem(BuildContext context, Map<String, dynamic> leave) {
     final status = leave['status'] as String? ?? '';
     final leaveStatus = LeaveStatus.fromString(status);
-    final statusColor = leaveStatus.color;
+    final statusColor = leaveStatus.color(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),

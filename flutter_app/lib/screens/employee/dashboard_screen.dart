@@ -51,7 +51,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (i) => setState(() => _currentIndex = i),
           backgroundColor: context.surface,
-          indicatorColor: QuickpassColors.darkPrimary.withValues(alpha: 0.15),
+          indicatorColor: context.primary.withValues(alpha: 0.15),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: [
             NavigationDestination(

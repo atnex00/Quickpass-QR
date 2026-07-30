@@ -22,7 +22,7 @@ class LeaveHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = leave.status.color;
+    final statusColor = leave.status.color(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

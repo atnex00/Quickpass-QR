@@ -205,7 +205,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           child: Text(
                             code,
                             style:
-                                TextStyle(fontSize: 10, color: context.outline),
+                                TextStyle(fontSize: 10, color: context.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         );
@@ -221,15 +221,15 @@ class _ReportsTabState extends State<ReportsTab> {
                         return Text(
                           '${value.toInt()}',
                           style:
-                              TextStyle(fontSize: 10, color: context.outline),
-                        );
+                              TextStyle(fontSize: 10, color: context.onSurfaceVariant),
+                    );
                       },
                     ),
                   ),
                   topTitles: const AxisTitles(
-                      ),
+                  ),
                   rightTitles: const AxisTitles(
-                      ),
+                  ),
                 ),
                 borderData: FlBorderData(show: false),
                 barTouchData: BarTouchData(
@@ -306,7 +306,7 @@ class _ReportsTabState extends State<ReportsTab> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(e.$1, style: TextStyle(fontSize: 11, color: context.outline)),
+            Text(e.$1, style: TextStyle(fontSize: 11, color: context.onSurfaceVariant)),
           ],
         );
       }).toList(),
@@ -389,7 +389,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           final entry = _reportData![index];
                           final leaveStatus = LeaveStatus.fromString(
                               entry['status'] as String? ?? '');
-                          final statusColor = leaveStatus.color;
+                          final statusColor = leaveStatus.color(context);
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
@@ -417,7 +417,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                         '${entry['leave_date'] ?? ''} \u2022 ${entry['start_time'] ?? ''}-${entry['end_time'] ?? ''}',
                                         style: TextStyle(
                                             fontSize: 12,
-                                            color: context.outline),
+                                            color: context.onSurfaceVariant),
                                       ),
                                       Text(
                                         entry['reason'] ?? '',
