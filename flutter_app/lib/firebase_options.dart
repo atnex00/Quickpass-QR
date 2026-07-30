@@ -6,6 +6,9 @@ class DefaultFirebaseOptions {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return android;
     }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return ios;
+    }
     throw UnsupportedError(
       'DefaultFirebaseOptions are not supported for this platform.',
     );
@@ -17,5 +20,15 @@ class DefaultFirebaseOptions {
     messagingSenderId: '299600715888',
     projectId: 'quickpass-qr',
     storageBucket: 'quickpass-qr.firebasestorage.app',
+  );
+
+  // TODO: Add iOS Firebase app in Firebase Console, then fill these values
+  static const ios = FirebaseOptions(
+    apiKey: 'YOUR_IOS_API_KEY',
+    appId: 'YOUR_IOS_APP_ID',
+    messagingSenderId: '299600715888',
+    projectId: 'quickpass-qr',
+    storageBucket: 'quickpass-qr.firebasestorage.app',
+    iosBundleId: 'com.example.quickpass',
   );
 }
