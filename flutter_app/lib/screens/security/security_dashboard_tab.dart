@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/scan_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/loading_indicator.dart';
+import '../employee/request_leave_screen.dart';
 import '../shared/settings_screen.dart';
 import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
@@ -229,6 +230,69 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: context.outlineVariant),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    const RequestLeaveScreen())),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: context.primary
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(Icons.logout_outlined,
+                                    color: context.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Request Leave',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            color: context.onSurface)),
+                                    const SizedBox(height: 2),
+                                    Text('Submit a new leave request',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: context.neutralGray)),
+                                  ],
+                                ),
+                              ),
+                              Icon(Icons.chevron_right,
+                                  color: context.neutralGray, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
