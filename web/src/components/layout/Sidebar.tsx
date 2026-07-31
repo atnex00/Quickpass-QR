@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router"
 import {
   LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, User, BookOpen, ScrollText,
+  Scan, User, BookOpen, ScrollText, Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
@@ -35,6 +35,7 @@ const sections = [
   {
     label: "Admin",
     links: [
+      { to: "/admin/panel", icon: Settings, label: "Admin Panel" },
       { to: "/admin/employees", icon: Users, label: "Employees" },
       { to: "/admin/departments", icon: Building2, label: "Departments" },
       { to: "/admin/reports", icon: BarChart3, label: "Reports" },
@@ -107,7 +108,7 @@ export default function Sidebar() {
         {!collapsed ? (
           <>
             <div className="brand-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-              <img src="/app-icon.png" alt="" className="h-5 w-5" />
+              <img src="/app-icon.png" alt="" className="h-full w-full object-contain" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold font-display leading-tight text-foreground">QuickPass</p>
@@ -117,7 +118,7 @@ export default function Sidebar() {
           </>
         ) : (
           <div className="brand-gradient flex h-9 w-9 items-center justify-center rounded-lg">
-            <img src="/app-icon.png" alt="QuickPass" className="h-5 w-5" />
+            <img src="/app-icon.png" alt="QuickPass" className="h-full w-full object-contain" />
           </div>
         )}
       </div>

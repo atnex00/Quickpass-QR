@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import api from "@/lib/api"
 import {
   Loader2, Server, Database, Activity, FileText, RefreshCw, Play, ArrowLeft,
@@ -38,6 +39,7 @@ export default function AdminPanelPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [statusLoading, setStatusLoading] = useState(true)
   const [restarting, setRestarting] = useState(false)
+  const [showRestartDialog, setShowRestartDialog] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchStatus = useCallback(async () => {
@@ -84,8 +86,12 @@ export default function AdminPanelPage() {
     }
   }
 
-  const handleRestart = async () => {
-    if (!confirm("Restart the backend server? This will cause a brief downtime.")) return
+  const handleRestart = () => {
+    setShowRestartDialog(true)
+  }
+
+  const doRestart = async () => {
+    setShowRestartDialog(false)
     setRestarting(true)
     try {
       await api.post("/admin/panel/restart")
@@ -336,6 +342,26 @@ export default function AdminPanelPage() {
           </CardContent>
         </Card>
       </main>
+
+      <Dialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+        <DialogContent className="bg-[#111] border-[#222]">
+          <DialogHeader>
+            <DialogTitle className="text-[#e0e0e0]">Restart Server?</DialogTitle>
+            <DialogDescription className="text-[#888]">
+              The backend server will restart, causing a brief downtime. Are you sure?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowRestartDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={doRestart} className="bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20">
+              {restarting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              Restart
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
