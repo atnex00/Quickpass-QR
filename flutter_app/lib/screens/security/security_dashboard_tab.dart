@@ -12,7 +12,9 @@ import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 
 class SecurityDashboardTab extends StatefulWidget {
-  const SecurityDashboardTab({super.key});
+  const SecurityDashboardTab({super.key, this.onScanRequested});
+
+  final VoidCallback? onScanRequested;
 
   @override
   State<SecurityDashboardTab> createState() => _SecurityDashboardTabState();
@@ -211,10 +213,12 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const ScannerScreen())),
+                          onPressed: widget.onScanRequested ??
+                              () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ScannerScreen())),
                           icon: const Icon(Icons.qr_code_scanner, size: 20),
                           label: const Text('Scan QR'),
                         ),
@@ -236,7 +240,7 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
                     children: [
                       Expanded(

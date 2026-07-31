@@ -49,10 +49,12 @@ class _SecurityShellState extends State<SecurityShell> {
       ],
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
-          SecurityDashboardTab(),
-          ScannerScreen(),
-          ScanHistoryScreen(showBack: false),
+        children: [
+          SecurityDashboardTab(
+            onScanRequested: () => _onTabSelected(1),
+          ),
+          ScannerScreen(active: _currentIndex == 1),
+          const ScanHistoryScreen(showBack: false),
         ],
       ),
     );

@@ -11,7 +11,9 @@ import 'scan_history_screen.dart';
 import 'scan_result_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({super.key});
+  const ScannerScreen({super.key, this.active = true});
+
+  final bool active;
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -32,13 +34,26 @@ class _ScannerScreenState extends State<ScannerScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _requestCameraPermission();
+    if (widget.active) {
+      _requestCameraPermission();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ScannerScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active == oldWidget.active) return;
+    if (widget.active) {
+      _syncCamera();
+    } else {
+      _controller?.stop();
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && _controller != null) {
-      _controller!.start();
+      if (widget.active) _controller!.start();
     } else if (state == AppLifecycleState.paused && _controller != null) {
       _controller!.stop();
     }
@@ -65,10 +80,19 @@ class _ScannerScreenState extends State<ScannerScreen>
     }
   }
 
+  void _syncCamera() {
+    if (_permissionGranted) {
+      _initScanner();
+    } else {
+      _requestCameraPermission();
+    }
+  }
+
   void _initScanner() {
-    _controller = MobileScannerController(
+    _controller ??= MobileScannerController(
       detectionSpeed: DetectionSpeed.noDuplicates,
     );
+    _controller?.start();
     if (mounted) setState(() {});
   }
 
