@@ -265,10 +265,6 @@ body { @apply bg-background text-foreground antialiased; }
 .status-bar-user {
   @apply text-[11px] text-muted-foreground;
 }
-.status-bar-dot {
-  @apply inline-block h-1.5 w-1.5 rounded-full bg-primary;
-  animation: amberPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
 
 /* LED dot indicator */
 .led-dot {
