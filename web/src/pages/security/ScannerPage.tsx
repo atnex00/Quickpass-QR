@@ -184,10 +184,10 @@ export default function ScannerPage() {
 
           <div className="flex items-center justify-center gap-3">
             <Link to="/employee">
-              <Button variant="ghost" size="sm" className="gap-1.5"><LayoutDashboard className="h-4 w-4" /><span className="text-[11px]">Dashboard</span></Button>
+              <Button variant="ghost" size="sm" className="gap-1.5"><LayoutDashboard className="h-4 w-4" /><span className="text-[11px]">Back to Dashboard</span></Button>
             </Link>
             <Link to="/security/history">
-              <Button variant="ghost" size="sm" className="gap-1.5"><History className="h-4 w-4" /><span className="text-[11px]">History</span></Button>
+              <Button variant="ghost" size="sm" className="gap-1.5"><History className="h-4 w-4" /><span className="text-[11px]">Scanned QR History</span></Button>
             </Link>
             <Button variant="ghost" size="sm" className="gap-1.5" onClick={logout}><LogOut className="h-4 w-4" /><span className="text-[11px]">Logout</span></Button>
           </div>
