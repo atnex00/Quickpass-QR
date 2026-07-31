@@ -6,11 +6,6 @@ const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 const auditService = require('../services/auditService');
 
-function fmtDate(d) {
-  if (d instanceof Date) return d.toISOString().split('T')[0];
-  return String(d).split('T')[0];
-}
-
 async function getPendingRequests(req, res, next) {
   try {
     let query = db('leave_requests')
@@ -68,7 +63,7 @@ async function approveLeave(req, res, next) {
         }
       }
 
-      const leaveDate = fmtDate(leave.leave_date);
+      const leaveDate = getLocalDateString(leave.leave_date);
       const todayStr = getLocalDateString();
 
       const now = new Date();
@@ -107,7 +102,7 @@ async function approveLeave(req, res, next) {
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
         title: 'Leave Approved',
-        body: `Your leave for ${fmtDate(leave.leave_date)} has been approved`,
+        body: `Your leave for ${getLocalDateString(leave.leave_date)} has been approved`,
         data: { leave_id: leaveId, type: 'approved' },
       });
     } catch (notifErr) {
@@ -134,7 +129,7 @@ async function approveLeave(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
       entity: 'leave_request',
       entityId: leaveId,
-      description: `Approved leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      description: `Approved leave for ${updated.employee_name} on ${getLocalDateString(leave.leave_date)}`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
@@ -183,7 +178,7 @@ async function rejectLeave(req, res, next) {
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
         title: 'Leave Rejected',
-        body: `Your leave for ${fmtDate(leave.leave_date)} was rejected: ${reason}`,
+        body: `Your leave for ${getLocalDateString(leave.leave_date)} was rejected: ${reason}`,
         data: { leave_id: leaveId, type: 'rejected' },
       });
     } catch (notifErr) {
@@ -210,7 +205,7 @@ async function rejectLeave(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
       entity: 'leave_request',
       entityId: leaveId,
-      description: `Rejected leave for ${updated.employee_name} on ${fmtDate(leave.leave_date)}: ${reason.trim()}`,
+      description: `Rejected leave for ${updated.employee_name} on ${getLocalDateString(leave.leave_date)}: ${reason.trim()}`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
@@ -296,7 +291,7 @@ async function revokeApproval(req, res, next) {
     try {
       await notificationService.sendToEmployee(leave.employee_id, {
         title: 'Approval Revoked',
-        body: `Your leave for ${fmtDate(leave.leave_date)} approval has been revoked`,
+        body: `Your leave for ${getLocalDateString(leave.leave_date)} approval has been revoked`,
         data: { leave_id: leaveId, type: 'revoked' },
       });
     } catch (notifErr) {
@@ -323,7 +318,7 @@ async function revokeApproval(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: req.user.is_admin ? 'admin' : 'supervisor' },
       entity: 'leave_request',
       entityId: leaveId,
-      description: `Revoked approval for ${updated.employee_name} on ${fmtDate(leave.leave_date)}`,
+      description: `Revoked approval for ${updated.employee_name} on ${getLocalDateString(leave.leave_date)}`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
