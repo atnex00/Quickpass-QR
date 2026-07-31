@@ -7,7 +7,6 @@ import jsQR from "jsqr"
 import { toast } from "sonner"
 import { useScanStore } from "@/stores/scanStore"
 import { useAuthStore } from "@/stores/authStore"
-import PageHeader from "@/components/layout/PageHeader"
 
 type ScanState = "idle" | "detected" | "confirmed"
 
@@ -178,22 +177,20 @@ export default function ScannerPage() {
       <main className="relative z-[1] flex flex-1 flex-col items-center p-6">
         <div className="w-full max-w-sm space-y-4">
 
-          <PageHeader
-            title="Gate Scanner"
-            subtitle="Scan OUT or IN QR codes to record gate entries"
-            icon={<QrCode className="h-5 w-5" />}
-            actions={
-              <div className="flex items-center gap-1">
-                <Link to="/employee">
-                  <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
-                </Link>
-                <Link to="/security/history">
-                  <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
-              </div>
-            }
-          />
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Gate Scanner</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Scan OUT or IN QR codes to record gate entries</p>
+          </div>
+
+          <div className="flex items-center gap-1 self-end">
+            <Link to="/employee">
+              <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
+            </Link>
+            <Link to="/security/history">
+              <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
+          </div>
 
           {/* Scanner Card */}
           <div className="card-elevated">
