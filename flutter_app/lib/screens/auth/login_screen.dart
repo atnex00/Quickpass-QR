@@ -204,16 +204,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 16),
                           decoration: BoxDecoration(
-                            color: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                            color: Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white.withValues(alpha: 0.85)
                                 : context.surface,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: context.outlineVariant),
                           ),
-                          child: Image.asset(
-                            'assets/icon/logo.png',
-                            height: 56,
-                            fit: BoxFit.contain,
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              BlendMode.srcIn,
+                            ),
+                            child: Image.asset(
+                              'assets/icon/logo.png',
+                              height: 56,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
