@@ -182,14 +182,14 @@ export default function ScannerPage() {
             <p className="mt-1 text-sm text-muted-foreground">Scan OUT or IN QR codes to record gate entries</p>
           </div>
 
-          <div className="flex items-center gap-1 self-end">
+          <div className="flex items-center justify-center gap-3">
             <Link to="/employee">
-              <Button variant="ghost" size="sm"><LayoutDashboard className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" className="gap-1.5"><LayoutDashboard className="h-4 w-4" /><span className="text-[11px]">Dashboard</span></Button>
             </Link>
             <Link to="/security/history">
-              <Button variant="ghost" size="sm"><History className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" className="gap-1.5"><History className="h-4 w-4" /><span className="text-[11px]">History</span></Button>
             </Link>
-            <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={logout}><LogOut className="h-4 w-4" /><span className="text-[11px]">Logout</span></Button>
           </div>
 
           {/* Scanner Card */}
