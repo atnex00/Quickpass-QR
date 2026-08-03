@@ -131,6 +131,7 @@ const limiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path.startsWith('/api/scan'),
   keyGenerator: (req) => {
     if (req.user) return `user:${req.user.employee_id}`;
     const auth = req.headers.authorization;
