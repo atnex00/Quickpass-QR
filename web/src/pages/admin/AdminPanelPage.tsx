@@ -98,6 +98,7 @@ export default function AdminPanelPage() {
     } catch {
       //
     }
+    setTimeout(() => { window.location.reload() }, 1000)
   }
 
   const formatUptime = (seconds: number) => {
