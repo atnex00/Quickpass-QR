@@ -212,7 +212,7 @@ async function updateProfile(req, res, next) {
     await db('employees').where({ employee_id: req.user.employee_id }).update(toUpdate);
 
     const updated = await db('employees')
-      .join('departments', 'employees.department_id', 'departments.department_id')
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', req.user.employee_id)
       .select(
         'employees.employee_id',
@@ -283,7 +283,7 @@ async function uploadProfilePhoto(req, res, next) {
     });
 
     const updated = await db('employees')
-      .join('departments', 'employees.department_id', 'departments.department_id')
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', req.user.employee_id)
       .select(
         'employees.employee_id',
