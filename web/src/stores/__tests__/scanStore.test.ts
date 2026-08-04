@@ -9,6 +9,11 @@ vi.mock('@/lib/api', () => ({
   },
 }))
 
+const apiMock = api as unknown as {
+  get: ReturnType<typeof vi.fn>
+  post: ReturnType<typeof vi.fn>
+}
+
 describe('scanStore', () => {
   beforeEach(() => {
     useScanStore.setState({
@@ -23,19 +28,19 @@ describe('scanStore', () => {
 
   it('validateScan posts QR data and stores result on success', async () => {
     const result = { success: true, message: 'Valid QR', data: { leave_id: 'LV-001' } }
-    ;(api.post as any).mockResolvedValueOnce({ data: result })
+    apiMock.post.mockResolvedValueOnce({ data: result })
 
     const ok = await useScanStore.getState().validateScan('qr-data-string')
     const state = useScanStore.getState()
 
     expect(ok).toBe(true)
-    expect(api.post).toHaveBeenCalledWith('/scan/validate', { qr_data: 'qr-data-string' })
+    expect(apiMock.post).toHaveBeenCalledWith('/scan/validate', { qr_data: 'qr-data-string' })
     expect(state.lastResult).toEqual(result)
     expect(state.isLoading).toBe(false)
   })
 
   it('validateScan stores error on failure', async () => {
-    ;(api.post as any).mockRejectedValueOnce({
+    apiMock.post.mockRejectedValueOnce({
       response: { status: 400, data: { message: 'Invalid QR code' } },
     })
 
@@ -48,7 +53,7 @@ describe('scanStore', () => {
   })
 
   it('validateScan stores generic message when no response error text', async () => {
-    ;(api.post as any).mockRejectedValueOnce(new Error('Network Error'))
+    apiMock.post.mockRejectedValueOnce(new Error('Network Error'))
 
     await useScanStore.getState().validateScan('bad-data')
 
@@ -57,7 +62,7 @@ describe('scanStore', () => {
 
   it('loadHistory fetches scan history', async () => {
     const history = [{ id: 1, qr_data: 'abc' }]
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: history } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: history } })
 
     await useScanStore.getState().loadHistory()
 
@@ -66,7 +71,7 @@ describe('scanStore', () => {
   })
 
   it('loadHistory sets loading false on error', async () => {
-    ;(api.get as any).mockRejectedValueOnce(new Error('fail'))
+    apiMock.get.mockRejectedValueOnce(new Error('fail'))
 
     await useScanStore.getState().loadHistory()
 

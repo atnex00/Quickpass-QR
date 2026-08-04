@@ -4,7 +4,7 @@ const QRCode = require('qrcode');
 const sharp = require('sharp');
 
 const LOGO_PATH = path.join(__dirname, '../../uploads/logo.png');
-const OUTPUT_DIR = path.join(__dirname, '../../uploads/qr_codes');
+const OUTPUT_DIR = path.join(__dirname, '../../uploads-private/qr_codes');
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
@@ -61,14 +61,22 @@ async function generateQrImage(qrData, type, leaveId) {
   const outputPath = path.join(OUTPUT_DIR, filename);
   await img.toFile(outputPath);
 
-  return `/uploads/qr_codes/${filename}`;
+  return `/api/leave/${leaveId}/qr/${type.toLowerCase()}`;
+}
+
+function getQrImagePath(leaveId, type) {
+  const filename = `${leaveId}_${type.toLowerCase()}.png`;
+  return path.join(OUTPUT_DIR, filename);
 }
 
 function deleteQrImages(leaveId) {
+  if (typeof leaveId !== 'string' || !/^LV-\d{8}-[A-F0-9]{8}$/.test(leaveId)) {
+    return;
+  }
   ['out', 'in'].forEach((type) => {
     const p = path.join(OUTPUT_DIR, `${leaveId}_${type}.png`);
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
 }
 
-module.exports = { generateQrImage, deleteQrImages };
+module.exports = { generateQrImage, deleteQrImages, getQrImagePath };

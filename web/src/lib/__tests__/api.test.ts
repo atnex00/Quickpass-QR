@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import axios from 'axios'
-import api, { setAccessToken, getAccessToken, setOnAuthFailure } from '@/lib/api'
+import { setAccessToken, getAccessToken, setOnAuthFailure } from '@/lib/api'
 
 vi.mock('axios', () => {
   const mockAxiosInstance = {
@@ -18,6 +18,17 @@ vi.mock('axios', () => {
   }
   return { default: mockAxios }
 })
+
+interface MockAxiosInstance {
+  interceptors: {
+    request: { use: ReturnType<typeof vi.fn> }
+    response: { use: ReturnType<typeof vi.fn> }
+  }
+}
+
+function createdInstance(): MockAxiosInstance {
+  return (axios.create as unknown as { mock: { results: Array<{ value: MockAxiosInstance }> } }).mock.results[0].value
+}
 
 describe('api client', () => {
   beforeEach(() => {
@@ -42,12 +53,10 @@ describe('api client', () => {
   })
 
   it('registers request interceptor', () => {
-    const createMock = (axios.create as any).mock.results[0].value
-    expect(createMock.interceptors.request.use).toHaveBeenCalled()
+    expect(createdInstance().interceptors.request.use).toHaveBeenCalled()
   })
 
   it('registers response interceptor', () => {
-    const createMock = (axios.create as any).mock.results[0].value
-    expect(createMock.interceptors.response.use).toHaveBeenCalled()
+    expect(createdInstance().interceptors.response.use).toHaveBeenCalled()
   })
 })

@@ -190,9 +190,11 @@ class ApiService {
   }
 
   Future<void> logout() async {
-    try {
-      await dio.post('/auth/logout');
-    } catch (_) {}
+    if (_dio != null) {
+      try {
+        await dio.post('/auth/logout');
+      } catch (_) {}
+    }
     await clearLocalAuth();
   }
 
@@ -276,6 +278,14 @@ class ApiService {
     final d = res.data['data'];
     if (d == null) throw Exception('Leave not found');
     return LeaveRequest.fromJson(d);
+  }
+
+  Future<Uint8List> getQrImageBytes(String leaveId, String type) async {
+    final res = await dio.get(
+      '/leave/$leaveId/qr/$type',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return res.data as Uint8List;
   }
 
   // ── Supervisor ──

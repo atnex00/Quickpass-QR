@@ -83,6 +83,8 @@ jest.mock('../config/database', () => {
     trx.groupBy = jest.fn().mockReturnValue(chain);
     trx.clearSelect = jest.fn().mockReturnValue(chain);
     trx.clone = jest.fn().mockReturnValue(trx);
+    trx.whereIn = jest.fn().mockReturnValue(chain);
+    trx.whereNotIn = jest.fn().mockReturnValue(chain);
     return cb(trx);
   });
   return db;
@@ -255,6 +257,7 @@ describe('DELETE /api/admin/departments/:id', () => {
     mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
     db.first
       .mockResolvedValueOnce({ department_id: 'DEP-002', department_name: 'TSD · Technical Services Department' })
+      .mockResolvedValueOnce({ count: 0 })
       .mockResolvedValueOnce({ count: 0 });
     const res = await request(app)
       .delete('/api/admin/departments/DEP-002')
@@ -269,6 +272,108 @@ describe('DELETE /api/admin/departments/:id', () => {
       .delete('/api/admin/departments/DEP-099')
       .set('Authorization', `Bearer ${adminToken()}`);
     expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when leave requests reference the department', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first
+      .mockResolvedValueOnce({ department_id: 'DEP-002', department_name: 'TSD · Technical Services Department' })
+      .mockResolvedValueOnce({ count: 0 })
+      .mockResolvedValueOnce({ count: 5 });
+    const res = await request(app)
+      .delete('/api/admin/departments/DEP-002')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('DELETE /api/admin/employees/:id', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deletes employee, cleaning up scan logs, leaves, sessions and audit references', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first
+      .mockResolvedValueOnce({ employee_id: '000002', is_active: true })
+      .mockResolvedValueOnce({ count: 0 });
+    db().resolve([{ leave_id: 'LV-1' }, { leave_id: 'LV-2' }]);
+    const res = await request(app)
+      .delete('/api/admin/employees/000002')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(200);
+  });
+
+  it('returns 404 when employee not found', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first.mockResolvedValueOnce(null);
+    const res = await request(app)
+      .delete('/api/admin/employees/999999')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when employee is a supervisor with leave history', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first
+      .mockResolvedValueOnce({ employee_id: '000011', is_active: true })
+      .mockResolvedValueOnce({ count: 3 });
+    const res = await request(app)
+      .delete('/api/admin/employees/000011')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when deleting own account', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first.mockResolvedValueOnce({ employee_id: '999999', is_active: true });
+    const res = await request(app)
+      .delete('/api/admin/employees/999999')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('PUT /api/admin/employees/:id/admin', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns 400 when demoting the last active admin', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first
+      .mockResolvedValueOnce({ employee_id: '999999', is_admin: true, is_active: true })
+      .mockResolvedValueOnce({ count: 1 });
+    const res = await request(app)
+      .put('/api/admin/employees/999999/admin')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 200 when demoting a non-last admin', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first
+      .mockResolvedValueOnce({ employee_id: '000005', is_admin: true, is_active: true })
+      .mockResolvedValueOnce({ count: 2 });
+    const res = await request(app)
+      .put('/api/admin/employees/000005/admin')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(200);
+  });
+});
+
+describe('PUT /api/admin/employees/:id/status (self-deactivate guard)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns 400 when deactivating own account', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db.first.mockResolvedValueOnce({ employee_id: '999999', is_active: true });
+    const res = await request(app)
+      .put('/api/admin/employees/999999/status')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(400);
   });
 });
 

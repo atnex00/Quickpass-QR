@@ -1,6 +1,5 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
-
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 
 const makeChain = () => {
@@ -87,28 +86,13 @@ jest.mock('../config/database', () => {
   return db;
 });
 
-jest.mock('../services/qrService', () => ({
-  decodeQrData: jest.fn((data) => {
-    try {
-      const json = Buffer.from(data, 'base64').toString('utf8');
-      return JSON.parse(json);
-    } catch { return null; }
-  }),
-  verifySignature: jest.fn((leaveId, empId, type, timestamp, sig, secret) => {
-    const crypto = require('crypto');
-    const expected = crypto.createHmac('sha256', secret || process.env.QR_SECRET || 'test-qr-secret')
-      .update(JSON.stringify({ leave_id: leaveId, employee_id: empId, type, timestamp }))
-      .digest('hex');
-    return sig === expected;
-  }),
-  isWithinTimeWindow: jest.fn(() => true),
-}));
-
 jest.mock('../services/notificationService', () => ({
   sendToEmployee: jest.fn().mockResolvedValue(),
 }));
 
 const db = require('../config/database');
+const qrService = require('../services/qrService');
+const { getLocalDateString } = require('../utils/date');
 
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.QR_SECRET = 'test-qr-secret';
@@ -116,14 +100,22 @@ process.env.NODE_ENV = 'test';
 
 const app = require('../app');
 
-const today = new Date().toISOString().split('T')[0];
-const now = new Date().toISOString();
+const nowDate = new Date();
+const today = getLocalDateString(nowDate);
+const now = nowDate.toTimeString().split(' ')[0];
 
-function signQR(payload) {
-  const crypto = require('crypto');
-  const data = JSON.stringify({ leave_id: payload.leave_id, employee_id: payload.employee_id, type: payload.type, timestamp: payload.timestamp });
-  const signature = crypto.createHmac('sha256', process.env.QR_SECRET).update(data).digest('hex');
-  return Buffer.from(JSON.stringify({ ...payload, signature })).toString('base64');
+function currentQr(leaveId, employeeId, type) {
+  const d = new Date();
+  return qrService.encodeQrData(
+    qrService.generateQrData(leaveId, employeeId, type, getLocalDateString(d), d.toTimeString().split(' ')[0])
+  );
+}
+
+function pastQr(leaveId, employeeId, type, minutesAgo) {
+  const d = new Date(Date.now() - minutesAgo * 60 * 1000);
+  return qrService.encodeQrData(
+    qrService.generateQrData(leaveId, employeeId, type, getLocalDateString(d), d.toTimeString().split(' ')[0])
+  );
 }
 
 function secToken() {
@@ -154,7 +146,7 @@ describe('POST /api/scan/validate', () => {
     db.first
       .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
       .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
-    const qr = signQR({ leave_id: 'LV-001', employee_id: '000001', type: 'OUT', timestamp: now });
+    const qr = currentQr('LV-001', '000001', 'OUT');
     const leaveRow = { leave_id: 'LV-001', employee_id: '000001', status: 'approved', employee_name: 'James Wilson', out_scan_time: null, leave_date: today, start_time: '09:00', end_time: '17:00' };
     db.transaction.mockImplementationOnce((cb) => {
       const trx = makeChain();
@@ -172,17 +164,68 @@ describe('POST /api/scan/validate', () => {
     expect(res.body.success).toBe(true);
   });
 
-  it('returns 400 for invalid QR signature', async () => {
+  it('returns 200 for valid IN scan on active leave', async () => {
     db.first
       .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
       .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
-    const fakeQr = Buffer.from(JSON.stringify({ leave_id: 'LV-001', employee_id: '000001', type: 'OUT', timestamp: now, signature: 'badsig' })).toString('base64');
+    const qr = currentQr('LV-002', '000001', 'IN');
+    const leaveRow = { leave_id: 'LV-002', employee_id: '000001', status: 'active', employee_name: 'James Wilson', out_scan_time: today + ' 09:05', leave_date: today, start_time: '09:00', end_time: '17:00' };
+    db.transaction.mockImplementationOnce((cb) => {
+      const trx = makeChain();
+      trx.fn = { now: jest.fn(() => 'NOW()') };
+      trx.first
+        .mockResolvedValueOnce(leaveRow)
+        .mockResolvedValueOnce(null);
+      return cb(trx);
+    });
+    const res = await request(app)
+      .post('/api/scan/validate')
+      .set('Authorization', `Bearer ${secToken()}`)
+      .send({ qr_data: qr });
+    expect(res.status).toBe(200);
+    expect(res.body.data.new_status).toBe('completed');
+  });
+
+  it('returns 400 for invalid QR signature (wrong length)', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    const fakeQr = qrService.encodeQrData({ leave_id: 'LV-001', employee_id: '000001', type: 'OUT', timestamp: `${today}T${now}`, signature: 'badsig' });
     const res = await request(app)
       .post('/api/scan/validate')
       .set('Authorization', `Bearer ${secToken()}`)
       .send({ qr_data: fakeQr });
     expect(res.status).toBe(400);
     expect(res.body.message).toContain('signature');
+  });
+
+  it('returns 400 for tampered valid-length signature', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    const d = new Date();
+    const payload = qrService.generateQrData('LV-001', '000001', 'OUT', getLocalDateString(d), d.toTimeString().split(' ')[0]);
+    const tampered = { ...payload, signature: (payload.signature[0] === 'a' ? 'b' : 'a') + payload.signature.slice(1) };
+    const qr = qrService.encodeQrData(tampered);
+    const res = await request(app)
+      .post('/api/scan/validate')
+      .set('Authorization', `Bearer ${secToken()}`)
+      .send({ qr_data: qr });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain('signature');
+  });
+
+  it('returns 400 for expired QR code', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    const qr = pastQr('LV-001', '000001', 'OUT', 20);
+    const res = await request(app)
+      .post('/api/scan/validate')
+      .set('Authorization', `Bearer ${secToken()}`)
+      .send({ qr_data: qr });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain('expired');
   });
 
   it('returns 400 for invalid base64', async () => {
@@ -195,6 +238,28 @@ describe('POST /api/scan/validate', () => {
       .send({ qr_data: '!!!not-valid-b64!!!' });
     expect(res.status).toBe(400);
     expect(res.body.message).toContain('Invalid QR');
+  });
+
+  it('returns 400 when QR was already scanned', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    const qr = currentQr('LV-003', '000001', 'OUT');
+    const leaveRow = { leave_id: 'LV-003', employee_id: '000001', status: 'approved', employee_name: 'James Wilson', out_scan_time: null, leave_date: today, start_time: '09:00', end_time: '17:00' };
+    db.transaction.mockImplementationOnce((cb) => {
+      const trx = makeChain();
+      trx.fn = { now: jest.fn(() => 'NOW()') };
+      trx.first
+        .mockResolvedValueOnce(leaveRow)
+        .mockResolvedValueOnce({ log_id: 1, leave_id: 'LV-003', qr_type: 'OUT' });
+      return cb(trx);
+    });
+    const res = await request(app)
+      .post('/api/scan/validate')
+      .set('Authorization', `Bearer ${secToken()}`)
+      .send({ qr_data: qr });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain('already been scanned');
   });
 });
 

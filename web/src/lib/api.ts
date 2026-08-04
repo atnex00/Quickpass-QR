@@ -16,6 +16,11 @@ export function setOnAuthFailure(callback: (() => void) | null) {
   _onAuthFailure = callback
 }
 
+export function getErrorMessage(err: unknown, fallback: string): string {
+  const data = (err as { response?: { data?: { message?: string } } }).response?.data
+  return data?.message || (err as { message?: string }).message || fallback
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   if (_refreshPromise) return _refreshPromise
 

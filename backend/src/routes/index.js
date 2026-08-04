@@ -98,6 +98,10 @@ router.get('/leave/active', authenticate, leaveController.getActiveLeave);
 router.get('/leave/:id', authenticate, validateParams(Joi.object({
   id: Joi.string().required(),
 })), leaveController.getLeaveById);
+router.get('/leave/:id/qr/:type', authenticate, validateParams(Joi.object({
+  id: Joi.string().pattern(/^LV-\d{8}-[A-F0-9]{8}$/).required(),
+  type: Joi.string().valid('OUT', 'IN', 'out', 'in').required(),
+})), leaveController.getQrImage);
 router.post('/leave/:id/cancel', authenticate, validateParams(Joi.object({
   id: Joi.string().required(),
 })), leaveController.cancelLeave);

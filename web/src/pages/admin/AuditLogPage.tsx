@@ -41,12 +41,13 @@ export default function AuditLogPage() {
 
   const load = async () => {
     try {
-      const params: Record<string, any> = { page, limit: 25 }
+      const params: Record<string, string | number> = { page, limit: 25 }
       if (search) params.actor_id = search
       const res = await api.get("/admin/audit", { params })
       setLogs(res.data.data)
       setTotal(res.data.pagination?.total || 0)
     } catch {
+      // keep previous logs; page still shows data
     } finally {
       setLoading(false)
     }

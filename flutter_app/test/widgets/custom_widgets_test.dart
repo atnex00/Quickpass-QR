@@ -6,41 +6,6 @@ import 'package:quickpass/widgets/custom_widgets.dart';
 Widget _wrap(Widget w) => MaterialApp(theme: QuickpassTheme.light, home: w);
 
 void main() {
-  group('LoadingOverlay', () {
-    testWidgets('shows overlay when loading', (tester) async {
-      await tester.pumpWidget(_wrap(
-        const LoadingOverlay(
-          isLoading: true,
-          child: Text('content'),
-        ),
-      ));
-      expect(find.text('content'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('hides overlay when not loading', (tester) async {
-      await tester.pumpWidget(_wrap(
-        const LoadingOverlay(
-          isLoading: false,
-          child: Text('content'),
-        ),
-      ));
-      expect(find.text('content'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-    });
-
-    testWidgets('shows message when provided', (tester) async {
-      await tester.pumpWidget(_wrap(
-        const LoadingOverlay(
-          isLoading: true,
-          message: 'Please wait...',
-          child: Text('content'),
-        ),
-      ));
-      expect(find.text('Please wait...'), findsOneWidget);
-    });
-  });
-
   group('InfoRow', () {
     testWidgets('renders label and value', (tester) async {
       await tester.pumpWidget(_wrap(

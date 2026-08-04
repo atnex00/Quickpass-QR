@@ -1,6 +1,5 @@
 import { create } from "zustand"
 import { persist, createJSONStorage, type StateStorage } from "zustand/middleware"
-import { useAuthStore } from "@/stores/authStore"
 
 type Theme = "light" | "dark" | "system"
 
@@ -10,14 +9,15 @@ interface ThemeState {
   resolved: () => "light" | "dark"
 }
 
+let _currentUserId: string | null = null
+
 function systemPrefersDark(): boolean {
   if (typeof window === "undefined") return false
   return window.matchMedia("(prefers-color-scheme: dark)").matches
 }
 
 function themeStorageKey(): string {
-  const id = useAuthStore.getState().user?.employee_id
-  return id ? `quickpass-theme-${id}` : "quickpass-theme"
+  return _currentUserId ? `quickpass-theme-${_currentUserId}` : "quickpass-theme"
 }
 
 const userScopedStorage: StateStorage = {
@@ -57,6 +57,7 @@ export function applyTheme() {
   }
 }
 
-export function rehydrateTheme() {
+export function rehydrateTheme(employeeId?: string | null) {
+  _currentUserId = employeeId ?? null
   useThemeStore.persist.rehydrate()
 }

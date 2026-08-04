@@ -19,13 +19,13 @@ declare class BarcodeDetector {
 const hasNative = typeof window !== "undefined" && "BarcodeDetector" in window
 let nativeDetector: BarcodeDetector | null = null
 if (hasNative) {
-  try { nativeDetector = new BarcodeDetector({ formats: ["qr_code"] }) } catch (_) {}
+  try { nativeDetector = new BarcodeDetector({ formats: ["qr_code"] }) } catch { /* native API unavailable */ }
 }
 
 export default function ScannerPage() {
   const navigate = useNavigate()
   const { validateScan, isLoading } = useScanStore()
-  const { user, logout } = useAuthStore()
+  const { logout } = useAuthStore()
   const [manualInput, setManualInput] = useState("")
   const [cameraActive, setCameraActive] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
@@ -103,7 +103,7 @@ export default function ScannerPage() {
           try {
             const barcodes = await nativeDetector.detect(vid)
             if (barcodes.length > 0 && barcodes[0].rawValue) raw = barcodes[0].rawValue
-          } catch (_) {}
+          } catch { /* fall back to jsQR below */ }
         }
         if (!raw) {
           octx.drawImage(vid, 0, 0, scanW, scanH)
@@ -149,8 +149,9 @@ export default function ScannerPage() {
         schedule()
       }
       schedule()
-    } catch (err: any) {
-      const name = err.name || "", msg = err.message || ""
+    } catch (err) {
+      const name = (err as { name?: string }).name || ""
+      const msg = (err as { message?: string }).message || ""
       if (name === "NotAllowedError" || msg.includes("permission"))
         setCameraError("Camera permission denied. Allow camera access in your browser settings.")
       else if (name === "NotFoundError" || msg.includes("NotFound"))

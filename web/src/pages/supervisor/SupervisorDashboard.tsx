@@ -2,11 +2,10 @@ import { useEffect } from "react"
 import { Link } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { useLeaveStore } from "@/stores/leaveStore"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import LoadingScreen from "@/components/shared/LoadingScreen"
 import PageHeader from "@/components/layout/PageHeader"
-import { UserCheck, ShieldCheck, CalendarDays, ArrowRight } from "lucide-react"
+import { ShieldCheck, ArrowRight } from "lucide-react"
 
 export default function SupervisorDashboard() {
   const { user } = useAuthStore()

@@ -4,11 +4,10 @@ import { useLeaveStore } from "@/stores/leaveStore"
 import { Card } from "@/components/ui/card"
 import StatusBadge from "@/components/shared/StatusBadge"
 import { formatDate, formatTime } from "@/lib/utils"
-import type { LeaveStatus } from "@/types"
 import { useAuthStore } from "@/stores/authStore"
-import api from "@/lib/api"
+import api, { getErrorMessage } from "@/lib/api"
 import { toast } from "sonner"
-import { Inbox, CalendarDays, Filter, Trash2 } from "lucide-react"
+import { Inbox, CalendarDays, Trash2 } from "lucide-react"
 import PageHeader from "@/components/layout/PageHeader"
 
 export default function LeaveHistoryPage() {
@@ -23,8 +22,8 @@ export default function LeaveHistoryPage() {
       await api.delete(`/leave/${leaveId}`)
       toast.success("Leave deleted")
       loadHistory(filter)
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Could not delete")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Could not delete"))
     }
   }
 

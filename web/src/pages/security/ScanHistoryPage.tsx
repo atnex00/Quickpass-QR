@@ -62,7 +62,7 @@ export default function ScanHistoryPage() {
               </div>
 
               <div className="space-y-3">
-                {history.map((log: any, i: number) => (
+                {history.map((log, i) => (
                   <div
                     key={log.log_id}
                     className="card-hover rounded-lg border border-border bg-card p-4"

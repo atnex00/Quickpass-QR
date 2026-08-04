@@ -15,35 +15,45 @@ import {
   Cell,
   Legend,
 } from "recharts"
-import { format } from "date-fns"
 import PageHeader from "@/components/layout/PageHeader"
 
 const COLORS = ["#f59e0b", "#0d9488", "#dc2626", "#fbbf24", "#a8a29e"]
 
+interface DeptReport {
+  department_id: string
+  department_name: string
+  department_code: string
+  total_requests: number
+  pending: number
+  approved: number
+  rejected: number
+  completed: number
+}
+
 export default function ReportsPage() {
-  const [deptData, setDeptData] = useState<any[]>([])
+  const [deptData, setDeptData] = useState<DeptReport[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.get("/admin/reports", { params: { type: "department" } })
       .then((res) => setDeptData(res.data.data || []))
-      .catch(() => {})
+      .catch(() => { /* toast not needed for a read-only page */ })
       .finally(() => setLoading(false))
   }, [])
 
   const pieData = deptData.flatMap((d) => [
-    { name: `${d.department_name} - Pending`, value: parseInt(d.pending || 0) },
-    { name: `${d.department_name} - Approved`, value: parseInt(d.approved || 0) },
-    { name: `${d.department_name} - Rejected`, value: parseInt(d.rejected || 0) },
-    { name: `${d.department_name} - Completed`, value: parseInt(d.completed || 0) },
+    { name: `${d.department_name} - Pending`, value: Number(d.pending || 0) },
+    { name: `${d.department_name} - Approved`, value: Number(d.approved || 0) },
+    { name: `${d.department_name} - Rejected`, value: Number(d.rejected || 0) },
+    { name: `${d.department_name} - Completed`, value: Number(d.completed || 0) },
   ]).filter((d) => d.value > 0)
 
   const barData = deptData.map((d) => ({
     name: d.department_code || d.department_name,
-    Pending: parseInt(d.pending || 0),
-    Approved: parseInt(d.approved || 0),
-    Rejected: parseInt(d.rejected || 0),
-    Completed: parseInt(d.completed || 0),
+    Pending: Number(d.pending || 0),
+    Approved: Number(d.approved || 0),
+    Rejected: Number(d.rejected || 0),
+    Completed: Number(d.completed || 0),
   }))
 
   if (loading) {
@@ -129,7 +139,7 @@ export default function ReportsPage() {
                 </tr>
               </thead>
               <tbody>
-                {deptData.map((d: any) => (
+                {deptData.map((d) => (
                   <tr key={d.department_id} className="border-b last:border-0">
                     <td className="py-3 font-medium">{d.department_name}</td>
                     <td className="py-3">{d.total_requests}</td>

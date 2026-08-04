@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useAuthStore } from '@/stores/authStore'
 import api from '@/lib/api'
+import type { Employee } from '@/types'
 
 vi.mock('@/lib/api', () => ({
   default: {
@@ -11,6 +12,10 @@ vi.mock('@/lib/api', () => ({
   setAccessToken: vi.fn(),
   getAccessToken: vi.fn(),
   setOnAuthFailure: vi.fn(),
+  getErrorMessage: (err: unknown, fallback: string) => {
+    const data = (err as { response?: { data?: { message?: string } } }).response?.data
+    return data?.message || (err as { message?: string }).message || fallback
+  },
 }))
 
 vi.mock('@/stores/themeStore', () => ({
@@ -18,6 +23,31 @@ vi.mock('@/stores/themeStore', () => ({
 }))
 
 const { setAccessToken, getAccessToken } = await import('@/lib/api')
+
+const apiMock = api as unknown as {
+  post: ReturnType<typeof vi.fn>
+  get: ReturnType<typeof vi.fn>
+  put: ReturnType<typeof vi.fn>
+}
+const getAccessTokenMock = getAccessToken as unknown as ReturnType<typeof vi.fn>
+
+function makeUser(overrides: Partial<Employee> = {}): Employee {
+  return {
+    employee_id: '000001',
+    full_name: 'James Wilson',
+    position: 'Staff',
+    department_id: 'DEPT1',
+    department_name: 'TSD',
+    email: 'james@example.com',
+    is_supervisor: false,
+    is_admin: false,
+    is_security: false,
+    is_active: true,
+    profile_photo: null,
+    hire_date: null,
+    ...overrides,
+  }
+}
 
 describe('authStore', () => {
   beforeEach(() => {
@@ -38,8 +68,8 @@ describe('authStore', () => {
   })
 
   it('login succeeds with valid credentials', async () => {
-    const mockUser = { employee_id: '000001', full_name: 'James Wilson' }
-    ;(api.post as any).mockResolvedValueOnce({
+    const mockUser = makeUser()
+    apiMock.post.mockResolvedValueOnce({
       data: { success: true, token: 'mock-token', user: mockUser },
     })
 
@@ -54,7 +84,7 @@ describe('authStore', () => {
   })
 
   it('login returns false on API error', async () => {
-    ;(api.post as any).mockRejectedValueOnce({
+    apiMock.post.mockRejectedValueOnce({
       response: { data: { message: 'Invalid credentials' } },
     })
 
@@ -67,7 +97,7 @@ describe('authStore', () => {
   })
 
   it('logout clears auth state', async () => {
-    useAuthStore.setState({ user: { employee_id: '000001' } as any, isAuthenticated: true })
+    useAuthStore.setState({ user: makeUser(), isAuthenticated: true })
 
     await useAuthStore.getState().logout()
     const state = useAuthStore.getState()
@@ -78,12 +108,12 @@ describe('authStore', () => {
   })
 
   it('loadUser refreshes token when no access token exists', async () => {
-    ;(getAccessToken as any).mockReturnValue(null)
-    ;(api.post as any).mockResolvedValueOnce({
+    getAccessTokenMock.mockReturnValue(null)
+    apiMock.post.mockResolvedValueOnce({
       data: { token: 'refreshed-token' },
     })
-    const mockProfile = { data: { employee_id: '000001', full_name: 'James Wilson' } }
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: mockProfile } })
+    const mockProfile = makeUser()
+    apiMock.get.mockResolvedValueOnce({ data: { data: mockProfile } })
 
     await useAuthStore.getState().loadUser()
     const state = useAuthStore.getState()
@@ -94,9 +124,8 @@ describe('authStore', () => {
   })
 
   it('updateProfile updates user data', async () => {
-    const existingUser = { employee_id: '000001', full_name: 'James Wilson' }
-    useAuthStore.setState({ user: existingUser as any })
-    ;(api.put as any).mockResolvedValueOnce({
+    useAuthStore.setState({ user: makeUser() })
+    apiMock.put.mockResolvedValueOnce({
       data: { data: { full_name: 'James Updated' } },
     })
 

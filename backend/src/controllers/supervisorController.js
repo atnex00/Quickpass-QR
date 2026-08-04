@@ -91,6 +91,8 @@ async function approveLeave(req, res, next) {
         .where({ leave_id: leaveId })
         .update({
           status: 'approved',
+          approved_at: trx.fn.now(),
+          approved_by: req.user.employee_id,
           out_qr_code: outQrCode,
           in_qr_code: inQrCode,
           out_qr_image: outQrImage,

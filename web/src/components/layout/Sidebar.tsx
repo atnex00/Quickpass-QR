@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router"
 import {
   LayoutDashboard, Clock, Users, Building2, BarChart3,
   LogOut, ChevronLeft, ChevronRight, ShieldCheck, FileText, UserCheck,
-  Scan, User, BookOpen, ScrollText,
+  Scan, User, BookOpen, ScrollText, Server,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
@@ -39,6 +39,7 @@ const sections = [
       { to: "/admin/departments", icon: Building2, label: "Departments" },
       { to: "/admin/reports", icon: BarChart3, label: "Reports" },
       { to: "/admin/audit", icon: ScrollText, label: "Audit Log" },
+      { to: "/admin/panel", icon: Server, label: "System Panel" },
     ],
   },
   {

@@ -3,6 +3,7 @@ import QRCodeStyling from "qr-code-styling"
 import { Clock, TimerOff, CheckCircle, User, FlipHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import api from "@/lib/api"
 
 interface Props {
   qrData: string
@@ -52,12 +53,35 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
   const timerRef = useRef<number | null>(null)
   const [windowState, setWindowState] = useState<'before' | 'during' | 'after'>('during')
   const [remaining, setRemaining] = useState(0)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 767px)")
   const qrSize = isMobile ? 280 : 450
   const [flipped, setFlipped] = useState(false)
 
   const isUsed = !!scanTime
   const accent = color === "blue" ? "#fbbf24" : "#0d9488"
+
+  useEffect(() => {
+    if (!qrImageUrl?.startsWith("/api/")) {
+      setImageUrl(null)
+      return
+    }
+    let objectUrl: string | null = null
+    let cancelled = false
+    api.get(qrImageUrl, { responseType: "blob" })
+      .then((res) => {
+        if (cancelled) return
+        objectUrl = URL.createObjectURL(res.data)
+        setImageUrl(objectUrl)
+      })
+      .catch(() => {
+        if (!cancelled) setImageUrl(null)
+      })
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [qrImageUrl])
 
   useEffect(() => {
     const container = containerRef.current
@@ -107,6 +131,7 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
       const parsed = JSON.parse(raw)
       if (parsed.timestamp) target = new Date(parsed.timestamp).getTime()
     } catch {
+      // fall back to the leave schedule below
     }
     if (isNaN(target)) {
       const fallback = `${date}T${time}`
@@ -200,8 +225,8 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
         ) : (
           <>
             <div className="flex justify-center overflow-hidden">
-              {qrImageUrl ? (
-                <img src={qrImageUrl} alt="QR Code" className={cn("max-w-full", flipped && "scale-x-[-1]")} style={{ width: qrSize, height: qrSize }} />
+              {imageUrl ? (
+                <img src={imageUrl} alt="QR Code" className={cn("max-w-full", flipped && "scale-x-[-1]")} style={{ width: qrSize, height: qrSize }} />
               ) : (
                 <div ref={containerRef} className={cn("max-w-full", flipped && "scale-x-[-1]")} />
               )}

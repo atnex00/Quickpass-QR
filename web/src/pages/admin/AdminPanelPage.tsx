@@ -25,7 +25,19 @@ interface PanelMetrics {
   errorRate: string
 }
 
-type LogEntry = { level: number; time: number; msg: string } | string
+interface PanelLogLine {
+  level: number
+  time: number
+  msg: string
+}
+
+interface ActionResult {
+  success: boolean
+  message: string
+  batch?: number
+  migrations?: string[]
+  seeds?: string[]
+}
 
 export default function AdminPanelPage() {
   const navigate = useNavigate()
@@ -33,8 +45,8 @@ export default function AdminPanelPage() {
   const [status, setStatus] = useState<PanelStatus | null>(null)
   const [metrics, setMetrics] = useState<PanelMetrics | null>(null)
   const [logs, setLogs] = useState<string[]>([])
-  const [migrateResult, setMigrateResult] = useState<any>(null)
-  const [seedResult, setSeedResult] = useState<any>(null)
+  const [migrateResult, setMigrateResult] = useState<ActionResult | null>(null)
+  const [seedResult, setSeedResult] = useState<ActionResult | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [statusLoading, setStatusLoading] = useState(true)
   const [restarting, setRestarting] = useState(false)
@@ -51,7 +63,7 @@ export default function AdminPanelPage() {
       setMetrics(mRes.data.data)
       if (lRes.data.data?.lines) setLogs(lRes.data.data.lines)
     } catch {
-      //
+      // panel data unavailable — show empty state
     } finally {
       setStatusLoading(false)
     }
@@ -73,8 +85,9 @@ export default function AdminPanelPage() {
     setSeedResult(null)
     try {
       const res = await api.post(url)
-      if (action === "migrate") setMigrateResult(res.data.data)
-      if (action === "seed") setSeedResult(res.data.data)
+      const result = res.data.data as ActionResult | null
+      if (action === "migrate") setMigrateResult(result)
+      if (action === "seed") setSeedResult(result)
     } catch {
       if (action === "migrate") setMigrateResult(null)
       if (action === "seed") setSeedResult(null)
@@ -90,7 +103,7 @@ export default function AdminPanelPage() {
     try {
       await api.post("/admin/panel/restart")
     } catch {
-      //
+      // restart failure is visible via the status poll
     }
   }
 
@@ -242,9 +255,9 @@ export default function AdminPanelPage() {
                   <p className="text-[11px] text-green-400">
                     Batch {migrateResult.batch} — {migrateResult.migrations?.length || 0} migration(s) run
                   </p>
-                  {migrateResult.migrations?.length > 0 && (
+                  {migrateResult.migrations && migrateResult.migrations.length > 0 && (
                     <ul className="mt-1 space-y-0.5">
-                      {migrateResult.migrations.map((m: string, i: number) => (
+                      {migrateResult.migrations.map((m, i) => (
                         <li key={i} className="font-mono text-[10px] text-green-300/70">{m.split('/').pop()}</li>
                       ))}
                     </ul>
@@ -316,8 +329,8 @@ export default function AdminPanelPage() {
                 <p className="text-[#555]">No logs yet. Make some API requests first.</p>
               ) : (
                 logs.map((line, i) => {
-                  let parsed: any = null
-                  try { parsed = JSON.parse(line) } catch { /* plain string */ }
+                  let parsed: PanelLogLine | null = null
+                  try { parsed = JSON.parse(line) as PanelLogLine } catch { /* plain string log line */ }
                   const isError = parsed && parsed.level >= 50
                   const isWarn = parsed && parsed.level >= 40
                   return (

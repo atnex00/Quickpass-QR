@@ -35,6 +35,9 @@ function createSignature(leaveId, employeeId, type, timestamp) {
 
 function verifySignature(leaveId, employeeId, type, timestamp, signature) {
   const expected = createSignature(leaveId, employeeId, type, timestamp);
+  if (typeof signature !== 'string' || signature.length !== expected.length) {
+    return false;
+  }
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 

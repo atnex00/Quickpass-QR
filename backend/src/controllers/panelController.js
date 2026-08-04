@@ -2,8 +2,16 @@ const path = require('path');
 const fs = require('fs');
 const db = require('../config/database');
 const logger = require('../config/logger');
+const auditService = require('../services/auditService');
+const { createError } = require('../middleware/errorHandler');
 
 const logFile = path.join(__dirname, '../../logs/app.log');
+
+function requirePanelEnabled() {
+  if (process.env.PANEL_ENABLED !== 'true') {
+    throw createError(403, 'Admin panel operations are disabled (PANEL_ENABLED must be true)');
+  }
+}
 
 async function getStatus(req, res) {
   const mem = process.memoryUsage();
@@ -29,8 +37,17 @@ async function getStatus(req, res) {
 
 async function runMigrate(req, res, next) {
   try {
+    requirePanelEnabled();
     const [batch, migrations] = await db.migrate.latest();
     logger.info({ batch, count: migrations.length }, 'Migration run via panel');
+    auditService.log({
+      action: 'panel_migrate',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'panel',
+      entityId: 'migrate',
+      description: `Ran migrations via panel (${(migrations || []).length} applied)`,
+      ip: req.ip,
+    }).catch(() => {});
     res.json({
       success: true,
       data: { batch, migrations: migrations || [] },
@@ -42,8 +59,17 @@ async function runMigrate(req, res, next) {
 
 async function runSeed(req, res, next) {
   try {
+    requirePanelEnabled();
     const [result] = await db.seed.run();
     logger.info({ count: result?.length || 0 }, 'Seed run via panel');
+    auditService.log({
+      action: 'panel_seed',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'panel',
+      entityId: 'seed',
+      description: `Ran seeds via panel (${(result || []).length})`,
+      ip: req.ip,
+    }).catch(() => {});
     res.json({
       success: true,
       data: { seeds: result || [] },
@@ -80,10 +106,23 @@ function getMetrics(req, res) {
   });
 }
 
-function restartServer(req, res) {
-  logger.info('Restart requested via panel');
-  res.json({ success: true, message: 'Server restarting...' });
-  setTimeout(() => process.exit(0), 500);
+function restartServer(req, res, next) {
+  try {
+    requirePanelEnabled();
+    logger.info('Restart requested via panel');
+    auditService.log({
+      action: 'panel_restart',
+      actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
+      entity: 'panel',
+      entityId: 'restart',
+      description: 'Restarted server via panel',
+      ip: req.ip,
+    }).catch(() => {});
+    res.json({ success: true, message: 'Server restarting...' });
+    setTimeout(() => process.exit(0), 500);
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = { getStatus, runMigrate, runSeed, getLogs, getMetrics, restartServer };

@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
 import {
@@ -30,13 +29,12 @@ import { Label } from "@/components/ui/label"
 import PageHeader from "@/components/layout/PageHeader"
 import { toast } from "sonner"
 import type { Employee, Department } from "@/types"
-import api from "@/lib/api"
+import api, { getErrorMessage } from "@/lib/api"
 import {
   Loader2,
   Plus,
   Search,
   Shield,
-  ShieldOff,
   ShieldCheck,
   UserCheck,
   UserX,
@@ -96,8 +94,8 @@ export default function UserManagerPage() {
       setEmployees(res.data.data)
       setTotal(res.data.pagination?.total || 0)
     } catch {
-    }
-    finally { setLoading(false) }
+      // list stays as-is; error visible via empty state
+    } finally { setLoading(false) }
   }
 
   const loadDepartments = async () => {
@@ -105,6 +103,7 @@ export default function UserManagerPage() {
       const res = await api.get("/admin/departments")
       setDepartments(res.data.data)
     } catch {
+      // department filter will just show none
     }
   }
 
@@ -122,8 +121,8 @@ export default function UserManagerPage() {
       setAddOpen(false)
       setForm({ ...emptyForm })
       loadEmployees()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to create")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to create"))
     }
     setSaving(false)
   }
@@ -145,8 +144,8 @@ export default function UserManagerPage() {
       toast.success("Employee updated")
       setEditOpen(false)
       loadEmployees()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to update")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to update"))
     }
     setUpdating(false)
   }
@@ -160,8 +159,8 @@ export default function UserManagerPage() {
       toast.success("Password reset")
       setPasswordOpen(false)
       setPassword("")
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to reset password")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to reset password"))
     }
     setResetting(false)
   }
@@ -172,8 +171,8 @@ export default function UserManagerPage() {
       await api.put(`/admin/employees/${id}/supervisor`)
       toast.success("Supervisor status toggled")
       loadEmployees()
-    } catch (_) {
-      toast.error("Failed to toggle")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to toggle"))
     }
     setTogglingId(null)
   }
@@ -184,8 +183,8 @@ export default function UserManagerPage() {
       await api.put(`/admin/employees/${id}/admin`)
       toast.success("Admin status toggled")
       loadEmployees()
-    } catch (_) {
-      toast.error("Failed to toggle")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to toggle"))
     }
     setTogglingId(null)
   }
@@ -197,8 +196,8 @@ export default function UserManagerPage() {
       await api.delete(`/admin/employees/${id}`)
       toast.success("Employee deleted")
       loadEmployees()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to delete"))
     }
     setDeletingId(null)
   }
@@ -209,8 +208,8 @@ export default function UserManagerPage() {
       await api.put(`/admin/employees/${emp.employee_id}/status`)
       toast.success(emp.is_active ? "Employee deactivated" : "Employee activated")
       loadEmployees()
-    } catch (_) {
-      toast.error("Failed to toggle status")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to toggle status"))
     }
     setTogglingId(null)
   }

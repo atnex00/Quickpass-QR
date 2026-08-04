@@ -1,5 +1,7 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 
@@ -245,6 +247,60 @@ describe('GET /api/leave/:id', () => {
       .get('/api/leave/LV-999')
       .set('Authorization', `Bearer ${authToken()}`);
     expect(res.status).toBe(404);
+  });
+});
+
+describe('GET /api/leave/:id/qr/:type', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns the QR image file for own leave', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first.mockResolvedValueOnce({
+      leave_id: 'LV-20260101-ABCDEF01', employee_id: '000001', department_id: 'DEP-002',
+    });
+    const dir = path.join(__dirname, '../../uploads-private/qr_codes');
+    const file = path.join(dir, 'LV-20260101-ABCDEF01_out.png');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(file, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    try {
+      const res = await request(app)
+        .get('/api/leave/LV-20260101-ABCDEF01/qr/out')
+        .set('Authorization', `Bearer ${authToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toContain('image/png');
+    } finally {
+      fs.unlinkSync(file);
+    }
+  });
+
+  it('returns 403 for another employee leave', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first.mockResolvedValueOnce({
+      leave_id: 'LV-20260101-ABCDEF01', employee_id: '000002', department_id: 'DEP-002',
+    });
+    const res = await request(app)
+      .get('/api/leave/LV-20260101-ABCDEF01/qr/out')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 404 when leave not found', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first.mockResolvedValueOnce(null);
+    const res = await request(app)
+      .get('/api/leave/LV-20260101-ABCDEF01/qr/out')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 for invalid qr type', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    const res = await request(app)
+      .get('/api/leave/LV-20260101-ABCDEF01/qr/xyz')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(400);
   });
 });
 

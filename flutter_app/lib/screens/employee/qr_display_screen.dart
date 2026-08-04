@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
 import '../../services/api_service.dart';
@@ -397,9 +397,19 @@ class _QrPassCard extends StatefulWidget {
 }
 
 class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassCard> {
+  Future<Uint8List>? _qrImageFuture;
+
   @override
   void initState() {
     super.initState();
+    final url = widget.qrImageUrl;
+    if (url != null && url.startsWith('/api/')) {
+      final match = RegExp(r'^/api/leave/([^/]+)/qr/([^/]+)$').firstMatch(url);
+      if (match != null) {
+        final api = context.read<ApiService>();
+        _qrImageFuture = api.getQrImageBytes(match.group(1)!, match.group(2)!);
+      }
+    }
     if (widget.scanTime == null) {
       initCountdown(widget.date, widget.time, target: _resolveTarget());
     }
@@ -505,7 +515,7 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                     final qrSize = (MediaQuery.of(context).size.width - 80)
                         .clamp(180.0, 240.0);
                     final displaySize = qrSize - 32;
-                    if (widget.qrImageUrl != null) {
+                    if (_qrImageFuture != null) {
                       return Container(
                         width: qrSize,
                         height: qrSize,
@@ -518,22 +528,28 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            AppConfig.photoUrl(widget.qrImageUrl)!,
-                            width: displaySize,
-                            height: displaySize,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                QrImageView(
-                              data: widget.qrData,
-                              size: displaySize,
-                              eyeStyle: QrEyeStyle(
-                                  eyeShape: QrEyeShape.circle,
-                                  color: widget.qrColor),
-                              dataModuleStyle: QrDataModuleStyle(
-                                  dataModuleShape: QrDataModuleShape.circle,
-                                  color: widget.qrColor),
-                            ),
+                          child: FutureBuilder<Uint8List>(
+                            future: _qrImageFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Image.memory(
+                                  snapshot.data!,
+                                  width: displaySize,
+                                  height: displaySize,
+                                  fit: BoxFit.contain,
+                                );
+                              }
+                              return QrImageView(
+                                data: widget.qrData,
+                                size: displaySize,
+                                eyeStyle: QrEyeStyle(
+                                    eyeShape: QrEyeShape.circle,
+                                    color: widget.qrColor),
+                                dataModuleStyle: QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.circle,
+                                    color: widget.qrColor),
+                              );
+                            },
                           ),
                         ),
                       );

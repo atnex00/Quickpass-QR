@@ -17,6 +17,14 @@ class ScanResultScreen extends StatefulWidget {
 }
 
 class _ScanResultScreenState extends State<ScanResultScreen> {
+  ScanProvider? _scanProv;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scanProv = context.read<ScanProvider>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +39,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 
   @override
   void dispose() {
-    context.read<ScanProvider>().clearResult();
+    _scanProv?.clearResult();
     super.dispose();
   }
 
@@ -200,10 +208,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
     final isOut = data?['type'] == 'OUT';
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 100,
@@ -290,10 +298,10 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
 
   Widget _buildError(String message) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 100,

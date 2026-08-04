@@ -70,6 +70,9 @@ function AppRoutes() {
           <Route path="/admin/audit" element={
             <RequireRole roles={["is_admin"]}><AuditLogPage /></RequireRole>
           } />
+          <Route path="/admin/panel" element={
+            <RequireRole roles={["is_admin"]}><AdminPanelPage /></RequireRole>
+          } />
 
         </Route>
 
@@ -80,9 +83,6 @@ function AppRoutes() {
         </Route>
 
         {import.meta.env.DEV && <Route path="/load-preview" element={<LoadPreviewPage />} />}
-        <Route path="/admin/panel" element={
-          <RequireRole roles={["is_admin"]}><AdminPanelPage /></RequireRole>
-        } />
         <Route path="*" element={<Navigate to="/employee" replace />} />
       </Routes>
     </Suspense>

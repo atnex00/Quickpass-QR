@@ -1,6 +1,9 @@
 import { useAuthStore } from "@/stores/authStore"
 import { BookOpen, ChevronDown } from "lucide-react"
 import { useState } from "react"
+import type { Employee } from "@/types"
+
+type GuideUser = Pick<Employee, "is_security" | "is_admin" | "is_supervisor">
 
 const guides = [
   {
@@ -40,7 +43,7 @@ const guides = [
   },
   {
     role: "For Security Guards",
-    show: (u: any) => u?.is_security || u?.is_admin,
+    show: (u: GuideUser | null) => u?.is_security || u?.is_admin,
     items: [
       {
         title: "How to Scan a QR Code",
@@ -65,7 +68,7 @@ const guides = [
   },
   {
     role: "For Supervisors",
-    show: (u: any) => u?.is_supervisor || u?.is_admin,
+    show: (u: GuideUser | null) => u?.is_supervisor || u?.is_admin,
     items: [
       {
         title: "How to Approve or Reject a Leave",
@@ -90,7 +93,7 @@ const guides = [
   },
   {
     role: "For Administrators",
-    show: (u: any) => u?.is_admin,
+    show: (u: GuideUser | null) => u?.is_admin,
     items: [
       {
         title: "How to Manage Employees",

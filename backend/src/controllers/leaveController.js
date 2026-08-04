@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
+const qrImageService = require('../services/qrImageService');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 
@@ -200,6 +202,42 @@ async function getLeaveById(req, res, next) {
   }
 }
 
+async function getQrImage(req, res, next) {
+  try {
+    const { id, type } = req.params;
+    const normalized = type.toUpperCase();
+
+    if (!['OUT', 'IN'].includes(normalized)) {
+      throw createError(400, 'Invalid QR type');
+    }
+
+    const leave = await db('leave_requests').where({ leave_id: id }).first();
+    if (!leave) {
+      throw createError(404, 'Leave request not found');
+    }
+
+    if (!req.user.is_admin) {
+      if (leave.employee_id !== req.user.employee_id) {
+        if (!req.user.is_supervisor) {
+          throw createError(403, 'You can only view your own leave requests');
+        }
+        if (leave.department_id !== req.user.department_id) {
+          throw createError(403, 'This leave request is not in your department');
+        }
+      }
+    }
+
+    const imagePath = qrImageService.getQrImagePath(id, normalized);
+    if (!fs.existsSync(imagePath)) {
+      throw createError(404, 'QR image not found');
+    }
+
+    res.sendFile(imagePath);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function cancelLeave(req, res, next) {
   try {
     const { id } = req.params;
@@ -228,6 +266,8 @@ async function cancelLeave(req, res, next) {
       });
     });
 
+    qrImageService.deleteQrImages(id);
+
     res.json({ success: true, message: 'Leave request cancelled' });
   } catch (err) {
     next(err);
@@ -252,10 +292,12 @@ async function deleteLeave(req, res, next) {
       await trx('leave_requests').where({ leave_id: id }).del();
     });
 
+    qrImageService.deleteQrImages(id);
+
     res.json({ success: true, message: 'Leave request deleted' });
   } catch (err) {
     next(err);
   }
 }
 
-module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, cancelLeave, deleteLeave };
+module.exports = { submitLeave, getHistory, getActiveLeave, getLeaveById, getQrImage, cancelLeave, deleteLeave };

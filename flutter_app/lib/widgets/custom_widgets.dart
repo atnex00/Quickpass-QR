@@ -1,54 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
 
-class LoadingOverlay extends StatelessWidget {
-
-  const LoadingOverlay({
-    super.key,
-    required this.isLoading,
-    required this.child,
-    this.message,
-  });
-  final bool isLoading;
-  final Widget child;
-  final String? message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        child,
-        if (isLoading)
-          Container(
-            color: context.onSurface.withValues(alpha: 0.3),
-            child: Center(
-              child: Container(
-                margin: const EdgeInsets.all(32),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: context.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.outlineVariant),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: context.primaryBlue),
-                    if (message != null) ...[
-                      const SizedBox(height: 16),
-                      Text(message!,
-                          style: TextStyle(color: context.onSurfaceVariant)),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class InfoRow extends StatelessWidget {
 
   const InfoRow(

@@ -34,7 +34,16 @@ vi.mock('@/lib/api', () => ({
     get: vi.fn(),
     post: vi.fn(),
   },
+  getErrorMessage: (err: unknown, fallback: string) => {
+    const data = (err as { response?: { data?: { message?: string } } }).response?.data
+    return data?.message || (err as { message?: string }).message || fallback
+  },
 }))
+
+const apiMock = api as unknown as {
+  get: ReturnType<typeof vi.fn>
+  post: ReturnType<typeof vi.fn>
+}
 
 describe('leaveStore', () => {
   beforeEach(() => {
@@ -51,7 +60,7 @@ describe('leaveStore', () => {
 
   it('loadHistory fetches and sets history', async () => {
     const leaves = [makeLeave({ leave_id: 'LV-001', status: 'approved' })]
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: leaves } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: leaves } })
 
     await useLeaveStore.getState().loadHistory()
     const state = useLeaveStore.getState()
@@ -61,15 +70,15 @@ describe('leaveStore', () => {
   })
 
   it('loadHistory with status filter passes params', async () => {
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: [] } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: [] } })
 
     await useLeaveStore.getState().loadHistory('pending')
 
-    expect(api.get).toHaveBeenCalledWith('/leave/history', { params: { status: 'pending' } })
+    expect(apiMock.get).toHaveBeenCalledWith('/leave/history', { params: { status: 'pending' } })
   })
 
   it('loadHistory sets error on failure', async () => {
-    ;(api.get as any).mockRejectedValueOnce({
+    apiMock.get.mockRejectedValueOnce({
       response: { data: { message: 'Server error' } },
     })
 
@@ -82,7 +91,7 @@ describe('leaveStore', () => {
 
   it('loadActiveLeave sets active leave', async () => {
     const leave = makeLeave({ leave_id: 'LV-001', status: 'approved' })
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: leave } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: leave } })
 
     await useLeaveStore.getState().loadActiveLeave()
 
@@ -90,7 +99,7 @@ describe('leaveStore', () => {
   })
 
   it('loadActiveLeave sets null on 404', async () => {
-    ;(api.get as any).mockRejectedValueOnce(new Error('Not found'))
+    apiMock.get.mockRejectedValueOnce(new Error('Not found'))
 
     await useLeaveStore.getState().loadActiveLeave()
 
@@ -99,7 +108,7 @@ describe('leaveStore', () => {
 
   it('submitLeave posts data and prepends to history', async () => {
     const newLeave = makeLeave({ leave_id: 'LV-002', status: 'pending' })
-    ;(api.post as any).mockResolvedValueOnce({ data: { data: newLeave } })
+    apiMock.post.mockResolvedValueOnce({ data: { data: newLeave } })
     useLeaveStore.setState({ history: [makeLeave({ leave_id: 'LV-001' })] })
 
     const result = await useLeaveStore.getState().submitLeave({
@@ -107,14 +116,14 @@ describe('leaveStore', () => {
     })
 
     expect(result).toBe(true)
-    expect(api.post).toHaveBeenCalledWith('/leave/request', {
+    expect(apiMock.post).toHaveBeenCalledWith('/leave/request', {
       leave_date: '2026-07-22', start_time: '09:00', end_time: '17:00', reason: 'Sick',
     })
     expect(useLeaveStore.getState().history[0]).toEqual(newLeave)
   })
 
   it('submitLeave returns false on error', async () => {
-    ;(api.post as any).mockRejectedValueOnce({
+    apiMock.post.mockRejectedValueOnce({
       response: { data: { message: 'Time conflict' } },
     })
 
@@ -128,7 +137,7 @@ describe('leaveStore', () => {
 
   it('loadPendingRequests fetches pending requests', async () => {
     const requests = [makeLeave({ leave_id: 'LV-003', status: 'pending' })]
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: requests } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: requests } })
 
     await useLeaveStore.getState().loadPendingRequests()
 
@@ -136,30 +145,30 @@ describe('leaveStore', () => {
   })
 
   it('approveLeave posts approval and removes from pending', async () => {
-    ;(api.post as any).mockResolvedValueOnce({})
+    apiMock.post.mockResolvedValueOnce({})
     useLeaveStore.setState({ pendingRequests: [makeLeave({ leave_id: 'LV-001' }), makeLeave({ leave_id: 'LV-002' })] })
 
     const result = await useLeaveStore.getState().approveLeave('LV-001')
 
     expect(result).toBe(true)
-    expect(api.post).toHaveBeenCalledWith('/supervisor/approve/LV-001')
+    expect(apiMock.post).toHaveBeenCalledWith('/supervisor/approve/LV-001')
     expect(useLeaveStore.getState().pendingRequests).toEqual([makeLeave({ leave_id: 'LV-002' })])
   })
 
   it('rejectLeave posts rejection with reason', async () => {
-    ;(api.post as any).mockResolvedValueOnce({})
+    apiMock.post.mockResolvedValueOnce({})
     useLeaveStore.setState({ pendingRequests: [makeLeave({ leave_id: 'LV-001' })] })
 
     const result = await useLeaveStore.getState().rejectLeave('LV-001', 'Not approved')
 
     expect(result).toBe(true)
-    expect(api.post).toHaveBeenCalledWith('/supervisor/reject/LV-001', { reason: 'Not approved' })
+    expect(apiMock.post).toHaveBeenCalledWith('/supervisor/reject/LV-001', { reason: 'Not approved' })
     expect(useLeaveStore.getState().pendingRequests).toHaveLength(0)
   })
 
   it('loadApprovedLeaves fetches approved leaves', async () => {
     const leaves = [makeLeave({ leave_id: 'LV-004', status: 'approved' })]
-    ;(api.get as any).mockResolvedValueOnce({ data: { data: leaves } })
+    apiMock.get.mockResolvedValueOnce({ data: { data: leaves } })
 
     await useLeaveStore.getState().loadApprovedLeaves()
 
@@ -167,13 +176,13 @@ describe('leaveStore', () => {
   })
 
   it('revokeApproval posts revoke and removes from approved', async () => {
-    ;(api.post as any).mockResolvedValueOnce({})
+    apiMock.post.mockResolvedValueOnce({})
     useLeaveStore.setState({ approvedLeaves: [makeLeave({ leave_id: 'LV-001' })] })
 
     const result = await useLeaveStore.getState().revokeApproval('LV-001')
 
     expect(result).toBe(true)
-    expect(api.post).toHaveBeenCalledWith('/supervisor/revoke/LV-001')
+    expect(apiMock.post).toHaveBeenCalledWith('/supervisor/revoke/LV-001')
     expect(useLeaveStore.getState().approvedLeaves).toHaveLength(0)
   })
 })

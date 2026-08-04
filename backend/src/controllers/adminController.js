@@ -143,6 +143,10 @@ async function updateEmployee(req, res, next) {
 
       await trx('employees').where({ employee_id: id }).update(toUpdate);
 
+      if (updates.password) {
+        await trx('sessions').where({ employee_id: id }).update({ is_active: false });
+      }
+
       changedFields = Object.keys(toUpdate).filter((k) => k !== 'updated_at' && k !== 'password_hash');
 
       updated = await trx('employees')
@@ -217,6 +221,20 @@ async function toggleAdmin(req, res, next) {
         throw createError(404, 'Employee not found');
       }
 
+      if (id === req.user.employee_id && employee.is_admin) {
+        throw createError(400, 'You cannot remove your own admin access');
+      }
+
+      if (employee.is_admin) {
+        const adminCount = await trx('employees')
+          .where({ is_admin: true, is_active: true })
+          .count('* as count')
+          .first();
+        if (parseInt(adminCount?.count || 0) <= 1) {
+          throw createError(400, 'Cannot demote the last active admin');
+        }
+      }
+
       fullName = employee.full_name;
       toggledTo = !employee.is_admin;
       await trx('employees').where({ employee_id: id }).update({
@@ -254,6 +272,10 @@ async function toggleActive(req, res, next) {
       const employee = await trx('employees').where({ employee_id: id }).forUpdate().first();
       if (!employee) {
         throw createError(404, 'Employee not found');
+      }
+
+      if (id === req.user.employee_id && employee.is_active) {
+        throw createError(400, 'You cannot deactivate your own account');
       }
 
       fullName = employee.full_name;
@@ -392,6 +414,11 @@ async function deleteDepartment(req, res, next) {
         throw createError(400, `Cannot delete: ${empCount.count} employee(s) still belong to this department`);
       }
 
+      const leaveCount = await trx('leave_requests').where({ department_id: id }).count('* as count').first();
+      if (parseInt(leaveCount?.count || 0) > 0) {
+        throw createError(400, `Cannot delete: ${leaveCount.count} leave request(s) reference this department`);
+      }
+
       await trx('departments').where({ department_id: id }).del();
     });
     res.json({ success: true, message: 'Department deleted' });
@@ -419,8 +446,24 @@ async function deleteEmployee(req, res, next) {
         throw createError(404, 'Employee not found');
       }
 
+      if (id === req.user.employee_id) {
+        throw createError(400, 'You cannot delete your own account');
+      }
+
+      const superviseCount = await trx('leave_requests').where({ supervisor_id: id }).count('* as count').first();
+      if (parseInt(superviseCount?.count || 0) > 0) {
+        throw createError(400, 'Cannot delete: employee has supervised leave requests. Deactivate instead.');
+      }
+
+      const leaveIds = await trx('leave_requests').where({ employee_id: id }).select('leave_id');
+      const ids = leaveIds.map((l) => l.leave_id);
+
+      if (ids.length > 0) {
+        await trx('qr_scan_logs').whereIn('leave_id', ids).del();
+      }
       await trx('qr_scan_logs').where({ scanned_by: id }).del();
       await trx('sessions').where({ employee_id: id }).del();
+      await trx('audit_logs').where({ actor_id: id }).update({ actor_id: null });
       await trx('leave_requests').where({ employee_id: id }).del();
       await trx('employees').where({ employee_id: id }).del();
     });

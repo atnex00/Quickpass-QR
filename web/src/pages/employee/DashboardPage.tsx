@@ -2,13 +2,12 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { useLeaveStore } from "@/stores/leaveStore"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
 import DashboardSkeleton from "@/components/shared/DashboardSkeleton"
 import PageHeader from "@/components/layout/PageHeader"
 import {
-  Clock, History, Plus, CheckCircle, Timer, Hourglass, Inbox, CalendarDays, Sparkles,
+  History, Plus, CheckCircle, Timer, Hourglass, Inbox, CalendarDays, Sparkles,
 } from "lucide-react"
 import { formatDate, formatTime } from "@/lib/utils"
 

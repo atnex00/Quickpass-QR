@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import type { Employee } from "@/types"
-import api, { setAccessToken, getAccessToken, setOnAuthFailure } from "@/lib/api"
+import api, { setAccessToken, getAccessToken, setOnAuthFailure, getErrorMessage } from "@/lib/api"
 import { rehydrateTheme } from "@/stores/themeStore"
 
 interface AuthState {
@@ -36,14 +36,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           isAuthenticated: true,
           isLoading: false,
         })
-        rehydrateTheme()
+        rehydrateTheme(data.user?.employee_id)
         return true
       }
       set({ error: data.message, isLoading: false })
       return false
-    } catch (err: any) {
-      const msg = err.response?.data?.message || "Login failed"
-      set({ error: msg, isLoading: false })
+    } catch (err) {
+      set({ error: getErrorMessage(err, "Login failed"), isLoading: false })
       return false
     }
   },
@@ -52,10 +51,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       await api.post("/auth/logout")
     } catch {
+      // session already gone — still clear local state
     }
     setAccessToken(null)
     set({ user: null, isAuthenticated: false, isLoading: false })
-    rehydrateTheme()
+    rehydrateTheme(null)
   },
 
   loadUser: async () => {
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       const res = await api.get("/auth/profile")
       set({ user: res.data.data, isAuthenticated: true, isLoading: false })
-      rehydrateTheme()
+      rehydrateTheme(res.data.data?.employee_id)
     } catch {
       setAccessToken(null)
       set({ user: null, isAuthenticated: false, isLoading: false })

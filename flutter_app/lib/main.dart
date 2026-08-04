@@ -40,9 +40,11 @@ void main() async {
   }
 
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    final options = DefaultFirebaseOptions.currentPlatform;
+    final hasPlaceholder = options.apiKey.startsWith('YOUR_');
+    if (!hasPlaceholder) {
+      await Firebase.initializeApp(options: options);
+    }
   } catch (e) {
     // Non-fatal — app works without Firebase
   }

@@ -179,8 +179,11 @@ const importLimiter = rateLimit({
 const webDist = path.join(__dirname, '../../web/dist');
 app.use(express.static(webDist));
 
-// Serve uploaded files
+// Serve uploaded files (QR code images are private — served via authed API)
 const uploadsDir = path.join(__dirname, '../uploads');
+app.use('/uploads/qr_codes', (req, res) => {
+  res.status(404).json({ success: false, message: 'QR images are served via authenticated endpoints only' });
+});
 app.use('/uploads', express.static(uploadsDir));
 
 // Routes
@@ -230,12 +233,33 @@ async function cleanupStartup() {
   }
 }
 
+async function purgeSessions() {
+  await db('sessions')
+    .where('expires_at', '<', db.fn.now())
+    .where('is_active', true)
+    .update({ is_active: false });
+  const purged = await db('sessions')
+    .where('is_active', false)
+    .where('expires_at', '<', db.raw("now() - interval '30 days'"))
+    .del();
+  if (purged > 0) {
+    logger.info({ count: purged }, 'Purged old inactive sessions');
+  }
+}
+
+function startSessionPurge() {
+  setInterval(() => {
+    purgeSessions().catch((err) => logger.error({ err }, 'Session purge error'));
+  }, 24 * 60 * 60 * 1000).unref();
+}
+
 if (require.main === module) {
   let server;
 
   async function start() {
     await db.testConnection();
     await cleanupStartup();
+    startSessionPurge();
 
     server = app.listen(PORT, () => {
       logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');

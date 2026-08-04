@@ -65,8 +65,9 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="space-y-1">
-                  <label className="label-stitch">Employee ID</label>
+                  <label htmlFor="employee-id" className="label-stitch">Employee ID</label>
                   <input
+                    id="employee-id"
                     className="input-stitch h-10"
                     placeholder="000001"
                     maxLength={6}
@@ -78,11 +79,12 @@ export default function LoginPage() {
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="label-stitch">Password</label>
-                    <a className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 hover:text-primary transition-colors" href="#">Forgot?</a>
+                    <label htmlFor="password" className="label-stitch">Password</label>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">Forgot?</span>
                   </div>
                   <div className="relative">
                     <input
+                      id="password"
                       className="input-stitch h-10 pr-10"
                       type={showPass ? "text" : "password"}
                       placeholder="Enter your password"
@@ -113,7 +115,7 @@ export default function LoginPage() {
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4 text-[10px] text-muted-foreground/60">
               <span>v1.0</span>
-              <a href="#" className="hover:text-primary transition-colors">Need help? Contact IT</a>
+              <span>Need help? Contact IT</span>
             </div>
           </div>
         </div>

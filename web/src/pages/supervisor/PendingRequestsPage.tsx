@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { useLeaveStore } from "@/stores/leaveStore"
-import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
 import {
@@ -14,9 +13,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { formatDate, formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/stores/authStore"
-import api from "@/lib/api"
+import api, { getErrorMessage } from "@/lib/api"
 import PageHeader from "@/components/layout/PageHeader"
-import { CheckCircle, XCircle, Loader2, Inbox, User, Undo2, Trash2 } from "lucide-react"
+import { CheckCircle, XCircle, Loader2, Inbox, Undo2, Trash2 } from "lucide-react"
 
 export default function PendingRequestsPage() {
   const {
@@ -71,8 +70,8 @@ export default function PendingRequestsPage() {
       await api.delete(`/leave/${leaveId}`)
       toast.success("Leave record deleted")
       loadApprovedLeaves()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Could not delete")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Could not delete"))
     }
     setActionLoading(null)
   }

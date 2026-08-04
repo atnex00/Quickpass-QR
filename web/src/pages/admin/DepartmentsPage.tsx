@@ -3,17 +3,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
+import { DialogTitle, DialogHeader, Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog"
 import PageHeader from "@/components/layout/PageHeader"
 import type { Department } from "@/types"
-import api from "@/lib/api"
+import api, { getErrorMessage } from "@/lib/api"
 import { Building2, Loader2, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -30,7 +23,7 @@ export default function DepartmentsPage() {
     setLoading(true)
     api.get("/admin/departments")
       .then((res) => setDepartments(res.data.data))
-      .catch(() => {})
+      .catch(() => { /* toast is not critical here */ })
       .finally(() => setLoading(false))
   }
 
@@ -46,8 +39,8 @@ export default function DepartmentsPage() {
       setAddOpen(false)
       setForm({ department_id: "", department_name: "", department_code: "", head_of_department: "" })
       load()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to create")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to create"))
     }
     setSaving(false)
   }
@@ -59,8 +52,8 @@ export default function DepartmentsPage() {
       toast.success("Department deleted")
       setConfirmId(null)
       load()
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete")
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Failed to delete"))
       setConfirmId(null)
     }
     setDeleting(false)
