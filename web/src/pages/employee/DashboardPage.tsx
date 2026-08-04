@@ -5,9 +5,8 @@ import { useLeaveStore } from "@/stores/leaveStore"
 import { Button } from "@/components/ui/button"
 import StatusBadge from "@/components/shared/StatusBadge"
 import DashboardSkeleton from "@/components/shared/DashboardSkeleton"
-import PageHeader from "@/components/layout/PageHeader"
 import {
-  History, Plus, CheckCircle, Timer, Hourglass, Inbox, CalendarDays, Sparkles,
+  History, Plus, CheckCircle, Timer, Hourglass, Inbox, CalendarDays,
 } from "lucide-react"
 import { formatDate, formatTime } from "@/lib/utils"
 
@@ -28,11 +27,14 @@ export default function EmployeeDashboard() {
 
   return (
     <div className="page-enter space-y-5">
-      <PageHeader
-        title={`Welcome back, ${user?.full_name?.split(" ")[0] || "User"}`}
-        subtitle={`${user?.position} · ${user?.department_name}`}
-        icon={<Sparkles className="h-5 w-5" />}
-      />
+      <div className="mb-2">
+        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          Welcome back, {user?.full_name?.split(" ")[0] || "User"}
+        </h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {user?.position} · {user?.department_name}
+        </p>
+      </div>
 
       {/* Active leave banner */}
       {activeLeave && (

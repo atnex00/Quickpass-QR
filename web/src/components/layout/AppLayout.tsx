@@ -22,8 +22,6 @@ function StatusBar() {
     <div className="status-bar">
       <div className="flex items-center gap-3">
         <span className="status-bar-time">{fmt(h)}:{fmt(m)}:{fmt(s)}</span>
-        <span className="status-bar-dot" />
-        <span className="text-[11px] text-muted-foreground/50">System Online</span>
       </div>
       <div className="flex items-center gap-2">
         <ThemeToggle />
