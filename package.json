@@ -19,7 +19,7 @@
       "npm run lint --prefix backend -- --fix"
     ],
     "web/src/**/*.{ts,tsx}": [
-      "npx --prefix web tsc --noEmit"
+      "bash -c \"cd web && npx tsc --noEmit\""
     ],
     "flutter_app/**/*.dart": [
       "bash -c \"cd flutter_app && flutter analyze --no-fatal-infos --no-fatal-warnings\""
