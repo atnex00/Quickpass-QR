@@ -125,6 +125,20 @@ app.use((req, res, next) => {
 // Trust proxy for rate limiting behind reverse proxy
 app.set('trust proxy', 1);
 
+function userOrIpKey(req) {
+  if (req.user) return `user:${req.user.employee_id}`;
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET, { algorithms: ['HS256'] });
+      if (decoded && decoded.employee_id) return `user:${decoded.employee_id}`;
+    } catch {
+      // Token invalid or expired — fall through to IP-based key
+    }
+  }
+  return `ip:${req.ip}`;
+}
+
 // Global rate limit — per-user when authenticated, per-IP otherwise
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -132,22 +146,21 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path.startsWith('/api/scan'),
-  keyGenerator: (req) => {
-    if (req.user) return `user:${req.user.employee_id}`;
-    const auth = req.headers.authorization;
-    if (auth && auth.startsWith('Bearer ')) {
-      try {
-        const decoded = jwt.verify(auth.split(' ')[1], process.env.JWT_SECRET, { algorithms: ['HS256'] });
-        if (decoded && decoded.employee_id) return `user:${decoded.employee_id}`;
-      } catch {
-        // Token invalid or expired — fall through to IP-based key
-      }
-    }
-    return `ip:${req.ip}`;
-  },
+  keyGenerator: userOrIpKey,
   message: { success: false, message: 'Too many requests, please try again later' },
 });
 app.use(limiter);
+
+// Scan endpoints get a dedicated, higher limit (gate scanners are busy, but not unlimited)
+const scanLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  message: { success: false, message: 'Too many scan requests, please try again later' },
+});
+app.use('/api/scan', scanLimiter);
 
 // Stricter rate limit for login
 const loginLimiter = rateLimit({

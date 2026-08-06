@@ -10,10 +10,10 @@ void main() {
   });
 
   group('DeviceSecurityService', () {
-    test('isDeviceCompromised returns false when safe_device throws',
+    test('isDeviceCompromised returns true when safe_device throws',
         () async {
       final result = await DeviceSecurityService.isDeviceCompromised();
-      expect(result, false);
+      expect(result, true);
     });
 
     test('handleCompromisedDevice does not throw', () async {

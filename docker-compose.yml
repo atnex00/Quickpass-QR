@@ -38,7 +38,6 @@ services:
       - DB_CONNECTION=${DB_CONNECTION}
       - DB_SSL=true
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRES_IN=24h
       - SESSION_EXPIRES_IN=7d
       - QR_SECRET=${QR_SECRET}
       - QR_VALIDITY_WINDOW_MINUTES=15

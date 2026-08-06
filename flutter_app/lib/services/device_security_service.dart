@@ -9,7 +9,8 @@ class DeviceSecurityService {
     try {
       return await JailbreakRootDetection.instance.isJailBroken;
     } catch (_) {
-      return false;
+      // Fail closed: if the detection plugin itself errors, treat the device as compromised
+      return true;
     }
   }
 

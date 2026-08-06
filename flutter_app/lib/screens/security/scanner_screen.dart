@@ -45,8 +45,6 @@ class _ScannerScreenState extends State<ScannerScreen>
     if (widget.active == oldWidget.active) return;
     if (widget.active) {
       _syncCamera();
-    } else {
-      _controller?.stop();
     }
   }
 
@@ -92,7 +90,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     _controller ??= MobileScannerController(
       detectionSpeed: DetectionSpeed.noDuplicates,
     );
-    _controller?.start();
+    _cameraError = null;
     if (mounted) setState(() {});
   }
 
@@ -185,7 +183,11 @@ class _ScannerScreenState extends State<ScannerScreen>
                       setState(() => _showManualEntry = !_showManualEntry),
                   onToggleTorch: () {
                     setState(() => _torchEnabled = !_torchEnabled);
-                    _controller?.toggleTorch();
+                    try {
+                      _controller?.toggleTorch();
+                    } catch (_) {
+                      // Camera may be unavailable — torch state is cosmetic
+                    }
                   },
                 ),
                 const Spacer(),

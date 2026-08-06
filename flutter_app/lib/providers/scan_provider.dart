@@ -82,7 +82,7 @@ class ScanProvider extends ChangeNotifier {
       _historyPages = int.tryParse('${p?['pages']}') ?? 1;
       _error = null;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     }
 
     _historyLoading = false;
@@ -107,7 +107,7 @@ class ScanProvider extends ChangeNotifier {
       }
       _error = null;
     } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
+      _error = friendlyError(e);
     }
 
     _statsLoading = false;

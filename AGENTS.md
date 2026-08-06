@@ -114,10 +114,10 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 - Spacing: 8px grid, cards 16px padding, section gaps 24px
 
 ### Database
-- Migrations in `database/migrations/` (8 files, ordered: departments → employees → sessions → leave_requests → qr_scan_logs → functions → add_is_security → optional_department)
+- Migrations in `database/migrations/` (13 numbered files; note `013_` prefix exists twice — `013_add_approval_metadata` and `013_leave_requests_optional_department` — applied in lexical order, so do NOT rename after deployment)
 - Seeds in `database/seeds/` (departments + employees, all passwords `pass1234`)
 - `employees` table: `password_hash` auth, `sessions` table for JWT tracking
-- Employee ID is auto-generated 6-digit zero-padded string via `generate_employee_id()` function
+- Employee IDs are explicit 6-digit zero-padded strings (e.g. `000001`); the `generate_employee_id()` function/sequence was dropped by migration `013_add_approval_metadata`
 
 ### Test Users
 | ID | Name | Role |
@@ -152,7 +152,7 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 - Theme: `QuickpassTheme` with `QuickpassColors` from `config/theme.dart`
 - Forms: `Form` + `GlobalKey<FormState>` + `TextFormField` + validators
 - Screens: `StatefulWidget` + `Scaffold`, `RefreshIndicator`
-- `API_BASE_URL` is compile-time `--dart-define`. Default fallback: `http://182.168.0.231:3000/api` (note: likely a typo for `192.168`)
+- `API_BASE_URL` is compile-time `--dart-define`. Default fallback: `http://192.168.0.231:3000/api`
 
 ### Backend (Node.js + Express)
 - Controllers in `controllers/`
@@ -193,7 +193,7 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 - Depth via tonal layering, not shadows
 
 ## Misc
-- No CI/CD configured (no `.github/workflows/`)
+- CI in `.github/workflows/`: `ci.yml` (backend lint+test, web lint+typecheck+build+test, flutter analyze+test) + `security.yml` (npm audit on backend/web)
 - Vite dev server on port 8080 (not the default 5173)
 - `npm run dev` at root runs `dev.sh` which starts backend + web concurrently
 - Web Color System defined in `web/src/index.css` via `@theme` — CSS-driven, no config file

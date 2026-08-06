@@ -5,6 +5,25 @@ const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 const auditService = require('../services/auditService');
 
+const EMPLOYEE_SELECT = [
+  'employees.employee_id',
+  'employees.full_name',
+  'employees.position',
+  'employees.department_id',
+  'departments.department_name',
+  'departments.department_code',
+  'employees.email',
+  'employees.is_supervisor',
+  'employees.is_admin',
+  'employees.is_security',
+  'employees.is_active',
+  'employees.profile_photo',
+  'employees.hire_date',
+  'employees.last_login',
+  'employees.created_at',
+  'employees.updated_at',
+];
+
 async function createEmployee(req, res, next) {
   try {
     const { employee_id, full_name, position, department_id, email, password, is_supervisor, is_admin, is_security } = req.body;
@@ -42,7 +61,7 @@ async function createEmployee(req, res, next) {
     const employee = await db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.employee_id', employee_id)
-      .select('employees.*', 'departments.department_name')
+      .select(EMPLOYEE_SELECT)
       .first();
 
     res.status(201).json({ success: true, data: employee });
@@ -67,7 +86,7 @@ async function listEmployees(req, res, next) {
 
     let query = db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
-      .select('employees.*', 'departments.department_name', 'departments.department_code');
+      .select(EMPLOYEE_SELECT);
 
     if (department_id) {
       query = query.andWhere('employees.department_id', department_id);
@@ -152,7 +171,7 @@ async function updateEmployee(req, res, next) {
       updated = await trx('employees')
         .leftJoin('departments', 'employees.department_id', 'departments.department_id')
         .where('employees.employee_id', id)
-        .select('employees.*', 'departments.department_name')
+        .select(EMPLOYEE_SELECT)
         .first();
     });
 
