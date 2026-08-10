@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react"
-import { Outlet, Navigate, useLocation } from "react-router"
+import { Outlet, Navigate, useLocation, useNavigate } from "react-router"
+import { LogOut } from "lucide-react"
 import { useAuthStore } from "@/stores/authStore"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 import Sidebar from "./Sidebar"
 import ThemeToggle from "./ThemeToggle"
 import { Toaster } from "sonner"
 
 function StatusBar() {
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const [time, setTime] = useState(new Date())
+  const isMobile = useMediaQuery("(max-width: 767px)")
 
   useEffect(() => {
     const id = setInterval(() => setTime(new Date()), 1000)
@@ -18,6 +22,11 @@ function StatusBar() {
   const h = time.getHours(), m = time.getMinutes(), s = time.getSeconds()
   const role = user?.is_admin ? "Admin" : user?.is_supervisor ? "Supervisor" : user?.is_security ? "Security" : "Employee"
 
+  const handleLogout = async () => {
+    await logout()
+    navigate("/login")
+  }
+
   return (
     <div className="status-bar">
       <div className="flex items-center gap-3">
@@ -27,6 +36,16 @@ function StatusBar() {
         <ThemeToggle />
         <span className="status-bar-user">{user?.full_name}</span>
         <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40">{role}</span>
+        {isMobile && (
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            aria-label="Logout"
+            className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
     </div>
   )
