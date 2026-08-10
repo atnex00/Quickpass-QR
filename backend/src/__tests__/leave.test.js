@@ -180,6 +180,35 @@ describe('POST /api/leave/request', () => {
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
   });
+
+  it('normalizes ISO date input to plain date string and stores it verbatim', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        leave_id: 'LV-MOCK', employee_id: '000001', status: 'pending', employee_name: 'James Wilson',
+      });
+    db().resolve([{ employee_id: '000011' }]);
+    const res = await request(app)
+      .post('/api/leave/request')
+      .set('Authorization', `Bearer ${authToken()}`)
+      .send({ leave_date: `${today}T00:00:00.000Z`, start_time: '09:00', end_time: '17:00', reason: 'Medical appointment' });
+    expect(res.status).toBe(201);
+    const insertCall = db().insert.mock.calls.find(([obj]) => obj.leave_date !== undefined);
+    expect(insertCall[0].leave_date).toBe(today);
+  });
+
+  it('returns 400 when leave date is not today', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    const yesterday = new Date(Date.now() - 86400000);
+    const past = yesterday.toISOString().split('T')[0];
+    const res = await request(app)
+      .post('/api/leave/request')
+      .set('Authorization', `Bearer ${authToken()}`)
+      .send({ leave_date: past, start_time: '09:00', end_time: '17:00', reason: 'Medical appointment' });
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Leave date must be today');
+  });
 });
 
 describe('GET /api/leave/history', () => {

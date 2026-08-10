@@ -83,7 +83,7 @@ router.put('/auth/fcm-token', authenticate, validate(Joi.object({
 
 // ── Employee Leave Routes ──
 router.post('/leave/request', authenticate, validate(Joi.object({
-  leave_date: Joi.date().iso().required(),
+  leave_date: Joi.date().iso().raw().required(),
   start_time: Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).required(),
   end_time: Joi.string().pattern(/^\d{2}:\d{2}(:\d{2})?$/).required(),
   reason: Joi.string().min(5).max(500).required(),
