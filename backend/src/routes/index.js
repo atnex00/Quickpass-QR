@@ -115,6 +115,7 @@ router.post('/supervisor/approve/:leaveId', authenticate, requireSupervisor, val
   leaveId: Joi.string().required(),
 })), supervisorController.approveLeave);
 router.get('/supervisor/approved', authenticate, requireSupervisor, supervisorController.getApprovedLeaves);
+router.get('/supervisor/history', authenticate, requireSupervisor, supervisorController.getSupervisorHistory);
 router.post('/supervisor/revoke/:leaveId', authenticate, requireSupervisor, validateParams(Joi.object({
   leaveId: Joi.string().required(),
 })), supervisorController.revokeApproval);

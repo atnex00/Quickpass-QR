@@ -293,6 +293,62 @@ describe('GET /api/supervisor/approved', () => {
   });
 });
 
+describe('GET /api/supervisor/history', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns approved and rejected leaves with decided_at for supervisor', async () => {
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
+    db().resolve([
+      {
+        leave_id: 'LV-001', status: 'rejected', supervisor_id: '000015',
+        rejection_reason: 'Lack of coverage', employee_name: 'James Wilson',
+        approved_at: null, updated_at: '2026-07-20T02:00:00.000Z',
+        leave_date: '2026-07-25',
+      },
+      {
+        leave_id: 'LV-002', status: 'approved', supervisor_id: '000015',
+        approved_by: '000015', employee_name: 'Maria',
+        approved_at: '2026-07-21T02:00:00.000Z', updated_at: '2026-07-21T02:00:00.000Z',
+        leave_date: '2026-07-26',
+      },
+    ]);
+    const res = await request(app)
+      .get('/api/supervisor/history')
+      .set('Authorization', `Bearer ${supToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(2);
+    expect(res.body.data[0].decided_at).toBe('2026-07-21T02:00:00.000Z');
+    expect(res.body.data[0].status).toBe('approved');
+    expect(res.body.data[1].decided_at).toBe('2026-07-20T02:00:00.000Z');
+    expect(res.body.data[1].status).toBe('rejected');
+    expect(res.body.data[1].rejection_reason).toBe('Lack of coverage');
+  });
+
+  it('returns all decided leaves for admin', async () => {
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db().resolve([
+      {
+        leave_id: 'LV-003', status: 'completed', approved_by: '000011',
+        employee_name: 'Anna', approved_at: '2026-07-22T02:00:00.000Z',
+        updated_at: '2026-07-23T02:00:00.000Z', leave_date: '2026-07-27',
+      },
+    ]);
+    const res = await request(app)
+      .get('/api/supervisor/history')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].decided_at).toBe('2026-07-22T02:00:00.000Z');
+  });
+
+  it('returns 401 without token', async () => {
+    const res = await request(app).get('/api/supervisor/history');
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('GET /api/supervisor/team-leaves', () => {
   beforeEach(() => {
     jest.clearAllMocks();

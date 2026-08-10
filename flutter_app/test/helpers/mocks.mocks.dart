@@ -448,6 +448,19 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
       ) as _i7.Future<List<_i4.LeaveRequest>>);
 
   @override
+  _i7.Future<List<_i4.LeaveRequest>> getSupervisorHistory() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getSupervisorHistory,
+          [],
+        ),
+        returnValue:
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+        returnValueForMissingStub:
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+      ) as _i7.Future<List<_i4.LeaveRequest>>);
+
+  @override
   _i7.Future<_i4.LeaveRequest> revokeApproval(String? leaveId) =>
       (super.noSuchMethod(
         Invocation.method(

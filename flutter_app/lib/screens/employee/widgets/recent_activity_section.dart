@@ -84,7 +84,7 @@ class RecentActivitySection extends StatelessWidget {
             isOffline: context.read<LeaveProvider>().fromCache,
           )
         else ...[
-          if (history.any((l) => l.isExpired)) ...[
+          if (history.firstOrNull?.isExpired == true) ...[
             _ExpiredNotice(
               onRequestAgain: () {
                 Navigator.push(

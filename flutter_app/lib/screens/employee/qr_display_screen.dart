@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../config/theme.dart';
 import '../../models/leave_request.dart';
+import '../../providers/leave_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/qr_countdown.dart';
@@ -39,6 +40,11 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
         final api = context.read<ApiService>();
         final updated = await api.getLeaveById(_leave.leaveId);
         if (!mounted) return;
+        if (updated.status != _leave.status ||
+            updated.outScanTime != _leave.outScanTime ||
+            updated.inScanTime != _leave.inScanTime) {
+          context.read<LeaveProvider>().updateLeave(updated);
+        }
         setState(() => _leave = updated);
         if (updated.status == LeaveStatus.completed) {
           _pollTimer?.cancel();

@@ -100,6 +100,35 @@ void main() {
       expect(lr.isExpired, true);
     });
 
+    test('leave_date with timezone suffix parses as local date', () {
+      final lr = LeaveRequest.fromJson({
+        ...baseJson,
+        'leave_date': '2026-08-10T00:00:00.000Z',
+      });
+      expect(lr.leaveDate, DateTime(2026, 8, 10));
+    });
+
+    test('leave_date plain string parses as local date', () {
+      final lr = LeaveRequest.fromJson({...baseJson, 'leave_date': '2026-08-10'});
+      expect(lr.leaveDate, DateTime(2026, 8, 10));
+    });
+
+    test('parses decided_at and approved_by', () {
+      final lr = LeaveRequest.fromJson({
+        ...baseJson,
+        'decided_at': '2026-07-21T02:00:00.000Z',
+        'approved_by': '000011',
+      });
+      expect(lr.decidedAt, isNotNull);
+      expect(lr.approvedBy, '000011');
+    });
+
+    test('decided_at absent defaults to null', () {
+      final lr = LeaveRequest.fromJson(baseJson);
+      expect(lr.decidedAt, isNull);
+      expect(lr.approvedBy, isNull);
+    });
+
     test('fromJson handles missing fields with defaults', () {
       final lr = LeaveRequest.fromJson({});
 

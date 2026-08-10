@@ -186,6 +186,51 @@ void main() {
     });
   });
 
+  group('updateLeave', () {
+    test('replaces history entry and updates counts', () async {
+      when(mockApi.getLeaveHistory(status: anyNamed('status')))
+          .thenAnswer((_) async => {
+                'data': [
+                  {
+                    'leave_id': 'l1',
+                    'employee_id': '000001',
+                    'employee_name': 'James Wilson',
+                    'department_id': 'DEP-002',
+                    'supervisor_id': '000011',
+                    'supervisor_name': 'Ethan White',
+                    'leave_date': '2025-06-15',
+                    'start_time': '09:00',
+                    'end_time': '17:00',
+                    'reason': 'Sick',
+                    'status': 'approved',
+                    'created_at': '2025-06-10T08:00:00Z',
+                    'updated_at': '2025-06-10T08:00:00Z',
+                  },
+                ],
+              });
+      await provider.loadHistory();
+      expect(provider.approvedCount, 1);
+
+      final updated = _createMockLeaveRequest('l1', 'completed');
+      provider.updateLeave(updated);
+
+      expect(provider.history.single.status, LeaveStatus.completed);
+      expect(provider.approvedCount, 0);
+      expect(provider.completedCount, 1);
+    });
+
+    test('clears active leave when updated to completed', () async {
+      final active = _createMockLeaveRequest('active-1', 'active');
+      provider.updateLeave(active);
+      expect(provider.activeLeave?.leaveId, 'active-1');
+
+      provider.updateLeave(_createMockLeaveRequest('active-1', 'completed'));
+
+      expect(provider.activeLeave, isNull);
+      expect(provider.history.first.status, LeaveStatus.completed);
+    });
+  });
+
   group('refresh', () {
     test('calls both loadHistory and loadActiveLeave', () async {
       when(mockApi.getLeaveHistory(status: anyNamed('status')))

@@ -131,6 +131,7 @@ class _SupervisorOverviewState extends State<_SupervisorOverview> {
       final prov = context.read<SupervisorProvider>();
       prov.loadPendingRequests();
       prov.loadApprovedLeaves();
+      prov.loadSupervisorHistory();
     });
   }
 

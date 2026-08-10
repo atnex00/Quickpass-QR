@@ -318,6 +318,13 @@ class ApiService {
     return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
   }
 
+  Future<List<LeaveRequest>> getSupervisorHistory() async {
+    final res = await dio.get('/supervisor/history');
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
+  }
+
   Future<LeaveRequest> revokeApproval(String leaveId) async {
     final res = await dio.post('/supervisor/revoke/$leaveId');
     final d = res.data['data'];

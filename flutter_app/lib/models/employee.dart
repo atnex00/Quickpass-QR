@@ -61,8 +61,17 @@ class Employee {
 
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
   static bool _boolActiveFromJson(dynamic v) => v == true || v == 1;
-  static DateTime? _hireDateFromJson(dynamic v) =>
-      v != null ? DateTime.tryParse(v.toString()) : null;
+  static DateTime? _hireDateFromJson(dynamic v) {
+    if (v == null) return null;
+    final parts = v.toString().split(RegExp(r'[T ]')).first.split('-');
+    if (parts.length == 3) {
+      final y = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final d = int.tryParse(parts[2]);
+      if (y != null && m != null && d != null) return DateTime(y, m, d);
+    }
+    return DateTime.tryParse(v.toString());
+  }
   static String? _hireDateToJson(DateTime? v) =>
       v?.toIso8601String().split('T').first;
 

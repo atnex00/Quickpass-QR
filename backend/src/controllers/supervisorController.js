@@ -360,4 +360,39 @@ async function getTeamLeaves(req, res, next) {
   }
 }
 
-module.exports = { getPendingRequests, getApprovedLeaves, approveLeave, rejectLeave, revokeApproval, getTeamLeaves };
+async function getSupervisorHistory(req, res, next) {
+  try {
+    let query = db('leave_requests')
+      .where(function () {
+        this.whereNotNull('leave_requests.approved_by')
+          .orWhere('leave_requests.status', 'rejected');
+      })
+      .leftJoin('employees as emp', 'leave_requests.employee_id', 'emp.employee_id')
+      .leftJoin('employees as sup', 'leave_requests.supervisor_id', 'sup.employee_id')
+      .select(
+        'leave_requests.*',
+        'emp.full_name as employee_name',
+        'emp.position as employee_position',
+        'emp.profile_photo as employee_photo',
+        'sup.full_name as supervisor_name'
+      );
+
+    if (!req.user.is_admin) {
+      query = query.andWhere('leave_requests.supervisor_id', req.user.employee_id);
+    }
+
+    const rows = await query;
+    const history = rows.map((r) => ({
+      ...r,
+      decided_at: r.approved_at ?? r.updated_at,
+      is_expired: qrService.isOutQrExpired(r),
+    }));
+    history.sort((a, b) => new Date(b.decided_at) - new Date(a.decided_at));
+
+    res.json({ success: true, data: history });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getPendingRequests, getApprovedLeaves, approveLeave, rejectLeave, revokeApproval, getTeamLeaves, getSupervisorHistory };

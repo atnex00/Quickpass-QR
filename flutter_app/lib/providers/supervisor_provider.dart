@@ -14,6 +14,7 @@ class SupervisorProvider extends ChangeNotifier {
   List<LeaveRequest> _pendingRequests = [];
   List<LeaveRequest> _approvedLeaves = [];
   List<LeaveRequest> _teamLeaves = [];
+  List<LeaveRequest> _history = [];
   int _loadingCount = 0;
   bool _fromCache = false;
   String? _error;
@@ -21,6 +22,7 @@ class SupervisorProvider extends ChangeNotifier {
   List<LeaveRequest> get pendingRequests => _pendingRequests;
   List<LeaveRequest> get approvedLeaves => _approvedLeaves;
   List<LeaveRequest> get teamLeaves => _teamLeaves;
+  List<LeaveRequest> get history => _history;
   bool get isLoading => _loadingCount > 0;
   bool get fromCache => _fromCache;
   String? get error => _error;
@@ -54,6 +56,7 @@ class SupervisorProvider extends ChangeNotifier {
       final leave = await _api.approveLeave(leaveId);
       _pendingRequests.removeWhere((l) => l.leaveId == leaveId);
       _approvedLeaves.insert(0, leave);
+      loadSupervisorHistory();
       notifyListeners();
       AnalyticsService().logLeaveApproved();
       return leave;
@@ -92,6 +95,7 @@ class SupervisorProvider extends ChangeNotifier {
       final leave = await _api.revokeApproval(leaveId);
       _approvedLeaves.removeWhere((l) => l.leaveId == leaveId);
       _pendingRequests.insert(0, leave);
+      loadSupervisorHistory();
       notifyListeners();
       AnalyticsService().logLeaveRevoked();
       return leave;
@@ -102,10 +106,29 @@ class SupervisorProvider extends ChangeNotifier {
     }
   }
 
+  Future<List<LeaveRequest>> loadSupervisorHistory() async {
+    _loadingCount++;
+    notifyListeners();
+
+    try {
+      _history = await _api.getSupervisorHistory();
+      _error = null;
+      _fromCache = false;
+      return _history;
+    } catch (e) {
+      _error = friendlyError(e);
+      return _history;
+    } finally {
+      _loadingCount--;
+      notifyListeners();
+    }
+  }
+
   Future<LeaveRequest?> rejectLeave(String leaveId, String reason) async {
     try {
       final leave = await _api.rejectLeave(leaveId, reason);
       _pendingRequests.removeWhere((l) => l.leaveId == leaveId);
+      loadSupervisorHistory();
       notifyListeners();
       AnalyticsService().logLeaveRejected();
       return leave;
@@ -147,6 +170,7 @@ class SupervisorProvider extends ChangeNotifier {
   void reset() {
     _pendingRequests = [];
     _approvedLeaves = [];
+    _history = [];
     _loadingCount = 0;
     _error = null;
     notifyListeners();

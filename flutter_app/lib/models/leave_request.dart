@@ -105,6 +105,8 @@ class LeaveRequest {
     this.employeePosition,
     this.employeePhoto,
     this.isExpired = false,
+    this.decidedAt,
+    this.approvedBy,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
@@ -186,7 +188,23 @@ class LeaveRequest {
   @JsonKey(name: 'is_expired', defaultValue: false)
   final bool isExpired;
 
+  @JsonKey(
+      name: 'decided_at',
+      fromJson: _dateTimeOrNullFromJson,
+      toJson: _dateTimeOrNullToJson)
+  final DateTime? decidedAt;
+
+  @JsonKey(name: 'approved_by')
+  final String? approvedBy;
+
   static DateTime _dateFromJson(dynamic v) {
+    final parts = (v?.toString() ?? '').split(RegExp(r'[T ]')).first.split('-');
+    if (parts.length == 3) {
+      final y = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final d = int.tryParse(parts[2]);
+      if (y != null && m != null && d != null) return DateTime(y, m, d);
+    }
     return DateTime.tryParse(v?.toString() ?? '') ?? DateTime(0);
   }
 

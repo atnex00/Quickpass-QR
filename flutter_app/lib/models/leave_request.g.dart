@@ -30,6 +30,8 @@ LeaveRequest _$LeaveRequestFromJson(Map<String, dynamic> json) => LeaveRequest(
       employeePosition: json['employee_position'] as String?,
       employeePhoto: json['employee_photo'] as String?,
       isExpired: json['is_expired'] as bool? ?? false,
+      decidedAt: LeaveRequest._dateTimeOrNullFromJson(json['decided_at']),
+      approvedBy: json['approved_by'] as String?,
     );
 
 Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
@@ -57,4 +59,6 @@ Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
       'employee_position': instance.employeePosition,
       'employee_photo': instance.employeePhoto,
       'is_expired': instance.isExpired,
+      'decided_at': LeaveRequest._dateTimeOrNullToJson(instance.decidedAt),
+      'approved_by': instance.approvedBy,
     };

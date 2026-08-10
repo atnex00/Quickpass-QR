@@ -187,6 +187,27 @@ class LeaveProvider extends ChangeNotifier {
     await Future.wait([loadHistory(), loadActiveLeave()]);
   }
 
+  void updateLeave(LeaveRequest updated) {
+    final idx = _history.indexWhere((l) => l.leaveId == updated.leaveId);
+    if (idx >= 0) {
+      _history[idx] = updated;
+    } else {
+      _history.insert(0, updated);
+    }
+    final ended = updated.status == LeaveStatus.completed ||
+        updated.status == LeaveStatus.cancelled ||
+        updated.isExpired;
+    if (_activeLeave?.leaveId == updated.leaveId) {
+      _activeLeave = ended ? null : updated;
+    } else if (_activeLeave == null && !ended) {
+      _activeLeave = updated;
+    }
+    _recomputeCounts();
+    CacheService().saveLeaves(_history);
+    CacheService().saveActiveLeave(_activeLeave);
+    notifyListeners();
+  }
+
   void reset() {
     _history = [];
     _activeLeave = null;
