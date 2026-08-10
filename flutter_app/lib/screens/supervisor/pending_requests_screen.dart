@@ -245,15 +245,16 @@ class _ApprovedCard extends StatelessWidget {
                     tooltip: 'Delete',
                     onPressed: () => _confirmDelete(context),
                   ),
-                OutlinedButton.icon(
-                  onPressed: () => _confirmRevoke(context),
-                  icon: const Icon(Icons.undo, size: 18),
-                  label: const Text('Revoke'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: context.warning,
-                    side: BorderSide(color: context.warning),
+                if (!leave.isExpired)
+                  OutlinedButton.icon(
+                    onPressed: () => _confirmRevoke(context),
+                    icon: const Icon(Icons.undo, size: 18),
+                    label: const Text('Revoke'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.warning,
+                      side: BorderSide(color: context.warning),
+                    ),
                   ),
-                ),
               ],
             ),
           ],

@@ -23,9 +23,11 @@ async function validateScan(req, res, next) {
       throw createError(400, 'QR code signature is invalid');
     }
 
-    const timeValid = qrService.isWithinTimeWindow(timestamp, process.env.QR_VALIDITY_WINDOW_MINUTES || 15);
-    if (!timeValid) {
-      throw createError(400, 'QR code has expired');
+    if (type === 'OUT') {
+      const timeValid = qrService.isWithinTimeWindow(timestamp, process.env.QR_VALIDITY_WINDOW_MINUTES || 15);
+      if (!timeValid) {
+        throw createError(400, 'QR code has expired');
+      }
     }
 
     let leave;

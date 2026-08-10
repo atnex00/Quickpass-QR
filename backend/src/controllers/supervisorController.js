@@ -238,7 +238,7 @@ async function getApprovedLeaves(req, res, next) {
     }
 
     const requests = await query;
-    res.json({ success: true, data: requests });
+    res.json({ success: true, data: requests.map((r) => ({ ...r, is_expired: qrService.isOutQrExpired(r) })) });
   } catch (err) {
     next(err);
   }
@@ -257,6 +257,10 @@ async function revokeApproval(req, res, next) {
 
       if (!leave) {
         throw createError(404, 'Approved leave request not found');
+      }
+
+      if (qrService.isOutQrExpired(leave)) {
+        throw createError(400, 'This leave pass has expired and cannot be revoked');
       }
 
       if (!req.user.is_admin) {

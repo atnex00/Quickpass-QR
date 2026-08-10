@@ -431,7 +431,8 @@ class _LeaveTabState extends State<LeaveTab> {
                       ),
                     ),
                   ],
-                  if (status == 'approved')
+                  if (status == 'approved' &&
+                      leave['is_expired'] != true)
                     OutlinedButton.icon(
                       onPressed: () => _revokeApproval(leave),
                       icon: const Icon(Icons.undo, size: 18),

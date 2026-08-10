@@ -22,7 +22,7 @@ class LeaveHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = leave.status.color(context);
+    final statusColor = leave.isExpired ? context.error : leave.status.color(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -80,7 +80,9 @@ class LeaveHistoryCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
-                                    leave.status.label.toUpperCase(),
+                                    leave.isExpired
+                                        ? 'Expired'
+                                        : leave.status.label.toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
@@ -145,8 +147,9 @@ class LeaveHistoryCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      if (leave.status == LeaveStatus.pending ||
-                          leave.status == LeaveStatus.approved)
+                      if ((leave.status == LeaveStatus.pending ||
+                          leave.status == LeaveStatus.approved) &&
+                      !leave.isExpired)
                         GestureDetector(
                           onTap: onCancel,
                           child: Container(

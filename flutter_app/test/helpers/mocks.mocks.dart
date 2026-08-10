@@ -4,6 +4,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i7;
+import 'dart:typed_data' as _i8;
 import 'dart:ui' as _i6;
 
 import 'package:dio/dio.dart' as _i2;
@@ -344,6 +345,24 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
       ) as _i7.Future<_i4.LeaveRequest>);
 
   @override
+  _i7.Future<_i8.Uint8List> getQrImageBytes(
+    String? leaveId,
+    String? type,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getQrImageBytes,
+          [
+            leaveId,
+            type,
+          ],
+        ),
+        returnValue: _i7.Future<_i8.Uint8List>.value(_i8.Uint8List(0)),
+        returnValueForMissingStub:
+            _i7.Future<_i8.Uint8List>.value(_i8.Uint8List(0)),
+      ) as _i7.Future<_i8.Uint8List>);
+
+  @override
   _i7.Future<List<_i4.LeaveRequest>> getPendingRequests() =>
       (super.noSuchMethod(
         Invocation.method(
@@ -500,6 +519,18 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
             #page: page,
             #limit: limit,
           },
+        ),
+        returnValue:
+            _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+        returnValueForMissingStub:
+            _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+
+  @override
+  _i7.Future<Map<String, dynamic>> getScanStats() => (super.noSuchMethod(
+        Invocation.method(
+          #getScanStats,
+          [],
         ),
         returnValue:
             _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),

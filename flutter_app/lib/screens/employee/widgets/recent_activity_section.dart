@@ -8,6 +8,7 @@ import '../../../utils/date_formatter.dart';
 import '../../../utils/responsive.dart';
 import '../../../widgets/custom_widgets.dart';
 import '../qr_display_screen.dart';
+import '../request_leave_screen.dart';
 
 class RecentActivitySection extends StatelessWidget {
   const RecentActivitySection({
@@ -82,9 +83,84 @@ class RecentActivitySection extends StatelessWidget {
             title: 'No recent activity',
             isOffline: context.read<LeaveProvider>().fromCache,
           )
-        else
+        else ...[
+          if (history.any((l) => l.isExpired)) ...[
+            _ExpiredNotice(
+              onRequestAgain: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const RequestLeaveScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
           ...history.take(10).map((leave) => _ActivityCard(leave: leave)),
+        ],
       ],
+    );
+  }
+}
+
+class _ExpiredNotice extends StatelessWidget {
+  const _ExpiredNotice({required this.onRequestAgain});
+  final VoidCallback onRequestAgain;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.error.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.error.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.timer_off_outlined, size: 18, color: context.error),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Your leave pass has expired',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: context.error,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'The exit QR wasn\u2019t scanned in time, so the pass can no longer be used. You can submit a new request.',
+            style: TextStyle(
+              fontSize: 12,
+              color: context.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: onRequestAgain,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: Size.zero,
+              foregroundColor: context.error,
+            ),
+            icon: const Icon(Icons.add_circle_outline, size: 18),
+            label: const Text(
+              'Request Again',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -123,7 +199,7 @@ class _ActivityCard extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () {
-              if (leave.hasQrCodes) {
+              if (leave.hasQrCodes && !leave.isExpired) {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -176,15 +252,20 @@ class _ActivityCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: leave.status.color(context).withValues(alpha: 0.1),
+                    color: (leave.isExpired
+                            ? context.error
+                            : leave.status.color(context))
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    leave.status.label,
+                    leave.isExpired ? 'Expired' : leave.status.label,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: leave.status.color(context),
+                      color: leave.isExpired
+                          ? context.error
+                          : leave.status.color(context),
                     ),
                   ),
                 ),

@@ -135,7 +135,9 @@ class ActiveLeaveCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (leave.status == LeaveStatus.approved) ...[
+                if (leave.status == LeaveStatus.approved &&
+                    leave.outScanTime == null &&
+                    !leave.isExpired) ...[
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,

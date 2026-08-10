@@ -92,6 +92,7 @@ jest.mock('../services/qrService', () => ({
     leave_id: 'LV-001', employee_id: '000001', type: 'OUT', timestamp: new Date().toISOString(), signature: 'abc',
   })),
   encodeQrData: jest.fn((d) => Buffer.from(JSON.stringify(d)).toString('base64')),
+  isOutQrExpired: jest.fn(() => false),
 }));
 
 jest.mock('../services/qrImageService', () => ({
@@ -247,6 +248,48 @@ describe('POST /api/supervisor/revoke/:leaveId', () => {
       .post('/api/supervisor/revoke/LV-001')
       .set('Authorization', `Bearer ${supToken()}`);
     expect(res.status).toBe(200);
+  });
+
+  it('returns 400 when the leave pass has expired', async () => {
+    const qrService = require('../services/qrService');
+    qrService.isOutQrExpired.mockReturnValueOnce(true);
+    mockAuth({ employee_id: '000015', department_id: 'DEP-001', is_supervisor: true, is_active: true });
+    db.transaction.mockImplementationOnce((cb) => {
+      const trx = makeChain();
+      trx.fn = { now: jest.fn(() => 'NOW()') };
+      trx.first.mockResolvedValueOnce({
+        leave_id: 'LV-001', employee_id: '000001', status: 'approved',
+        supervisor_id: '000015', department_id: 'DEP-001', leave_date: today,
+      });
+      return cb(trx);
+    });
+    const res = await request(app)
+      .post('/api/supervisor/revoke/LV-001')
+      .set('Authorization', `Bearer ${supToken()}`);
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain('expired');
+  });
+});
+
+describe('GET /api/supervisor/approved', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('annotates is_expired on approved leaves', async () => {
+    const qrService = require('../services/qrService');
+    qrService.isOutQrExpired.mockReturnValueOnce(true).mockReturnValueOnce(false);
+    mockAuth({ employee_id: '999999', is_admin: true, is_active: true });
+    db().resolve([
+      { leave_id: 'LV-001', status: 'approved', employee_name: 'James Wilson' },
+      { leave_id: 'LV-002', status: 'approved', employee_name: 'Maria' },
+    ]);
+    const res = await request(app)
+      .get('/api/supervisor/approved')
+      .set('Authorization', `Bearer ${adminToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].is_expired).toBe(true);
+    expect(res.body.data[1].is_expired).toBe(false);
   });
 });
 

@@ -155,7 +155,7 @@ class _LeaveHistoryScreenState extends State<LeaveHistoryScreen> {
                             leave: leave,
                             isAdmin: isAdmin,
                             onTap: () {
-                              if (leave.hasQrCodes) {
+                              if (leave.hasQrCodes && !leave.isExpired) {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(

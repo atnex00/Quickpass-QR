@@ -104,6 +104,7 @@ class LeaveRequest {
     required this.updatedAt,
     this.employeePosition,
     this.employeePhoto,
+    this.isExpired = false,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
@@ -181,6 +182,9 @@ class LeaveRequest {
 
   @JsonKey(name: 'employee_photo')
   final String? employeePhoto;
+
+  @JsonKey(name: 'is_expired', defaultValue: false)
+  final bool isExpired;
 
   static DateTime _dateFromJson(dynamic v) {
     return DateTime.tryParse(v?.toString() ?? '') ?? DateTime(0);

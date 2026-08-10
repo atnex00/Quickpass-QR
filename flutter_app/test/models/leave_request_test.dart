@@ -92,6 +92,12 @@ void main() {
       expect(lr.rejectionReason, isNull);
       expect(lr.employeePosition, 'Software Engineer');
       expect(lr.employeePhoto, 'https://example.com/photo.jpg');
+      expect(lr.isExpired, false);
+    });
+
+    test('parses is_expired flag', () {
+      final lr = LeaveRequest.fromJson({...baseJson, 'is_expired': true});
+      expect(lr.isExpired, true);
     });
 
     test('fromJson handles missing fields with defaults', () {

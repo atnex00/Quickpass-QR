@@ -4,6 +4,7 @@ const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 const auditService = require('../services/auditService');
+const qrService = require('../services/qrService');
 
 const EMPLOYEE_SELECT = [
   'employees.employee_id',
@@ -583,6 +584,7 @@ async function getReports(req, res, next) {
           'departments.department_name'
         )
         .orderBy('leave_requests.start_time');
+      reportData = reportData.map((r) => ({ ...r, is_expired: qrService.isOutQrExpired(r) }));
     } else if (type === 'department') {
       reportData = await db('leave_requests')
         .join('departments', 'leave_requests.department_id', 'departments.department_id')
@@ -615,6 +617,7 @@ async function getReports(req, res, next) {
       }
 
       reportData = await query.orderBy('leave_requests.created_at', 'desc');
+      reportData = reportData.map((r) => ({ ...r, is_expired: qrService.isOutQrExpired(r) }));
     }
 
     res.json({ success: true, data: reportData });

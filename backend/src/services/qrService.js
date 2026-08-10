@@ -63,6 +63,23 @@ function isWithinTimeWindow(timestamp, windowMinutes) {
   return diffMs <= windowMs;
 }
 
+function getQrTimestamp(qrCode) {
+  if (typeof qrCode !== 'string' || !qrCode) return null;
+  const decoded = decodeQrData(qrCode);
+  if (!decoded || !decoded.timestamp) return null;
+  const ts = new Date(decoded.timestamp);
+  return isNaN(ts.getTime()) ? null : ts;
+}
+
+function isOutQrExpired(leave, now = new Date()) {
+  if (!leave || leave.status !== 'approved') return false;
+  const windowMs = (parseInt(process.env.QR_VALIDITY_WINDOW_MINUTES) || 15) * 60 * 1000;
+  const qrTime = getQrTimestamp(leave.out_qr_code);
+  const reference = qrTime || new Date(`${leave.leave_date}T${leave.start_time}`.replace(' ', 'T'));
+  if (isNaN(reference.getTime())) return false;
+  return now.getTime() > reference.getTime() + windowMs;
+}
+
 module.exports = {
   generateQrData,
   createSignature,
@@ -70,4 +87,6 @@ module.exports = {
   encodeQrData,
   decodeQrData,
   isWithinTimeWindow,
+  getQrTimestamp,
+  isOutQrExpired,
 };

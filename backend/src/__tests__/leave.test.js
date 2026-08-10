@@ -100,9 +100,16 @@ process.env.QR_SECRET = 'test-qr-secret';
 process.env.NODE_ENV = 'test';
 
 const { getLocalDateString } = require('../utils/date');
+const qrService = require('../services/qrService');
 const today = getLocalDateString();
 
 const app = require('../app');
+
+function expiredApprovedLeave(leaveId) {
+  const d = new Date(Date.now() - 60 * 60 * 1000);
+  const data = qrService.generateQrData(leaveId, '000001', 'OUT', getLocalDateString(d), d.toTimeString().split(' ')[0]);
+  return { leave_id: leaveId, status: 'approved', employee_name: 'James Wilson', employee_id: '000001', out_qr_code: qrService.encodeQrData(data) };
+}
 
 function authToken(overrides = {}) {
   return jwt.sign(
@@ -194,6 +201,21 @@ describe('GET /api/leave/history', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(2);
   });
+
+  it('annotates is_expired on history rows', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first.mockResolvedValueOnce({ count: 2 });
+    db().resolve([
+      expiredApprovedLeave('LV-001'),
+      { leave_id: 'LV-002', status: 'approved', employee_name: 'James Wilson', out_qr_code: null, leave_date: today, start_time: '23:00' },
+    ]);
+    const res = await request(app)
+      .get('/api/leave/history')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].is_expired).toBe(true);
+    expect(res.body.data[1].is_expired).toBe(false);
+  });
 });
 
 describe('GET /api/leave/active', () => {
@@ -216,6 +238,15 @@ describe('GET /api/leave/active', () => {
   it('returns 404 when no active leave', async () => {
     mockAuth({ employee_id: '000001', is_active: true });
     db.first.mockResolvedValueOnce(null);
+    const res = await request(app)
+      .get('/api/leave/active')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 when the approved leave pass is expired', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.first.mockResolvedValueOnce(expiredApprovedLeave('LV-001'));
     const res = await request(app)
       .get('/api/leave/active')
       .set('Authorization', `Bearer ${authToken()}`);
@@ -316,5 +347,20 @@ describe('POST /api/leave/:id/cancel', () => {
       .post('/api/leave/LV-999/cancel')
       .set('Authorization', `Bearer ${authToken()}`);
     expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when the leave pass has expired', async () => {
+    mockAuth({ employee_id: '000001', is_active: true });
+    db.transaction.mockImplementationOnce((cb) => {
+      const trx = makeChain();
+      trx.fn = { now: jest.fn(() => 'NOW()') };
+      trx.first.mockResolvedValueOnce(expiredApprovedLeave('LV-001'));
+      return cb(trx);
+    });
+    const res = await request(app)
+      .post('/api/leave/LV-001/cancel')
+      .set('Authorization', `Bearer ${authToken()}`);
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain('expired');
   });
 });

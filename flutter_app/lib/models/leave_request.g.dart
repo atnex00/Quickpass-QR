@@ -29,6 +29,7 @@ LeaveRequest _$LeaveRequestFromJson(Map<String, dynamic> json) => LeaveRequest(
       updatedAt: LeaveRequest._dateTimeFromJson(json['updated_at']),
       employeePosition: json['employee_position'] as String?,
       employeePhoto: json['employee_photo'] as String?,
+      isExpired: json['is_expired'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
@@ -55,4 +56,5 @@ Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
       'updated_at': LeaveRequest._dateTimeToJson(instance.updatedAt),
       'employee_position': instance.employeePosition,
       'employee_photo': instance.employeePhoto,
+      'is_expired': instance.isExpired,
     };

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -35,11 +34,15 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
 
   void _startPolling() {
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      if (!mounted) return;
+      if (!mounted || _leave.status == LeaveStatus.completed) return;
       try {
         final api = context.read<ApiService>();
         final updated = await api.getLeaveById(_leave.leaveId);
+        if (!mounted) return;
         setState(() => _leave = updated);
+        if (updated.status == LeaveStatus.completed) {
+          _pollTimer?.cancel();
+        }
       } catch (_) {}
     });
   }
@@ -158,18 +161,20 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                                         horizontal: 12,
                                                         vertical: 4),
                                                 decoration: BoxDecoration(
-                                                  color: context.success
+                                                  color: _leave.status
+                                                      .color(context)
                                                       .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           999),
                                                 ),
                                                 child: Text(
-                                                  'Approved',
+                                                  _leave.status.label,
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w500,
-                                                    color: context.success,
+                                                    color: _leave.status
+                                                        .color(context),
                                                   ),
                                                 ),
                                               ),
@@ -397,20 +402,10 @@ class _QrPassCard extends StatefulWidget {
 }
 
 class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassCard> {
-  Future<Uint8List>? _qrImageFuture;
-
   @override
   void initState() {
     super.initState();
-    final url = widget.qrImageUrl;
-    if (url != null && url.startsWith('/api/')) {
-      final match = RegExp(r'^/api/leave/([^/]+)/qr/([^/]+)$').firstMatch(url);
-      if (match != null) {
-        final api = context.read<ApiService>();
-        _qrImageFuture = api.getQrImageBytes(match.group(1)!, match.group(2)!);
-      }
-    }
-    if (widget.scanTime == null) {
+    if (widget.scanTime == null && widget.isOut) {
       initCountdown(widget.date, widget.time, target: _resolveTarget());
     }
   }
@@ -515,45 +510,6 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                     final qrSize = (MediaQuery.of(context).size.width - 80)
                         .clamp(180.0, 240.0);
                     final displaySize = qrSize - 32;
-                    if (_qrImageFuture != null) {
-                      return Container(
-                        width: qrSize,
-                        height: qrSize,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: widget.qrColor.withValues(alpha: 0.2)),
-                          borderRadius: BorderRadius.circular(12),
-                          color: context.surfaceContainerLow,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: FutureBuilder<Uint8List>(
-                            future: _qrImageFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return Image.memory(
-                                  snapshot.data!,
-                                  width: displaySize,
-                                  height: displaySize,
-                                  fit: BoxFit.contain,
-                                );
-                              }
-                              return QrImageView(
-                                data: widget.qrData,
-                                size: displaySize,
-                                eyeStyle: QrEyeStyle(
-                                    eyeShape: QrEyeShape.circle,
-                                    color: widget.qrColor),
-                                dataModuleStyle: QrDataModuleStyle(
-                                    dataModuleShape: QrDataModuleShape.circle,
-                                    color: widget.qrColor),
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    }
                     return Container(
                       width: qrSize,
                       height: qrSize,
@@ -564,72 +520,90 @@ class _QrPassCardState extends State<_QrPassCard> with QrCountdownMixin<_QrPassC
                         borderRadius: BorderRadius.circular(12),
                         color: context.surfaceContainerLow,
                       ),
-                      child: RepaintBoundary(
-                        child: QrImageView(
-                          data: widget.qrData,
-                          size: displaySize,
-                          eyeStyle: QrEyeStyle(
-                              eyeShape: QrEyeShape.circle,
-                              color: widget.qrColor),
-                          dataModuleStyle: QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.circle,
-                              color: widget.qrColor),
-                        ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          RepaintBoundary(
+                            child: QrImageView(
+                              data: widget.qrData,
+                              size: displaySize,
+                              errorCorrectionLevel: QrErrorCorrectLevel.H,
+                              eyeStyle: QrEyeStyle(
+                                  eyeShape: QrEyeShape.circle,
+                                  color: widget.qrColor),
+                              dataModuleStyle: QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.circle,
+                                  color: widget.qrColor),
+                            ),
+                          ),
+                          Container(
+                            width: displaySize * 0.28,
+                            height: displaySize * 0.28,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Image.asset(
+                              'assets/icon/app-icon.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }(),
                   const SizedBox(height: 12),
-                  if (!expired)
-                    if (!widget.isOut && windowState == 'during')
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: widget.qrColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.check_circle,
-                                size: 16, color: widget.qrColor),
-                            const SizedBox(width: 6),
-                            Text('Ready to scan',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: widget.qrColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: widget.qrColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.timer_outlined,
-                                size: 16, color: widget.qrColor),
-                            const SizedBox(width: 6),
-                            Text(
-                              windowState == 'before'
-                                  ? 'Opens in ${formatCountdown(remainingSeconds)}'
-                                  : 'Expires in ${formatCountdown(remainingSeconds)}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'monospace',
-                                color: widget.qrColor,
-                              ),
-                            ),
-                          ],
-                        ),
+                  if (!widget.isOut)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: widget.qrColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle,
+                              size: 16, color: widget.qrColor),
+                          const SizedBox(width: 6),
+                          Text('Ready to scan',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: widget.qrColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (!expired)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: widget.qrColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.timer_outlined,
+                              size: 16, color: widget.qrColor),
+                          const SizedBox(width: 6),
+                          Text(
+                            windowState == 'before'
+                                ? 'Opens in ${formatCountdown(remainingSeconds)}'
+                                : 'Expires in ${formatCountdown(remainingSeconds)}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'monospace',
+                              color: widget.qrColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (expired)
                     Container(
                       padding:

@@ -3,6 +3,7 @@ const fs = require('fs');
 const db = require('../config/database');
 const notificationService = require('../services/notificationService');
 const qrImageService = require('../services/qrImageService');
+const qrService = require('../services/qrService');
 const { createError } = require('../middleware/errorHandler');
 const { getLocalDateString } = require('../utils/date');
 
@@ -121,10 +122,11 @@ async function getHistory(req, res, next) {
       .count('* as count')
       .first();
     const leaves = await query.limit(limit).offset(offset);
+    const withExpiry = leaves.map((l) => ({ ...l, is_expired: qrService.isOutQrExpired(l) }));
 
     res.json({
       success: true,
-      data: leaves,
+      data: withExpiry,
       pagination: {
         total: parseInt(count),
         page: parseInt(page),
@@ -155,6 +157,10 @@ async function getActiveLeave(req, res, next) {
       .first();
 
     if (!leave) {
+      throw createError(404, 'No active leave found');
+    }
+
+    if (qrService.isOutQrExpired(leave)) {
       throw createError(404, 'No active leave found');
     }
 
@@ -196,7 +202,7 @@ async function getLeaveById(req, res, next) {
       }
     }
 
-    res.json({ success: true, data: leave });
+    res.json({ success: true, data: { ...leave, is_expired: qrService.isOutQrExpired(leave) } });
   } catch (err) {
     next(err);
   }
@@ -254,6 +260,10 @@ async function cancelLeave(req, res, next) {
 
       if (!['approved', 'pending'].includes(leave.status)) {
         throw createError(400, `Cannot cancel a leave that is ${leave.status}`);
+      }
+
+      if (qrService.isOutQrExpired(leave)) {
+        throw createError(400, 'This leave pass has expired and can no longer be cancelled');
       }
 
       await trx('leave_requests').where({ leave_id: id }).update({
