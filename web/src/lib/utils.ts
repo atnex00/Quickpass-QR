@@ -6,20 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: string | Date) {
-  const value = typeof date === "string" ? parseDateString(date) : date
+  // Date-only strings ("YYYY-MM-DD") have no timezone — parse as local
+  // midnight, otherwise `new Date("2026-08-10")` is treated as UTC and
+  // shifts a day for negative-offset timezones.
+  const isDateOnly = typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)
+  const d = isDateOnly ? new Date(`${date}T00:00:00`) : new Date(date)
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(value)
-}
-
-function parseDateString(date: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
-  if (match) {
-    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-  }
-  return new Date(date)
+  }).format(d)
 }
 
 export function formatTime(time: string) {
