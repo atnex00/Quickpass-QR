@@ -413,7 +413,7 @@ Quickpass-QR/
 │   │   │   ├── auth/          # LoginPage
 │   │   │   ├── employee/      # Dashboard, RequestLeave, LeaveHistory, QrDisplay, MyProfile
 │   │   │   ├── supervisor/    # SupervisorDashboard, PendingRequests
-│   │   │   ├── admin/         # UserManager, Departments, Reports
+│   │   │   ├── admin/         # UserManager, Departments, Reports, AuditLog, AdminPanel
 │   │   │   ├── security/      # Scanner, ScanResult, ScanHistory
 │   │   │   └── guides/        # GuidesPage
 │   │   ├── stores/            # Zustand (authStore, leaveStore, scanStore)
@@ -432,26 +432,35 @@ Quickpass-QR/
 │       │   ├── auth/          # Login, Splash
 │       │   ├── employee/      # Dashboard, RequestLeave, History, QR Display, Profile
 │       │   ├── supervisor/    # Dashboard, PendingRequests
-│       │   ├── admin/         # AdminPanel, EmployeeDetail
+│       │   ├── admin/         # AdminPanel (tabs: overview/employees/departments/leaves/reports + EmployeeDetail)
 │       │   └── security/      # Scanner, ScanResult, ScanHistory
 │       ├── widgets/           # StatusBadge, QrCodeWidget, LoadingIndicator, etc.
 │       └── utils/             # Validators, DateFormatter, Constants, Debounce, Responsive
 ├── database/
-│   ├── migrations/            # 8 Knex migration files (see below)
+│   ├── migrations/            # 14 Knex migration files (see below)
 │   └── seeds/                 # 2 seed files (departments + employees)
 ├── scripts/                   # Setup and utility scripts (PowerShell + Bash)
 │   ├── setup.ps1 / setup.sh   # Install Flutter + Android SDK into tools/
 │   ├── setup_db.ps1 / .sh     # Database setup
-│   └── run_phone.ps1 / .sh    # ADB reverse tunnel for physical device testing
+│   ├── run.sh / stop.sh       # Start / force-stop all processes + ADB tunnel
+│   ├── run_phone.ps1 / .sh    # ADB reverse tunnel for physical device testing
+│   ├── test.sh / test.ps1     # Run backend + web + flutter test suites
+│   ├── build_release.*        # Release build helpers
+│   ├── generate-certs.sh      # Self-signed HTTPS certs for mobile camera access
+│   ├── generate-keystore.sh   # Android release keystore generator
+│   ├── backup-db.sh           # Database dump helper
+│   └── uninstall.*            # Toolchain removal
+├── .github/workflows/         # CI (backend lint+test, web lint+typecheck+build+test, flutter analyze+test) + npm audit
 ├── assets/brand/              # Logo and icon SVGs/PNGs
 ├── docs/design/               # Design documentation
 ├── docker-compose.yml         # Production backend service only (DB = Supabase cloud)
 ├── dev.sh                     # Dev launcher (backend + web concurrently)
+├── prod.sh                    # Production launcher (backend + built web)
 ├── AGENTS.md                  # AI agent project guide
 └── package.json               # Root scripts (dev, prod, build:web, migrate, seed)
 ```
 
-### Database Migrations (11 files)
+### Database Migrations (14 files)
 
 | # | File | Purpose |
 |---|------|---------|
@@ -466,6 +475,11 @@ Quickpass-QR/
 | 9 | `009_add_qr_images.js` | Add QR image paths to leave_requests |
 | 10 | `010_add_qr_scan_unique_constraint.js` | Enforce one scan per leave/qr_type |
 | 11 | `011_create_audit_logs.js` | Audit log table for tracking actions |
+| 12 | `012_add_indexes.js` | Performance indexes on hot queries |
+| 13 | `013_add_approval_metadata.js` | `approved_at`/`approved_by` columns; drops `generate_employee_id()` function + sequence |
+| 13 | `013_leave_requests_optional_department.js` | Makes `department_id` nullable on leave_requests |
+
+> Two files share the `013_` prefix and apply in lexical order — do not rename them after deployment.
 
 ---
 
@@ -514,11 +528,14 @@ Optional:
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Backend + web concurrently (`dev.sh`, env: dev) |
-| `npm run prod` | Production mode (`dev.sh`, env: prod) |
+| `npm run prod` | Production mode (`prod.sh`, env: production) |
+| `npm run dev:backend` | Start backend only (nodemon) |
+| `npm run dev:web` | Start Vite dev server only (port 8080, host 0.0.0.0) |
 | `npm run build:web` | Build web frontend (`web/dist`) |
+| `npm run test` | Run all test suites (`scripts/test.sh`) |
 | `npm run migrate` | Run database migrations |
 | `npm run seed` | Seed database with sample data |
-| `npm run dev:backend` | Start backend only |
+| `npm run prepare` | Install Husky pre-commit hooks |
 
 ### Backend (`backend/`)
 
@@ -538,6 +555,8 @@ Optional:
 |---------|-------------|
 | `npm run dev` | Vite dev server on port 8080 |
 | `npm run build` | TypeScript check + Vite build |
+| `npm run lint` | ESLint |
+| `npm run test` | Vitest unit tests |
 | `npm run preview` | Preview production build |
 | `npm run tunnel` | Start ngrok tunnel (requires ngrok config) |
 
@@ -558,7 +577,9 @@ Optional:
 |---------|-------------|
 | `npm run migrate` | Apply all pending migrations |
 | `npm run migrate:rollback` | Rollback last batch |
-| `npm run seed` | Insert sample data |
+| `npm run seed` | Insert sample data (requires `bcryptjs`; run from `backend/`) |
+
+> **Note:** Running seeds requires `bcryptjs` installed (resolves from `backend/node_modules`, root has a fallback copy).
 
 ---
 
@@ -716,11 +737,11 @@ flutter test --coverage
 ### Workflow
 
 1. **Employee** requests leave → status: `pending`
-2. **Supervisor** approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min)
+2. **Supervisor** approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min) and QR images rendered with the brand logo (`uploads-private/qr_codes`, served via authenticated endpoints)
 3. **Security** scans OUT QR at exit → status: `active`
 4. **Security** scans IN QR at entry → status: `completed`
 
-Each OUT/IN QR can only be scanned once. The database enforces this with a unique constraint and the scan is wrapped in a transaction.
+Each OUT/IN QR can only be scanned once. The database enforces this with a unique constraint and the scan is wrapped in a transaction. Actual scan times are recorded (`out_scan_time` / `in_scan_time` on the leave, `scan_time` in `qr_scan_logs`).
 
 ### Roles
 
@@ -748,6 +769,8 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | `/admin/employees` | is_admin | UserManagerPage | AppLayout |
 | `/admin/departments` | is_admin | DepartmentsPage | AppLayout |
 | `/admin/reports` | is_admin | ReportsPage | AppLayout |
+| `/admin/audit` | is_admin | AuditLogPage | AppLayout |
+| `/admin/panel` | is_admin | AdminPanelPage | AppLayout |
 | `/security/scan` | is_security/is_admin | ScannerPage | SecurityShell (no sidebar) |
 | `/security/result` | is_security/is_admin | ScanResultPage | SecurityShell |
 | `/security/history` | is_security/is_admin | ScanHistoryPage | SecurityShell |
@@ -773,6 +796,7 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | POST | `/api/auth/refresh` | — | Refresh JWT token |
 | GET | `/api/auth/profile` | ✓ | Get current user profile |
 | PUT | `/api/auth/profile` | ✓ | Update profile (name, position, email, password) |
+| POST | `/api/auth/profile/photo` | ✓ | Upload profile photo (max 5MB) |
 | PUT | `/api/auth/fcm-token` | ✓ | Update FCM push token |
 
 ### Leave Requests
@@ -783,6 +807,8 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | GET | `/api/leave/history` | ✓ | Get user's leave history (filterable by status) |
 | GET | `/api/leave/active` | ✓ | Get current active leave |
 | GET | `/api/leave/:id` | ✓ | Get leave by ID |
+| GET | `/api/leave/:id/qr/:type` | ✓ | Get QR code image (OUT/IN) |
+| POST | `/api/leave/:id/cancel` | ✓ | Cancel a pending/approved leave |
 | DELETE | `/api/leave/:id` | admin | Delete a leave request |
 
 ### Supervisor
@@ -793,6 +819,7 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | POST | `/api/supervisor/approve/:leaveId` | supervisor | Approve and generate QR codes |
 | POST | `/api/supervisor/reject/:leaveId` | supervisor | Reject with reason |
 | GET | `/api/supervisor/approved` | supervisor | List approved leaves |
+| GET | `/api/supervisor/history` | supervisor | Supervisor decision history |
 | POST | `/api/supervisor/revoke/:leaveId` | supervisor | Revoke approval |
 | GET | `/api/supervisor/team-leaves` | supervisor | Team leave calendar |
 
@@ -802,6 +829,7 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 |--------|------|------|-------------|
 | POST | `/api/scan/validate` | security | Validate scanned QR code |
 | GET | `/api/scan/history` | security | Scan log history |
+| GET | `/api/scan/stats` | security | Today's scan statistics |
 
 ### Admin
 
@@ -820,6 +848,19 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | PUT | `/api/admin/departments/:id` | admin | Update department |
 | DELETE | `/api/admin/departments/:id` | admin | Delete department |
 | GET | `/api/admin/reports` | admin | Generate reports |
+| GET | `/api/admin/audit` | admin | Audit log (paginated, filterable by actor) |
+| GET | `/api/admin/export` | admin | Export audit log |
+
+### Admin Panel (operations)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/admin/panel/status` | admin | Server + DB status |
+| GET | `/api/admin/panel/metrics` | admin | Request/error metrics |
+| GET | `/api/admin/panel/logs` | admin | Recent log lines |
+| POST | `/api/admin/panel/migrate` | admin | Run pending migrations |
+| POST | `/api/admin/panel/seed` | admin | Run database seeds |
+| POST | `/api/admin/panel/restart` | admin | Restart the server |
 
 ---
 
@@ -871,6 +912,7 @@ All passwords are `pass1234`.
 |---------|----------|
 | `flutter doctor` shows missing Android SDK | Set `ANDROID_HOME` env var and install Android Studio |
 | `npm run migrate` fails | Check `DB_CONNECTION` in `.env.<env>` and that Supabase allows your IP |
+| `npm run seed` fails with "relation `employee_id_seq` does not exist" | Known issue: migration `013_add_approval_metadata` drops the ID sequence that the seed still references (see `AUDIT.md`) |
 | `flutter pub get` fails | Ensure you're in the `flutter_app` directory |
 | QR scanner not working | Grant camera permission in Android Settings → Apps → Quickpass |
 | Backend won't start | Check missing required env vars (`DB_CONNECTION`, `JWT_SECRET`, `COOKIE_SECRET`, `QR_SECRET`, `CORS_ORIGIN` in production) and that port 3000 is free |
@@ -923,7 +965,7 @@ This project follows defense-in-depth security practices across all layers.
 |---------|-------------|
 | **JWT algorithm pinning** | Tokens are signed and verified with `HS256` only — `"alg": "none"` attacks are rejected |
 | **Account enumeration prevention** | Login and token verification return identical messages for invalid credentials, inactive accounts, and deactivated employees |
-| **Rate limiting** | Global: 100 req/15min, login: 20 req/15min, auth refresh: 30 req/15min, bulk import: 5 req/hour |
+| **Rate limiting** | Global: 100 req/15min (skips `/api/scan` and QR refresh polling on `GET /api/leave/:id`), scan: 300 req/15min, login: 20 req/15min, auth refresh: 30 req/15min, bulk import: 5 req/hour |
 | **Magic byte validation** | Uploaded files are validated by content (JPEG, PNG, GIF, WebP magic bytes), not just MIME type |
 | **Password complexity** | Admin-created passwords require uppercase, lowercase, and digit (min 8 chars) |
 | **QR signature verification** | HMAC-SHA256 with constant-time comparison (`crypto.timingSafeEqual`) |
