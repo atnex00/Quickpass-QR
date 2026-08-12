@@ -145,7 +145,9 @@ const limiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.path.startsWith('/api/scan'),
+  skip: (req) =>
+    req.path.startsWith('/api/scan') ||
+    (req.method === 'GET' && /^\/api\/leave\/LV-[\w-]+(\/qr\/(out|in))?$/.test(req.path)),
   keyGenerator: userOrIpKey,
   message: { success: false, message: 'Too many requests, please try again later' },
 });
