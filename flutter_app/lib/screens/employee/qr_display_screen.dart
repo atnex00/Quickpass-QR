@@ -46,7 +46,7 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
           context.read<LeaveProvider>().updateLeave(updated);
         }
         setState(() => _leave = updated);
-        if (updated.status == LeaveStatus.completed) {
+        if (updated.status == LeaveStatus.completed || updated.isExpired) {
           _pollTimer?.cancel();
         }
       } catch (_) {}
