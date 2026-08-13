@@ -9,8 +9,6 @@ exports.seed = async function (knex) {
 
   const hash = await bcrypt.hash('pass1234', 10);
 
-  await knex.raw("SELECT setval('employee_id_seq', 1, false)");
-
   await knex('employees').insert([
 
     // ===== DEP-001 — ISD · Institutional Services Department =====
@@ -58,6 +56,4 @@ exports.seed = async function (knex) {
     // ===== No Department =====
     { employee_id: '999999', full_name: 'System Admin', position: 'System Administrator', department_id: null, email: 'admin@zaneco.com', is_supervisor: true, is_admin: true, is_security: true, is_active: true, hire_date: '2024-01-01', password_hash: hash },
   ]);
-
-  await knex.raw("SELECT setval('employee_id_seq', 999999, true)");
 };
