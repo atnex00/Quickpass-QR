@@ -13,26 +13,31 @@ function requirePanelEnabled() {
   }
 }
 
-async function getStatus(req, res) {
-  const mem = process.memoryUsage();
-  let dbStatus = 'disconnected';
+async function getStatus(req, res, next) {
   try {
-    await db.raw('SELECT 1');
-    dbStatus = 'connected';
-  } catch {
-    // DB unreachable — leave as disconnected
+    requirePanelEnabled();
+    const mem = process.memoryUsage();
+    let dbStatus = 'disconnected';
+    try {
+      await db.raw('SELECT 1');
+      dbStatus = 'connected';
+    } catch {
+      // DB unreachable — leave as disconnected
+    }
+    res.json({
+      success: true,
+      data: {
+        db: dbStatus,
+        uptime: process.uptime(),
+        memory: { rss: mem.rss, heapUsed: mem.heapUsed, heapTotal: mem.heapTotal },
+        nodeVersion: process.version,
+        env: process.env.NODE_ENV || 'development',
+        pid: process.pid,
+      },
+    });
+  } catch (err) {
+    next(err);
   }
-  res.json({
-    success: true,
-    data: {
-      db: dbStatus,
-      uptime: process.uptime(),
-      memory: { rss: mem.rss, heapUsed: mem.heapUsed, heapTotal: mem.heapTotal },
-      nodeVersion: process.version,
-      env: process.env.NODE_ENV || 'development',
-      pid: process.pid,
-    },
-  });
 }
 
 async function runMigrate(req, res, next) {
@@ -81,6 +86,7 @@ async function runSeed(req, res, next) {
 
 async function getLogs(req, res) {
   try {
+    requirePanelEnabled();
     if (!fs.existsSync(logFile)) {
       return res.json({ success: true, data: { lines: [] } });
     }
