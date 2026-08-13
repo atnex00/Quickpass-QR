@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:quickpass/models/leave_request.dart';
 import 'package:quickpass/services/api_service.dart';
@@ -83,7 +84,12 @@ void main() {
     });
 
     test('clearLocalAuth deletes stored keys', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cache_profile', '{"full_name":"leak"}');
+      await prefs.setInt('unread_count', 3);
       await api.clearLocalAuth();
+      expect(prefs.getString('cache_profile'), isNull);
+      expect(prefs.getInt('unread_count'), isNull);
     });
 
     test('logout clears local auth even if API call fails', () async {

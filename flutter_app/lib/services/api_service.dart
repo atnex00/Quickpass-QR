@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
+import 'cache_service.dart';
 
 class ApiService {
   Dio? _dio;
@@ -187,6 +188,7 @@ class ApiService {
     await _storage.delete(key: 'refresh_sid');
     await _storage.delete(key: 'user_data');
     await _storage.delete(key: 'employee_id');
+    await CacheService().clearAll();
   }
 
   Future<void> logout() async {

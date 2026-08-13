@@ -14,6 +14,7 @@ class CacheService {
   static const _keyPending = 'cache_pending';
   static const _keyApproved = 'cache_approved';
   static const _keyProfile = 'cache_profile';
+  static const _keyUnreadCount = 'unread_count';
 
   static Map<String, dynamic> _sanitize(Map<String, dynamic> json) {
     json.remove('out_qr_code');
@@ -107,5 +108,6 @@ class CacheService {
     await prefs.remove(_keyPending);
     await prefs.remove(_keyApproved);
     await prefs.remove(_keyProfile);
+    await prefs.remove(_keyUnreadCount);
   }
 }
