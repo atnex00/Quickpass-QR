@@ -12,7 +12,7 @@ async function authenticate(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
 
     const session = await db('sessions')
-      .where({ session_id: decoded.session_id, is_active: true })
+      .where({ session_id: decoded.session_id, employee_id: decoded.employee_id, is_active: true })
       .where('expires_at', '>', db.fn.now())
       .first();
 
