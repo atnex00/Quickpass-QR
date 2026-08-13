@@ -41,6 +41,7 @@ export interface LeaveRequest {
   in_qr_image: string | null
   out_scan_time: string | null
   in_scan_time: string | null
+  is_expired?: boolean
   rejection_reason: string | null
   created_at: string
   updated_at: string

@@ -23,7 +23,13 @@ export default function QrDisplayPage() {
     if (showLoading) setLoading(true)
     setError(null)
     api.get(`/leave/${id}`)
-      .then((res) => setLeave(res.data.data))
+      .then((res) => {
+        setLeave(res.data.data)
+        const l = res.data.data as LeaveRequest
+        if (l.status === "completed" || l.is_expired) {
+          if (pollRef.current) clearInterval(pollRef.current)
+        }
+      })
       .catch((err) => {
         const msg = err.response?.data?.message || err.message || "Could not load leave request"
         setError(msg)
