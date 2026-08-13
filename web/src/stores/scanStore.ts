@@ -20,6 +20,7 @@ interface ScanState {
   validateScan: (qrData: string) => Promise<boolean>
   loadHistory: () => Promise<void>
   clearResult: () => void
+  reset: () => void
 }
 
 export const useScanStore = create<ScanState>((set) => ({
@@ -56,4 +57,6 @@ export const useScanStore = create<ScanState>((set) => ({
   },
 
   clearResult: () => set({ lastResult: null, error: null }),
+
+  reset: () => set({ isLoading: false, error: null, lastResult: null, history: [], historyLoading: false }),
 }))

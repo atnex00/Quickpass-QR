@@ -22,6 +22,16 @@ vi.mock('@/stores/themeStore', () => ({
   rehydrateTheme: vi.fn(),
 }))
 
+const { resetLeave, resetScan } = vi.hoisted(() => ({ resetLeave: vi.fn(), resetScan: vi.fn() }))
+
+vi.mock('@/stores/leaveStore', () => ({
+  useLeaveStore: { getState: () => ({ reset: resetLeave }) },
+}))
+
+vi.mock('@/stores/scanStore', () => ({
+  useScanStore: { getState: () => ({ reset: resetScan }) },
+}))
+
 const { setAccessToken, getAccessToken } = await import('@/lib/api')
 
 const apiMock = api as unknown as {
@@ -105,6 +115,8 @@ describe('authStore', () => {
     expect(state.user).toBeNull()
     expect(state.isAuthenticated).toBe(false)
     expect(setAccessToken).toHaveBeenCalledWith(null)
+    expect(resetLeave).toHaveBeenCalled()
+    expect(resetScan).toHaveBeenCalled()
   })
 
   it('loadUser refreshes token when no access token exists', async () => {

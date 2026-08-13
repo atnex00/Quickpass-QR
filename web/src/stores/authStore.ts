@@ -2,6 +2,8 @@ import { create } from "zustand"
 import type { Employee } from "@/types"
 import api, { setAccessToken, getAccessToken, setOnAuthFailure, getErrorMessage } from "@/lib/api"
 import { rehydrateTheme } from "@/stores/themeStore"
+import { useLeaveStore } from "@/stores/leaveStore"
+import { useScanStore } from "@/stores/scanStore"
 
 interface AuthState {
   user: Employee | null
@@ -55,6 +57,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
     setAccessToken(null)
     set({ user: null, isAuthenticated: false, isLoading: false })
+    useLeaveStore.getState().reset()
+    useScanStore.getState().reset()
     rehydrateTheme(null)
   },
 
@@ -114,4 +118,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
 setOnAuthFailure(() => {
   useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: false })
+  useLeaveStore.getState().reset()
+  useScanStore.getState().reset()
 })

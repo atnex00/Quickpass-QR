@@ -22,6 +22,7 @@ interface LeaveState {
   rejectLeave: (leaveId: string, reason: string) => Promise<boolean>
   loadApprovedLeaves: () => Promise<void>
   revokeApproval: (leaveId: string) => Promise<boolean>
+  reset: () => void
 }
 
 export const useLeaveStore = create<LeaveState>((set) => ({
@@ -118,4 +119,6 @@ export const useLeaveStore = create<LeaveState>((set) => ({
       return false
     }
   },
+
+  reset: () => set({ history: [], activeLeave: null, pendingRequests: [], approvedLeaves: [], isLoading: false, error: null }),
 }))
