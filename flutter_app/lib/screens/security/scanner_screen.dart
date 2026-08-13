@@ -45,6 +45,8 @@ class _ScannerScreenState extends State<ScannerScreen>
     if (widget.active == oldWidget.active) return;
     if (widget.active) {
       _syncCamera();
+    } else {
+      _controller?.stop();
     }
   }
 
