@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
@@ -264,17 +266,27 @@ async function uploadProfilePhoto(req, res, next) {
       throw createError(400, 'Only JPEG, PNG, GIF, and WebP images are accepted');
     }
 
-    const uploadDir = path.join(__dirname, '../../uploads/photos');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    let ext = '.jpg';
+    try {
+      const meta = await sharp(buf).metadata();
+      const formatExt = { jpeg: '.jpg', png: '.png', gif: '.gif', webp: '.webp' }[meta.format];
+      if (!formatExt) {
+        throw createError(400, 'Only JPEG, PNG, GIF, and WebP images are accepted');
+      }
+      ext = formatExt;
+    } catch (err) {
+      if (err.statusCode) throw err;
+      throw createError(400, 'Invalid image file');
     }
 
-    const ext = path.extname(req.file.originalname) || '.jpg';
-    const oldFiles = fs.readdirSync(uploadDir).filter(f => f.startsWith(req.user.employee_id));
-    oldFiles.forEach(f => fs.unlinkSync(path.join(uploadDir, f)));
-    const filename = `${req.user.employee_id}_${Date.now()}${ext}`;
-    const filePath = path.join(uploadDir, filename);
-    fs.writeFileSync(filePath, req.file.buffer);
+    const uploadDir = path.join(__dirname, '../../uploads/photos');
+    await fs.promises.mkdir(uploadDir, { recursive: true });
+
+    const oldFiles = await fs.promises.readdir(uploadDir);
+    const stale = oldFiles.filter((f) => f.startsWith(req.user.employee_id));
+    await Promise.all(stale.map((f) => fs.promises.unlink(path.join(uploadDir, f)).catch(() => {})));
+    const filename = `${req.user.employee_id}_${crypto.randomUUID()}${ext}`;
+    await fs.promises.writeFile(path.join(uploadDir, filename), buf);
 
     const photoUrl = `/uploads/photos/${filename}`;
     await db('employees').where({ employee_id: req.user.employee_id }).update({

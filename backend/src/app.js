@@ -206,7 +206,9 @@ const uploadsDir = path.join(__dirname, '../uploads');
 app.use('/uploads/qr_codes', (req, res) => {
   res.status(404).json({ success: false, message: 'QR images are served via authenticated endpoints only' });
 });
-app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static(uploadsDir, {
+  setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff'),
+}));
 
 // Routes
 app.use('/api/auth/login', loginLimiter);
