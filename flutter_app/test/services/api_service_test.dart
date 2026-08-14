@@ -328,17 +328,36 @@ void main() {
   });
 
   group('error handling', () {
-    test('getActiveLeave returns null on exception', () async {
+    test('getActiveLeave returns null on 404', () async {
       dio.interceptors.clear();
       dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
-          handler.reject(DioException(requestOptions: options, type: DioExceptionType.badResponse));
+          handler.reject(DioException(
+            requestOptions: options,
+            type: DioExceptionType.badResponse,
+            response: Response(requestOptions: options, statusCode: 404),
+          ));
         },
       ));
 
       final result = await api.getActiveLeave();
 
       expect(result, isNull);
+    });
+
+    test('getActiveLeave rethrows non-404 errors', () async {
+      dio.interceptors.clear();
+      dio.interceptors.add(InterceptorsWrapper(
+        onRequest: (options, handler) {
+          handler.reject(DioException(
+            requestOptions: options,
+            type: DioExceptionType.badResponse,
+            response: Response(requestOptions: options, statusCode: 500),
+          ));
+        },
+      ));
+
+      expect(() => api.getActiveLeave(), throwsA(isA<DioException>()));
     });
   });
 }

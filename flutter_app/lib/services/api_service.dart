@@ -202,7 +202,9 @@ class ApiService {
     if (_dio != null) {
       try {
         await dio.post('/auth/logout');
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('logout: server session invalidation failed: $e');
+      }
     }
     await clearLocalAuth();
   }
@@ -277,8 +279,9 @@ class ApiService {
     try {
       final res = await dio.get('/leave/active');
       return LeaveRequest.fromJson(res.data['data']);
-    } catch (_) {
-      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      rethrow;
     }
   }
 

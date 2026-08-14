@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/adaptive_scaffold.dart';
+import '../security/scanner_screen.dart';
 import 'admin_department_tab.dart';
 import 'admin_employee_tab.dart';
 import 'admin_leave_tab.dart';
@@ -54,6 +55,11 @@ class _AdminPanelState extends State<AdminPanel> {
           selectedIcon: Icons.event_note,
           label: 'Leaves',
         ),
+        AdaptiveDestination(
+          icon: Icons.qr_code_scanner_outlined,
+          selectedIcon: Icons.qr_code_scanner,
+          label: 'Scan',
+        ),
       ],
       body: SafeArea(
         top: false,
@@ -65,6 +71,7 @@ class _AdminPanelState extends State<AdminPanel> {
             const DepartmentTab(),
             const ReportsTab(),
             const LeaveTab(),
+            ScannerScreen(active: _currentIndex == 5),
           ],
         ),
       ),

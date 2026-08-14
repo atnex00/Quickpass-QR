@@ -45,16 +45,8 @@ class AuthProvider extends ChangeNotifier {
         CacheService().saveProfile(user.toJson());
       }
     } catch (e) {
-      try {
-        final cached = await CacheService().loadProfile();
-        if (cached != null) {
-          _user = Employee.fromJson(cached);
-          _isAuthenticated = true;
-        } else {
-          await _api.clearLocalAuth();
-        }
-      } catch (cacheError) {
-      }
+      debugPrint('initialize: profile validation failed, clearing session: $e');
+      await _api.clearLocalAuth();
     } finally {
       _isLoading = false;
       _isInitializing = false;
