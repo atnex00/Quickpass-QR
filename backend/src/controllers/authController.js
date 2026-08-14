@@ -61,7 +61,7 @@ async function login(req, res, next) {
         role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
       },
       process.env.JWT_SECRET,
-      { algorithm: 'HS256', expiresIn: '15m' }
+      { algorithm: 'HS256', expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
     );
 
     res.cookie('refresh_sid', sessionId, {
@@ -163,7 +163,7 @@ async function refreshToken(req, res, next) {
           role: employee.is_admin ? 'admin' : employee.is_security ? 'security' : employee.is_supervisor ? 'supervisor' : 'employee',
         },
         process.env.JWT_SECRET,
-        { algorithm: 'HS256', expiresIn: '15m' }
+        { algorithm: 'HS256', expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
       );
     });
 
