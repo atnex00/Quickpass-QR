@@ -6,8 +6,7 @@ function errorHandler(err, req, res, _next) {
   log.error({ err, statusCode: err.statusCode || 500 }, err.message);
 
   const statusCode = err.statusCode || 500;
-  const isPrivileged = req.user && (req.user.is_admin || req.user.is_supervisor);
-  const showMessage = err.expose && (isPrivileged || statusCode < 500);
+  const showMessage = err.expose && statusCode < 500;
   const message = showMessage ? err.message : 'Internal server error';
 
   res.status(statusCode).json({
