@@ -128,8 +128,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Trust proxy for rate limiting behind reverse proxy
-app.set('trust proxy', 1);
+// Trust X-Forwarded-For only from loopback proxies (vite dev server); remote clients cannot spoof IPs
+app.set('trust proxy', (ip) => ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1');
 
 function userOrIpKey(req) {
   if (req.user) return `user:${req.user.employee_id}`;
