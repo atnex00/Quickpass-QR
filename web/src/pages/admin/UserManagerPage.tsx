@@ -62,6 +62,12 @@ export default function UserManagerPage() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(id)
+  }, [search])
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [filterDept, setFilterDept] = useState("all")
@@ -83,7 +89,7 @@ export default function UserManagerPage() {
   const loadEmployees = async () => {
     try {
       const params: Record<string, string | number | undefined> = {
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         page,
       }
       if (filterDept !== "all") params.department_id = filterDept
@@ -110,7 +116,7 @@ export default function UserManagerPage() {
   useEffect(() => {
     loadEmployees()
     loadDepartments()
-  }, [page, search, filterDept, filterStatus, filterRole])
+  }, [page, debouncedSearch, filterDept, filterStatus, filterRole])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()

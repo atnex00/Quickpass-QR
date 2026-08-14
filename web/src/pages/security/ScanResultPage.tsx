@@ -78,11 +78,11 @@ export default function ScanResultPage() {
             </span>
           )}
           <Link to="/security/history">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" aria-label="Scan history" className="text-muted-foreground hover:text-foreground">
               <History className="h-4 w-4" />
             </Button>
           </Link>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" aria-label="Logout" onClick={logout} className="text-muted-foreground hover:text-foreground">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

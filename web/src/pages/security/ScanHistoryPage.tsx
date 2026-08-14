@@ -20,7 +20,7 @@ export default function ScanHistoryPage() {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/security/scan")} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors">
+          <button onClick={() => navigate("/security/scan")} aria-label="Back to scanner" className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors">
             <ArrowLeft className="h-4 w-4" />
           </button>
           <img src="/logo.png" alt="ZANECO QuickPass" className="h-7 w-auto" />

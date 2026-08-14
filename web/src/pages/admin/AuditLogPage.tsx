@@ -37,12 +37,18 @@ export default function AuditLogPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [exporting, setExporting] = useState(false)
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(id)
+  }, [search])
 
   const load = async () => {
     try {
       const params: Record<string, string | number> = { page, limit: 25 }
-      if (search) params.actor_id = search
+      if (debouncedSearch) params.actor_id = debouncedSearch
       const res = await api.get("/admin/audit", { params })
       setLogs(res.data.data)
       setTotal(res.data.pagination?.total || 0)
@@ -56,7 +62,7 @@ export default function AuditLogPage() {
   useEffect(() => {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search])
+  }, [page, debouncedSearch])
 
   const handleExport = async () => {
     setExporting(true)

@@ -10,6 +10,23 @@ import { useAuthStore } from "@/stores/authStore"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import MobileBottomBar from "./MobileBottomBar"
 
+const fmt = (n: number) => n.toString().padStart(2, "0")
+
+function SidebarClock() {
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const id = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60">
+      {fmt(time.getHours())}:{fmt(time.getMinutes())}
+    </span>
+  )
+}
+
 const sections = [
   {
     label: "Operations",
@@ -55,20 +72,11 @@ export default function Sidebar() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
-  const [time, setTime] = useState(new Date())
-
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
 
   const handleLogout = async () => {
     await logout()
     navigate("/login")
   }
-
-  const fmt = (n: number) => n.toString().padStart(2, "0")
-  const h = time.getHours(), m = time.getMinutes()
 
   const isAdmin = !!user?.is_admin
   const isSupervisor = !!user?.is_supervisor
@@ -115,7 +123,7 @@ export default function Sidebar() {
               <p className="text-sm font-bold font-display leading-tight text-foreground">QuickPass</p>
               <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">Gate Access</p>
             </div>
-            <span className="text-[10px] font-semibold tabular-nums text-muted-foreground/60">{fmt(h)}:{fmt(m)}</span>
+            <SidebarClock />
           </>
         ) : (
           <div className="brand-gradient flex h-9 w-9 items-center justify-center rounded-lg">
@@ -160,6 +168,7 @@ export default function Sidebar() {
       <div className="border-t border-border/60 p-2">
         <Link
           to="/employee/profile"
+          aria-label="Profile"
           className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-foreground"
         >
           <User className="h-4 w-4 shrink-0" />
@@ -167,6 +176,7 @@ export default function Sidebar() {
         </Link>
         <button
           onClick={handleLogout}
+          aria-label="Logout"
           className="flex w-full items-center gap-3 rounded-sm px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:text-destructive"
         >
           <LogOut className="h-4 w-4 shrink-0" />
@@ -174,6 +184,7 @@ export default function Sidebar() {
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="flex w-full items-center justify-center rounded-sm py-1.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
         >
           {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}

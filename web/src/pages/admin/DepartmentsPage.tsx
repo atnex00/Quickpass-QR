@@ -111,7 +111,8 @@ export default function DepartmentsPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Delete ${dept.department_name}`}
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                     onClick={() => setConfirmId(dept.department_id)}
                   >
                     <Trash2 className="h-4 w-4" />
