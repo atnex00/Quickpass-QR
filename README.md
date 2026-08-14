@@ -437,7 +437,7 @@ Quickpass-QR/
 │       ├── widgets/           # StatusBadge, QrCodeWidget, LoadingIndicator, etc.
 │       └── utils/             # Validators, DateFormatter, Constants, Debounce, Responsive
 ├── database/
-│   ├── migrations/            # 14 Knex migration files (see below)
+│   ├── migrations/            # 15 Knex migration files (see below)
 │   └── seeds/                 # 2 seed files (departments + employees)
 ├── scripts/                   # Setup and utility scripts (PowerShell + Bash)
 │   ├── setup.ps1 / setup.sh   # Install Flutter + Android SDK into tools/
@@ -453,7 +453,7 @@ Quickpass-QR/
 ├── .github/workflows/         # CI (backend lint+test, web lint+typecheck+build+test, flutter analyze+test) + npm audit
 ├── assets/brand/              # Logo and icon SVGs/PNGs
 ├── docs/design/               # Design documentation
-├── docker-compose.yml         # Production backend service only (DB = Supabase cloud)
+├── docker-compose.yml         # Production web (nginx) + backend services (DB = Supabase cloud)
 ├── dev.sh                     # Dev launcher (backend + web concurrently)
 ├── prod.sh                    # Production launcher (backend + built web)
 ├── AGENTS.md                  # AI agent project guide
@@ -478,6 +478,7 @@ Quickpass-QR/
 | 12 | `012_add_indexes.js` | Performance indexes on hot queries |
 | 13 | `013_add_approval_metadata.js` | `approved_at`/`approved_by` columns; drops `generate_employee_id()` function + sequence |
 | 13 | `013_leave_requests_optional_department.js` | Makes `department_id` nullable on leave_requests |
+| 14 | `014_device_fingerprint.js` | `device_fingerprint` column on `sessions` (mobile device binding) |
 
 > Two files share the `013_` prefix and apply in lexical order — do not rename them after deployment.
 
@@ -558,7 +559,6 @@ Optional:
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest unit tests |
 | `npm run preview` | Preview production build |
-| `npm run tunnel` | Start ngrok tunnel (requires ngrok config) |
 
 ### Flutter (`flutter_app/`)
 

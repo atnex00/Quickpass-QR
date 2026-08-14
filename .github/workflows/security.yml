@@ -10,11 +10,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
       - name: Audit backend
         run: |
           cd backend
           npm ci
           npm audit --audit-level=high
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
       - name: Audit web
         run: |
           cd web

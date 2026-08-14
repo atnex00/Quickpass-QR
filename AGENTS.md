@@ -36,7 +36,7 @@ Then select your team in Xcode → Signing & Capabilities. Build to device with 
 
 Firebase: add an iOS app in [Firebase Console](https://console.firebase.google.com) for Quickpass-QR, download `GoogleService-Info.plist` to `flutter_app/ios/Runner/`, and update the `ios` config in `flutter_app/lib/firebase_options.dart` with the actual API key and app ID.
 
-No local PostgreSQL needed — `docker-compose.yml` provides only the backend service, DB is Supabase cloud.
+No local PostgreSQL needed — `docker-compose.yml` provides web (nginx) + backend services, DB is Supabase cloud.
 
 ## Commands
 
