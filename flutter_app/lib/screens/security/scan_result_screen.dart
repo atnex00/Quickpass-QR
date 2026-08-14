@@ -28,7 +28,9 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _validate());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _validate();
+    });
   }
 
   Future<void> _validate() async {

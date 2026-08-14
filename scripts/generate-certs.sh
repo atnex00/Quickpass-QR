@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CERTS_DIR="$(cd "$(dirname "$0")" && pwd)/certs"
+CERTS_DIR="$(cd "$(dirname "$0")/.." && pwd)/certs"
 mkdir -p "$CERTS_DIR"
 
 if [[ -f "$CERTS_DIR/server.crt" && -f "$CERTS_DIR/server.key" ]]; then
