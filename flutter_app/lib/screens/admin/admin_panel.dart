@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/adaptive_scaffold.dart';
 import 'admin_department_tab.dart';
 import 'admin_employee_tab.dart';
@@ -19,6 +20,11 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    if (!auth.isAuthenticated || !auth.isAdmin) {
+      return const SizedBox.shrink();
+    }
+
     return AdaptiveScaffold(
       selectedIndex: _currentIndex,
       onDestinationSelected: (i) => setState(() => _currentIndex = i),

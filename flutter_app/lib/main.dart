@@ -124,6 +124,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     await NotificationService().init(
       navigatorKey: _navigatorKey,
       apiService: widget.apiService,
+      canViewSupervisor: () => widget.auth.isSupervisor || widget.auth.isAdmin,
       onUnreadNotification: widget.notifProv.increment,
     );
 
@@ -138,7 +139,9 @@ class _QuickpassAppState extends State<QuickpassApp> {
     Widget screen;
     switch (pending) {
       case 'new_request':
-        screen = const SupervisorDashboard();
+        screen = widget.auth.isSupervisor || widget.auth.isAdmin
+            ? const SupervisorDashboard()
+            : const LeaveHistoryScreen();
         break;
       case 'approved':
       case 'rejected':

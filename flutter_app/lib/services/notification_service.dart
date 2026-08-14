@@ -17,6 +17,7 @@ class NotificationService {
   ApiService? _api;
   String? _pendingScreen;
   void Function()? _onUnreadNotification;
+  bool Function()? _canViewSupervisor;
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -24,11 +25,13 @@ class NotificationService {
   Future<void> init({
     required GlobalKey<NavigatorState> navigatorKey,
     required ApiService apiService,
+    required bool Function() canViewSupervisor,
     void Function()? onUnreadNotification,
   }) async {
     if (_initialized) return;
     _navigatorKey = navigatorKey;
     _api = apiService;
+    _canViewSupervisor = canViewSupervisor;
     _onUnreadNotification = onUnreadNotification;
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -105,8 +108,11 @@ class NotificationService {
   }
 
   void _navigateByType(String type) {
-    final screen = switch (type) {
-      'new_request' => const SupervisorDashboard(),
+    final canViewSupervisor = _canViewSupervisor?.call() ?? false;
+    final Widget screen = switch (type) {
+      'new_request' => canViewSupervisor
+          ? const SupervisorDashboard()
+          : const LeaveHistoryScreen(),
       'approved' || 'rejected' || 'revoked' || 'out_scan' || 'in_scan'
           => const LeaveHistoryScreen(),
       _ => const EmployeeDashboard(),

@@ -27,6 +27,11 @@ class _SupervisorDashboardState extends State<SupervisorDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    if (!auth.isAuthenticated || (!auth.isSupervisor && !auth.isAdmin)) {
+      return const SizedBox.shrink();
+    }
+
     return Scaffold(
       body: SafeArea(
           top: false,
