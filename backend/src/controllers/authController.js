@@ -53,7 +53,7 @@ async function login(req, res, next) {
     res.cookie('refresh_sid', sessionId, {
       signed: true,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecureRequest(req),
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -149,7 +149,7 @@ async function refreshToken(req, res, next) {
     res.cookie('refresh_sid', newSessionId, {
       signed: true,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecureRequest(req),
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -311,5 +311,9 @@ function isMobileClient(req) {
   const ua = req.headers['user-agent'] || '';
   return ua.includes('Dart');
 }
+
+const isSecureRequest = (req) =>
+  process.env.COOKIE_SECURE === 'true' ||
+  (process.env.COOKIE_SECURE !== 'false' && (req.secure || process.env.NODE_ENV === 'production'));
 
 module.exports = { login, logout, refreshToken, getProfile, updateProfile, fcmToken, uploadProfilePhoto };
