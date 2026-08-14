@@ -27,10 +27,15 @@ function exitOrThrow(message) {
   process.exit(1);
 }
 
+const PLACEHOLDER_PATTERN = /change-this-|your_|your-|replace-me|changeme|secret$/i;
+
 function requireEnv(name) {
   const value = process.env[name];
   if (!value) {
     exitOrThrow(`${name} is required. Set it in your backend/.env file.`);
+  }
+  if (PLACEHOLDER_PATTERN.test(value) && process.env.NODE_ENV === 'production') {
+    exitOrThrow(`${name} must not contain a placeholder value in production.`);
   }
   return value;
 }
