@@ -7,7 +7,8 @@ const logger = require('./config/logger');
 
 function loadEnv() {
   const baseEnv = path.join(__dirname, '..', '.env');
-  const envFile = path.join(__dirname, '..', `.env.${process.env.NODE_ENV || 'dev'}`);
+  const suffix = process.env.NODE_ENV === 'production' ? 'prod' : (process.env.NODE_ENV || 'dev');
+  const envFile = path.join(__dirname, '..', `.env.${suffix}`);
   if (fs.existsSync(baseEnv)) {
     dotenv.config({ path: baseEnv });
   }
