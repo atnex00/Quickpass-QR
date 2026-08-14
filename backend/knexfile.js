@@ -21,7 +21,7 @@ module.exports = {
     client: 'pg',
     connection: {
       connectionString: process.env.DB_CONNECTION,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: process.env.DB_SSL_INSECURE === 'true' } : false,
     },
     migrations: {
       directory: '../database/migrations',
@@ -41,7 +41,7 @@ module.exports = {
     client: 'pg',
     connection: {
       connectionString: process.env.DB_CONNECTION,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: process.env.DB_SSL_INSECURE === 'true' } : false,
     },
     migrations: {
       directory: '../database/migrations',
@@ -61,7 +61,7 @@ module.exports = {
     client: 'pg',
     connection: {
       connectionString: process.env.DB_CONNECTION,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: process.env.DB_SSL_INSECURE === 'true' } : false,
     },
     migrations: {
       directory: '../database/migrations',
