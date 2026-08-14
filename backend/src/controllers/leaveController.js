@@ -203,7 +203,9 @@ async function getLeaveById(req, res, next) {
       }
     }
 
-    res.json({ success: true, data: { ...leave, is_expired: qrService.isOutQrExpired(leave) } });
+    const isOwner = leave.employee_id === req.user.employee_id;
+    const payload = isOwner ? leave : { ...leave, out_qr_code: null, in_qr_code: null };
+    res.json({ success: true, data: { ...payload, is_expired: qrService.isOutQrExpired(payload) } });
   } catch (err) {
     next(err);
   }

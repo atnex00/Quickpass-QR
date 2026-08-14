@@ -238,7 +238,10 @@ async function getApprovedLeaves(req, res, next) {
     }
 
     const requests = await query;
-    res.json({ success: true, data: requests.map((r) => ({ ...r, is_expired: qrService.isOutQrExpired(r) })) });
+    res.json({
+      success: true,
+      data: requests.map((r) => ({ ...r, out_qr_code: null, in_qr_code: null, is_expired: qrService.isOutQrExpired(r) })),
+    });
   } catch (err) {
     next(err);
   }
@@ -317,7 +320,7 @@ async function revokeApproval(req, res, next) {
       )
       .first();
 
-    res.json({ success: true, data: updated, message: 'Approval revoked' });
+    res.json({ success: true, data: { ...updated, out_qr_code: null, in_qr_code: null }, message: 'Approval revoked' });
 
     auditService.log({
       action: 'revoke',
@@ -354,7 +357,10 @@ async function getTeamLeaves(req, res, next) {
 
     const leaves = await query.orderBy('leave_requests.leave_date', 'asc');
 
-    res.json({ success: true, data: leaves });
+    res.json({
+      success: true,
+      data: leaves.map((l) => ({ ...l, out_qr_code: null, in_qr_code: null })),
+    });
   } catch (err) {
     next(err);
   }
@@ -384,6 +390,8 @@ async function getSupervisorHistory(req, res, next) {
     const rows = await query;
     const history = rows.map((r) => ({
       ...r,
+      out_qr_code: null,
+      in_qr_code: null,
       decided_at: r.approved_at ?? r.updated_at,
       is_expired: qrService.isOutQrExpired(r),
     }));
