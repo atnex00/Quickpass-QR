@@ -547,7 +547,8 @@ async function importEmployees(req, res, next) {
 
         results.created++;
       } catch (err) {
-        results.errors.push({ employee_id: emp.employee_id, reason: err.message });
+        results.errors.push({ employee_id: emp.employee_id, reason: 'Could not import this employee — check the data and try again' });
+        req.log?.error({ err, employee_id: emp.employee_id }, 'Employee import failed');
       }
     }
 
