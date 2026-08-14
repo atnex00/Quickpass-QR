@@ -1,5 +1,13 @@
 const auditService = require('../services/auditService');
 
+function csvSafe(value) {
+  const str = String(value ?? '');
+  if (/^[=+\-@]/.test(str)) {
+    return `'${str}`;
+  }
+  return str;
+}
+
 async function getAuditLogs(req, res, next) {
   try {
     const { page = 1, limit = 25, actor_id } = req.query;
@@ -33,16 +41,16 @@ async function exportAuditLogs(req, res, next) {
     const csvHeader = 'audit_log_id,actor_id,actor_name,actor_role,action,entity,entity_id,description,ip_address,created_at';
     const csvRows = rows.map((r) =>
       [
-        r.audit_log_id,
-        r.actor_id,
-        `"${(r.actor_name || '').replace(/"/g, '""')}"`,
-        r.actor_role,
-        r.action,
-        r.entity,
-        r.entity_id || '',
-        `"${(r.description || '').replace(/"/g, '""')}"`,
-        r.ip_address || '',
-        r.created_at,
+        csvSafe(r.audit_log_id),
+        csvSafe(r.actor_id),
+        `"${csvSafe(r.actor_name || '').replace(/"/g, '""')}"`,
+        csvSafe(r.actor_role),
+        csvSafe(r.action),
+        csvSafe(r.entity),
+        csvSafe(r.entity_id),
+        `"${csvSafe(r.description || '').replace(/"/g, '""')}"`,
+        csvSafe(r.ip_address),
+        csvSafe(r.created_at),
       ].join(',')
     );
 
