@@ -26,9 +26,11 @@ jest.mock('../config/database', () => {
     del: jest.fn(),
     count: jest.fn().mockReturnThis(),
     clone: jest.fn().mockReturnThis(),
+    forUpdate: jest.fn().mockReturnThis(),
     raw: jest.fn((sql) => sql),
   };
   const db = jest.fn(() => chain);
+  db.transaction = jest.fn(async (fn) => fn(db));
   db.where = jest.fn().mockReturnValue(chain);
   db.leftJoin = jest.fn().mockReturnValue(chain);
   db.join = jest.fn().mockReturnValue(chain);
@@ -102,6 +104,47 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post('/api/auth/login').send({ employee_id: '000001', password: 'pass1234' });
     expect(res.status).toBe(401);
     expect(res.body.message).toContain('Invalid employee ID or password');
+  });
+});
+
+describe('POST /api/auth/refresh', () => {
+  const crypto = require('crypto');
+  const fp = (id) => crypto.createHash('sha256').update(id).digest('hex');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects refresh when device fingerprint does not match', async () => {
+    db.first.mockResolvedValueOnce({
+      session_id: 'sid-1',
+      employee_id: '000001',
+      is_active: true,
+      device_fingerprint: fp('other-device'),
+    });
+    const res = await request(app)
+      .post('/api/auth/refresh')
+      .set('x-device-id', 'my-phone')
+      .send({ refresh_sid: 'sid-1' });
+    expect(res.status).toBe(401);
+  });
+
+  it('refreshes with matching device fingerprint and rotates the session', async () => {
+    db.first
+      .mockResolvedValueOnce({
+        session_id: 'sid-1',
+        employee_id: '000001',
+        is_active: true,
+        device_fingerprint: fp('my-phone'),
+      })
+      .mockResolvedValueOnce({ employee_id: '000001', is_active: true });
+    const res = await request(app)
+      .post('/api/auth/refresh')
+      .set('x-device-id', 'my-phone')
+      .send({ refresh_sid: 'sid-1' });
+    expect(res.status).toBe(200);
+    expect(res.body.refresh_sid).toBe('mock-uuid');
+    expect(db.insert).toHaveBeenCalledWith(expect.objectContaining({ device_fingerprint: fp('my-phone') }));
   });
 });
 

@@ -12,7 +12,12 @@ class DeviceService {
           '${android.id}:${android.brand}:${android.device}:${android.fingerprint}';
       return sha256.convert(utf8.encode(raw)).toString();
     }
-    final raw = 'unknown:${DateTime.now().millisecondsSinceEpoch}';
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final ios = await info.iosInfo;
+      final raw = 'ios:${ios.identifierForVendor ?? ios.model}';
+      return sha256.convert(utf8.encode(raw)).toString();
+    }
+    final raw = 'other:${defaultTargetPlatform.name}';
     return sha256.convert(utf8.encode(raw)).toString();
   }
 }

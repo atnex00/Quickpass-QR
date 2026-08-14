@@ -8,6 +8,16 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const { createError } = require('../middleware/errorHandler');
 
+function getDeviceFingerprint(req) {
+  const deviceId = req.headers['x-device-id'];
+  if (!deviceId || typeof deviceId !== 'string') return null;
+  return crypto.createHash('sha256').update(deviceId).digest('hex');
+}
+
+function isMobileClient(req) {
+  return getDeviceFingerprint(req) !== null;
+}
+
 async function login(req, res, next) {
   try {
     const { employee_id, password } = req.body;
@@ -31,6 +41,7 @@ async function login(req, res, next) {
     }
 
     const sessionId = uuidv4();
+    const deviceFp = getDeviceFingerprint(req);
 
     await db('sessions').insert({
       session_id: sessionId,
@@ -38,6 +49,7 @@ async function login(req, res, next) {
       created_at: db.fn.now(),
       expires_at: db.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
       is_active: true,
+      ...(deviceFp ? { device_fingerprint: deviceFp } : {}),
     });
 
     await db('employees').where({ employee_id }).update({ last_login: db.fn.now() });
@@ -101,7 +113,8 @@ async function logout(req, res, next) {
 
 async function refreshToken(req, res, next) {
   try {
-    const isMobile = isMobileClient(req);
+    const deviceFp = getDeviceFingerprint(req);
+    const isMobile = deviceFp !== null;
     const sessionId = req.signedCookies.refresh_sid || (isMobile && req.body?.refresh_sid);
     if (!sessionId) {
       throw createError(401, 'No refresh token');
@@ -121,6 +134,11 @@ async function refreshToken(req, res, next) {
         throw createError(401, 'Session expired');
       }
 
+      if (session.device_fingerprint && (!deviceFp || deviceFp !== session.device_fingerprint)) {
+        await trx('sessions').where({ session_id: sessionId }).update({ is_active: false });
+        throw createError(401, 'Session device mismatch');
+      }
+
       const employee = await trx('employees').where({ employee_id: session.employee_id }).first();
       if (!employee || !employee.is_active) {
         await trx('sessions').where({ session_id: sessionId }).update({ is_active: false });
@@ -134,6 +152,7 @@ async function refreshToken(req, res, next) {
         created_at: trx.fn.now(),
         expires_at: trx.raw("NOW() + ?::interval", [process.env.SESSION_EXPIRES_IN || '7 days']),
         is_active: true,
+        ...(deviceFp ? { device_fingerprint: deviceFp } : {}),
       });
       await trx('sessions').where({ session_id: sessionId }).update({ is_active: false });
 
@@ -317,11 +336,6 @@ async function uploadProfilePhoto(req, res, next) {
   } catch (err) {
     next(err);
   }
-}
-
-function isMobileClient(req) {
-  const ua = req.headers['user-agent'] || '';
-  return ua.includes('Dart');
 }
 
 const isSecureRequest = (req) =>

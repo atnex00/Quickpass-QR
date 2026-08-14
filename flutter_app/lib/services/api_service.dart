@@ -8,6 +8,7 @@ import '../config/app_config.dart';
 import '../models/employee.dart';
 import '../models/leave_request.dart';
 import 'cache_service.dart';
+import 'device_service.dart';
 
 class ApiService {
   Dio? _dio;
@@ -97,7 +98,10 @@ class ApiService {
           final res = await refreshDio.post(
             '/auth/refresh',
             data: refreshData.isNotEmpty ? refreshData : null,
-            options: Options(headers: {'Authorization': 'Bearer $oldToken'}),
+            options: Options(headers: {
+              'Authorization': 'Bearer $oldToken',
+              'x-device-id': await DeviceService.getFingerprint(),
+            }),
           );
           final rawToken = res.data?['token'];
           if (rawToken is! String || rawToken.isEmpty) {
@@ -164,10 +168,13 @@ class ApiService {
 
   // ── Auth ──
   Future<Map<String, dynamic>> login(String employeeId, String password) async {
-    final res = await dio.post('/auth/login', data: {
-      'employee_id': employeeId,
-      'password': password,
-    });
+    final deviceId = await DeviceService.getFingerprint();
+    final res = await dio.post('/auth/login',
+        data: {
+          'employee_id': employeeId,
+          'password': password,
+        },
+        options: Options(headers: {'x-device-id': deviceId}));
     final data = res.data;
     if (data['success'] != true) {
       throw Exception(data['message'] ?? 'Login failed');
