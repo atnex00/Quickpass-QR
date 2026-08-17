@@ -22,7 +22,7 @@ async function getTeam(req, res, next) {
       .andWhere('employees.is_active', true)
       .groupBy('employees.employee_id', 'departments.department_id')
       .select(...MEMBER_SELECT)
-      .count('leave_requests.leave_id as leave_count')
+      .select(db.raw('count(leave_requests.leave_id)::int as leave_count'))
       .orderBy('employees.full_name', 'asc');
 
     res.json({ success: true, data: rows });
@@ -33,12 +33,18 @@ async function getTeam(req, res, next) {
 
 async function getDirectory(req, res, next) {
   try {
-    const rows = await db('employees')
+    const query = db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.is_active', true)
       .select(...MEMBER_SELECT)
       .orderBy('departments.department_name', 'asc')
       .orderBy('employees.full_name', 'asc');
+
+    if (!req.user.is_admin) {
+      query.where('employees.department_id', req.user.department_id);
+    }
+
+    const rows = await query;
 
     res.json({ success: true, data: rows });
   } catch (err) {

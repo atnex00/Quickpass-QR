@@ -23,7 +23,6 @@ Employee _mockMember(String id, String name, String department,
     isSecurity: false,
     isActive: true,
     email: '',
-    profilePhoto: null,
     leaveCount: leaveCount,
   );
 }
@@ -33,7 +32,7 @@ Widget _wrap(MockApiService api) {
     create: (_) => DirectoryProvider(api: api),
     child: MaterialApp(
       theme: QuickpassTheme.light,
-      home: TeamMembersScreen(),
+      home: const TeamMembersScreen(),
     ),
   );
 }
@@ -46,7 +45,7 @@ void main() {
     mockApi = MockApiService();
     when(mockApi.getMyTeam()).thenAnswer((_) async => [
           _mockMember('000001', 'James Wilson', 'TSD', leaveCount: 4),
-          _mockMember('000002', 'Jane Doe', 'TSD', leaveCount: 0),
+          _mockMember('000002', 'Jane Doe', 'TSD'),
         ]);
   });
 

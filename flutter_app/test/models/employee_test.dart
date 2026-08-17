@@ -35,6 +35,20 @@ void main() {
       expect(employee.hireDate, isNotNull);
     });
 
+    test('fromJson parses leave_count as string or number', () {
+      final fromString = Employee.fromJson({...validJson, 'leave_count': '4'});
+      expect(fromString.leaveCount, 4);
+
+      final fromNumber = Employee.fromJson({...validJson, 'leave_count': 9});
+      expect(fromNumber.leaveCount, 9);
+
+      final fromNull = Employee.fromJson({...validJson, 'leave_count': null});
+      expect(fromNull.leaveCount, 0);
+
+      final missing = Employee.fromJson({...validJson});
+      expect(missing.leaveCount, 0);
+    });
+
     test('fromJson handles missing fields with defaults', () {
       final employee = Employee.fromJson({});
 

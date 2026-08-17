@@ -56,7 +56,8 @@ class Employee {
   @JsonKey(name: 'profile_photo')
   final String? profilePhoto;
 
-  @JsonKey(name: 'leave_count', defaultValue: 0)
+  @JsonKey(
+      name: 'leave_count', defaultValue: 0, fromJson: _leaveCountFromJson)
   final int leaveCount;
 
   @JsonKey(
@@ -65,6 +66,7 @@ class Employee {
 
   static bool _boolFromJson(dynamic v) => v == true || v == 1;
   static bool _boolActiveFromJson(dynamic v) => v == true || v == 1;
+  static int _leaveCountFromJson(dynamic v) => int.tryParse('$v') ?? 0;
   static DateTime? _hireDateFromJson(dynamic v) {
     if (v == null) return null;
     final parts = v.toString().split(RegExp(r'[T ]')).first.split('-');

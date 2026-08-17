@@ -127,6 +127,10 @@ describe('GET /api/team', () => {
     expect(res.body.data).toHaveLength(2);
     expect(res.body.data[0].employee_id).toBe('000001');
     expect(res.body.data[0].leave_count).toBe(3);
+    const chain = db('employees');
+    expect(chain.select).toHaveBeenCalledWith(
+      'count(leave_requests.leave_id)::int as leave_count'
+    );
   });
 });
 
@@ -140,7 +144,7 @@ describe('GET /api/directory', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns all active employees for any authenticated user', async () => {
+  it('returns only same-department employees for non-admin users', async () => {
     mockAuth({
       employee_id: '000001',
       full_name: 'James Wilson',
@@ -157,7 +161,33 @@ describe('GET /api/directory', () => {
       .set('Authorization', `Bearer ${token('000001', 'employee')}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toHaveLength(2);
+    expect(db('employees').where).toHaveBeenCalledWith(
+      'employees.department_id',
+      'DEP-002'
+    );
+  });
+
+  it('returns all active employees for admin users', async () => {
+    mockAuth({
+      employee_id: '999999',
+      full_name: 'System Admin',
+      department_id: null,
+      is_active: true,
+      is_admin: true,
+    });
+    db('employees').resolve([
+      { employee_id: '000001', full_name: 'James Wilson', position: 'Software Engineer', department_id: 'DEP-002', department_name: 'TSD · Technical Services Department', department_code: 'TSD', is_supervisor: false, profile_photo: null },
+    ]);
+
+    const res = await request(app)
+      .get('/api/directory')
+      .set('Authorization', `Bearer ${token('999999', 'admin')}`);
+
+    expect(res.status).toBe(200);
+    expect(db('employees').where).not.toHaveBeenCalledWith(
+      'employees.department_id',
+      expect.anything()
+    );
   });
 });
 

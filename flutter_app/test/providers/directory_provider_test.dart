@@ -20,7 +20,6 @@ Employee _mockMember(String id, String name, String department,
     isSecurity: false,
     isActive: true,
     email: '',
-    profilePhoto: null,
     leaveCount: leaveCount,
   );
 }
