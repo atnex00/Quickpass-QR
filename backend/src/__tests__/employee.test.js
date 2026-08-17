@@ -320,5 +320,8 @@ describe('GET /api/team/:employeeId/leaves', () => {
     expect(res.body.data[0].out_qr_code).toBeNull();
     expect(res.body.data[0].in_qr_code).toBeNull();
     expect(res.body.data[0].employee_name).toBe('James Wilson');
+    expect(db('employees').select.mock.calls.flat()).toContain(
+      'employees.is_active'
+    );
   });
 });

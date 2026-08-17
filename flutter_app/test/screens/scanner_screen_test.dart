@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:quickpass/config/theme.dart';
@@ -11,7 +13,7 @@ import 'package:quickpass/screens/security/scanner_screen.dart';
 import '../helpers/mocks.mocks.dart';
 import '../helpers/test_setup.dart';
 
-Widget _buildTestApp(MockApiService mockApi) {
+Widget _buildTestApp(MockApiService mockApi, {bool active = false}) {
   return MultiProvider(
     providers: [
       ChangeNotifierProvider<AuthProvider>(
@@ -21,8 +23,43 @@ Widget _buildTestApp(MockApiService mockApi) {
     ],
     child: MaterialApp(
       theme: QuickpassTheme.light,
-      home: const ScannerScreen(active: false),
+      home: ScannerScreen(active: active),
     ),
+  );
+}
+
+void _mockCameraPermissionGranted() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+    const MethodChannel('flutter.baseflow.com/permissions/methods'),
+    (call) async {
+      if (call.method == 'requestPermissions') {
+        return <int, int>{1: 1};
+      }
+      if (call.method == 'checkPermissionStatus') {
+        return 1;
+      }
+      return null;
+    },
+  );
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+    const MethodChannel('dev.steenbakker.mobile_scanner/scanner/method'),
+    (call) async {
+      if (call.method == 'state') {
+        return 1;
+      }
+      if (call.method == 'start') {
+        return <String, Object?>{
+          'textureId': 1,
+          'numberOfCameras': 1,
+          'currentTorchState': 0,
+          'size': <String, Object?>{'width': 1.0, 'height': 1.0},
+        };
+      }
+      return null;
+    },
   );
 }
 
@@ -41,9 +78,31 @@ void main() {
     await tester.pump();
 
     expect(find.text('Quickpass'), findsOneWidget);
-    expect(find.text('Camera unavailable'), findsOneWidget);
-    expect(find.textContaining('Use the manual entry below'),
+    expect(find.text('Scanner inactive'), findsWidgets);
+    expect(find.text('Open the Scan tab to activate the camera'),
         findsOneWidget);
+    expect(find.byType(MobileScanner), findsNothing);
+  });
+
+  testWidgets('camera initializes on activation and releases on deactivation',
+      (WidgetTester tester) async {
+    _mockCameraPermissionGranted();
+
+    await tester.pumpWidget(_buildTestApp(mockApi));
+    await tester.pump();
+
+    expect(find.byType(MobileScanner), findsNothing);
+
+    await tester.pumpWidget(_buildTestApp(mockApi, active: true));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MobileScanner), findsOneWidget);
+
+    await tester.pumpWidget(_buildTestApp(mockApi));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MobileScanner), findsNothing);
+    expect(find.text('Scanner inactive'), findsWidgets);
   });
 
   testWidgets('manual entry validates a QR code and shows scan result',

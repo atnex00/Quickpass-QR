@@ -28,6 +28,13 @@ let logoDataUrl: string | null = null
 let logoLoading = false
 const logoCallbacks: Array<() => void> = []
 
+export const QR_SCAN_STYLE = {
+  dotsOptions: { type: "dots", color: "#000000" },
+  cornersSquareOptions: { type: "square", color: "#000000" },
+  cornersDotOptions: { type: "square", color: "#000000" },
+  backgroundOptions: { color: "#ffffff" },
+} as const
+
 function loadLogo(cb: () => void) {
   if (logoDataUrl) { cb(); return }
   logoCallbacks.push(cb)
@@ -59,7 +66,6 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
   const [flipped, setFlipped] = useState(false)
 
   const isUsed = !!scanTime
-  const accent = color === "blue" ? "#fbbf24" : "#0d9488"
 
   useEffect(() => {
     if (!qrImageUrl?.startsWith("/api/")) {
@@ -95,10 +101,7 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
       image: logoDataUrl || "",
       qrOptions: { errorCorrectionLevel: "H" as const },
       imageOptions: { hideBackgroundDots: true, imageSize: 0.28, margin: 4 },
-      dotsOptions: { type: "dots" as const, color: "#000000" },
-      cornersSquareOptions: { type: "extra-rounded" as const, color: accent },
-      cornersDotOptions: { type: "dot" as const, color: accent },
-      backgroundOptions: { color: "#ffffff" },
+      ...QR_SCAN_STYLE,
     }
 
     if (qrRef.current) {
@@ -122,7 +125,7 @@ export default function QrDisplay({ qrData, qrImageUrl, label, color, date, time
       qrRef.current = null
       if (timerRef.current !== null) clearInterval(timerRef.current)
     }
-  }, [qrData, accent, qrSize])
+  }, [qrData, qrSize])
 
   useEffect(() => {
     let target = NaN

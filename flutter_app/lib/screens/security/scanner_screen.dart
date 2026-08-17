@@ -46,7 +46,12 @@ class _ScannerScreenState extends State<ScannerScreen>
     if (widget.active) {
       _syncCamera();
     } else {
-      _controller?.stop();
+      _controller?.dispose();
+      _controller = null;
+      _permissionGranted = false;
+      _permissionChecked = false;
+      _cameraError = null;
+      _isProcessing = false;
     }
   }
 
@@ -61,7 +66,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
-    if (!mounted) return;
+    if (!mounted || !widget.active) return;
 
     if (status.isGranted) {
       _permissionGranted = true;
@@ -147,7 +152,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     return Scaffold(
       body: Stack(
         children: [
-          if (_cameraError == null && _permissionGranted)
+          if (widget.active && _cameraError == null && _permissionGranted)
             RepaintBoundary(
               child: MobileScanner(
                 controller: _controller,
@@ -207,21 +212,31 @@ class _ScannerScreenState extends State<ScannerScreen>
   }
 
   Widget _buildCameraError() {
+    final inactive = !widget.active;
     return Container(
       color: Colors.black87,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.videocam_off, size: 64, color: context.error),
+            Icon(
+              inactive ? Icons.qr_code_scanner : Icons.videocam_off,
+              size: 64,
+              color: inactive ? Colors.white24 : context.error,
+            ),
             const SizedBox(height: 12),
-            const Text('Camera unavailable',
-                style: TextStyle(color: Colors.white70, fontSize: 16)),
+            Text(
+              inactive ? 'Scanner inactive' : 'Camera unavailable',
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
             const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                _cameraError ?? 'Use the manual entry below to enter QR code',
+                inactive
+                    ? 'Open the Scan tab to activate the camera'
+                    : _cameraError ??
+                        'Use the manual entry below to enter QR code',
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white38, fontSize: 13),
               ),
@@ -242,7 +257,10 @@ class _ScannerScreenState extends State<ScannerScreen>
   Widget _buildStatusIndicator() {
     Color color;
     String text;
-    if (_cameraError != null) {
+    if (!widget.active) {
+      color = context.warning;
+      text = 'Scanner inactive';
+    } else if (_cameraError != null) {
       color = context.error;
       text = 'Camera error';
     } else if (_isProcessing) {

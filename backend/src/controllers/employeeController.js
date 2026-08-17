@@ -10,6 +10,7 @@ const MEMBER_SELECT = [
   'departments.department_name',
   'departments.department_code',
   'employees.is_supervisor',
+  'employees.is_active',
   'employees.profile_photo',
 ];
 
