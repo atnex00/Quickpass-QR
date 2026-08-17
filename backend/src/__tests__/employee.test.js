@@ -189,6 +189,29 @@ describe('GET /api/directory', () => {
       expect.anything()
     );
   });
+
+  it('returns all active employees for security users', async () => {
+    mockAuth({
+      employee_id: '090901',
+      full_name: 'Mike Ross',
+      department_id: 'DEP-001',
+      is_active: true,
+      is_security: true,
+    });
+    db('employees').resolve([
+      { employee_id: '090901', full_name: 'Mike Ross', position: 'Head of Security', department_id: 'DEP-001', department_name: 'ISD · Institutional Services Department', department_code: 'ISD', is_supervisor: false, profile_photo: null },
+    ]);
+
+    const res = await request(app)
+      .get('/api/directory')
+      .set('Authorization', `Bearer ${token('090901', 'security')}`);
+
+    expect(res.status).toBe(200);
+    expect(db('employees').where).not.toHaveBeenCalledWith(
+      'employees.department_id',
+      expect.anything()
+    );
+  });
 });
 
 describe('GET /api/team/:employeeId/leaves', () => {

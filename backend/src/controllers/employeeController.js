@@ -40,7 +40,7 @@ async function getDirectory(req, res, next) {
       .orderBy('departments.department_name', 'asc')
       .orderBy('employees.full_name', 'asc');
 
-    if (!req.user.is_admin) {
+    if (!req.user.is_admin && !req.user.is_security) {
       query.where('employees.department_id', req.user.department_id);
     }
 

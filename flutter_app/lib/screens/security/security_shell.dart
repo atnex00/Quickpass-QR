@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/adaptive_scaffold.dart';
+import '../employee/directory_screen.dart';
 import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 import 'security_dashboard_tab.dart';
@@ -46,6 +47,11 @@ class _SecurityShellState extends State<SecurityShell> {
           selectedIcon: Icons.history,
           label: 'History',
         ),
+        AdaptiveDestination(
+          icon: Icons.people_outline,
+          selectedIcon: Icons.people,
+          label: 'Directory',
+        ),
       ],
       body: IndexedStack(
         index: _currentIndex,
@@ -55,6 +61,7 @@ class _SecurityShellState extends State<SecurityShell> {
           ),
           ScannerScreen(active: _currentIndex == 1),
           const ScanHistoryScreen(showBack: false),
+          const DirectoryScreen(),
         ],
       ),
     );
