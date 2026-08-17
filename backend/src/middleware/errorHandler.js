@@ -3,9 +3,14 @@ const logger = require('../config/logger');
 function errorHandler(err, req, res, _next) {
   const isDev = process.env.NODE_ENV === 'development';
   const log = req?.log || logger;
-  log.error({ err, statusCode: err.statusCode || 500 }, err.message);
-
   const statusCode = err.statusCode || 500;
+
+  if (statusCode >= 500) {
+    log.error({ err, statusCode }, err.message);
+  } else if (statusCode !== 404) {
+    log.warn({ err, statusCode }, err.message);
+  }
+
   const showMessage = err.expose && statusCode < 500;
   const message = showMessage ? err.message : 'Internal server error';
 

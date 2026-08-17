@@ -52,6 +52,7 @@ export default function AdminPanelPage() {
   const [statusLoading, setStatusLoading] = useState(true)
   const [restarting, setRestarting] = useState(false)
   const [showRestartDialog, setShowRestartDialog] = useState(false)
+  const [disabled, setDisabled] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchStatus = useCallback(async () => {
@@ -61,10 +62,16 @@ export default function AdminPanelPage() {
         api.get("/admin/panel/metrics"),
         api.get("/admin/panel/logs"),
       ])
+      setDisabled(false)
       setStatus(sRes.data.data)
       setMetrics(mRes.data.data)
       if (lRes.data.data?.lines) setLogs(lRes.data.data.lines)
-    } catch {
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 403) {
+        setDisabled(true)
+        if (pollRef.current) clearInterval(pollRef.current)
+      }
       // panel data unavailable — show empty state
     } finally {
       setStatusLoading(false)
@@ -167,6 +174,15 @@ export default function AdminPanelPage() {
       </header>
 
       <main className="mx-auto max-w-4xl space-y-5 p-6">
+        {disabled && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-sm font-semibold text-amber-400">Admin panel is disabled</p>
+            <p className="mt-1 text-xs text-[#888]">
+              The backend requires <code className="rounded bg-[#222] px-1 py-0.5">PANEL_ENABLED=true</code> (dev only) to expose panel endpoints.
+            </p>
+          </div>
+        )}
+
         {/* Status */}
         <Card className="border-[#222] bg-[#111]">
           <CardContent className="p-5">
