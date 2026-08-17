@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/leave_provider.dart';
 import '../../widgets/offline_indicator.dart';
 import '../shared/settings_screen.dart';
+import 'directory_screen.dart';
 import 'leave_history_screen.dart';
 import 'request_leave_screen.dart';
 import 'widgets/active_leave_card.dart';
@@ -42,6 +43,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
         children: [
           _DashboardTab(onViewHistory: () => setState(() => _currentIndex = 1)),
           const LeaveHistoryScreen(),
+          const DirectoryScreen(),
           const SettingsScreen(),
         ],
       ),
@@ -67,6 +69,12 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                   color: context.onSurfaceVariant),
               selectedIcon: Icon(Icons.receipt_long, color: context.primary),
               label: 'History',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.people_outline,
+                  color: context.onSurfaceVariant),
+              selectedIcon: Icon(Icons.people, color: context.primary),
+              label: 'Directory',
             ),
             NavigationDestination(
               icon: Icon(Icons.settings_outlined,

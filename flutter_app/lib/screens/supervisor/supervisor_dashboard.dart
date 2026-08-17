@@ -14,6 +14,7 @@ import '../employee/request_leave_screen.dart';
 import '../shared/settings_screen.dart';
 import 'pending_requests_screen.dart';
 import 'team_calendar_screen.dart';
+import 'team_members_screen.dart';
 
 class SupervisorDashboard extends StatefulWidget {
   const SupervisorDashboard({super.key});
@@ -435,6 +436,24 @@ class _QuickActionsRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.group_outlined,
+                title: 'Team Members',
+                subtitle: 'Employees & their leaves',
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const TeamMembersScreen()));
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
             Expanded(
               child: _QuickActionCard(
                 icon: Icons.calendar_month,

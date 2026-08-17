@@ -360,6 +360,28 @@ class ApiService {
     return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
   }
 
+  // ── Team & Directory ──
+  Future<List<Employee>> getMyTeam() async {
+    final res = await dio.get('/team');
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => Employee.fromJson(j)).toList();
+  }
+
+  Future<List<Employee>> getDirectory() async {
+    final res = await dio.get('/directory');
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => Employee.fromJson(j)).toList();
+  }
+
+  Future<List<LeaveRequest>> getTeamMemberLeaves(String employeeId) async {
+    final res = await dio.get('/team/$employeeId/leaves');
+    final list = res.data['data'];
+    if (list == null) return [];
+    return (list as List).map((j) => LeaveRequest.fromJson(j)).toList();
+  }
+
   // ── Scan ──
   Future<Map<String, dynamic>> validateScan(String qrData) async {
     final res = await dio.post('/scan/validate', data: {'qr_data': qrData});

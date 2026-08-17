@@ -507,6 +507,41 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
       ) as _i7.Future<List<_i4.LeaveRequest>>);
 
   @override
+  _i7.Future<List<_i3.Employee>> getMyTeam() => (super.noSuchMethod(
+        Invocation.method(
+          #getMyTeam,
+          [],
+        ),
+        returnValue: _i7.Future<List<_i3.Employee>>.value(<_i3.Employee>[]),
+        returnValueForMissingStub:
+            _i7.Future<List<_i3.Employee>>.value(<_i3.Employee>[]),
+      ) as _i7.Future<List<_i3.Employee>>);
+
+  @override
+  _i7.Future<List<_i3.Employee>> getDirectory() => (super.noSuchMethod(
+        Invocation.method(
+          #getDirectory,
+          [],
+        ),
+        returnValue: _i7.Future<List<_i3.Employee>>.value(<_i3.Employee>[]),
+        returnValueForMissingStub:
+            _i7.Future<List<_i3.Employee>>.value(<_i3.Employee>[]),
+      ) as _i7.Future<List<_i3.Employee>>);
+
+  @override
+  _i7.Future<List<_i4.LeaveRequest>> getTeamMemberLeaves(String? employeeId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getTeamMemberLeaves,
+          [employeeId],
+        ),
+        returnValue:
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+        returnValueForMissingStub:
+            _i7.Future<List<_i4.LeaveRequest>>.value(<_i4.LeaveRequest>[]),
+      ) as _i7.Future<List<_i4.LeaveRequest>>);
+
+  @override
   _i7.Future<Map<String, dynamic>> validateScan(String? qrData) =>
       (super.noSuchMethod(
         Invocation.method(

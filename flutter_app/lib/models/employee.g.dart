@@ -19,6 +19,7 @@ Employee _$EmployeeFromJson(Map<String, dynamic> json) => Employee(
       isActive: Employee._boolActiveFromJson(json['is_active']),
       profilePhoto: json['profile_photo'] as String?,
       hireDate: Employee._hireDateFromJson(json['hire_date']),
+      leaveCount: (json['leave_count'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$EmployeeToJson(Employee instance) => <String, dynamic>{
@@ -33,5 +34,6 @@ Map<String, dynamic> _$EmployeeToJson(Employee instance) => <String, dynamic>{
       'is_security': instance.isSecurity,
       'is_active': instance.isActive,
       'profile_photo': instance.profilePhoto,
+      'leave_count': instance.leaveCount,
       'hire_date': Employee._hireDateToJson(instance.hireDate),
     };

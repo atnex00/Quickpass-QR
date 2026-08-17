@@ -18,6 +18,7 @@ class Employee {
     required this.isActive,
     this.profilePhoto,
     this.hireDate,
+    this.leaveCount = 0,
   });
 
   factory Employee.fromJson(Map<String, dynamic> json) =>
@@ -54,6 +55,9 @@ class Employee {
 
   @JsonKey(name: 'profile_photo')
   final String? profilePhoto;
+
+  @JsonKey(name: 'leave_count', defaultValue: 0)
+  final int leaveCount;
 
   @JsonKey(
       name: 'hire_date', fromJson: _hireDateFromJson, toJson: _hireDateToJson)

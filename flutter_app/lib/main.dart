@@ -12,6 +12,7 @@ import 'config/app_config.dart';
 import 'config/theme.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/directory_provider.dart';
 import 'providers/leave_provider.dart';
 import 'providers/notification_provider.dart';
 import 'providers/scan_provider.dart';
@@ -107,6 +108,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
   late final LeaveProvider _leaveProvider;
   late final SupervisorProvider _supervisorProvider;
   late final ScanProvider _scanProvider;
+  late final DirectoryProvider _directoryProvider;
 
   @override
   void initState() {
@@ -114,6 +116,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     _leaveProvider = LeaveProvider(api: widget.apiService);
     _supervisorProvider = SupervisorProvider(api: widget.apiService);
     _scanProvider = ScanProvider(api: widget.apiService);
+    _directoryProvider = DirectoryProvider(api: widget.apiService);
     widget.apiService.onForceLogout = _handleForceLogout;
     widget.auth.onLoggedOut = _handleForceLogout;
     widget.auth.onLoggedIn = _handleLoginSuccess;
@@ -174,6 +177,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     _leaveProvider.reset();
     _supervisorProvider.reset();
     _scanProvider.reset();
+    _directoryProvider.reset();
   }
 
   void _handleLoginSuccess() {
@@ -210,6 +214,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
           ChangeNotifierProvider.value(value: _leaveProvider),
           ChangeNotifierProvider.value(value: _supervisorProvider),
           ChangeNotifierProvider.value(value: _scanProvider),
+          ChangeNotifierProvider.value(value: _directoryProvider),
         ],
         child: Consumer2<AuthProvider, SettingsProvider>(
           builder: (context, auth, settings, _) {
