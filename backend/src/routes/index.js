@@ -33,6 +33,7 @@ function handleMulterError(err, req, res, next) {
 const authController = require('../controllers/authController');
 const leaveController = require('../controllers/leaveController');
 const supervisorController = require('../controllers/supervisorController');
+const employeeController = require('../controllers/employeeController');
 const scanController = require('../controllers/scanController');
 const adminController = require('../controllers/adminController');
 const auditController = require('../controllers/auditController');
@@ -108,6 +109,13 @@ router.post('/leave/:id/cancel', authenticate, validateParams(Joi.object({
 router.delete('/leave/:id', authenticate, requireAdmin, validateParams(Joi.object({
   id: Joi.string().required(),
 })), leaveController.deleteLeave);
+
+// ── Team & Directory Routes ──
+router.get('/team', authenticate, employeeController.getTeam);
+router.get('/team/:employeeId/leaves', authenticate, validateParams(Joi.object({
+  employeeId: Joi.string().pattern(/^\d{6}$/).required(),
+})), employeeController.getTeamMemberLeaves);
+router.get('/directory', authenticate, employeeController.getDirectory);
 
 // ── Supervisor Routes ──
 router.get('/supervisor/pending', authenticate, requireSupervisor, supervisorController.getPendingRequests);
