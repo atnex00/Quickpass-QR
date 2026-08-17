@@ -36,6 +36,7 @@ async function getDirectory(req, res, next) {
     const query = db('employees')
       .leftJoin('departments', 'employees.department_id', 'departments.department_id')
       .where('employees.is_active', true)
+      .whereNotNull('employees.department_id')
       .select(...MEMBER_SELECT)
       .orderBy('departments.department_name', 'asc')
       .orderBy('employees.full_name', 'asc');

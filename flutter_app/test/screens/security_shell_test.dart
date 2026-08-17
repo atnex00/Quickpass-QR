@@ -38,6 +38,7 @@ void main() {
             'position': 'Software Engineer',
             'department_id': 'DEP-002',
             'department_name': 'TSD · Technical Services Department',
+            'department_code': 'TSD',
             'email': 'james.wilson@zaneco.com',
             'is_supervisor': false,
             'is_admin': false,
@@ -47,7 +48,7 @@ void main() {
         ]);
   });
 
-  testWidgets('security shell shows a Directory tab with employees',
+  testWidgets('security shell shows department cards, not employee names',
       (tester) async {
     final auth = AuthProvider(api: mockApi);
     await auth.initialize();
@@ -76,7 +77,8 @@ void main() {
     await tester.tap(find.text('Directory'));
     await tester.pumpAndSettle();
 
-    expect(find.text('James Wilson'), findsOneWidget);
     expect(find.text('TSD · Technical Services Department'), findsOneWidget);
+    expect(find.text('TSD'), findsOneWidget);
+    expect(find.text('James Wilson'), findsNothing);
   });
 }

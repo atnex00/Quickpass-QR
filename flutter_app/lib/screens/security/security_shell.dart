@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/adaptive_scaffold.dart';
-import '../employee/directory_screen.dart';
 import 'scan_history_screen.dart';
 import 'scanner_screen.dart';
 import 'security_dashboard_tab.dart';
+import 'security_directory_screen.dart';
 
 class SecurityShell extends StatefulWidget {
   const SecurityShell({super.key});
@@ -61,7 +61,7 @@ class _SecurityShellState extends State<SecurityShell> {
           ),
           ScannerScreen(active: _currentIndex == 1),
           const ScanHistoryScreen(showBack: false),
-          const DirectoryScreen(),
+          const SecurityDirectoryScreen(),
         ],
       ),
     );

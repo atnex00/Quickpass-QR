@@ -18,6 +18,7 @@ const makeChain = () => {
   chain.whereNot = jest.fn().mockReturnValue(chain);
   chain.whereIn = jest.fn().mockReturnValue(chain);
   chain.whereNotIn = jest.fn().mockReturnValue(chain);
+  chain.whereNotNull = jest.fn().mockReturnValue(chain);
   chain.whereBetween = jest.fn().mockReturnValue(chain);
   chain.leftJoin = jest.fn().mockReturnValue(chain);
   chain.join = jest.fn().mockReturnValue(chain);
@@ -164,6 +165,9 @@ describe('GET /api/directory', () => {
     expect(db('employees').where).toHaveBeenCalledWith(
       'employees.department_id',
       'DEP-002'
+    );
+    expect(db('employees').whereNotNull).toHaveBeenCalledWith(
+      'employees.department_id'
     );
   });
 

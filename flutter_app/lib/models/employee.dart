@@ -11,6 +11,7 @@ class Employee {
     required this.position,
     required this.departmentId,
     required this.departmentName,
+    this.departmentCode = '',
     required this.email,
     required this.isSupervisor,
     required this.isAdmin,
@@ -37,6 +38,9 @@ class Employee {
 
   @JsonKey(name: 'department_name', defaultValue: '')
   final String departmentName;
+
+  @JsonKey(name: 'department_code', defaultValue: '')
+  final String departmentCode;
 
   @JsonKey(defaultValue: '')
   final String email;
