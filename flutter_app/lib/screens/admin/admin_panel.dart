@@ -38,12 +38,12 @@ class _AdminPanelState extends State<AdminPanel> {
         AdaptiveDestination(
           icon: Icons.people_outline,
           selectedIcon: Icons.people,
-          label: 'Employees',
+          label: 'Staff',
         ),
         AdaptiveDestination(
           icon: Icons.business_outlined,
           selectedIcon: Icons.business,
-          label: 'Departments',
+          label: 'Depts',
         ),
         AdaptiveDestination(
           icon: Icons.bar_chart_outlined,

@@ -189,7 +189,7 @@ class _ReportsTabState extends State<ReportsTab> {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 28,
+                      reservedSize: 32,
                       getTitlesWidget: (value, meta) {
                         final idx = value.toInt();
                         if (idx < 0 ||
@@ -278,6 +278,64 @@ class _ReportsTabState extends State<ReportsTab> {
           ),
           const SizedBox(height: 8),
           _buildBarLegend(),
+          const SizedBox(height: 12),
+          _buildDepartmentLegend(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDepartmentLegend() {
+    if (_departmentReport == null || _departmentReport!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Department Legend',
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: context.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          ..._departmentReport!.map((d) {
+            final code = d['department_code'] as String? ?? '';
+            final fullName = d['department_name'] as String? ?? '';
+            final parts = fullName.split('·');
+            final name = parts.length > 1 ? parts.last.trim() : fullName;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    code,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.primary),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                          fontSize: 12, color: context.onSurfaceVariant),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
