@@ -70,3 +70,6 @@ sessions.txt
 # Test coverage
 backend/coverage/
 web/coverage/
+
+# Runtime-generated QR images (backend)
+backend/uploads-private/

@@ -21,7 +21,7 @@ async function generateQrImage(qrData, type, leaveId) {
     scale: CELL_SIZE,
     margin: MARGIN_MODULES,
     color: {
-      dark: type === 'OUT' ? '#fbbf24' : '#0d9488',
+      dark: type === 'OUT' ? '#1E40AF' : '#16A34A',
       light: '#ffffff',
     },
   });
@@ -64,13 +64,18 @@ async function generateQrImage(qrData, type, leaveId) {
   return `/api/leave/${leaveId}/qr/${type.toLowerCase()}`;
 }
 
+const LEAVE_ID_PATTERN = /^LV-\d{8}-[A-F0-9]{8}$/;
+
 function getQrImagePath(leaveId, type) {
+  if (typeof leaveId !== 'string' || !LEAVE_ID_PATTERN.test(leaveId)) {
+    return '';
+  }
   const filename = `${leaveId}_${type.toLowerCase()}.png`;
   return path.join(OUTPUT_DIR, filename);
 }
 
 function deleteQrImages(leaveId) {
-  if (typeof leaveId !== 'string' || !/^LV-\d{8}-[A-F0-9]{8}$/.test(leaveId)) {
+  if (typeof leaveId !== 'string' || !LEAVE_ID_PATTERN.test(leaveId)) {
     return;
   }
   ['out', 'in'].forEach((type) => {
