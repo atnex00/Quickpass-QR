@@ -7,6 +7,7 @@ import '../../providers/supervisor_provider.dart';
 import '../../services/api_service.dart';
 import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/expandable_reason.dart';
 import 'admin_shared.dart';
 
 class LeaveTab extends StatefulWidget {
@@ -390,10 +391,10 @@ class _LeaveTabState extends State<LeaveTab> {
           ),
           if ((leave['reason'] as String?)?.isNotEmpty == true) ...[
             const SizedBox(height: 4),
-            Text(leave['reason'] as String? ?? '',
-                style: TextStyle(fontSize: 12, color: context.neutralGray),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis),
+            ExpandableReason(
+              text: leave['reason'] as String? ?? '',
+              style: TextStyle(fontSize: 12, color: context.neutralGray),
+            ),
           ],
           if (status == 'pending' ||
               status == 'approved' ||

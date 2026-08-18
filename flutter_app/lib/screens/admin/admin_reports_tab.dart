@@ -8,6 +8,7 @@ import '../../services/api_service.dart';
 import '../../utils/date_formatter.dart';
 import '../../utils/errors.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/expandable_reason.dart';
 import 'admin_shared.dart';
 
 class ReportsTab extends StatefulWidget {
@@ -486,13 +487,11 @@ class _ReportsTabState extends State<ReportsTab> {
                                             fontSize: 12,
                                             color: context.onSurfaceVariant),
                                       ),
-                                      Text(
-                                        entry['reason'] ?? '',
+                                      ExpandableReason(
+                                        text: entry['reason'] ?? '',
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: context.neutralGray),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),

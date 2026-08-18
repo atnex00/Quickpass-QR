@@ -7,6 +7,7 @@ import '../models/leave_request.dart';
 import '../providers/leave_provider.dart';
 import '../providers/supervisor_provider.dart';
 import '../utils/date_formatter.dart';
+import 'expandable_reason.dart';
 import 'status_badge.dart';
 
 class PendingCard extends StatelessWidget {
@@ -124,10 +125,11 @@ class PendingCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(leave.reason,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: context.neutralGray, fontSize: 13)),
+                ExpandableReason(
+                  text: leave.reason,
+                  collapsedLines: 3,
+                  style: TextStyle(color: context.neutralGray, fontSize: 13),
+                ),
                 const SizedBox(height: 12),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -179,8 +181,34 @@ class PendingCard extends StatelessWidget {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Approve Leave?'),
-        content: Text(
-            '${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                  '${leave.employeeName} \u2014 ${DateFormatter.formatDateApi(leave.leaveDate)} (${leave.startTime} - ${leave.endTime})'),
+              const SizedBox(height: 12),
+              Text(
+                'Reason',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: context.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                leave.reason,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: context.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),

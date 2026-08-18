@@ -7,6 +7,7 @@ import '../../../providers/leave_provider.dart';
 import '../../../utils/date_formatter.dart';
 import '../../../utils/responsive.dart';
 import '../../../widgets/custom_widgets.dart';
+import '../../../widgets/expandable_reason.dart';
 import '../qr_display_screen.dart';
 import '../request_leave_screen.dart';
 
@@ -226,10 +227,8 @@ class _ActivityCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        leave.reason,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      ExpandableReason(
+                        text: leave.reason,
                         style: TextStyle(
                           fontSize: responsiveFontSize(context, 14),
                           fontWeight: FontWeight.w600,

@@ -11,6 +11,7 @@ import '../../utils/date_formatter.dart';
 import '../../utils/qr_countdown.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/expandable_reason.dart';
 import '../../widgets/notification_bell.dart';
 
 class QrDisplayScreen extends StatefulWidget {
@@ -185,10 +186,8 @@ class _QrDisplayScreenState extends State<QrDisplayScreen> {
                                                 ),
                                               ),
                                               const SizedBox(height: 8),
-                                              Text(
-                                                _leave.reason,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
+                                              ExpandableReason(
+                                                text: _leave.reason,
                                                 style: TextStyle(
                                                   fontSize: responsiveFontSize(context, 20),
                                                   fontWeight: FontWeight.w600,

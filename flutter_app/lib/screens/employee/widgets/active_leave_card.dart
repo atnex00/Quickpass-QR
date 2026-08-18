@@ -7,6 +7,7 @@ import '../../../providers/leave_provider.dart';
 import '../../../utils/date_formatter.dart';
 import '../../../utils/responsive.dart';
 import '../../../widgets/custom_widgets.dart';
+import '../../../widgets/expandable_reason.dart';
 import '../qr_display_screen.dart';
 
 class ActiveLeaveCard extends StatelessWidget {
@@ -70,10 +71,8 @@ class ActiveLeaveCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            leave.reason,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          ExpandableReason(
+                            text: leave.reason,
                             style: TextStyle(
                               fontSize: responsiveFontSize(context, 24),
                               fontWeight: FontWeight.w700,

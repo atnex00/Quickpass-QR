@@ -9,6 +9,7 @@ import '../../providers/leave_provider.dart';
 import '../../providers/supervisor_provider.dart';
 import '../../utils/date_formatter.dart';
 import '../../widgets/custom_widgets.dart';
+import '../../widgets/expandable_reason.dart';
 import '../../widgets/pending_card.dart';
 import '../../widgets/shimmer_list.dart';
 import '../../widgets/status_badge.dart';
@@ -345,10 +346,11 @@ class _HistoryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: context.neutralGray, fontSize: 13)),
+            ExpandableReason(
+              text: leave.reason,
+              collapsedLines: 3,
+              style: TextStyle(color: context.neutralGray, fontSize: 13),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -473,10 +475,11 @@ class _ApprovedCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(leave.reason,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: context.neutralGray, fontSize: 13)),
+            ExpandableReason(
+              text: leave.reason,
+              collapsedLines: 3,
+              style: TextStyle(color: context.neutralGray, fontSize: 13),
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
