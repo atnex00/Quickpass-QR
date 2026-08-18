@@ -591,6 +591,7 @@ async function getReports(req, res, next) {
         .join('departments', 'leave_requests.department_id', 'departments.department_id')
         .select(
           'departments.department_name',
+          'departments.department_code',
           'departments.department_id',
           db.raw('COUNT(*) as total_requests'),
           db.raw("COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved"),

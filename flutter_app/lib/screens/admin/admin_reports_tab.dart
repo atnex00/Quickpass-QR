@@ -115,6 +115,19 @@ class _ReportsTabState extends State<ReportsTab> {
     return max < 10 ? 10 : max;
   }
 
+  String _deptCode(Map<dynamic, dynamic> dept) {
+    final code = dept['department_code'] as String?;
+    if (code != null && code.isNotEmpty) return code;
+    final name = dept['department_name'] as String? ?? '';
+    return name.split('·').first.trim();
+  }
+
+  String _deptName(Map<dynamic, dynamic> dept) {
+    final fullName = dept['department_name'] as String? ?? '';
+    final parts = fullName.split('·');
+    return parts.length > 1 ? parts.last.trim() : fullName;
+  }
+
   List<BarChartGroupData> _buildBarGroups() {
     if (_cachedBarGroups != null) return _cachedBarGroups!;
     if (_departmentReport == null) return [];
@@ -197,9 +210,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           return const SizedBox.shrink();
                         }
                         final dept = _departmentReport![idx];
-                        final code = dept['department_code'] as String? ??
-                            dept['department_name'] as String? ??
-                            '';
+                        final code = _deptCode(dept);
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
@@ -308,10 +319,8 @@ class _ReportsTabState extends State<ReportsTab> {
           ),
           const SizedBox(height: 8),
           ..._departmentReport!.map((d) {
-            final code = d['department_code'] as String? ?? '';
-            final fullName = d['department_name'] as String? ?? '';
-            final parts = fullName.split('·');
-            final name = parts.length > 1 ? parts.last.trim() : fullName;
+            final code = _deptCode(d);
+            final name = _deptName(d);
             return Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(

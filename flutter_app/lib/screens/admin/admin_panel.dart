@@ -33,7 +33,7 @@ class _AdminPanelState extends State<AdminPanel> {
         AdaptiveDestination(
           icon: Icons.dashboard_outlined,
           selectedIcon: Icons.dashboard,
-          label: 'Overview',
+          label: 'Home',
         ),
         AdaptiveDestination(
           icon: Icons.people_outline,

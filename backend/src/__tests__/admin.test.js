@@ -405,6 +405,7 @@ describe('GET /api/admin/reports', () => {
       .set('Authorization', `Bearer ${adminToken()}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toBeDefined();
+    expect(db().select.mock.calls.flat()).toContain('departments.department_code');
   });
 });
 

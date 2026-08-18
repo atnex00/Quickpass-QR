@@ -37,16 +37,16 @@ void main() {
               'success': true,
               'data': [
                 {
-                  'department_code': 'TSD',
                   'department_name': 'TSD · Technical Services Department',
+                  'department_id': 'DEP-002',
                   'pending': 1,
                   'approved': 2,
                   'rejected': 0,
                   'completed': 5,
                 },
                 {
-                  'department_code': 'ISD',
-                  'department_name': 'ISD · Institutional Services Department',
+                  'department_name': 'IAD · Internal Audit Department',
+                  'department_id': 'DEP-004',
                   'pending': 0,
                   'approved': 1,
                   'rejected': 1,
@@ -79,7 +79,7 @@ void main() {
     expect(find.text('Department Legend'), findsOneWidget);
     expect(find.text('TSD'), findsNWidgets(2));
     expect(find.text('Technical Services Department'), findsOneWidget);
-    expect(find.text('ISD'), findsNWidgets(2));
-    expect(find.text('Institutional Services Department'), findsOneWidget);
+    expect(find.text('IAD'), findsNWidgets(2));
+    expect(find.text('Internal Audit Department'), findsOneWidget);
   });
 }
