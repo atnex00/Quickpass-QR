@@ -142,6 +142,13 @@ class _LeaveTabState extends State<LeaveTab> {
                       onTap: () {
                         setState(() => _statusFilter = 'rejected');
                       }),
+                  const SizedBox(width: 8),
+                  AdminFilterChip(
+                      label: 'Expired',
+                      selected: _statusFilter == 'expired',
+                      onTap: () {
+                        setState(() => _statusFilter = 'expired');
+                      }),
                 ],
               ),
             ),

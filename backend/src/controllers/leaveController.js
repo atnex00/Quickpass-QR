@@ -28,6 +28,7 @@ async function submitLeave(req, res, next) {
       .where({ employee_id: req.user.employee_id, leave_date })
       .whereNot('status', 'rejected')
       .whereNot('status', 'cancelled')
+      .whereNot('status', 'expired')
       .andWhere(function () {
         this.where(function () {
           this.where('start_time', '<', end_time)
@@ -97,6 +98,7 @@ async function submitLeave(req, res, next) {
 
 async function getHistory(req, res, next) {
   try {
+    await qrService.expireOverdueLeaves(db);
     const { status, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
@@ -142,6 +144,7 @@ async function getHistory(req, res, next) {
 
 async function getActiveLeave(req, res, next) {
   try {
+    await qrService.expireOverdueLeaves(db);
     const leave = await db('leave_requests')
       .where('leave_requests.employee_id', req.user.employee_id)
       .whereIn('status', ['approved', 'active'])
@@ -173,6 +176,7 @@ async function getActiveLeave(req, res, next) {
 
 async function getLeaveById(req, res, next) {
   try {
+    await qrService.expireOverdueLeaves(db);
     const { id } = req.params;
 
     const leave = await db('leave_requests')

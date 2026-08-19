@@ -661,6 +661,12 @@ class ReportsStatSummary extends StatelessWidget {
                 color: context.secondary),
             const SizedBox(width: 8),
             AdminStatCard(
+                icon: Icons.timer_off,
+                label: 'Expired',
+                value: '${statusCounts['expired'] ?? 0}',
+                color: context.error),
+            const SizedBox(width: 8),
+            AdminStatCard(
                 icon: Icons.business,
                 label: 'Departments',
                 value: '$departmentCount',

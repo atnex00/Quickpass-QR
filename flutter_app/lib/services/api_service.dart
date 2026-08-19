@@ -389,9 +389,18 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getScanHistory(
-      {int page = 1, int limit = 50}) async {
-    final res = await dio
-        .get('/scan/history', queryParameters: {'page': page, 'limit': limit});
+      {int page = 1, int limit = 50, String? department}) async {
+    final res = await dio.get('/scan/history',
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          if (department != null) 'department': department,
+        });
+    return res.data;
+  }
+
+  Future<Map<String, dynamic>> getScanHistoryDepartments() async {
+    final res = await dio.get('/scan/history/departments');
     return res.data;
   }
 

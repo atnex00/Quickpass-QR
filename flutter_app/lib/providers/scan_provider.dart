@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/scan_department.dart';
 import '../models/scan_log.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
@@ -19,6 +20,8 @@ class ScanProvider extends ChangeNotifier {
   int _historyPage = 1;
   int _historyTotal = 0;
   int _historyPages = 1;
+  List<ScanDepartment> _historyDepartments = [];
+  bool _historyDepartmentsLoading = false;
 
   int _todayTotal = 0;
   int _todayValid = 0;
@@ -37,6 +40,8 @@ class ScanProvider extends ChangeNotifier {
   int get historyPage => _historyPage;
   int get historyTotal => _historyTotal;
   int get historyPages => _historyPages;
+  List<ScanDepartment> get historyDepartments => _historyDepartments;
+  bool get historyDepartmentsLoading => _historyDepartmentsLoading;
 
   int get todayTotal => _todayTotal;
   int get todayValid => _todayValid;
@@ -69,12 +74,12 @@ class ScanProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadHistory({int page = 1}) async {
+  Future<void> loadHistory({int page = 1, String? department}) async {
     _historyLoading = true;
     notifyListeners();
 
     try {
-      final data = await _api.getScanHistory(page: page);
+      final data = await _api.getScanHistory(page: page, department: department);
       _history = (data['data'] as List?)?.map((j) => ScanLog.fromJson(j)).toList() ?? [];
       final p = data['pagination'] as Map<String, dynamic>?;
       _historyTotal = int.tryParse('${p?['total']}') ?? _history.length;
@@ -86,6 +91,25 @@ class ScanProvider extends ChangeNotifier {
     }
 
     _historyLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadHistoryDepartments() async {
+    _historyDepartmentsLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _api.getScanHistoryDepartments();
+      _historyDepartments = (data['data'] as List?)
+              ?.map((j) => ScanDepartment.fromJson(j as Map<String, dynamic>))
+              .toList() ??
+          [];
+      _error = null;
+    } catch (e) {
+      _error = friendlyError(e);
+    }
+
+    _historyDepartmentsLoading = false;
     notifyListeners();
   }
 
@@ -135,6 +159,8 @@ class ScanProvider extends ChangeNotifier {
     _historyPage = 1;
     _historyTotal = 0;
     _historyPages = 1;
+    _historyDepartments = [];
+    _historyDepartmentsLoading = false;
     _todayTotal = 0;
     _todayValid = 0;
     _todayInvalid = 0;

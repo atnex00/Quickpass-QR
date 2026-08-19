@@ -17,6 +17,9 @@ ScanLog _$ScanLogFromJson(Map<String, dynamic> json) => ScanLog(
       validationMessage: json['validation_message'] as String?,
       employeeName: json['employee_name'] as String?,
       employeeId: json['employee_id'] as String?,
+      departmentName: json['department_name'] as String?,
+      departmentCode: json['department_code'] as String?,
+      scannedByName: json['scanned_by_name'] as String?,
     );
 
 Map<String, dynamic> _$ScanLogToJson(ScanLog instance) => <String, dynamic>{
@@ -30,4 +33,7 @@ Map<String, dynamic> _$ScanLogToJson(ScanLog instance) => <String, dynamic>{
       'validation_message': instance.validationMessage,
       'employee_name': instance.employeeName,
       'employee_id': instance.employeeId,
+      'department_name': instance.departmentName,
+      'department_code': instance.departmentCode,
+      'scanned_by_name': instance.scannedByName,
     };

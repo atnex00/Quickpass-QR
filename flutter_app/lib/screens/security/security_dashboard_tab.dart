@@ -58,7 +58,8 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: ColorFiltered(
-                            colorFilter: ColorFilter.mode(context.onPrimary, BlendMode.srcIn),
+                            colorFilter: ColorFilter.mode(
+                                context.onPrimary, BlendMode.srcIn),
                             child: Image.asset('assets/icon/app-icon.png',
                                 width: 16, height: 16)),
                       ),
@@ -125,8 +126,8 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                           PopupMenuItem(
                             value: 'settings',
                             child: ListTile(
-                              leading:
-                                  Icon(Icons.settings, color: context.onSurface),
+                              leading: Icon(Icons.settings,
+                                  color: context.onSurface),
                               title: const Text('Settings'),
                               contentPadding: EdgeInsets.zero,
                               visualDensity: VisualDensity.compact,
@@ -172,8 +173,7 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
             if (scanProv.statsLoading)
               const SliverToBoxAdapter(
                 child: SizedBox(
-                    height: 200,
-                    child: Center(child: LoadingIndicator())),
+                    height: 200, child: Center(child: LoadingIndicator())),
               )
             else ...[
               SliverToBoxAdapter(
@@ -217,8 +217,7 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                               () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ScannerScreen())),
+                                      builder: (_) => const ScannerScreen())),
                           icon: const Icon(Icons.qr_code_scanner, size: 20),
                           label: const Text('Scan QR'),
                         ),
@@ -251,8 +250,7 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) =>
-                                      const RequestLeaveScreen())),
+                                  builder: (_) => const RequestLeaveScreen())),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -264,8 +262,7 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) =>
-                                      const LeaveHistoryScreen())),
+                                  builder: (_) => const LeaveHistoryScreen())),
                         ),
                       ),
                     ],
@@ -300,106 +297,137 @@ class _SecurityDashboardTabState extends State<SecurityDashboardTab> {
                       (context, index) {
                         final log = scanProv.recentScans[index];
                         final isSuccess = log.isValid;
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: context.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: context.outlineVariant),
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ScanHistoryScreen(
+                                departmentName: log.departmentName,
+                                departmentCode: log.departmentCode,
+                              ),
+                            ),
                           ),
-                          child: IntrinsicHeight(
-                            child: Row(
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: context.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: context.outlineVariant),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 4,
-                                  decoration: BoxDecoration(
-                                    color: isSuccess
-                                        ? context.success
-                                        : context.error,
-                                    borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(12),
-                                        bottomLeft: Radius.circular(12)),
-                                  ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isSuccess
+                                          ? Icons.check_circle
+                                          : Icons.cancel,
+                                      size: 20,
+                                      color: isSuccess
+                                          ? context.success
+                                          : context.error,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: context.primary
+                                            .withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: context.primary
+                                                .withValues(alpha: 0.3)),
+                                      ),
+                                      child: Text(
+                                        log.departmentCode ?? '',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.5,
+                                            color: context.primary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        log.departmentName ?? 'Unknown',
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: context.onSurface,
+                                            overflow: TextOverflow.ellipsis),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: (isSuccess
+                                                ? context.success
+                                                : context.error)
+                                            .withValues(alpha: 0.12),
+                                        borderRadius:
+                                            BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        isSuccess ? 'Valid' : 'Invalid',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: isSuccess
+                                                ? context.success
+                                                : context.error),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(14),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: (isSuccess
-                                                    ? context.success
-                                                    : context.error)
-                                                .withValues(alpha: 0.12),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Icon(
-                                              isSuccess
-                                                  ? Icons.check_circle
-                                                  : Icons.cancel,
-                                              color: isSuccess
-                                                  ? context.success
-                                                  : context.error,
-                                              size: 20),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                  log.employeeName ??
-                                                      'Unknown',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 14,
-                                                      color:
-                                                          context.onSurface)),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                  '${log.qrType} \u2022 ${DateFormatter.formatDateTime(log.scanTime)}',
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: context
-                                                          .neutralGray)),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 3),
-                                          decoration: BoxDecoration(
-                                            color: (isSuccess
-                                                    ? context.success
-                                                    : context.error)
-                                                .withValues(alpha: 0.12),
-                                            borderRadius:
-                                                BorderRadius.circular(999),
-                                          ),
-                                          child: Text(
-                                              isSuccess
-                                                  ? 'Valid'
-                                                  : 'Invalid',
-                                              style: TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: isSuccess
-                                                      ? context.success
-                                                      : context.error)),
-                                        ),
-                                      ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  log.employeeName ?? 'Unknown',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.onSurface),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${log.qrType} \u2022 ${DateFormatter.formatDateTime(log.scanTime)}',
+                                  style: TextStyle(
+                                      fontSize: 12, color: context.neutralGray),
+                                ),
+                                if (log.scannedByName != null) ...[
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.verified_user_outlined,
+                                          size: 13, color: context.neutralGray),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Scanned by ${log.scannedByName}',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: context.neutralGray),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (log.validationMessage != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      log.validationMessage!,
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: isSuccess
+                                              ? context.success
+                                              : context.error),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -523,19 +551,15 @@ class _MiniStatCard extends StatelessWidget {
             Container(
               width: 8,
               height: 8,
-              decoration:
-                  BoxDecoration(color: color, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 8),
             Text(value,
                 style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: color)),
+                    fontSize: 16, fontWeight: FontWeight.w700, color: color)),
             const SizedBox(width: 6),
             Text(label,
-                style: TextStyle(
-                    fontSize: 12, color: context.neutralGray)),
+                style: TextStyle(fontSize: 12, color: context.neutralGray)),
           ],
         ),
       ),
@@ -591,8 +615,7 @@ class _LeaveActionCard extends StatelessWidget {
                         color: context.onSurface)),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: TextStyle(
-                        fontSize: 12, color: context.neutralGray)),
+                    style: TextStyle(fontSize: 12, color: context.neutralGray)),
               ],
             ),
           ),

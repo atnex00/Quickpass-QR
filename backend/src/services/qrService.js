@@ -72,12 +72,43 @@ function getQrTimestamp(qrCode) {
 }
 
 function isOutQrExpired(leave, now = new Date()) {
-  if (!leave || leave.status !== 'approved') return false;
+  if (!leave) return false;
+  if (leave.status === 'expired') return true;
+  if (leave.status !== 'approved') return false;
   const windowMs = (parseInt(process.env.QR_VALIDITY_WINDOW_MINUTES) || 15) * 60 * 1000;
   const qrTime = getQrTimestamp(leave.out_qr_code);
   const reference = qrTime || new Date(`${leave.leave_date}T${leave.start_time}`.replace(' ', 'T'));
   if (isNaN(reference.getTime())) return false;
   return now.getTime() > reference.getTime() + windowMs;
+}
+
+async function expireOverdueLeaves(db) {
+  try {
+    const windowMs = (parseInt(process.env.QR_VALIDITY_WINDOW_MINUTES) || 15) * 60 * 1000;
+    const cutoff = new Date(Date.now() - windowMs);
+    const rows = await db('leave_requests')
+      .where('status', 'approved')
+      .andWhereRaw('leave_date::timestamp + start_time::time < ?', [cutoff.toISOString()])
+      .update({
+        status: 'expired',
+        out_qr_code: null,
+        in_qr_code: null,
+        out_qr_image: null,
+        in_qr_image: null,
+        updated_at: db.fn.now(),
+      })
+      .returning('leave_id');
+
+    if (Array.isArray(rows) && rows.length > 0) {
+      const qrImageService = require('./qrImageService');
+      for (const row of rows) {
+        qrImageService.deleteQrImages(row.leave_id);
+      }
+    }
+    return Array.isArray(rows) ? rows.length : 0;
+  } catch {
+    return 0;
+  }
 }
 
 module.exports = {
@@ -89,4 +120,5 @@ module.exports = {
   isWithinTimeWindow,
   getQrTimestamp,
   isOutQrExpired,
+  expireOverdueLeaves,
 };

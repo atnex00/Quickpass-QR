@@ -142,17 +142,27 @@ async function validateScan(req, res, next) {
 
 async function getScanHistory(req, res, next) {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 50, department } = req.query;
     const offset = (page - 1) * limit;
 
-    const { count } = await db('qr_scan_logs').count('* as count').first();
-    const logs = await db('qr_scan_logs')
+    const base = db('qr_scan_logs')
       .leftJoin('leave_requests', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
+      .leftJoin('employees as scanner', 'qr_scan_logs.scanned_by', 'scanner.employee_id');
+    if (department) {
+      base.where('departments.department_name', department);
+    }
+
+    const { count } = await base.clone().count('* as count').first();
+    const logs = await base
       .select(
         'qr_scan_logs.*',
         'employees.full_name as employee_name',
-        'employees.employee_id as employee_id'
+        'employees.employee_id as employee_id',
+        'departments.department_name as department_name',
+        'departments.department_code as department_code',
+        'scanner.full_name as scanned_by_name'
       )
       .orderBy('qr_scan_logs.scan_time', 'desc')
       .limit(limit)
@@ -167,6 +177,33 @@ async function getScanHistory(req, res, next) {
         limit: parseInt(limit),
         pages: Math.ceil(count / limit),
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getScanHistoryDepartments(req, res, next) {
+  try {
+    const departments = await db('departments')
+      .leftJoin('employees', 'employees.department_id', 'departments.department_id')
+      .leftJoin('leave_requests', 'leave_requests.employee_id', 'employees.employee_id')
+      .leftJoin('qr_scan_logs', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
+      .select(
+        'departments.department_name as department_name',
+        'departments.department_code as department_code'
+      )
+      .count('qr_scan_logs.log_id as scan_count')
+      .groupBy('departments.department_id')
+      .orderBy('departments.department_name', 'asc');
+
+    res.json({
+      success: true,
+      data: departments.map((d) => ({
+        department_name: d.department_name,
+        department_code: d.department_code,
+        scan_count: parseInt(d.scan_count) || 0,
+      })),
     });
   } catch (err) {
     next(err);
@@ -192,10 +229,15 @@ async function getScanStats(req, res, next) {
     const recent = await db('qr_scan_logs')
       .leftJoin('leave_requests', 'qr_scan_logs.leave_id', 'leave_requests.leave_id')
       .leftJoin('employees', 'leave_requests.employee_id', 'employees.employee_id')
+      .leftJoin('departments', 'employees.department_id', 'departments.department_id')
+      .leftJoin('employees as scanner', 'qr_scan_logs.scanned_by', 'scanner.employee_id')
       .select(
         'qr_scan_logs.*',
         'employees.full_name as employee_name',
-        'employees.employee_id as employee_id'
+        'employees.employee_id as employee_id',
+        'departments.department_name as department_name',
+        'departments.department_code as department_code',
+        'scanner.full_name as scanned_by_name'
       )
       .where('qr_scan_logs.scan_time', '>=', today)
       .orderBy('qr_scan_logs.scan_time', 'desc')
@@ -217,4 +259,4 @@ async function getScanStats(req, res, next) {
   }
 }
 
-module.exports = { validateScan, getScanHistory, getScanStats };
+module.exports = { validateScan, getScanHistory, getScanHistoryDepartments, getScanStats };

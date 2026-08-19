@@ -78,4 +78,45 @@ void main() {
       expect(provider.error, isNull);
     });
   });
+
+  group('loadHistoryDepartments', () {
+    test('loads departments with scan counts', () async {
+      when(mockApi.getScanHistoryDepartments()).thenAnswer((_) async => {
+            'success': true,
+            'data': [
+              {
+                'department_name': 'Information Systems',
+                'department_code': 'ISD',
+                'scan_count': 2,
+              },
+              {
+                'department_name': 'Technical Services',
+                'department_code': 'TSD',
+                'scan_count': 1,
+              },
+            ],
+          });
+
+      await provider.loadHistoryDepartments();
+
+      expect(provider.historyDepartments, hasLength(2));
+      expect(provider.historyDepartments[0].departmentName,
+          'Information Systems');
+      expect(provider.historyDepartments[0].departmentCode, 'ISD');
+      expect(provider.historyDepartments[0].scanCount, 2);
+      expect(provider.historyDepartmentsLoading, false);
+      expect(provider.error, isNull);
+    });
+
+    test('sets error on failure', () async {
+      when(mockApi.getScanHistoryDepartments())
+          .thenThrow(Exception('Network error'));
+
+      await provider.loadHistoryDepartments();
+
+      expect(provider.historyDepartments, isEmpty);
+      expect(provider.historyDepartmentsLoading, false);
+      expect(provider.error, 'Network error');
+    });
+  });
 }

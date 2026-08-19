@@ -54,6 +54,7 @@ export type LeaveStatus =
   | "active"
   | "completed"
   | "cancelled"
+  | "expired"
 
 export interface ScanLog {
   log_id: number

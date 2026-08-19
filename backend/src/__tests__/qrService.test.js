@@ -1,6 +1,12 @@
 const qrService = require('../services/qrService');
 const { getLocalDateString } = require('../utils/date');
 
+jest.mock('../services/qrImageService', () => ({
+  deleteQrImages: jest.fn(),
+  generateQrImage: jest.fn(),
+  getQrImagePath: jest.fn(() => ''),
+}));
+
 describe('qrService', () => {
   const OLD_ENV = process.env;
 
@@ -133,5 +139,10 @@ describe('qrService', () => {
       const yesterday = getLocalDateString(new Date(Date.now() - 24 * 60 * 60 * 1000));
       expect(qrService.isOutQrExpired({ status: 'approved', out_qr_code: null, leave_date: yesterday, start_time: '09:00' })).toBe(true);
     });
+
+    it('returns true for a leave already in expired status', () => {
+      expect(qrService.isOutQrExpired({ status: 'expired' })).toBe(true);
+      expect(qrService.isOutQrExpired({ status: 'expired', out_qr_code: null, leave_date: '2026-08-10', start_time: '09:00' })).toBe(true);
+    });
   });
-});
+})

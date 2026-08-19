@@ -91,7 +91,7 @@ router.post('/leave/request', authenticate, validate(Joi.object({
 })), leaveController.submitLeave);
 
 router.get('/leave/history', authenticate, validateQuery(Joi.object({
-  status: Joi.string().valid('pending', 'approved', 'active', 'completed', 'rejected', 'cancelled').optional(),
+  status: Joi.string().valid('pending', 'approved', 'active', 'completed', 'rejected', 'cancelled', 'expired').optional(),
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(100).optional(),
 })), leaveController.getHistory);
@@ -141,10 +141,12 @@ router.post('/scan/validate', authenticate, requireSecurity, validate(Joi.object
   qr_data: Joi.string().required(),
 })), scanController.validateScan);
 router.get('/scan/stats', authenticate, requireSecurity, scanController.getScanStats);
+router.get('/scan/history/departments', authenticate, requireSecurity, scanController.getScanHistoryDepartments);
 
 router.get('/scan/history', authenticate, requireSecurity, validateQuery(Joi.object({
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(100).optional(),
+  department: Joi.string().max(100).optional(),
 })), scanController.getScanHistory);
 
 // ── Admin Routes ──

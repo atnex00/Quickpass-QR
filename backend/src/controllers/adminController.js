@@ -569,6 +569,7 @@ async function importEmployees(req, res, next) {
 
 async function getReports(req, res, next) {
   try {
+    await qrService.expireOverdueLeaves(db);
     const { type, start_date, end_date } = req.query;
 
     let reportData;
@@ -597,7 +598,8 @@ async function getReports(req, res, next) {
           db.raw("COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved"),
           db.raw("COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected"),
           db.raw("COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending"),
-          db.raw("COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed")
+          db.raw("COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed"),
+          db.raw("COUNT(CASE WHEN status = 'expired' THEN 1 END) as expired")
         )
         .groupBy('departments.department_id', 'departments.department_name');
     } else {

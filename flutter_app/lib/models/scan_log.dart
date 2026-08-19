@@ -16,6 +16,9 @@ class ScanLog {
     this.validationMessage,
     this.employeeName,
     this.employeeId,
+    this.departmentName,
+    this.departmentCode,
+    this.scannedByName,
   });
 
   factory ScanLog.fromJson(Map<String, dynamic> json) =>
@@ -49,6 +52,15 @@ class ScanLog {
 
   @JsonKey(name: 'employee_id')
   final String? employeeId;
+
+  @JsonKey(name: 'department_name')
+  final String? departmentName;
+
+  @JsonKey(name: 'department_code')
+  final String? departmentCode;
+
+  @JsonKey(name: 'scanned_by_name')
+  final String? scannedByName;
 
   static int _intFromJson(dynamic v) => int.tryParse('$v') ?? 0;
   static bool _boolFromJson(dynamic v) => v == true || v == 1;

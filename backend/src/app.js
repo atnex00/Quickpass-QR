@@ -284,6 +284,7 @@ if (require.main === module) {
     await db.testConnection();
     await cleanupStartup();
     startSessionPurge();
+    await require('./services/qrService').expireOverdueLeaves(db);
 
     server = app.listen(PORT, () => {
       logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' }, 'Quickpass API started');

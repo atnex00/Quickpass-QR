@@ -18,6 +18,8 @@ void main() {
         'validation_message': 'Valid QR',
         'employee_name': 'James Wilson',
         'employee_id': '000001',
+        'department_name': 'Technical Services',
+        'scanned_by_name': 'Mike Ross',
       });
 
       expect(log.logId, 42);
@@ -28,6 +30,8 @@ void main() {
       expect(log.validationMessage, 'Valid QR');
       expect(log.employeeName, 'James Wilson');
       expect(log.employeeId, '000001');
+      expect(log.departmentName, 'Technical Services');
+      expect(log.scannedByName, 'Mike Ross');
     });
 
     test('fromJson handles missing fields with defaults', () {
@@ -43,6 +47,8 @@ void main() {
       expect(log.validationMessage, isNull);
       expect(log.employeeName, isNull);
       expect(log.employeeId, isNull);
+      expect(log.departmentName, isNull);
+      expect(log.scannedByName, isNull);
     });
 
     test('toJson round-trips correctly', () {

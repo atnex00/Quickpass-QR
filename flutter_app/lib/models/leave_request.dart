@@ -11,6 +11,7 @@ enum LeaveStatus {
   active,
   completed,
   cancelled,
+  expired,
   unknown;
 
   String get label {
@@ -27,6 +28,8 @@ enum LeaveStatus {
         return 'Completed';
       case LeaveStatus.cancelled:
         return 'Cancelled';
+      case LeaveStatus.expired:
+        return 'Expired';
       case LeaveStatus.unknown:
         return 'Unknown';
     }
@@ -46,6 +49,8 @@ enum LeaveStatus {
         return context.secondary;
       case LeaveStatus.cancelled:
         return context.neutralGray;
+      case LeaveStatus.expired:
+        return context.error;
       case LeaveStatus.unknown:
         return context.neutralGray;
     }
@@ -65,6 +70,8 @@ enum LeaveStatus {
         return Icons.check_circle_outline;
       case LeaveStatus.cancelled:
         return Icons.close;
+      case LeaveStatus.expired:
+        return Icons.timer_off;
       case LeaveStatus.unknown:
         return Icons.help_outline;
     }

@@ -558,6 +558,7 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
   _i7.Future<Map<String, dynamic>> getScanHistory({
     int? page = 1,
     int? limit = 50,
+    String? department,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -566,7 +567,21 @@ class MockApiService extends _i1.Mock implements _i5.ApiService {
           {
             #page: page,
             #limit: limit,
+            #department: department,
           },
+        ),
+        returnValue:
+            _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+        returnValueForMissingStub:
+            _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
+      ) as _i7.Future<Map<String, dynamic>>);
+
+  @override
+  _i7.Future<Map<String, dynamic>> getScanHistoryDepartments() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getScanHistoryDepartments,
+          [],
         ),
         returnValue:
             _i7.Future<Map<String, dynamic>>.value(<String, dynamic>{}),

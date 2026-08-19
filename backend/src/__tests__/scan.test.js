@@ -347,12 +347,83 @@ describe('GET /api/scan/history', () => {
       .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true })
       .mockResolvedValueOnce({ count: 2 });
     db().resolve([
-      { log_id: 1, leave_id: 'LV-001', scanned_by: '090901', qr_type: 'OUT', scan_time: now, employee_name: 'James Wilson' },
+      { log_id: 1, leave_id: 'LV-001', scanned_by: '090901', qr_type: 'OUT', scan_time: now, employee_name: 'James Wilson', department_name: 'Technical Services', scanned_by_name: 'Mike Ross' },
     ]);
     const res = await request(app)
       .get('/api/scan/history')
       .set('Authorization', `Bearer ${secToken()}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data[0]).toEqual(expect.objectContaining({
+      department_name: 'Technical Services',
+      scanned_by_name: 'Mike Ross',
+    }));
+  });
+
+  it('filters scan history by department', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true })
+      .mockResolvedValueOnce({ count: 1 });
+    db().resolve([
+      { log_id: 2, leave_id: 'LV-002', scanned_by: '090901', qr_type: 'IN', scan_time: now, employee_name: 'Ethan White', department_name: 'Technical Services' },
+    ]);
+    const res = await request(app)
+      .get('/api/scan/history?department=Technical%20Services')
+      .set('Authorization', `Bearer ${secToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].department_name).toBe('Technical Services');
+  });
+});
+
+describe('GET /api/scan/history/departments', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns scan counts grouped by department', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    db().resolve([
+      { department_name: 'Information Systems', department_code: 'ISD', scan_count: 2 },
+      { department_name: 'Technical Services', department_code: 'TSD', scan_count: 1 },
+    ]);
+    const res = await request(app)
+      .get('/api/scan/history/departments')
+      .set('Authorization', `Bearer ${secToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([
+      { department_name: 'Information Systems', department_code: 'ISD', scan_count: 2 },
+      { department_name: 'Technical Services', department_code: 'TSD', scan_count: 1 },
+    ]);
+  });
+
+  it('returns zero for departments without scans', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '090901', is_security: true, is_active: true });
+    db().resolve([
+      { department_name: 'Technical Services', department_code: 'TSD', scan_count: '0' },
+    ]);
+    const res = await request(app)
+      .get('/api/scan/history/departments')
+      .set('Authorization', `Bearer ${secToken()}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data[0]).toEqual({
+      department_name: 'Technical Services',
+      department_code: 'TSD',
+      scan_count: 0,
+    });
+  });
+
+  it('rejects non-security users', async () => {
+    db.first
+      .mockResolvedValueOnce({ is_active: true, session_id: 's1' })
+      .mockResolvedValueOnce({ employee_id: '000001', is_security: false, is_active: true });
+    const res = await request(app)
+      .get('/api/scan/history/departments')
+      .set('Authorization', `Bearer ${jwt.sign({ employee_id: '000001', session_id: 's1' }, process.env.JWT_SECRET)}`);
+    expect(res.status).toBe(403);
   });
 });
