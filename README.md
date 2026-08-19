@@ -740,6 +740,7 @@ flutter test --coverage
 2. **Supervisor** approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min) and QR images rendered with the brand logo (`uploads-private/qr_codes`, served via authenticated endpoints)
 3. **Security** scans OUT QR at exit → status: `active`
 4. **Security** scans IN QR at entry → status: `completed`
+5. Unscanned QR passes past validity → status: `expired` (server-side sweep on startup, ±15 min from scheduled time)
 
 Each OUT/IN QR can only be scanned once. The database enforces this with a unique constraint and the scan is wrapped in a transaction. Actual scan times are recorded (`out_scan_time` / `in_scan_time` on the leave, `scan_time` in `qr_scan_logs`).
 
@@ -828,7 +829,8 @@ Each OUT/IN QR can only be scanned once. The database enforces this with a uniqu
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/api/scan/validate` | security | Validate scanned QR code |
-| GET | `/api/scan/history` | security | Scan log history |
+| GET | `/api/scan/history` | security | Scan log history (optional `department` filter) |
+| GET | `/api/scan/history/departments` | security | Scan counts per department |
 | GET | `/api/scan/stats` | security | Today's scan statistics |
 
 ### Admin

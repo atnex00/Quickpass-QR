@@ -59,7 +59,7 @@ Bottom Nav (2 tabs)
 ```
 Direct full-screen scanner (no bottom nav)
 ├── ScannerScreen → ScanResultScreen → ScannerScreen (loop)
-└── ScanHistoryScreen (accessible from... currently not linked)
+└── ScanHistoryScreen (accessible from SecurityShell History tab / dashboard Recent Scans)
 ```
 
 **Admin** (`AdminPanel`)
@@ -214,12 +214,12 @@ screens/
 
 | Aspect | Detail |
 |---|---|
-| **Purpose** | View past scans |
-| **Layout** | AppBar + RefreshIndicator + ListView |
-| **Elements** | Status icon (check/cancel), employee name, type + timestamp, validation message, valid/invalid badge |
-| **Empty state** | QR icon + "No scan history" |
+| **Purpose** | View past scans, grouped by department |
+| **Layout** | SliverAppBar (gold) + RefreshIndicator + CustomScrollView |
+| **Elements** | Level 1: department cards (Directory-style — CODE pill, name, scan count + chevron) from `GET /scan/history/departments`. Level 2 (after tap): "Scans for \<dept\>" header chip + per-scan cards (status icon, CODE pill, department name, valid/invalid badge, employee name, type + timestamp, scanned-by, validation message) |
+| **Empty state** | Level 1: "No departments yet" — Level 2: "No scan history" + Scan QR action |
 | **Error state** | Error icon + message + "Retry" |
-| **Pain points** | Not linked from scanner screen, no search/filter |
+| **Pain points** | No search/filter within a department, counts are all-time (not date-bounded) |
 
 ### 3.13 AdminPanel
 

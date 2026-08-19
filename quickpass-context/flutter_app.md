@@ -89,7 +89,8 @@ Force logout/logged in callbacks use `_navigatorKey` (GlobalKey) with `pushAndRe
 ## Models (json_serializable)
 - **Employee**: employee_id, full_name, position, department, email, roles, profile_photo, hire_date
 - **LeaveRequest**: leave_id, employee, supervisor, leave_date, start/end time, reason, status, QR codes, scan times, rejection_reason
-- **ScanLog**: log_id, leave_id, qr_type, scanned_by, scan_time, is_valid, message
+- **ScanLog**: log_id, leave_id, qr_type, scanned_by, scan_time, is_valid, message, department_name, department_code, scanned_by_name
+- **ScanDepartment**: department_name, department_code, scan_count
 - **Department**: department_id, name, code, head, is_active
 
 ## Storage

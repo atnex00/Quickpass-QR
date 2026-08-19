@@ -72,6 +72,7 @@ Seeds need `bcryptjs`. Run from `backend/` (resolves to `backend/node_modules/bc
 2. Supervisor approves → QR codes generated (OUT + IN, HMAC-SHA256 signed, one-time use, valid ±15 min from scheduled time)
 3. Security scans OUT QR at exit → `active`
 4. Security scans IN QR at entry → `completed`
+5. Unscanned QR passes past validity → `expired` (server-side sweep on startup, ±15 min from scheduled time)
 
 QR data: JSON with `leave_id`, `employee_id`, `type`, `timestamp`, `signature`.
 
@@ -103,6 +104,7 @@ Employee routes inside `<AppLayout />` (sidebar). Security routes inside `<Secur
 - `main.dart` role routing: `isScanner` → ScannerScreen, `isAdmin` → AdminPanel, `isSupervisor` → SupervisorDashboard, else → EmployeeDashboard
 - No named routes; uses `Navigator.push` for subscreens
 - MultiProvider (4 providers: Auth, Leave, Supervisor, Scan)
+- Security History tab (`ScanHistoryScreen`): department cards first (Directory-style, scan counts from `GET /scan/history/departments`), tap → per-department scan list (`?department=` filter)
 
 ### Flutter Admin Panel Visual Patterns
 - Bottom `NavigationBar` with gold (`darkPrimary`) indicator at 15% alpha, 80px height

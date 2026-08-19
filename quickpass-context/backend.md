@@ -68,7 +68,8 @@ Startup sequence:
 | Method | Path | Description |
 |---|---|---|
 | POST | `/scan/validate` | Validate QR, transition leave status |
-| GET | `/scan/history` | Paginated scan log |
+| GET | `/scan/history` | Paginated scan log (optional `department` filter) |
+| GET | `/scan/history/departments` | Scan counts per department |
 
 ### Admin
 | Method | Path | Description |
@@ -117,7 +118,7 @@ Startup sequence:
 | `authController.js` | login, logout, refreshToken, getProfile, updateProfile, fcmToken, uploadProfilePhoto | 306 |
 | `leaveController.js` | submitLeave, getHistory, getActiveLeave, getLeaveById, deleteLeave | 225 |
 | `supervisorController.js` | getPendingRequests, approveLeave, rejectLeave, getApprovedLeaves, revokeApproval, getTeamLeaves | 313 |
-| `scanController.js` | validateScan, getScanHistory | 174 |
+| `scanController.js` | validateScan, getScanHistory, getScanHistoryDepartments, getScanStats | ~290 |
 | `adminController.js` | 13 functions for employee/dept/report CRUD | 454 |
 
 ## Services

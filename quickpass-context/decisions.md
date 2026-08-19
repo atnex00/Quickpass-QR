@@ -47,3 +47,6 @@ tags:
 
 ## 14. No `device_fingerprint` Column
 **Why**: An earlier attempt added a `device_fingerprint` column to `sessions` for device-bound token invalidation, but the migration was rolled back and all references removed from the backend (`authController.js`, `middleware/auth.js`, `routes/index.js`) and Flutter (`api_service.dart`). Session validation relies solely on the `session_id` + `is_active` + `expires_at` check. Do not reintroduce device fingerprinting.
+
+## 15. Department-Card Scan History
+**Why**: A flat scan log becomes unreadable as it grows, and security guards think in terms of departments. The History screen therefore mirrors the Directory pattern: department cards first (counts from a single grouped query, `GET /scan/history/departments`), then a drill-down per department. The `?department=` filter is applied server-side to both the count and list queries so pagination stays correct, and `qr_scan_logs` is joined to `departments` (via `leave_requests` → `employees`) so each log carries `department_name`/`department_code` plus the scanner's name via a self-join.
