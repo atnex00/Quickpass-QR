@@ -501,6 +501,53 @@ class ApiService {
     final res = await dio.get('/admin/reports', queryParameters: params);
     return res.data;
   }
+
+  Future<Map<String, dynamic>> refreshToken() async {
+    final oldToken = await _storage.read(key: 'auth_token');
+    final refreshSid = await _storage.read(key: 'refresh_sid');
+    if (oldToken == null || refreshSid == null) {
+      throw Exception('No tokens to refresh');
+    }
+
+    final deviceFp = await DeviceService.getFingerprint();
+
+    int retryCount = 0;
+    while (retryCount < 3) {
+      try {
+        final refreshDio = Dio(BaseOptions(
+          baseUrl: AppConfig.apiBaseUrl,
+          connectTimeout: AppConfig.connectTimeout,
+          receiveTimeout: AppConfig.receiveTimeout,
+        ));
+
+        final res = await refreshDio.post(
+          '/auth/refresh',
+          data: {'refresh_sid': refreshSid},
+          options: Options(headers: {
+            'Authorization': 'Bearer $oldToken',
+            'x-device-id': deviceFp,
+          }),
+        );
+
+        final newToken = res.data['token'] as String;
+        final newRefreshSid = res.data['refresh_sid'] as String?;
+
+        await _storage.write(key: 'auth_token', value: newToken);
+        if (newRefreshSid != null && newRefreshSid.isNotEmpty) {
+          await _storage.write(key: 'refresh_sid', value: newRefreshSid);
+        }
+
+        _cachedToken = newToken;
+        _refreshRetryCount = 0;
+        return {'token': newToken, 'refresh_sid': newRefreshSid ?? refreshSid};
+      } catch (_) {
+        _refreshRetryCount++;
+      }
+    }
+
+    await clearLocalAuth();
+    throw Exception('Max refresh retries exceeded');
+  }
 }
 
 class _PendingRequest {

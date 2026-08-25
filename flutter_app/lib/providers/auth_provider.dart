@@ -43,15 +43,27 @@ class AuthProvider extends ChangeNotifier {
         _user = user;
         _isAuthenticated = true;
         CacheService().saveProfile(user.toJson());
+        _isInitializing = false;
+        _isLoading = false;
+        notifyListeners();
+        return;
       }
-    } catch (e) {
-      debugPrint('initialize: profile validation failed, clearing session: $e');
-      await _api.clearLocalAuth();
-    } finally {
-      _isLoading = false;
-      _isInitializing = false;
-      notifyListeners();
+    } catch (_) {
+      // Token expired or invalid — try silent refresh using stored refresh_sid
+      try {
+        await _api.refreshToken();
+        _user = await _api.getProfile();
+        _isAuthenticated = true;
+        CacheService().saveProfile(_user!.toJson());
+      } catch (refreshError) {
+        // Refresh failed — clear and force login
+        await _api.clearLocalAuth();
+      }
     }
+
+    _isLoading = false;
+    _isInitializing = false;
+    notifyListeners();
   }
 
   Future<bool> login(String employeeId, String password) async {
