@@ -4,6 +4,10 @@ node_modules/
 build/
 web/dist/
 
+# Android APK builds
+flutter_app/build/app/outputs/flutter-apk/*.apk
+flutter_app/build/app/outputs/package_*/
+
 # Build info
 *.tsbuildinfo
 
