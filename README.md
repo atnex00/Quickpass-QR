@@ -562,6 +562,23 @@ Optional:
 
 ### Flutter (`flutter_app/`)
 
+> **Important:** The default gatepass duration was changed from **2 hours to 7 hours** across all environments (Flutter, Web, Backend). Submissions exceeding 7h receive a backend validation error: `"Duration exceeds 7 hours — HR database verification required (placeholder)"`.
+
+| Command | Description |
+|---------|-------------|
+| `flutter run` | Run on connected device (uses `API_BASE_URL` from env) |
+| `flutter analyze` | Static analysis |
+| `flutter test` | Run unit/widget tests |
+| `flutter build apk` | Build release APK |
+| `flutter build appbundle` | Build Android App Bundle (recommended for Play Store) |
+| `flutter build ios` | Build iOS (macOS only) |
+
+> **Production build** uses `env.prod.json` for `API_BASE_URL`:
+> ```bash
+> flutter build apk --dart-define-from-file=env.prod.json
+> ```
+> The updated `env.prod.json` sets `API_BASE_URL` to `https://quickpass.example.com/api`.
+
 | Command | Description |
 |---------|-------------|
 | `flutter run` | Run on connected device |
@@ -570,6 +587,31 @@ Optional:
 | `flutter build apk` | Build release APK |
 | `flutter build appbundle` | Build Android App Bundle |
 | `flutter build ios` | Build iOS (macOS only) |
+
+> **Default gatepass duration:** 7 hours (changed from 2h across all environments).
+> Submissions >7h receive backend error: `"Duration exceeds 7 hours — HR database verification required (placeholder)"`.
+
+> **Environment configuration:**
+> - `env.prod.json` — production API URL (`https://quickpass.example.com/api`)
+> - `env.dev.json` (or `env.prod.json` modified) — development: `http://10.0.2.2:3000/api` (emulator) or `http://localhost:3000/api` (physical device)
+> - `backend/.env.dev` — local PostgreSQL (`znc-quickpass`)
+> - `backend/.env.prod` — Supabase cloud production
+
+> **New user onboarding:**
+> ```bash
+> cd Quickpass-QR
+> # 1. Clone & install
+> cp backend/.env.example backend/.env    # or copy .env.prod for production
+> cd backend && npm install
+> cd ../web && npm install
+> cd ../flutter_app && flutter pub get
+> # 2. Setup database (prompts for PG admin password if needed)
+> .\scripts\setup_db.ps1       # uses .env.dev by default
+> # 3. Start development
+> cd ../backend && npm run dev
+> # Terminal 2: cd web && npm run dev
+> # Terminal 3: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
+> ```
 
 ### Database
 
@@ -699,6 +741,7 @@ flutter test --coverage
 | `API_BASE_URL` not working | Ensure the backend is running and the port matches (default `:3000`) |
 | Emulator is slow | Enable **Hardware acceleration** in AVD settings (HAXM on Windows, Hypervisor.framework on macOS) |
 | `flutter build apk` fails | Run `flutter clean && flutter pub get` and retry |
+| **SDK version mismatch** | shared_preferences ^2.5.5 requires Dart SDK >=3.9.0, but this project has 3.6.0.<br>Fix: edit pubspec.yaml and change shared_preferences: ^2.5.5 to shared_preferences: ^2.0.5, then run lutter pub get. |
 
 ---
 
