@@ -19,7 +19,14 @@ async function submitLeave(req, res, next) {
       throw createError(400, 'End time must be after start time');
     }
 
-    const clientDate = String(leave_date).split('T')[0];
+    // 7-hour default gatepass limit — HR database verification required for >7h
+    const startMinutes = start_time.split(':')[0] * 60 + (start_time.split(':')[1] * 1 || 0);
+    const endMinutes = end_time.split(':')[0] * 60 + (end_time.split(':')[1] * 1 || 0);
+    const durationMinutes = endMinutes - startMinutes;
+    const durationHours = durationMinutes / 60;
+    if (durationHours > 7) {
+      throw createError(400, 'Duration exceeds 7 hours — HR database verification required (placeholder)');
+    }
     if (clientDate !== getLocalDateString()) {
       throw createError(400, 'Leave date must be today');
     }

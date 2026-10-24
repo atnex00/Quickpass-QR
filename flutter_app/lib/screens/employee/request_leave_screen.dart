@@ -26,7 +26,7 @@ class _RequestLeaveScreenState extends State<RequestLeaveScreen> {
     super.initState();
     _startTime = TimeOfDay.fromDateTime(DateTime.now());
     _endTime =
-        TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 2)));
+        TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 7)));
   }
 
   Future<void> _pickDate() async {
