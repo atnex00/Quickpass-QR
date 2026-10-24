@@ -742,6 +742,7 @@ flutter test --coverage
 | Emulator is slow | Enable **Hardware acceleration** in AVD settings (HAXM on Windows, Hypervisor.framework on macOS) |
 | `flutter build apk` fails | Run `flutter clean && flutter pub get` and retry |
 | **SDK version mismatch** | shared_preferences ^2.5.5 requires Dart SDK >=3.9.0, but this project has 3.6.0.<br>Fix: edit pubspec.yaml and change shared_preferences: ^2.5.5 to shared_preferences: ^2.0.5, then run lutter pub get. |
+| `flutter build apk` fails with `Unsupported class file major version 69` or `com.android.application` plugin error | Flutter uses Android Studio embedded JDK 25 (`jbr`) instead of JDK 21. Fix: `flutter config --jdk-dir "C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"`, set `JAVA_HOME` to that path, clear `.gradle/caches/8.5`, and ensure `gradle-wrapper.properties` uses `gradle-8.14-all.zip` (min 8.13, not 8.5). |
 
 ---
 

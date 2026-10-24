@@ -53,13 +53,13 @@ if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
     $Missing += "git"
 }
 
-# Check Java 17+
+# Check Java 21+ (Flutter 3.27 + Gradle 8.5+ require JDK 21)
 $JavaOk = $false
 $JavaCmd = Get-Command "java" -ErrorAction SilentlyContinue
 if ($JavaCmd) {
     $JavaVer = cmd.exe /c "java -version 2>&1" | Out-String
     if ($JavaVer -match '"(\d+)') {
-        $JavaOk = [int]$Matches[1] -ge 17
+        $JavaOk = [int]$Matches[1] -ge 21
     }
 }
 
@@ -180,9 +180,32 @@ Write-Host "  ── Verification ───────────────�
 Write-Host ""
 
 $env:Path += ";$FlutterDir\bin"
+# Make PATH change permanent (User scope)
+[System.Environment]::SetEnvironmentVariable("PATH", $env:PATH, "User")
+Write-Log "PATH updated permanently (User scope)"
 flutter doctor 2>&1
 
 Write-Host ""
-Write-Log "Setup complete."
-Write-Info "To build the APK:  cd flutter_app && flutter build apk"
+
+# ── Fix Gradle version (Flutter 3.27 + Gradle 8.14 needs JDK 21; upgrade to 8.5) ──
+Write-Host "Fixing Gradle version..." -ForegroundColor Cyan
+$WrapperProps = Join-Path $ProjectDir "android\gradle\wrapper\gradle-wrapper.properties"
+$WrapperContent = Get-Content -Path $WrapperProps -Raw
+$WrapperContent = $WrapperContent -replace 'gradle-8\.14-all', 'gradle-8.5-all'
+Set-Content -Path $WrapperProps -Value $WrapperContent
+Write-Log "Gradle version updated to 8.5"
+
+# Create gradle.properties with JVM args for native access
+$PropsPath = Join-Path $ProjectDir "gradle.properties"
+if (-not (Test-Path $PropsPath)) {
+    New-Item -ItemType File -Path $PropsPath -Force | Out-Null
+}
+$GradleProps = @"
+# Flutter Gradle properties
+org.gradle.jvmargs=--illegal-access=all
+"@
+Set-Content -Path $PropsPath -Value $GradleProps -Encoding ASCII
+Write-Log "gradle.properties created with --illegal-access=all"
 Write-Host ""
+
+# ── Verify ──

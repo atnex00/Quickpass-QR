@@ -78,7 +78,7 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
                       v == null || v.trim().isEmpty ? 'Required' : null),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: _selectedDept.isNotEmpty ? _selectedDept : null,
+                value: _selectedDept.isNotEmpty ? _selectedDept : null,
                 decoration: const InputDecoration(labelText: 'Department'),
                 items: [
                   const DropdownMenuItem<String>(

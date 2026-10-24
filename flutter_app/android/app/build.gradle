@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.quickpass.app"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         coreLibraryDesugaringEnabled true
@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId = "com.quickpass.app"
-        minSdkVersion = flutter.minSdkVersion
+        minSdkVersion = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

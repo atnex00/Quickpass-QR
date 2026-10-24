@@ -71,11 +71,11 @@ install_system_deps() {
     fi
   done
 
-  # Check if Java 17+ is available
+  # Check if Java 21+ is available (Flutter 3.27 + Gradle 8.5+ require JDK 21)
   JAVA_OK=false
   if command -v java &>/dev/null; then
     JAVA_VER=$(java -version 2>&1 | head -1 | sed 's/[^0-9.]//g' | cut -d. -f1)
-    if [ "$JAVA_VER" -ge 17 ] 2>/dev/null; then
+    if [ "$JAVA_VER" -ge 21 ] 2>/dev/null; then
       JAVA_OK=true
       log "Java $JAVA_VER found"
     fi
@@ -181,6 +181,16 @@ install_android_sdk() {
     echo "flutter.sdk=$FLUTTER_DIR"
   } > "$PROPERTIES_FILE"
   log "local.properties written"
+  
+  # Fix Gradle version (Flutter 3.27 + Gradle 8.14 needs JDK 21; upgrade to 8.5)
+  GRADLE_PROPS="$PROJECT_DIR/gradle.properties"
+  echo 'org.gradle.jvmargs=--illegal-access=all' >> "$GRADLE_PROPS"
+  log "gradle.properties updated with --illegal-access=all"
+  
+  # Update Gradle wrapper from 8.14 to 8.5
+  WRAPPER_PROPS="$PROJECT_DIR/android/gradle/wrapper/gradle-wrapper.properties"
+  sed -i 's/distributionUrl=\\https\\:\\/\\/services.gradle.org\\/distributions\\/gradle-8\.14-all.zip/distributionUrl=\\https\\:\\/\\/services.gradle.org\\/distributions\\/gradle-8\.5-all.zip/' "$WRAPPER_PROPS"
+  log "Gradle wrapper updated to 8.5"
 }
 
 # ── Flutter SDK ──

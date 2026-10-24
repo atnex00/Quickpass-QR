@@ -196,7 +196,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                     width: 280,
                     child: DropdownButtonFormField<String>(
                       key: ValueKey('dept_$_filterDepartment'),
-                      initialValue: _filterDepartment,
+                      value: _filterDepartment,
                       decoration: const InputDecoration(
                         labelText: 'Dept',
                         isDense: false,
@@ -226,7 +226,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                     width: 280,
                     child: DropdownButtonFormField<String>(
                       key: ValueKey('status_$_filterStatus'),
-                      initialValue: _filterStatus.isEmpty ? null : _filterStatus,
+                      value: _filterStatus.isEmpty ? null : _filterStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         isDense: false,
@@ -255,7 +255,7 @@ class _EmployeeTabState extends State<EmployeeTab> {
                     width: 280,
                     child: DropdownButtonFormField<String>(
                       key: ValueKey('role_$_filterRole'),
-                      initialValue: _filterRole.isEmpty ? null : _filterRole,
+                      value: _filterRole.isEmpty ? null : _filterRole,
                       decoration: const InputDecoration(
                         labelText: 'Role',
                         isDense: false,
