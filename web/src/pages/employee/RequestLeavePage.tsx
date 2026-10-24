@@ -22,7 +22,7 @@ export default function RequestLeavePage() {
   const today = adjusted.toISOString().split("T")[0]
   const now = new Date()
   const defaultStart = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-  const defaultEnd = `${String(now.getHours() + 2).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+  const defaultEnd = `${String(now.getHours() + 7).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
   const [startTime, setStartTime] = useState(defaultStart)
   const [endTime, setEndTime] = useState(defaultEnd)
   const [reason, setReason] = useState("")
