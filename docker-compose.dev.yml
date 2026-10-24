@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Local PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: quickpass-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: znc-quickpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d znc-quickpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quickpass-network
+
+  # Backend API (development)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: quickpass-api-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_CONNECTION=postgresql://postgres:postgres@postgres:5432/znc-quickpass
+      - DB_SSL=false
+      - JWT_SECRET=dev-jwt-secret-change-in-production-min-32-chars
+      - SESSION_EXPIRES_IN=7d
+      - QR_SECRET=dev-qr-secret-change-in-production-min-32-chars
+      - QR_VALIDITY_WINDOW_MINUTES=15
+      - COOKIE_SECRET=dev-cookie-secret-change-in-production-min-32-chars
+      - CORS_ORIGIN=http://localhost:8080
+      - PANEL_ENABLED=true
+    env_file:
+      - ./backend/.env.dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - quickpass-network
+    command: npm run dev
+
+  # Web frontend (development)
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    container_name: quickpass-web-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - quickpass-network
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
+
+networks:
+  quickpass-network:
+    driver: bridge

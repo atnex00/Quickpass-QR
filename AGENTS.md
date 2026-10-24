@@ -12,7 +12,7 @@ QR-based gate pass and leave management system.
 ```bash
 cp backend/.env.example backend/.env
 cd backend && npm install && cd ../flutter_app && flutter pub get
-createdb passlynx
+createdb znc-quickpass
 cd backend && npm run migrate && npm run seed
 ```
 

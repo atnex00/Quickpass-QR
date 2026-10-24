@@ -12,6 +12,12 @@
 
 $ErrorActionPreference = "Stop"
 
+# Add PostgreSQL 18 bin directory to PATH if not already present
+$pgBin = "C:\Program Files\PostgreSQL\18\bin"
+if (-not ($env:Path -split ';' -contains $pgBin)) {
+    $env:Path = $env:Path + ";" + $pgBin
+}
+
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $ProjectDir = Split-Path -Parent $ScriptDir
 $BackendDir = Join-Path $ProjectDir "backend"
@@ -89,7 +95,7 @@ Write-Host ""
 Write-Info "Checking if database '$DbName' exists..."
 $DbExists = & psql -h $DbHost -p $DbPort -U $DbUser -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$DbName'" 2>&1
 
-if ($DbExists.Trim() -eq "1") {
+if ($DbExists -ne $null -and $DbExists.Trim() -eq "1") {
     Write-Log "Database '$DbName' already exists"
 } else {
     Write-Info "Creating database '$DbName'..."
@@ -130,9 +136,9 @@ Write-Host ""
 # ── Admin user prompt ──
 
 Write-Host ""
-Write-Host "  ┌────────────────────────────────────────────┐" -ForegroundColor Cyan
-Write-Host "  │  Create admin user?                         │" -ForegroundColor Cyan
-Write-Host "  └────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host "  +----------------------------------------------+" -ForegroundColor Cyan
+Write-Host "  |  Create admin user?                         |" -ForegroundColor Cyan
+Write-Host "  +----------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
 Write-Info "Email:    admin@zaneco.ph"
 Write-Info "Password: admin123"
@@ -154,9 +160,9 @@ Write-Host ""
 
 # ── Done ──
 
-Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║     Database setup complete                  ║" -ForegroundColor Cyan
-Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "  +==============================================+" -ForegroundColor Cyan
+Write-Host "  |     Database setup complete                  |" -ForegroundColor Cyan
+Write-Host "  +==============================================+" -ForegroundColor Cyan
 Write-Host ""
-Write-Info "Start the backend:  cd backend && npm run dev"
+Write-Info 'Start the backend:  cd backend; npm run dev'
 Write-Host ""

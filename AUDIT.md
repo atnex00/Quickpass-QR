@@ -462,7 +462,7 @@ ci.yml: backend (npm ci -> lint -> test), web (npm ci -> lint -> build -> vitest
 `.github/workflows/security.yml:13-22` — npm ci twice, no setup-node cache. Push trigger `[push, pull_request]` (all branches) vs ci.yml `[master, khrez]`. Stale branches exist: `tauri`, `main`, `ZNC-Quickpass`, `ZNCQP-React`.
 
 ### 4.14 MEDIUM — `backend/.env.dev` is tracked in git
-`git ls-files` shows it despite `.gitignore:11-16` ignoring `.env.*`. Contains `postgresql://postgres:admin@localhost:5432/passlynx`, `JWT_SECRET`, `QR_SECRET`, `COOKIE_SECRET`. Dev-only (localhost), but committed secret material in history.
+`git ls-files` shows it despite `.gitignore:11-16` ignoring `.env.*`. Contains `postgresql://postgres:admin@localhost:5432/znc-quickpass`, `JWT_SECRET`, `QR_SECRET`, `COOKIE_SECRET`. Dev-only (localhost), but committed secret material in history.
 Fix: `git rm --cached backend/.env.dev`, add to .gitignore, rotate local DB password.
 
 ### 4.15 MEDIUM — AGENTS.md/README drift with reality

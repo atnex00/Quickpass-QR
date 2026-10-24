@@ -300,7 +300,7 @@ The backend loads `backend/.env` first if it exists, then loads `backend/.env.<N
 
 | Env | Base file | Override file | DB Target | Command |
 |-----|-----------|---------------|-----------|---------|
-| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/passlynx` | `npm run dev` |
+| dev | `backend/.env` | `backend/.env.dev` | `localhost:5432/znc-quickpass` | `npm run dev` |
 | prod | `backend/.env` | `backend/.env.prod` | Supabase cloud | `npm run prod` |
 
 ### Quick Switch
