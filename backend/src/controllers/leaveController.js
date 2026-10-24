@@ -27,6 +27,7 @@ async function submitLeave(req, res, next) {
     if (durationHours > 7) {
       throw createError(400, 'Duration exceeds 7 hours — HR database verification required (placeholder)');
     }
+    const clientDate = String(leave_date).split('T')[0];
     if (clientDate !== getLocalDateString()) {
       throw createError(400, 'Leave date must be today');
     }
