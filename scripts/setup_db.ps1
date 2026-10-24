@@ -93,6 +93,11 @@ Write-Host ""
 # ── Create database if not exists ──
 
 Write-Info "Checking if database '$DbName' exists..."
+# Prompt for PostgreSQL admin password if needed (new users / fresh setups)
+$PgAdminPass = Read-Host "PostgreSQL admin password (leave empty if using DB_CONNECTION from .env)"
+if (-not [string]::IsNullOrWhiteSpace($PgAdminPass)) {
+    $env:PGPASSWORD = $PgAdminPass
+}
 $DbExists = & psql -h $DbHost -p $DbPort -U $DbUser -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$DbName'" 2>&1
 
 if ($DbExists -ne $null -and $DbExists.Trim() -eq "1") {
