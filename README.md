@@ -18,6 +18,7 @@
 
 ## Table of Contents
 
+- [Flutter App Architecture](flutter_app.md)
 - [Quick Start (Dev Container)](#quick-start-dev-container)
 - [Manual Setup](#manual-setup)
   - [Windows](#windows)
