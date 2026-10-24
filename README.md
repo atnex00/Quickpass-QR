@@ -680,6 +680,29 @@ cd flutter_app
 flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
 ```
 
+### Building on Physical Device (Local Dev URL)
+
+When running on a real phone (not emulator), `localhost` points to the phone itself. Use your computer's LAN IP so the device can reach the backend directly.
+
+```powershell
+# Find your host LAN IP (e.g., 192.168.254.100)
+flutter build apk --release --dart-define=API_BASE_URL=http://192.168.254.100:3000/api
+```
+
+Then install and run:
+
+```powershell
+flutter install
+flutter run --dart-define=API_BASE_URL=http://192.168.254.100:3000/api
+```
+
+For ADB reverse tunnel (phone uses `localhost:3000`):
+
+```powershell
+scripts\run_phone.ps1
+flutter run --dart-define=API_BASE_URL=http://localhost:3000/api
+```
+
 ### Building for Production
 
 ```bash
