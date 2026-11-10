@@ -1,15 +1,25 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router"
 import { useAuthStore } from "@/stores/authStore"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 import ThemeToggle from "@/components/layout/ThemeToggle"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 
 export default function LoginPage() {
   const [employeeId, setEmployeeId] = useState("")
   const [password, setPassword] = useState("")
   const [showPass, setShowPass] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
   const { login, isLoading, error } = useAuthStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!sessionStorage.getItem("termsSeen")) {
+      setShowTerms(true)
+      sessionStorage.setItem("termsSeen", "true")
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -115,7 +125,7 @@ export default function LoginPage() {
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4 text-[10px] text-muted-foreground/60">
               <span>v1.0</span>
-              <span>Need help? Contact IT</span>
+              <button type="button" onClick={() => setShowTerms(true)} className="underline underline-offset-2 hover:text-foreground">Terms of Service</button>
             </div>
           </div>
         </div>
@@ -125,6 +135,37 @@ export default function LoginPage() {
         <span className="text-[10px] text-muted-foreground/30">&copy; 2026 ZANECO QuickPass</span>
         <span className="text-[10px] text-muted-foreground/30">v1.0</span>
       </div>
+
+      <Dialog open={showTerms} onOpenChange={setShowTerms}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Terms of Service</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p><strong className="text-foreground">1. Acceptance of Terms</strong></p>
+            <p>By logging into and using the QuickPass Gate Pass System ("System"), you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and any applicable policies referenced herein.</p>
+            <p><strong className="text-foreground">2. Authorized Use</strong></p>
+            <p>The System is provided to ZANECO employees solely for submitting leave requests, receiving approvals, and scanning gate passes. You may use the System only in accordance with company policy and these terms. Any unauthorized access, sharing of credentials, misuse of QR codes, or tampering with gate access records is strictly prohibited.</p>
+            <p><strong className="text-foreground">3. Account Responsibility</strong></p>
+            <p>You are responsible for maintaining the confidentiality of your employee ID and password. You agree to notify the IT department immediately of any suspected unauthorized use of your account. ZANECO is not liable for losses resulting from your failure to safeguard your credentials.</p>
+            <p><strong className="text-foreground">4. Gate Access &amp; Leave Records</strong></p>
+            <p>QR codes generated through the System are single-use, time-limited, and issued only after supervisor approval. You may not share, copy, resell, or lend your QR codes to any other person. All scans are logged and monitored. Unauthorized or invalid scans may result in denial of entry, disciplinary action, or loss of gate access privileges.</p>
+            <p><strong className="text-foreground">5. Data Privacy</strong></p>
+            <p>The System stores your personal information, leave requests, and scan history. This data is processed solely for gate access, leave management, and reporting purposes. Your data will not be disclosed to third parties except as required by law or as necessary to operate the System.</p>
+            <p><strong className="text-foreground">6. Availability</strong></p>
+            <p>ZANECO strives to keep the System available, but it may be temporarily unavailable for maintenance, updates, or unforeseen failures. ZANECO is not liable for any loss, damage, or inconvenience caused by System downtime or errors.</p>
+            <p><strong className="text-foreground">7. Termination</strong></p>
+            <p>ZANECO may suspend or terminate your System access at any time if you violate these terms, company policy, or applicable law.</p>
+            <p><strong className="text-foreground">8. Contact</strong></p>
+            <p>For questions about these Terms of Service, please contact your manager or the IT Helpdesk.</p>
+          </div>
+          <div className="flex justify-end pt-2">
+            <DialogClose asChild>
+              <Button variant="default" size="sm">Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }

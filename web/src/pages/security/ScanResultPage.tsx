@@ -13,7 +13,6 @@ export default function ScanResultPage() {
   const { lastResult, isLoading, error, clearResult } = useScanStore()
   const { user, logout } = useAuthStore()
   const [countdown, setCountdown] = useState(AUTO_REDIRECT_SECONDS)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const redirectRef = useRef(false)
 
   useEffect(() => {
@@ -21,28 +20,21 @@ export default function ScanResultPage() {
       navigate("/security/scan", { replace: true })
       return
     }
-
     if (redirectRef.current) return
     redirectRef.current = true
 
-    const tick = () => {
-      setCountdown((prev) => {
-        const next = prev - 1
-        if (next <= 0) {
-          navigate("/security/scan")
-          return 0
-        }
-        timerRef.current = setTimeout(tick, 1000)
-        return next
-      })
-    }
-    timerRef.current = setTimeout(tick, 1000)
-
-    return () => {
-      clearResult()
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [])
+    let remaining = AUTO_REDIRECT_SECONDS
+    const id = setInterval(() => {
+      remaining -= 1
+      setCountdown(remaining)
+      if (remaining <= 0) {
+        clearInterval(id)
+        clearResult()
+        navigate("/security/scan", { replace: true })
+      }
+    }, 1000)
+    return () => clearInterval(id)
+  }, [lastResult, isLoading, navigate, clearResult])
 
   if (isLoading) {
     return (
@@ -150,7 +142,7 @@ export default function ScanResultPage() {
             className="w-full gap-2 bg-success text-success-foreground hover:bg-success/90 hover:shadow-[0_0_12px_rgba(13,148,136,0.3)]"
             size="lg"
             onClick={() => {
-              if (timerRef.current) clearTimeout(timerRef.current)
+              clearResult()
               navigate("/security/scan")
             }}
           >

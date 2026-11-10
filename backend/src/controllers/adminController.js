@@ -183,7 +183,7 @@ async function updateEmployee(req, res, next) {
       actor: { id: req.user.employee_id, name: req.user.full_name, role: 'admin' },
       entity: 'employee',
       entityId: id,
-      description: `Updated employee ${updated.full_name} (${id}): ${changedFields.join(', ')}`,
+      description: `${req.user.full_name}: change ${changedFields.join(', ')} of employee ${id} (${updated.full_name})`,
       ip: req.ip,
     }).catch((err) => req.log?.error({ err }, 'Audit log error'));
   } catch (err) {
