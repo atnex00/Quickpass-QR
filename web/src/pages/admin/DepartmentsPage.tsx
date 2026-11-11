@@ -159,7 +159,7 @@ export default function DepartmentsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Head of Department (optional)</Label>
+              <Label>Head of Department</Label>
               <Input
                 placeholder="Full name"
                 value={form.head_of_department}

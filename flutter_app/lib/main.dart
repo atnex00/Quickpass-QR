@@ -18,7 +18,6 @@ import 'providers/notification_provider.dart';
 import 'providers/scan_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/supervisor_provider.dart';
-import 'screens/admin/admin_panel.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/employee/dashboard_screen.dart';
@@ -182,9 +181,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
 
   void _handleLoginSuccess() {
     _resetProviders();
-    final home = widget.auth.isAdmin
-        ? const AdminPanel()
-        : widget.auth.isSupervisor
+    final home = widget.auth.isSupervisor
             ? const SupervisorDashboard()
             : widget.auth.isScanner
                 ? const SecurityShell()
@@ -253,7 +250,7 @@ class _QuickpassAppState extends State<QuickpassApp> {
     }
 
     if (auth.isAdmin) {
-      return const AdminPanel();
+      return const EmployeeDashboard();
     }
 
     if (auth.isSupervisor) {

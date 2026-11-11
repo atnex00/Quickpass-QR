@@ -20,7 +20,6 @@ const UserManagerPage = lazy(() => import("@/pages/admin/UserManagerPage"))
 const DepartmentsPage = lazy(() => import("@/pages/admin/DepartmentsPage"))
 const ReportsPage = lazy(() => import("@/pages/admin/ReportsPage"))
 const AuditLogPage = lazy(() => import("@/pages/admin/AuditLogPage"))
-const AdminPanelPage = lazy(() => import("@/pages/admin/AdminPanelPage"))
 const ScannerPage = lazy(() => import("@/pages/security/ScannerPage"))
 const ScanResultPage = lazy(() => import("@/pages/security/ScanResultPage"))
 const ScanHistoryPage = lazy(() => import("@/pages/security/ScanHistoryPage"))
@@ -69,9 +68,6 @@ function AppRoutes() {
           } />
           <Route path="/admin/audit" element={
             <RequireRole roles={["is_admin"]}><AuditLogPage /></RequireRole>
-          } />
-          <Route path="/admin/panel" element={
-            <RequireRole roles={["is_admin"]}><AdminPanelPage /></RequireRole>
           } />
 
         </Route>
